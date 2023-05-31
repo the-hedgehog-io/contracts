@@ -10,11 +10,12 @@ contract BaseFeeOracle is AccessControl {
         uint80 roundId;
     }
 
-
     mapping(uint256 => Response) public responseById;
 
     bytes32 internal constant SETTER = keccak256("SETTER");
     bytes32 internal constant ULTIMATE_ADMIN = keccak256("ULTIMATE_ADMIN");
+
+    uint256 constant decimals = 18;
 
     event BaseFeeSet(int256 newValue);
 
@@ -25,10 +26,11 @@ contract BaseFeeOracle is AccessControl {
     }
 
     function setBaseFee(int256 _newValue) external onlyRole(SETTER) {
-        latestRoundData = Response({
+        // TODO: Update Round
+        responseById[0] = Response({
             answer: _newValue,
-            timestamp: block.timestamp
-            roundId: latestRoundData
+            timestamp: block.timestamp,
+            roundId: 0 // TODO: UPDATE
         });
 
         emit BaseFeeSet(_newValue);
