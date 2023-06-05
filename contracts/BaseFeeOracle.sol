@@ -13,7 +13,6 @@ contract BaseFeeOracle is AccessControl {
     }
 
     mapping(uint256 => Response) public responseById;
-    // TODO: Check if it's cheaper to have values pushed in an array
     uint80 public latestRound;
 
     bytes32 internal constant SETTER = keccak256("SETTER");
@@ -42,7 +41,7 @@ contract BaseFeeOracle is AccessControl {
         responseById[round] = Response({
             answer: _newValue,
             blockNumber: _blockNumber,
-            roundId: round // TODO: Is this field used anywhere
+            roundId: round
         });
 
         latestRound++;
