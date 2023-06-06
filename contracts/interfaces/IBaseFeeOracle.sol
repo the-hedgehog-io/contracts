@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.19;
 
-interface BaseFeeOracle {
+interface IBaseFeeOracle {
     function decimals() external view returns (uint8);
 
     function version() external view returns (uint256);

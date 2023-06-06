@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.19;
 
-import "./interfaces/BaseFeeOracle.sol";
+import "./interfaces/IBaseFeeOracle.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "./dependencies/BaseMath.sol";
 import "./dependencies/LiquityMath.sol";
@@ -23,8 +23,8 @@ error MainOracleDisabled();
 contract PriceFeed is Ownable, BaseMath {
     string public constant NAME = "PriceFeed";
 
-    BaseFeeOracle public mainOracle; // Main Oracle aggregator
-    BaseFeeOracle public backupOracle; // Backup Oracle
+    IBaseFeeOracle public mainOracle; // Main Oracle aggregator
+    IBaseFeeOracle public backupOracle; // Backup Oracle
 
     // Use to convert a price answer to an 18-digit precision uint
     uint public constant TARGET_DIGITS = 18;
@@ -74,8 +74,8 @@ contract PriceFeed is Ownable, BaseMath {
         Address.isContract(_mainOracleAddress);
         Address.isContract(_backupOracleAddress);
 
-        mainOracle = BaseFeeOracle(_mainOracleAddress);
-        backupOracle = BaseFeeOracle(_backupOracleAddress);
+        mainOracle = IBaseFeeOracle(_mainOracleAddress);
+        backupOracle = IBaseFeeOracle(_backupOracleAddress);
 
         // Explicitly set initial system status
         status = Status.mainOracleWorking;
@@ -112,7 +112,7 @@ contract PriceFeed is Ownable, BaseMath {
      * it uses the last good price seen by Hedgehog.
      *
      */
-    function fetchPrice() external returns (uint) {
+    function fetchPrice() external returns (uint256) {
         // Get current and previous price data from Main oracle, and current price data from Backup
         uint8 decimals = mainOracle.decimals();
 
