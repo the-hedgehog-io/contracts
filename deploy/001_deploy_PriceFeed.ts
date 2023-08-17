@@ -29,6 +29,6 @@ const deploy: DeployFunction = async ({
   });
 };
 
-deploy.tags = ["main", "BaseOracle"];
+deploy.tags = ["main", "PriceFeed"];
 
 export default deploy;
