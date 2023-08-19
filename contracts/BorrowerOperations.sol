@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.11;
+pragma solidity 0.8.19;
 
 import "./interfaces/IBorrowerOperations.sol";
 import "./interfaces/ITroveManager.sol";
@@ -8,13 +8,13 @@ import "./interfaces/ILUSDToken.sol";
 import "./interfaces/ICollSurplusPool.sol";
 import "./interfaces/ISortedTroves.sol";
 import "./interfaces/ILQTYStaking.sol";
-import "./dependencies/LiquityBase.sol";
-import "./dependencies/Ownable.sol";
+import "./dependencies/HedgehogBase.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
 import "./dependencies/console.sol";
 
 contract BorrowerOperations is
-    LiquityBase,
+    HedgehogBase,
     Ownable,
     CheckContract,
     IBorrowerOperations

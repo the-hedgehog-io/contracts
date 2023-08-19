@@ -1,19 +1,22 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.11;
+pragma solidity 0.8.19;
 
 import "./BaseMath.sol";
 import "./LiquityMath.sol";
 import "../interfaces/IActivePool.sol";
 import "../interfaces/IDefaultPool.sol";
 import "../interfaces/IPriceFeed.sol";
-import "../interfaces/ILiquityBase.sol";
+import "../interfaces/IHedgehogBase.sol";
 
-/*
+/**
+ * @notice Fork of LiquityMath with an upgraded pragma and:
+ * [ - Get OZ contracts from a package
+ * TODO: List changes to LiquityBase File and variables ]
  * Base contract for TroveManager, BorrowerOperations and StabilityPool. Contains global system constants and
  * common functions.
  */
-contract LiquityBase is BaseMath, ILiquityBase {
+contract HedgehogBase is BaseMath, IHedgehogBase {
     using SafeMath for uint;
 
     uint public constant _100pct = 1000000000000000000; // 1e18 == 100%

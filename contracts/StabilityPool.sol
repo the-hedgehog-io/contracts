@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.11;
+pragma solidity 0.8.19;
 
 import "./interfaces/IBorrowerOperations.sol";
 import "./interfaces/IStabilityPool.sol";
@@ -9,14 +9,20 @@ import "./interfaces/ITroveManager.sol";
 import "./interfaces/ILUSDToken.sol";
 import "./interfaces/ISortedTroves.sol";
 import "./interfaces/ICommunityIssuance.sol";
-import "./dependencies/LiquityBase.sol";
-import "./dependencies/SafeMath.sol";
+import "./dependencies/HedgehogBase.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/LiquitySafeMath128.sol";
-import "./dependencies/Ownable.sol";
 import "./dependencies/CheckContract.sol";
 import "./dependencies/console.sol";
 
-/*
+/**
+ * @notice Fork of Liquity's Stability Pool. Logic remains unchanged.
+ * Changes to the contract:
+ * - Raised pragma version
+ * - Removed an import of ActivePool Interface
+ * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
+ *
  * The Stability Pool holds LUSD tokens deposited by Stability Pool depositors.
  *
  * When a trove is liquidated, then depending on system conditions, some of its LUSD debt gets offset with
@@ -145,7 +151,7 @@ import "./dependencies/console.sol";
  * The product P (and snapshot P_t) is re-used, as the ratio P/P_t tracks a deposit's depletion due to liquidations.
  *
  */
-contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
+contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
     using LiquitySafeMath128 for uint128;
 
     string public constant NAME = "StabilityPool";

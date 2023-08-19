@@ -18,7 +18,7 @@ error MainOracleDisabled();
  * switching oracles based on oracle failures, timeouts, and conditions for returning to the primary
  * "Main Oracle" oracle.
  *
- * Inspired by Liquity Protocol.
+ * Based on Liquity Protocol.
  */
 contract PriceFeed is Ownable, BaseMath {
     string public constant NAME = "PriceFeed";

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.11;
+pragma solidity 0.8.19;
 
-import "../dependencies/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../dependencies/IERC2612.sol";
 
 interface ILUSDToken is IERC20, IERC2612 {

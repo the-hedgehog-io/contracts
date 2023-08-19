@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.11;
+pragma solidity 0.8.19;
 
 /*
  * The Stability Pool holds LUSD tokens deposited by Stability Pool depositors.
@@ -34,13 +34,14 @@ pragma solidity 0.6.11;
  * https://github.com/liquity/dev/blob/main/README.md#lqty-issuance-to-stability-providers
  */
 interface IStabilityPool {
-
     // --- Events ---
-    
+
     event StabilityPoolETHBalanceUpdated(uint _newBalance);
     event StabilityPoolLUSDBalanceUpdated(uint _newBalance);
 
-    event BorrowerOperationsAddressChanged(address _newBorrowerOperationsAddress);
+    event BorrowerOperationsAddressChanged(
+        address _newBorrowerOperationsAddress
+    );
     event TroveManagerAddressChanged(address _newTroveManagerAddress);
     event ActivePoolAddressChanged(address _newActivePoolAddress);
     event DefaultPoolAddressChanged(address _newDefaultPoolAddress);
@@ -58,12 +59,25 @@ interface IStabilityPool {
     event FrontEndRegistered(address indexed _frontEnd, uint _kickbackRate);
     event FrontEndTagSet(address indexed _depositor, address indexed _frontEnd);
 
-    event DepositSnapshotUpdated(address indexed _depositor, uint _P, uint _S, uint _G);
+    event DepositSnapshotUpdated(
+        address indexed _depositor,
+        uint _P,
+        uint _S,
+        uint _G
+    );
     event FrontEndSnapshotUpdated(address indexed _frontEnd, uint _P, uint _G);
     event UserDepositChanged(address indexed _depositor, uint _newDeposit);
-    event FrontEndStakeChanged(address indexed _frontEnd, uint _newFrontEndStake, address _depositor);
+    event FrontEndStakeChanged(
+        address indexed _frontEnd,
+        uint _newFrontEndStake,
+        address _depositor
+    );
 
-    event ETHGainWithdrawn(address indexed _depositor, uint _ETH, uint _LUSDLoss);
+    event ETHGainWithdrawn(
+        address indexed _depositor,
+        uint _ETH,
+        uint _LUSDLoss
+    );
     event LQTYPaidToDepositor(address indexed _depositor, uint _LQTY);
     event LQTYPaidToFrontEnd(address indexed _frontEnd, uint _LQTY);
     event EtherSent(address _to, uint _amount);
@@ -126,7 +140,10 @@ interface IStabilityPool {
      * - Leaves their compounded deposit in the Stability Pool
      * - Updates snapshots for deposit and tagged front end stake
      */
-    function withdrawETHGainToTrove(address _upperHint, address _lowerHint) external;
+    function withdrawETHGainToTrove(
+        address _upperHint,
+        address _lowerHint
+    ) external;
 
     /*
      * Initial checks:
@@ -162,7 +179,9 @@ interface IStabilityPool {
     /*
      * Calculates the ETH gain earned by the deposit since its last snapshots were taken.
      */
-    function getDepositorETHGain(address _depositor) external view returns (uint);
+    function getDepositorETHGain(
+        address _depositor
+    ) external view returns (uint);
 
     /*
      * Calculate the LQTY gain earned by a deposit since its last snapshots were taken.
@@ -170,24 +189,32 @@ interface IStabilityPool {
      * Otherwise, their cut of the deposit's earnings is equal to the kickbackRate, set by the front end through
      * which they made their deposit.
      */
-    function getDepositorLQTYGain(address _depositor) external view returns (uint);
+    function getDepositorLQTYGain(
+        address _depositor
+    ) external view returns (uint);
 
     /*
      * Return the LQTY gain earned by the front end.
      */
-    function getFrontEndLQTYGain(address _frontEnd) external view returns (uint);
+    function getFrontEndLQTYGain(
+        address _frontEnd
+    ) external view returns (uint);
 
     /*
      * Return the user's compounded deposit.
      */
-    function getCompoundedLUSDDeposit(address _depositor) external view returns (uint);
+    function getCompoundedLUSDDeposit(
+        address _depositor
+    ) external view returns (uint);
 
     /*
      * Return the front end's compounded stake.
      *
      * The front end's compounded stake is equal to the sum of its depositors' compounded deposits.
      */
-    function getCompoundedFrontEndStake(address _frontEnd) external view returns (uint);
+    function getCompoundedFrontEndStake(
+        address _frontEnd
+    ) external view returns (uint);
 
     /*
      * Fallback function

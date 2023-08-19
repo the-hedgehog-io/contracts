@@ -1,18 +1,20 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.11;
+pragma solidity 0.8.19;
 
-interface ICommunityIssuance { 
-    
+interface ICommunityIssuance {
     // --- Events ---
-    
+
     event LQTYTokenAddressSet(address _lqtyTokenAddress);
     event StabilityPoolAddressSet(address _stabilityPoolAddress);
     event TotalLQTYIssuedUpdated(uint _totalLQTYIssued);
 
     // --- Functions ---
 
-    function setAddresses(address _lqtyTokenAddress, address _stabilityPoolAddress) external;
+    function setAddresses(
+        address _lqtyTokenAddress,
+        address _stabilityPoolAddress
+    ) external;
 
     function issueLQTY() external returns (uint);
 

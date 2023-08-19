@@ -1,21 +1,27 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.11;
+pragma solidity 0.8.19;
 
-import "./interfaces/IActivePool.sol";
-import "./dependencies/SafeMath.sol";
-import "./dependencies/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
 import "./dependencies/console.sol";
+import "./interfaces/IPool.sol";
 
-/*
+/**
+ * @notice Fork of Liquity's Active Pool. Logic remains unchanged.
+ * Changes to the contract:
+ * - Raised pragma version
+ * - Removed an import of ActivePool Interface
+ * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
+ *
  * The Active Pool holds the ETH collateral and LUSD debt (but not LUSD tokens) for all active troves.
  *
  * When a trove is liquidated, it's ETH and LUSD debt are transferred from the Active Pool, to either the
  * Stability Pool, the Default Pool, or both, depending on the liquidation conditions.
  *
  */
-contract ActivePool is Ownable, CheckContract, IActivePool {
+contract ActivePool is Ownable, CheckContract, IPool {
     using SafeMath for uint256;
 
     string public constant NAME = "ActivePool";
@@ -59,7 +65,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         emit StabilityPoolAddressChanged(_stabilityPoolAddress);
         emit DefaultPoolAddressChanged(_defaultPoolAddress);
 
-        _renounceOwnership();
+        renounceOwnership();
     }
 
     // --- Getters for public variables. Required by IPool interface ---
@@ -79,7 +85,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
 
     // --- Pool functionality ---
 
-    function sendETH(address _account, uint _amount) external override {
+    function sendETH(address _account, uint _amount) external {
         _requireCallerIsBOorTroveMorSP();
         ETH = ETH.sub(_amount);
         emit ActivePoolETHBalanceUpdated(ETH);
@@ -92,13 +98,13 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
     function increaseLUSDDebt(uint _amount) external override {
         _requireCallerIsBOorTroveM();
         LUSDDebt = LUSDDebt.add(_amount);
-        ActivePoolLUSDDebtUpdated(LUSDDebt);
+        emit ActivePoolLUSDDebtUpdated(LUSDDebt);
     }
 
     function decreaseLUSDDebt(uint _amount) external override {
         _requireCallerIsBOorTroveMorSP();
         LUSDDebt = LUSDDebt.sub(_amount);
-        ActivePoolLUSDDebtUpdated(LUSDDebt);
+        emit ActivePoolLUSDDebtUpdated(LUSDDebt);
     }
 
     // --- 'require' functions ---

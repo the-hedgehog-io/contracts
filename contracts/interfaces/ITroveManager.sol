@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.11;
+pragma solidity 0.8.19;
 
-import "./ILiquityBase.sol";
+import "./IHedgehogBase.sol";
 import "./IStabilityPool.sol";
 import "./ILUSDToken.sol";
 import "./ILQTYToken.sol";
 import "./ILQTYStaking.sol";
 
 // Common interface for the Trove Manager.
-interface ITroveManager is ILiquityBase {
+interface ITroveManager is IHedgehogBase {
     // --- Events ---
 
     event BorrowerOperationsAddressChanged(

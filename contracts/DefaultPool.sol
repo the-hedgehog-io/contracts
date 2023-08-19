@@ -1,21 +1,28 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.11;
+pragma solidity 0.8.19;
 
-import "./interfaces/IDefaultPool.sol";
-import "./dependencies/SafeMath.sol";
-import "./dependencies/Ownable.sol";
+import "./interfaces/IPool.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
 import "./dependencies/console.sol";
 
-/*
+/**
+ * @notice Fork of Liquity's Default Pool. Logic remains unchanged.
+ * Changes to the contract:
+ * - Raised pragma version
+ * - Removed an import of Default Interface and updated with IPool
+ *
+ * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
+ *
  * The Default Pool holds the ETH and LUSD debt (but not LUSD tokens) from liquidations that have been redistributed
  * to active troves but not yet "applied", i.e. not yet recorded on a recipient active trove's struct.
  *
  * When a trove makes an operation that applies its pending ETH and LUSD debt, its pending ETH and LUSD debt is moved
  * from the Default Pool to the Active Pool.
  */
-contract DefaultPool is Ownable, CheckContract, IDefaultPool {
+contract DefaultPool is Ownable, CheckContract, IPool {
     using SafeMath for uint256;
 
     string public constant NAME = "DefaultPool";
@@ -44,7 +51,7 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit ActivePoolAddressChanged(_activePoolAddress);
 
-        _renounceOwnership();
+        renounceOwnership();
     }
 
     // --- Getters for public variables. Required by IPool interface ---
@@ -64,7 +71,7 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
 
     // --- Pool functionality ---
 
-    function sendETHToActivePool(uint _amount) external override {
+    function sendETHToActivePool(uint _amount) external {
         _requireCallerIsTroveManager();
         address activePool = activePoolAddress; // cache to save an SLOAD
         ETH = ETH.sub(_amount);
