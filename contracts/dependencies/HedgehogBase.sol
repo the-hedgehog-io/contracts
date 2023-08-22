@@ -12,7 +12,7 @@ import "../interfaces/IHedgehogBase.sol";
 /**
  * @notice Fork of LiquityMath with an upgraded pragma and:
  * [ - Get OZ contracts from a package
- * TODO: List changes to LiquityBase File and variables ]
+ * TODO: List changes to HedgehogBase File and variables ]
  * Base contract for TroveManager, BorrowerOperations and StabilityPool. Contains global system constants and
  * common functions.
  */
