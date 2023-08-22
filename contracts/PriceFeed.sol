@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 error MainOracleDisabled();
 
 /*
- * PriceFeed for production deployment, to be connected to Main Oracle's live BaseFee:stETH aggregator reference
+ * PriceFeed for production deployment, to be connected to Main Oracle's live BaseFee:stStETH aggregator reference
  * contract, and a Backup oracle contract.
  *
  * The PriceFeed uses "Main Oracle" as primary oracle, and "Back Up" as fallback. It contains logic for

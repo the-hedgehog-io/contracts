@@ -6,14 +6,12 @@ const deploy: DeployFunction = async ({
 }) => {
   const { deployer } = await getNamedAccounts();
 
-  await deploy("HDGStaking", {
+  await deploy("HOGStaking", {
     from: deployer,
     log: true,
   });
 };
 
-// TODO: Have HDG staking instead of LQTY Staking
-
-deploy.tags = ["main", "HDGStaking"];
+deploy.tags = ["main", "HOGStaking"];
 
 export default deploy;

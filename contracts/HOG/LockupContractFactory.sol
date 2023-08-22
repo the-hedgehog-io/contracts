@@ -13,13 +13,13 @@ import "../dependencies/console.sol";
  * The LockupContractFactory deploys LockupContracts - its main purpose is to keep a registry of valid deployed
  * LockupContracts.
  *
- * This registry is checked by LQTYToken when the Liquity deployer attempts to transfer LQTY tokens. During the first year
- * since system deployment, the Liquity deployer is only allowed to transfer LQTY to valid LockupContracts that have been
- * deployed by and recorded in the LockupContractFactory. This ensures the deployer's LQTY can't be traded or staked in the
+ * This registry is checked by HOGToken when the Hedgehog deployer attempts to transfer HOG tokens. During the first year
+ * since system deployment, the Hedgehog deployer is only allowed to transfer HOG to valid LockupContracts that have been
+ * deployed by and recorded in the LockupContractFactory. This ensures the deployer's HOG can't be traded or staked in the
  * first year, and can only be sent to a verified LockupContract which unlocks at least one year after system deployment.
  *
  * LockupContracts can of course be deployed directly, but only those deployed through and recorded in the LockupContractFactory
- * will be considered "valid" by LQTYToken. This is a convenient way to verify that the target address is a genuine
+ * will be considered "valid" by HOGToken. This is a convenient way to verify that the target address is a genuine
  * LockupContract.
  */
 
@@ -31,13 +31,13 @@ contract LockupContractFactory is Ownable, CheckContract {
 
     uint public constant SECONDS_IN_ONE_YEAR = 31536000;
 
-    address public lqtyTokenAddress;
+    address public hogTokenAddress;
 
     mapping(address => address) public lockupContractToDeployer;
 
     // --- Events ---
 
-    event LQTYTokenAddressSet(address _lqtyTokenAddress);
+    event HOGTokenAddressSet(address _hogTokenAddress);
     event LockupContractDeployedThroughFactory(
         address _lockupContractAddress,
         address _beneficiary,
@@ -47,11 +47,11 @@ contract LockupContractFactory is Ownable, CheckContract {
 
     // --- Functions ---
 
-    function setLQTYTokenAddress(address _lqtyTokenAddress) external onlyOwner {
-        checkContract(_lqtyTokenAddress);
+    function setHOGTokenAddress(address _hogTokenAddress) external onlyOwner {
+        checkContract(_hogTokenAddress);
 
-        lqtyTokenAddress = _lqtyTokenAddress;
-        emit LQTYTokenAddressSet(_lqtyTokenAddress);
+        hogTokenAddress = _hogTokenAddress;
+        emit HOGTokenAddressSet(_hogTokenAddress);
 
         renounceOwnership();
     }
@@ -60,10 +60,10 @@ contract LockupContractFactory is Ownable, CheckContract {
         address _beneficiary,
         uint _unlockTime
     ) external {
-        address lqtyTokenAddressCached = lqtyTokenAddress;
-        _requireLQTYAddressIsSet(lqtyTokenAddressCached);
+        address hogTokenAddressCached = hogTokenAddress;
+        _requireHOGAddressIsSet(hogTokenAddressCached);
         LockupContract lockupContract = new LockupContract(
-            lqtyTokenAddressCached,
+            hogTokenAddressCached,
             _beneficiary,
             _unlockTime
         );
@@ -84,10 +84,7 @@ contract LockupContractFactory is Ownable, CheckContract {
     }
 
     // --- 'require'  functions ---
-    function _requireLQTYAddressIsSet(address _lqtyTokenAddress) internal pure {
-        require(
-            _lqtyTokenAddress != address(0),
-            "LCF: LQTY Address is not set"
-        );
+    function _requireHOGAddressIsSet(address _hogTokenAddress) internal pure {
+        require(_hogTokenAddress != address(0), "LCF: HOG Address is not set");
     }
 }

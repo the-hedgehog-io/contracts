@@ -13,11 +13,12 @@ import "./interfaces/IPool.sol";
  * Changes to the contract:
  * - Raised pragma version
  * - Removed an import of ActivePool Interface
+ * - Updated variable names and docs to refer to BaseFeeLMA token and stEth as a collateral
  * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  *
- * The Active Pool holds the ETH collateral and LUSD debt (but not LUSD tokens) for all active troves.
+ * The Active Pool holds the stStETH collateral and BaseFeeLMA debt (but not BaseFeeLMA tokens) for all active troves.
  *
- * When a trove is liquidated, it's ETH and LUSD debt are transferred from the Active Pool, to either the
+ * When a trove is liquidated, it's stStETH and BaseFeeLMA debt are transferred from the Active Pool, to either the
  * Stability Pool, the Default Pool, or both, depending on the liquidation conditions.
  *
  */
@@ -30,8 +31,8 @@ contract ActivePool is Ownable, CheckContract, IPool {
     address public troveManagerAddress;
     address public stabilityPoolAddress;
     address public defaultPoolAddress;
-    uint256 internal ETH; // deposited ether tracker
-    uint256 internal LUSDDebt;
+    uint256 internal StETH; // deposited stEth tracker
+    uint256 internal BaseFeeLMADebt;
 
     // --- Events ---
 
@@ -39,8 +40,8 @@ contract ActivePool is Ownable, CheckContract, IPool {
         address _newBorrowerOperationsAddress
     );
     event TroveManagerAddressChanged(address _newTroveManagerAddress);
-    event ActivePoolLUSDDebtUpdated(uint _LUSDDebt);
-    event ActivePoolETHBalanceUpdated(uint _ETH);
+    event ActivePoolBaseFeeLMADebtUpdated(uint _BaseFeeLMADebt);
+    event ActivePoolStETHBalanceUpdated(uint _stStETH);
 
     // --- Contract setters ---
 
@@ -71,40 +72,40 @@ contract ActivePool is Ownable, CheckContract, IPool {
     // --- Getters for public variables. Required by IPool interface ---
 
     /*
-     * Returns the ETH state variable.
+     * Returns the stStETH state variable.
      *
-     *Not necessarily equal to the the contract's raw ETH balance - ether can be forcibly sent to contracts.
+     *Not necessarily equal to the the contract's raw StETH balance - stETH can be forcibly sent to contracts.
      */
-    function getETH() external view override returns (uint) {
-        return ETH;
+    function getStETH() external view override returns (uint) {
+        return StETH;
     }
 
-    function getLUSDDebt() external view override returns (uint) {
-        return LUSDDebt;
+    function getBaseFeeLMADebt() external view override returns (uint) {
+        return BaseFeeLMADebt;
     }
 
     // --- Pool functionality ---
 
-    function sendETH(address _account, uint _amount) external {
+    function sendStETH(address _account, uint _amount) external {
         _requireCallerIsBOorTroveMorSP();
-        ETH = ETH.sub(_amount);
-        emit ActivePoolETHBalanceUpdated(ETH);
-        emit EtherSent(_account, _amount);
+        StETH = StETH.sub(_amount);
+        emit ActivePoolStETHBalanceUpdated(StETH);
+        emit StETHSent(_account, _amount);
 
         (bool success, ) = _account.call{value: _amount}("");
-        require(success, "ActivePool: sending ETH failed");
+        require(success, "ActivePool: sending StETH failed");
     }
 
-    function increaseLUSDDebt(uint _amount) external override {
+    function increaseBaseFeeLMADebt(uint _amount) external override {
         _requireCallerIsBOorTroveM();
-        LUSDDebt = LUSDDebt.add(_amount);
-        emit ActivePoolLUSDDebtUpdated(LUSDDebt);
+        BaseFeeLMADebt = BaseFeeLMADebt.add(_amount);
+        emit ActivePoolBaseFeeLMADebtUpdated(BaseFeeLMADebt);
     }
 
-    function decreaseLUSDDebt(uint _amount) external override {
+    function decreaseBaseFeeLMADebt(uint _amount) external override {
         _requireCallerIsBOorTroveMorSP();
-        LUSDDebt = LUSDDebt.sub(_amount);
-        emit ActivePoolLUSDDebtUpdated(LUSDDebt);
+        BaseFeeLMADebt = BaseFeeLMADebt.sub(_amount);
+        emit ActivePoolBaseFeeLMADebtUpdated(BaseFeeLMADebt);
     }
 
     // --- 'require' functions ---
@@ -138,7 +139,7 @@ contract ActivePool is Ownable, CheckContract, IPool {
 
     receive() external payable {
         _requireCallerIsBorrowerOperationsOrDefaultPool();
-        ETH = ETH.add(msg.value);
-        emit ActivePoolETHBalanceUpdated(ETH);
+        StETH = StETH.add(msg.value);
+        emit ActivePoolStETHBalanceUpdated(StETH);
     }
 }

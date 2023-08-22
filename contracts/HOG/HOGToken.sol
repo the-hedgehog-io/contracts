@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../dependencies/IERC2612.sol";
 
 /**
-* @notice Token's functionality based on LQTY token. 
+* @notice Token's functionality based on HOG token. 
 * Functions logic remains unchanged.
  * Changes to the contract:
  * - Raised pragma version
@@ -24,13 +24,13 @@ import "../dependencies/IERC2612.sol";
 * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/53516bc555a454862470e7860a9b5254db4d00f5/contracts/token/ERC20/ERC20Permit.sol
 * 
 *
-*  --- Functionality added specific to the HDGHG ---
+*  --- Functionality added specific to the HOG ---
 * 
 * 1) Transfer protection: blacklist of addresses that are invalid recipients (i.e. core Liquity contracts) in external 
-* transfer() and transferFrom() calls. The purpose is to protect users from losing tokens by mistakenly sending LQTY directly to a Liquity
+* transfer() and transferFrom() calls. The purpose is to protect users from losing tokens by mistakenly sending HOG directly to a Liquity
 * core contract, when they should rather call the right function.
 *
-* 2) sendToLQTYStaking(): callable only by Liquity core contracts, which move LQTY tokens from user -> LQTYStaking contract.
+* 2) sendToHOGStaking(): callable only by Hedgehog core contracts, which move HOG tokens from user -> HOGStaking contract.
 *
 * 3) Supply hard-capped at 100 million
 *
@@ -42,26 +42,26 @@ import "../dependencies/IERC2612.sol";
 *
 * 7) The LP rewards allocation of (1 + 1/3) million tokens is minted at deployent to a Staking contract
 *
-* 8) (64 + 2/3) million tokens are minted at deployment to the Liquity multisig
+* 8) (64 + 2/3) million tokens are minted at deployment to the Hedgehog multisig
 *
 * 9) Until one year from deployment:
-* -Liquity multisig may only transfer() tokens to LockupContracts that have been deployed via & registered in the 
+* -Hedgehog multisig may only transfer() tokens to LockupContracts that have been deployed via & registered in the 
 *  LockupContractFactory 
 * -approve(), increaseAllowance(), decreaseAllowance() revert when called by the multisig
 * -transferFrom() reverts when the multisig is the sender
-* -sendToLQTYStaking() reverts when the multisig is the sender, blocking the multisig from staking its LQTY.
+* -sendToHOGStaking() reverts when the multisig is the sender, blocking the multisig from staking its HOG.
 * 
-* After one year has passed since deployment of the LQTYToken, the restrictions on multisig operations are lifted
+* After one year has passed since deployment of the HOGToken, the restrictions on multisig operations are lifted
 * and the multisig has the same rights as any other address.
 */
 
-contract HDGHGToken is CheckContract, IERC20, IERC2612 {
+contract HOGToken is CheckContract, IERC20, IERC2612 {
     using SafeMath for uint256;
 
     // --- ERC20 Data ---
 
-    string internal constant _NAME = "HDGHG";
-    string internal constant _SYMBOL = "HDGHG";
+    string internal constant _NAME = "Hedgehog";
+    string internal constant _SYMBOL = "HOG";
     string internal constant _VERSION = "1";
     uint8 internal constant _DECIMALS = 18;
 
@@ -88,7 +88,7 @@ contract HDGHGToken is CheckContract, IERC20, IERC2612 {
 
     mapping(address => uint256) private _nonces;
 
-    // --- LQTYToken specific data ---
+    // --- HOGToken specific data ---
 
     uint public constant ONE_YEAR_IN_SECONDS = 31536000; // 60 * 60 * 24 * 365
 
@@ -99,7 +99,7 @@ contract HDGHGToken is CheckContract, IERC20, IERC2612 {
     address public immutable multisigAddress;
 
     address public immutable communityIssuanceAddress;
-    address public immutable lqtyStakingAddress;
+    address public immutable hogStakingAddress;
 
     uint internal immutable lpRewardsEntitlement;
 
@@ -108,7 +108,7 @@ contract HDGHGToken is CheckContract, IERC20, IERC2612 {
     // --- Events ---
 
     event CommunityIssuanceAddressSet(address _communityIssuanceAddress);
-    event LQTYStakingAddressSet(address _lqtyStakingAddress);
+    event HOGStakingAddressSet(address _hogStakingAddress);
     event LockupContractFactoryAddressSet(
         address _lockupContractFactoryAddress
     );
@@ -117,21 +117,21 @@ contract HDGHGToken is CheckContract, IERC20, IERC2612 {
 
     constructor(
         address _communityIssuanceAddress,
-        address _lqtyStakingAddress,
+        address _hogStakingAddress,
         address _lockupFactoryAddress,
         address _bountyAddress,
         address _lpRewardsAddress,
         address _multisigAddress
     ) {
         checkContract(_communityIssuanceAddress);
-        checkContract(_lqtyStakingAddress);
+        checkContract(_hogStakingAddress);
         checkContract(_lockupFactoryAddress);
 
         multisigAddress = _multisigAddress;
         deploymentStartTime = block.timestamp;
 
         communityIssuanceAddress = _communityIssuanceAddress;
-        lqtyStakingAddress = _lqtyStakingAddress;
+        hogStakingAddress = _hogStakingAddress;
         lockupContractFactory = ILockupContractFactory(_lockupFactoryAddress);
 
         bytes32 hashedName = keccak256(bytes(_NAME));
@@ -146,7 +146,7 @@ contract HDGHGToken is CheckContract, IERC20, IERC2612 {
             hashedVersion
         );
 
-        // --- Initial LQTY allocations ---
+        // --- Initial HOG allocations ---
 
         uint bountyEntitlement = _1_MILLION.mul(2); // Allocate 2 million for bounties/hackathons
         _mint(_bountyAddress, bountyEntitlement);
@@ -158,7 +158,7 @@ contract HDGHGToken is CheckContract, IERC20, IERC2612 {
         lpRewardsEntitlement = _lpRewardsEntitlement;
         _mint(_lpRewardsAddress, _lpRewardsEntitlement);
 
-        // Allocate the remainder to the LQTY Multisig: (100 - 2 - 32 - 1.33) million = 64.66 million
+        // Allocate the remainder to the HOG Multisig: (100 - 2 - 32 - 1.33) million = 64.66 million
         uint multisigEntitlement = _1_MILLION
             .mul(100)
             .sub(bountyEntitlement)
@@ -281,12 +281,12 @@ contract HDGHGToken is CheckContract, IERC20, IERC2612 {
         return true;
     }
 
-    function sendToLQTYStaking(address _sender, uint256 _amount) external {
-        _requireCallerIsLQTYStaking();
+    function sendToHOGStaking(address _sender, uint256 _amount) external {
+        _requireCallerIsHOGStaking();
         if (_isFirstYear()) {
             _requireSenderIsNotMultisig(_sender);
-        } // Prevent the multisig from staking LQTY
-        _transfer(_sender, lqtyStakingAddress, _amount);
+        } // Prevent the multisig from staking HOG
+        _transfer(_sender, hogStakingAddress, _amount);
     }
 
     // --- EIP 2612 functionality ---
@@ -313,7 +313,7 @@ contract HDGHGToken is CheckContract, IERC20, IERC2612 {
         bytes32 r,
         bytes32 s
     ) external override {
-        require(deadline >= block.timestamp, "LQTY: expired deadline");
+        require(deadline >= block.timestamp, "HOG: expired deadline");
         bytes32 digest = keccak256(
             abi.encodePacked(
                 "\x19\x01",
@@ -331,7 +331,7 @@ contract HDGHGToken is CheckContract, IERC20, IERC2612 {
             )
         );
         address recoveredAddress = ecrecover(digest, v, r, s);
-        require(recoveredAddress == owner, "LQTY: invalid signature");
+        require(recoveredAddress == owner, "HOG: invalid signature");
         _approve(owner, spender, amount);
     }
 
@@ -412,40 +412,40 @@ contract HDGHGToken is CheckContract, IERC20, IERC2612 {
     function _requireValidRecipient(address _recipient) internal view {
         require(
             _recipient != address(0) && _recipient != address(this),
-            "LQTY: Cannot transfer tokens directly to the LQTY token contract or the zero address"
+            "HOG: Cannot transfer tokens directly to the HOG token contract or the zero address"
         );
         require(
             _recipient != communityIssuanceAddress &&
-                _recipient != lqtyStakingAddress,
-            "LQTY: Cannot transfer tokens directly to the community issuance or staking contract"
+                _recipient != hogStakingAddress,
+            "HOG: Cannot transfer tokens directly to the community issuance or staking contract"
         );
     }
 
     function _requireRecipientIsRegisteredLC(address _recipient) internal view {
         require(
             lockupContractFactory.isRegisteredLockup(_recipient),
-            "LQTYToken: recipient must be a LockupContract registered in the Factory"
+            "HOGToken: recipient must be a LockupContract registered in the Factory"
         );
     }
 
     function _requireSenderIsNotMultisig(address _sender) internal view {
         require(
             _sender != multisigAddress,
-            "LQTYToken: sender must not be the multisig"
+            "HOGToken: sender must not be the multisig"
         );
     }
 
     function _requireCallerIsNotMultisig() internal view {
         require(
             !_callerIsMultisig(),
-            "LQTYToken: caller must not be the multisig"
+            "HOGToken: caller must not be the multisig"
         );
     }
 
-    function _requireCallerIsLQTYStaking() internal view {
+    function _requireCallerIsHOGStaking() internal view {
         require(
-            msg.sender == lqtyStakingAddress,
-            "LQTYToken: caller must be the LQTYStaking contract"
+            msg.sender == hogStakingAddress,
+            "HOGToken: caller must be the HOGStaking contract"
         );
     }
 

@@ -6,13 +6,13 @@ const deploy: DeployFunction = async ({
 }) => {
   const { deployer } = await getNamedAccounts();
 
-  // TODO: Add proper HDG token params
-  await deploy("HDGToken", {
+  // TODO: Add proper HOG token params
+  await deploy("HOGToken", {
     from: deployer,
     log: true,
   });
 };
 
-deploy.tags = ["main", "HDGToken"];
+deploy.tags = ["main", "HOGToken"];
 
 export default deploy;

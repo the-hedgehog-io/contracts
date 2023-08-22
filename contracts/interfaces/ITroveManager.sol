@@ -4,9 +4,9 @@ pragma solidity 0.8.19;
 
 import "./IHedgehogBase.sol";
 import "./IStabilityPool.sol";
-import "./ILUSDToken.sol";
-import "./ILQTYToken.sol";
-import "./ILQTYStaking.sol";
+import "./IBaseFeeLMAToken.sol";
+import "./IHOGToken.sol";
+import "./IHOGStaking.sol";
 
 // Common interface for the Trove Manager.
 interface ITroveManager is IHedgehogBase {
@@ -16,27 +16,27 @@ interface ITroveManager is IHedgehogBase {
         address _newBorrowerOperationsAddress
     );
     event PriceFeedAddressChanged(address _newPriceFeedAddress);
-    event LUSDTokenAddressChanged(address _newLUSDTokenAddress);
+    event BaseFeeLMATokenAddressChanged(address _newBaseFeeLMATokenAddress);
     event ActivePoolAddressChanged(address _activePoolAddress);
     event DefaultPoolAddressChanged(address _defaultPoolAddress);
     event StabilityPoolAddressChanged(address _stabilityPoolAddress);
     event GasPoolAddressChanged(address _gasPoolAddress);
     event CollSurplusPoolAddressChanged(address _collSurplusPoolAddress);
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
-    event LQTYTokenAddressChanged(address _lqtyTokenAddress);
-    event LQTYStakingAddressChanged(address _lqtyStakingAddress);
+    event HOGTokenAddressChanged(address _hogTokenAddress);
+    event HOGStakingAddressChanged(address _hogStakingAddress);
 
     event Liquidation(
         uint _liquidatedDebt,
         uint _liquidatedColl,
         uint _collGasCompensation,
-        uint _LUSDGasCompensation
+        uint _BaseFeeLMAGasCompensation
     );
     event Redemption(
-        uint _attemptedLUSDAmount,
-        uint _actualLUSDAmount,
-        uint _ETHSent,
-        uint _ETHFee
+        uint _attemptedBaseFeeLMAAmount,
+        uint _actualBaseFeeLMAAmount,
+        uint _StETHSent,
+        uint _StETHFee
     );
     event TroveUpdated(
         address indexed _borrower,
@@ -58,8 +58,8 @@ interface ITroveManager is IHedgehogBase {
         uint _totalStakesSnapshot,
         uint _totalCollateralSnapshot
     );
-    event LTermsUpdated(uint _L_ETH, uint _L_LUSDDebt);
-    event TroveSnapshotsUpdated(uint _L_ETH, uint _L_LUSDDebt);
+    event LTermsUpdated(uint _L_StETH, uint _L_BaseFeeLMADebt);
+    event TroveSnapshotsUpdated(uint _L_StETH, uint _L_BaseFeeLMADebt);
     event TroveIndexUpdated(address _borrower, uint _newIndex);
 
     // --- Functions ---
@@ -72,19 +72,19 @@ interface ITroveManager is IHedgehogBase {
         address _gasPoolAddress,
         address _collSurplusPoolAddress,
         address _priceFeedAddress,
-        address _lusdTokenAddress,
+        address _baseFeeLMATokenAddress,
         address _sortedTrovesAddress,
-        address _lqtyTokenAddress,
-        address _lqtyStakingAddress
+        address _hogTokenAddress,
+        address _hogStakingAddress
     ) external;
 
     function stabilityPool() external view returns (IStabilityPool);
 
-    function lusdToken() external view returns (ILUSDToken);
+    function baseFeeLMAToken() external view returns (IBaseFeeLMAToken);
 
-    function lqtyToken() external view returns (ILQTYToken);
+    function hogToken() external view returns (IHOGToken);
 
-    function lqtyStaking() external view returns (ILQTYStaking);
+    function hogStaking() external view returns (IHOGStaking);
 
     function getTroveOwnersCount() external view returns (uint);
 
@@ -106,7 +106,7 @@ interface ITroveManager is IHedgehogBase {
     function batchLiquidateTroves(address[] calldata _troveArray) external;
 
     function redeemCollateral(
-        uint _LUSDAmount,
+        uint _BaseFeeLMAAmount,
         address _firstRedemptionHint,
         address _upperPartialRedemptionHint,
         address _lowerPartialRedemptionHint,
@@ -127,11 +127,11 @@ interface ITroveManager is IHedgehogBase {
 
     function applyPendingRewards(address _borrower) external;
 
-    function getPendingETHReward(
+    function getPendingStETHReward(
         address _borrower
     ) external view returns (uint);
 
-    function getPendingLUSDDebtReward(
+    function getPendingBaseFeeLMADebtReward(
         address _borrower
     ) external view returns (uint);
 
@@ -145,8 +145,8 @@ interface ITroveManager is IHedgehogBase {
         returns (
             uint debt,
             uint coll,
-            uint pendingLUSDDebtReward,
-            uint pendingETHReward
+            uint pendingBaseFeeLMADebtReward,
+            uint pendingStETHReward
         );
 
     function closeTrove(address _borrower) external;
@@ -158,17 +158,17 @@ interface ITroveManager is IHedgehogBase {
     function getRedemptionRateWithDecay() external view returns (uint);
 
     function getRedemptionFeeWithDecay(
-        uint _ETHDrawn
+        uint _StETHDrawn
     ) external view returns (uint);
 
     function getBorrowingRate() external view returns (uint);
 
     function getBorrowingRateWithDecay() external view returns (uint);
 
-    function getBorrowingFee(uint LUSDDebt) external view returns (uint);
+    function getBorrowingFee(uint BaseFeeLMADebt) external view returns (uint);
 
     function getBorrowingFeeWithDecay(
-        uint _LUSDDebt
+        uint _BaseFeeLMADebt
     ) external view returns (uint);
 
     function decayBaseRateFromBorrowing() external;

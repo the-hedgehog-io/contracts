@@ -14,8 +14,8 @@ interface IBorrowerOperations {
     event CollSurplusPoolAddressChanged(address _collSurplusPoolAddress);
     event PriceFeedAddressChanged(address _newPriceFeedAddress);
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
-    event LUSDTokenAddressChanged(address _lusdTokenAddress);
-    event LQTYStakingAddressChanged(address _lqtyStakingAddress);
+    event BaseFeeLMATokenAddressChanged(address _baseFeeLMATokenAddress);
+    event HOGStakingAddressChanged(address _hogStakingAddress);
 
     event TroveCreated(address indexed _borrower, uint arrayIndex);
     event TroveUpdated(
@@ -25,7 +25,10 @@ interface IBorrowerOperations {
         uint stake,
         uint8 operation
     );
-    event LUSDBorrowingFeePaid(address indexed _borrower, uint _LUSDFee);
+    event BaseFeeLMABorrowingFeePaid(
+        address indexed _borrower,
+        uint _BaseFeeLMAFee
+    );
 
     // --- Functions ---
 
@@ -38,20 +41,20 @@ interface IBorrowerOperations {
         address _collSurplusPoolAddress,
         address _priceFeedAddress,
         address _sortedTrovesAddress,
-        address _lusdTokenAddress,
-        address _lqtyStakingAddress
+        address _baseFeeLMATokenAddress,
+        address _hogStakingAddress
     ) external;
 
     function openTrove(
         uint _maxFee,
-        uint _LUSDAmount,
+        uint _BaseFeeLMAAmount,
         address _upperHint,
         address _lowerHint
     ) external payable;
 
     function addColl(address _upperHint, address _lowerHint) external payable;
 
-    function moveETHGainToTrove(
+    function moveStETHGainToTrove(
         address _user,
         address _upperHint,
         address _lowerHint
@@ -63,14 +66,14 @@ interface IBorrowerOperations {
         address _lowerHint
     ) external;
 
-    function withdrawLUSD(
+    function withdrawBaseFeeLMA(
         uint _maxFee,
         uint _amount,
         address _upperHint,
         address _lowerHint
     ) external;
 
-    function repayLUSD(
+    function repayBaseFeeLMA(
         uint _amount,
         address _upperHint,
         address _lowerHint

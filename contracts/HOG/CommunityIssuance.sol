@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.19;
 
-import "../interfaces/ILQTYToken.sol";
+import "../interfaces/IHOGToken.sol";
 import "../interfaces/ICommunityIssuance.sol";
 import "../dependencies/BaseMath.sol";
 import "../dependencies/LiquityMath.sol";
@@ -36,25 +36,25 @@ contract CommunityIssuance is Ownable, CheckContract, BaseMath {
     uint public constant ISSUANCE_FACTOR = 999998681227695000;
 
     /*
-     * The community LQTY supply cap is the starting balance of the Community Issuance contract.
-     * It should be minted to this contract by LQTYToken, when the token is deployed.
+     * The community HOG supply cap is the starting balance of the Community Issuance contract.
+     * It should be minted to this contract by HOGToken, when the token is deployed.
      *
-     * Set to 32M (slightly less than 1/3) of total LQTY supply.
+     * Set to 32M (slightly less than 1/3) of total HOG supply.
      */
-    uint public constant LQTYSupplyCap = 32e24; // 32 million
+    uint public constant HOGSupplyCap = 32e24; // 32 million
 
-    ILQTYToken public lqtyToken;
+    IHOGToken public hogToken;
 
     address public stabilityPoolAddress;
 
-    uint public totalLQTYIssued;
+    uint public totalHOGIssued;
     uint public immutable deploymentTime;
 
     // --- Events ---
 
-    event LQTYTokenAddressSet(address _lqtyTokenAddress);
+    event HOGTokenAddressSet(address _hogTokenAddress);
     event StabilityPoolAddressSet(address _stabilityPoolAddress);
-    event TotalLQTYIssuedUpdated(uint _totalLQTYIssued);
+    event TotalHOGIssuedUpdated(uint _totalHOGIssued);
 
     // --- Functions ---
 
@@ -63,35 +63,35 @@ contract CommunityIssuance is Ownable, CheckContract, BaseMath {
     }
 
     function setAddresses(
-        address _lqtyTokenAddress,
+        address _hogTokenAddress,
         address _stabilityPoolAddress
     ) external onlyOwner {
-        checkContract(_lqtyTokenAddress);
+        checkContract(_hogTokenAddress);
         checkContract(_stabilityPoolAddress);
 
-        lqtyToken = ILQTYToken(_lqtyTokenAddress);
+        hogToken = IHOGToken(_hogTokenAddress);
         stabilityPoolAddress = _stabilityPoolAddress;
 
-        // When LQTYToken deployed, it should have transferred CommunityIssuance's LQTY entitlement
-        uint LQTYBalance = lqtyToken.balanceOf(address(this));
-        assert(LQTYBalance >= LQTYSupplyCap);
+        // When HOGToken deployed, it should have transferred CommunityIssuance's HOG entitlement
+        uint HOGBalance = hogToken.balanceOf(address(this));
+        assert(HOGBalance >= HOGSupplyCap);
 
-        emit LQTYTokenAddressSet(_lqtyTokenAddress);
+        emit HOGTokenAddressSet(_hogTokenAddress);
         emit StabilityPoolAddressSet(_stabilityPoolAddress);
 
         renounceOwnership();
     }
 
-    function issueLQTY() external returns (uint) {
+    function issueHOG() external returns (uint) {
         _requireCallerIsStabilityPool();
 
-        uint latestTotalLQTYIssued = LQTYSupplyCap
+        uint latestTotalHOGIssued = HOGSupplyCap
             .mul(_getCumulativeIssuanceFraction())
             .div(DECIMAL_PRECISION);
-        uint issuance = latestTotalLQTYIssued.sub(totalLQTYIssued);
+        uint issuance = latestTotalHOGIssued.sub(totalHOGIssued);
 
-        totalLQTYIssued = latestTotalLQTYIssued;
-        emit TotalLQTYIssuedUpdated(latestTotalLQTYIssued);
+        totalHOGIssued = latestTotalHOGIssued;
+        emit TotalHOGIssuedUpdated(latestTotalHOGIssued);
 
         return issuance;
     }
@@ -99,7 +99,7 @@ contract CommunityIssuance is Ownable, CheckContract, BaseMath {
     /* Gets 1-f^t    where: f < 1
 
     f: issuance factor that determines the shape of the curve
-    t:  time passed since last LQTY issuance event  */
+    t:  time passed since last HOG issuance event  */
     function _getCumulativeIssuanceFraction() internal view returns (uint) {
         // Get the time passed since deployment
         uint timePassedInMinutes = block.timestamp.sub(deploymentTime).div(
@@ -116,10 +116,10 @@ contract CommunityIssuance is Ownable, CheckContract, BaseMath {
         return cumulativeIssuanceFraction;
     }
 
-    function sendLQTY(address _account, uint _LQTYamount) external {
+    function sendHOG(address _account, uint _HOGamount) external {
         _requireCallerIsStabilityPool();
 
-        lqtyToken.transfer(_account, _LQTYamount);
+        hogToken.transfer(_account, _HOGamount);
     }
 
     // --- 'require' functions ---
