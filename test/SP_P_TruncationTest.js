@@ -85,7 +85,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
         await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
         whale,
         whale,
-        { from: whale, value: dec(100000, "eth") }
+        { from: whale, value: dec(100000, "ether") }
       );
       await baseFeeLMAToken.transfer(A, dec(50000, 18), { from: whale });
 
@@ -96,7 +96,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
           await getBaseFeeLMAAmountForDesiredDebt(2000),
           account,
           account,
-          { from: account, value: dec(15, "eth") }
+          { from: account, value: dec(15, "ether") }
         );
         assert.isTrue(
           (await th.getTroveEntireDebt(contracts, account)).eq(
@@ -166,7 +166,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
         await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
         whale,
         whale,
-        { from: whale, value: dec(100000, "eth") }
+        { from: whale, value: dec(100000, "ether") }
       );
       await baseFeeLMAToken.transfer(A, dec(50000, 18), { from: whale });
 
@@ -177,7 +177,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
           await getBaseFeeLMAAmountForDesiredDebt(2000),
           account,
           account,
-          { from: account, value: dec(15, "eth") }
+          { from: account, value: dec(15, "ether") }
         );
         assert.isTrue(
           (await th.getTroveEntireDebt(contracts, account)).eq(
@@ -262,7 +262,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
         await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
         whale,
         whale,
-        { from: whale, value: dec(100000, "eth") }
+        { from: whale, value: dec(100000, "ether") }
       );
       await baseFeeLMAToken.transfer(A, dec(50000, 18), { from: whale });
 
@@ -273,7 +273,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
           await getBaseFeeLMAAmountForDesiredDebt(2000),
           account,
           account,
-          { from: account, value: dec(15, "eth") }
+          { from: account, value: dec(15, "ether") }
         );
         assert.isTrue(
           (await th.getTroveEntireDebt(contracts, account)).eq(
@@ -368,7 +368,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
         await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
         whale,
         whale,
-        { from: whale, value: dec(100000, "eth") }
+        { from: whale, value: dec(100000, "ether") }
       );
       await baseFeeLMAToken.transfer(A, dec(50000, 18), { from: whale });
 
@@ -379,7 +379,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
           await getBaseFeeLMAAmountForDesiredDebt(2000),
           account,
           account,
-          { from: account, value: dec(15, "eth") }
+          { from: account, value: dec(15, "ether") }
         );
         assert.isTrue(
           (await th.getTroveEntireDebt(contracts, account)).eq(
@@ -476,7 +476,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
         await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
         whale,
         whale,
-        { from: whale, value: dec(100000, "eth") }
+        { from: whale, value: dec(100000, "ether") }
       );
       await baseFeeLMAToken.transfer(A, dec(50000, 18), { from: whale });
 
@@ -487,7 +487,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
           await getBaseFeeLMAAmountForDesiredDebt(2000),
           account,
           account,
-          { from: account, value: dec(15, "eth") }
+          { from: account, value: dec(15, "ether") }
         );
         assert.isTrue(
           (await th.getTroveEntireDebt(contracts, account)).eq(
@@ -594,7 +594,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
         await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
         whale,
         whale,
-        { from: whale, value: dec(100000, "eth") }
+        { from: whale, value: dec(100000, "ether") }
       );
       await baseFeeLMAToken.transfer(A, dec(50000, 18), { from: whale });
 
@@ -605,7 +605,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
           await getBaseFeeLMAAmountForDesiredDebt(2000),
           account,
           account,
-          { from: account, value: dec(15, "eth") }
+          { from: account, value: dec(15, "ether") }
         );
         assert.isTrue(
           (await th.getTroveEntireDebt(contracts, account)).eq(

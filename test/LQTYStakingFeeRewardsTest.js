@@ -1241,12 +1241,12 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     const ethSendTxPromise1 = web3.eth.sendTransaction({
       to: hogStaking.address,
       from: A,
-      value: dec(1, "eth"),
+      value: dec(1, "ether"),
     });
     const ethSendTxPromise2 = web3.eth.sendTransaction({
       to: hogStaking.address,
       from: owner,
-      value: dec(1, "eth"),
+      value: dec(1, "ether"),
     });
 
     await assertRevert(ethSendTxPromise1);

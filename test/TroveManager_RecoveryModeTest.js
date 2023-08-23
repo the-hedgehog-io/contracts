@@ -14,18 +14,18 @@ const BaseFeeLMAToken = artifacts.require("./BaseFeeLMAToken.sol");
 const GAS_PRICE = 10000000;
 
 contract("TroveManager - in Recovery Mode", async (accounts) => {
-  const _1_Ether = web3.utils.toWei("1", "eth");
-  const _2_Ether = web3.utils.toWei("2", "eth");
-  const _3_Ether = web3.utils.toWei("3", "eth");
-  const _3pt5_Ether = web3.utils.toWei("3.5", "eth");
-  const _6_Ether = web3.utils.toWei("6", "eth");
-  const _10_Ether = web3.utils.toWei("10", "eth");
-  const _20_Ether = web3.utils.toWei("20", "eth");
-  const _21_Ether = web3.utils.toWei("21", "eth");
-  const _22_Ether = web3.utils.toWei("22", "eth");
-  const _24_Ether = web3.utils.toWei("24", "eth");
-  const _25_Ether = web3.utils.toWei("25", "eth");
-  const _30_Ether = web3.utils.toWei("30", "eth");
+  const _1_Ether = web3.utils.toWei("1", "ether");
+  const _2_Ether = web3.utils.toWei("2", "ether");
+  const _3_Ether = web3.utils.toWei("3", "ether");
+  const _3pt5_Ether = web3.utils.toWei("3.5", "ether");
+  const _6_Ether = web3.utils.toWei("6", "ether");
+  const _10_Ether = web3.utils.toWei("10", "ether");
+  const _20_Ether = web3.utils.toWei("20", "ether");
+  const _21_Ether = web3.utils.toWei("21", "ether");
+  const _22_Ether = web3.utils.toWei("22", "ether");
+  const _24_Ether = web3.utils.toWei("24", "ether");
+  const _25_Ether = web3.utils.toWei("25", "ether");
+  const _30_Ether = web3.utils.toWei("30", "ether");
 
   const ZERO_ADDRESS = th.ZERO_ADDRESS;
   const [
@@ -2735,7 +2735,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
   it("liquidateTroves(): liquidates only up to the requested number of undercollateralized troves", async () => {
     await openTrove({
       ICR: toBN(dec(300, 16)),
-      extraParams: { from: whale, value: dec(300, "eth") },
+      extraParams: { from: whale, value: dec(300, "ether") },
     });
 
     // --- SETUP ---
@@ -2861,7 +2861,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     // --- SETUP ---
     await openTrove({
       ICR: toBN(dec(300, 16)),
-      extraParams: { from: whale, value: dec(300, "eth") },
+      extraParams: { from: whale, value: dec(300, "ether") },
     });
 
     // create 5 Troves with varying ICRs

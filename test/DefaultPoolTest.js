@@ -25,7 +25,7 @@ contract("DefaultPool", async (accounts) => {
   });
 
   it("sendETHToActivePool(): fails if receiver cannot receive StETH", async () => {
-    const amount = dec(1, "eth");
+    const amount = dec(1, "ether");
 
     // start pool with `amount`
     //await web3.eth.sendTransaction({ to: defaultPool.address, from: owner, value: amount })

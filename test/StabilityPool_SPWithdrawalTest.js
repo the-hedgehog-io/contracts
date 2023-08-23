@@ -101,7 +101,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // Whale transfers 10k BaseFeeLMA to A, B and C who then deposit it to the SP
@@ -121,7 +121,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
 
         // price drops by 50%: defaulter ICR falls to 100%
@@ -195,7 +195,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // Whale transfers 10k BaseFeeLMA to A, B and C who then deposit it to the SP
@@ -215,14 +215,14 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(100, "eth") }
+          { from: defaulter_2, value: dec(100, "ether") }
         );
 
         // price drops by 50%: defaulter ICR falls to 100%
@@ -296,7 +296,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // Whale transfers 10k BaseFeeLMA to A, B and C who then deposit it to the SP
@@ -316,21 +316,21 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(100, "eth") }
+          { from: defaulter_2, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_3,
           defaulter_3,
-          { from: defaulter_3, value: dec(100, "eth") }
+          { from: defaulter_3, value: dec(100, "ether") }
         );
 
         // price drops by 50%: defaulter ICR falls to 100%
@@ -407,7 +407,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // Whale transfers 10k BaseFeeLMA to A, B and C who then deposit it to the SP
@@ -510,7 +510,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // Whale transfers 10k BaseFeeLMA to A, B and C who then deposit it to the SP
@@ -622,7 +622,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // Whale transfers 10k, 20k, 30k BaseFeeLMA to A, B and C respectively who then deposit it to the SP
@@ -645,14 +645,14 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(100, "eth") }
+          { from: defaulter_2, value: dec(100, "ether") }
         );
 
         // price drops by 50%: defaulter ICR falls to 100%
@@ -727,7 +727,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // Whale transfers 10k, 20k, 30k BaseFeeLMA to A, B and C respectively who then deposit it to the SP
@@ -750,21 +750,21 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(100, "eth") }
+          { from: defaulter_2, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_3,
           defaulter_3,
-          { from: defaulter_3, value: dec(100, "eth") }
+          { from: defaulter_3, value: dec(100, "ether") }
         );
 
         // price drops by 50%: defaulter ICR falls to 100%
@@ -841,7 +841,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(1000000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(1000000, "eth") }
+          { from: whale, value: dec(1000000, "ether") }
         );
 
         /* Depositors provide:-
@@ -880,14 +880,14 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(5, 21)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(50, "eth") }
+          { from: defaulter_2, value: dec(50, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount("46700000000000000000000"),
           defaulter_3,
           defaulter_3,
-          { from: defaulter_3, value: dec(500, "eth") }
+          { from: defaulter_3, value: dec(500, "ether") }
         );
 
         // price drops by 50%: defaulter ICR falls to 100%
@@ -967,7 +967,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // Whale transfers 10k BaseFeeLMA to A, B and C who then deposit it to the SP
@@ -987,21 +987,21 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(100, "eth") }
+          { from: defaulter_2, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_3,
           defaulter_3,
-          { from: defaulter_3, value: dec(100, "eth") }
+          { from: defaulter_3, value: dec(100, "ether") }
         );
 
         // price drops by 50%: defaulter ICR falls to 100%
@@ -1104,7 +1104,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // Whale transfers 10k BaseFeeLMA to A, B and C who then deposit it to the SP
@@ -1124,28 +1124,28 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(100, "eth") }
+          { from: defaulter_2, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_3,
           defaulter_3,
-          { from: defaulter_3, value: dec(100, "eth") }
+          { from: defaulter_3, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_4,
           defaulter_4,
-          { from: defaulter_4, value: dec(100, "eth") }
+          { from: defaulter_4, value: dec(100, "ether") }
         );
 
         // price drops by 50%: defaulter ICR falls to 100%
@@ -1246,7 +1246,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(1000000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(1000000, "eth") }
+          { from: whale, value: dec(1000000, "ether") }
         );
 
         /* Depositors open troves and make SP deposit:
@@ -1279,7 +1279,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
@@ -1300,7 +1300,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(40000, 18)),
           defaulter_4,
           defaulter_4,
-          { from: defaulter_4, value: dec(400, "eth") }
+          { from: defaulter_4, value: dec(400, "ether") }
         );
 
         // price drops by 50%: defaulter ICR falls to 100%
@@ -1405,7 +1405,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // Whale transfers 10k BaseFeeLMA to A, B and C who then deposit it to the SP
@@ -1425,28 +1425,28 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(100, "eth") }
+          { from: defaulter_2, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_3,
           defaulter_3,
-          { from: defaulter_3, value: dec(100, "eth") }
+          { from: defaulter_3, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_4,
           defaulter_4,
-          { from: defaulter_4, value: dec(100, "eth") }
+          { from: defaulter_4, value: dec(100, "ether") }
         );
 
         // price drops by 50%: defaulter ICR falls to 100%
@@ -1547,7 +1547,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         /* Initial deposits:
@@ -1585,21 +1585,21 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(20000, 18)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(200, "eth") }
+          { from: defaulter_2, value: dec(200, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(30000, 18)),
           defaulter_3,
           defaulter_3,
-          { from: defaulter_3, value: dec(300, "eth") }
+          { from: defaulter_3, value: dec(300, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
@@ -1710,7 +1710,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // Whale transfers 10k BaseFeeLMA to A, B and D who then deposit it to the SP
@@ -1730,21 +1730,21 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(100, "eth") }
+          { from: defaulter_2, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_3,
           defaulter_3,
-          { from: defaulter_3, value: dec(100, "eth") }
+          { from: defaulter_3, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
@@ -1867,7 +1867,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // Whale transfers 10k BaseFeeLMA to A, B who then deposit it to the SP
@@ -1887,14 +1887,14 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(20000, 18)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(200, "eth") }
+          { from: defaulter_1, value: dec(200, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(100, "eth") }
+          { from: defaulter_2, value: dec(100, "ether") }
         );
 
         // price drops by 50%: defaulter ICR falls to 100%
@@ -2012,7 +2012,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // Whale transfers 10k BaseFeeLMA to A, B who then deposit it to the SP
@@ -2032,28 +2032,28 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(100, "eth") }
+          { from: defaulter_2, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_3,
           defaulter_3,
-          { from: defaulter_3, value: dec(100, "eth") }
+          { from: defaulter_3, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_4,
           defaulter_4,
-          { from: defaulter_4, value: dec(100, "eth") }
+          { from: defaulter_4, value: dec(100, "ether") }
         );
 
         // price drops by 50%: defaulter ICR falls to 100%
@@ -2141,7 +2141,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // Whale transfers 10k BaseFeeLMA to A, B who then deposit it to the SP
@@ -2161,14 +2161,14 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(20000, 18)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(200, "eth") }
+          { from: defaulter_1, value: dec(200, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(100, "eth") }
+          { from: defaulter_2, value: dec(100, "ether") }
         );
 
         // price drops by 50%
@@ -2301,7 +2301,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         await baseFeeLMAToken.transfer(alice, dec(10000, 18), { from: whale });
@@ -2315,21 +2315,21 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(100, "eth") }
+          { from: defaulter_2, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
           defaulter_3,
           defaulter_3,
-          { from: defaulter_3, value: dec(100, "eth") }
+          { from: defaulter_3, value: dec(100, "ether") }
         );
 
         // price drops by 50%
@@ -2382,7 +2382,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // 4 Defaulters open trove with 200% ICR
@@ -2391,28 +2391,28 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(20000, 18)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(200, "eth") }
+          { from: defaulter_1, value: dec(200, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(20000, 18)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(200, "eth") }
+          { from: defaulter_2, value: dec(200, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(20000, 18)),
           defaulter_3,
           defaulter_3,
-          { from: defaulter_3, value: dec(200, "eth") }
+          { from: defaulter_3, value: dec(200, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(20000, 18)),
           defaulter_4,
           defaulter_4,
-          { from: defaulter_4, value: dec(200, "eth") }
+          { from: defaulter_4, value: dec(200, "ether") }
         );
 
         // price drops by 50%: defaulter ICR falls to 100%
@@ -2638,7 +2638,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         await baseFeeLMAToken.transfer(alice, dec(10000, 18), { from: whale });
@@ -2652,7 +2652,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount("9999999910000000000000"),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
 
         assert.equal(await stabilityPool.currentScale(), "0");
@@ -2663,7 +2663,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(9900, 18)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(60, "eth") }
+          { from: defaulter_2, value: dec(60, "ether") }
         );
 
         // price drops by 50%
@@ -2731,7 +2731,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         await baseFeeLMAToken.transfer(alice, dec(10000, 18), { from: whale });
@@ -2745,7 +2745,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount("9999999910000000000000"),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
 
         // Defaulter 2 withdraws 59400 BaseFeeLMA
@@ -2754,7 +2754,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount("59400000000000000000000"),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(330, "eth") }
+          { from: defaulter_2, value: dec(330, "ether") }
         );
 
         // price drops by 50%
@@ -2877,7 +2877,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         await baseFeeLMAToken.transfer(alice, dec(10000, 18), { from: whale });
@@ -2891,14 +2891,14 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(99999, 17)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(99999, 17)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(100, "eth") }
+          { from: defaulter_2, value: dec(100, "ether") }
         );
 
         // price drops by 50%: defaulter 1 ICR falls to 100%
@@ -2966,7 +2966,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         await baseFeeLMAToken.transfer(alice, dec(10000, 18), { from: whale });
@@ -2980,14 +2980,14 @@ contract(
           await getOpenTroveBaseFeeLMAAmount("9999900000000000000000"),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount("59999400000000000000000"),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(600, "eth") }
+          { from: defaulter_2, value: dec(600, "ether") }
         );
 
         // price drops by 50%
@@ -3096,7 +3096,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // Defaulters 1 withdraws 9999.9999999 BaseFeeLMA
@@ -3105,7 +3105,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount("9999999999900000000000"),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
 
         // Price drops by 50%
@@ -3146,7 +3146,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // Defaulters 1-4 each withdraw 9999.9 BaseFeeLMA
@@ -3155,28 +3155,28 @@ contract(
           await getOpenTroveBaseFeeLMAAmount("9999900000000000000000"),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount("9999900000000000000000"),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(100, "eth") }
+          { from: defaulter_2, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount("9999900000000000000000"),
           defaulter_3,
           defaulter_3,
-          { from: defaulter_3, value: dec(100, "eth") }
+          { from: defaulter_3, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount("9999900000000000000000"),
           defaulter_4,
           defaulter_4,
-          { from: defaulter_4, value: dec(100, "eth") }
+          { from: defaulter_4, value: dec(100, "ether") }
         );
 
         // price drops by 50%
@@ -3303,7 +3303,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // Defaulters 1-3 each withdraw 24100, 24300, 24500 BaseFeeLMA (inc gas comp)
@@ -3312,21 +3312,21 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(24100, 18)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(200, "eth") }
+          { from: defaulter_1, value: dec(200, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(24300, 18)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(200, "eth") }
+          { from: defaulter_2, value: dec(200, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(24500, 18)),
           defaulter_3,
           defaulter_3,
-          { from: defaulter_3, value: dec(200, "eth") }
+          { from: defaulter_3, value: dec(200, "ether") }
         );
 
         // price drops by 50%
@@ -3486,7 +3486,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // Defaulters 1-5 each withdraw up to debt of 9999.9999999 BaseFeeLMA
@@ -3495,35 +3495,35 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(99999, 17)),
           defaulter_1,
           defaulter_1,
-          { from: defaulter_1, value: dec(100, "eth") }
+          { from: defaulter_1, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(99999, 17)),
           defaulter_2,
           defaulter_2,
-          { from: defaulter_2, value: dec(100, "eth") }
+          { from: defaulter_2, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(99999, 17)),
           defaulter_3,
           defaulter_3,
-          { from: defaulter_3, value: dec(100, "eth") }
+          { from: defaulter_3, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(99999, 17)),
           defaulter_4,
           defaulter_4,
-          { from: defaulter_4, value: dec(100, "eth") }
+          { from: defaulter_4, value: dec(100, "ether") }
         );
         await borrowerOperations.openTrove(
           th._100pct,
           await getOpenTroveBaseFeeLMAAmount(dec(99999, 17)),
           defaulter_5,
           defaulter_5,
-          { from: defaulter_5, value: dec(100, "eth") }
+          { from: defaulter_5, value: dec(100, "ether") }
         );
 
         // price drops by 50%
@@ -3616,7 +3616,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // StETH:USD price is $2 billion per StETH
@@ -3706,7 +3706,7 @@ contract(
           await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
           whale,
           whale,
-          { from: whale, value: dec(100000, "eth") }
+          { from: whale, value: dec(100000, "ether") }
         );
 
         // StETH:USD price is $2 billion per StETH

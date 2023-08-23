@@ -197,7 +197,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
     it("withdrawFromSP(): reward term G does not update when no HOG is issued", async () => {
       await borrowerOperations.openTrove(th._100pct, dec(10000, 18), A, A, {
         from: A,
-        value: dec(1000, "eth"),
+        value: dec(1000, "ether"),
       });
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, {
         from: A,
@@ -212,7 +212,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
         await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
         defaulter_1,
         defaulter_1,
-        { from: defaulter_1, value: dec(100, "eth") }
+        { from: defaulter_1, value: dec(100, "ether") }
       );
 
       // StETH drops
@@ -271,24 +271,24 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
         dec(10000, 18),
         whale,
         whale,
-        { from: whale, value: dec(10000, "eth") }
+        { from: whale, value: dec(10000, "ether") }
       );
 
       await borrowerOperations.openTrove(th._100pct, dec(1, 22), A, A, {
         from: A,
-        value: dec(100, "eth"),
+        value: dec(100, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(1, 22), B, B, {
         from: B,
-        value: dec(100, "eth"),
+        value: dec(100, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(1, 22), C, C, {
         from: C,
-        value: dec(100, "eth"),
+        value: dec(100, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(1, 22), D, D, {
         from: D,
-        value: dec(100, "eth"),
+        value: dec(100, "ether"),
       });
 
       // Check all HOG balances are initially 0
@@ -384,24 +384,24 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
         await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
         whale,
         whale,
-        { from: whale, value: dec(10000, "eth") }
+        { from: whale, value: dec(10000, "ether") }
       );
 
       await borrowerOperations.openTrove(th._100pct, dec(10000, 18), A, A, {
         from: A,
-        value: dec(200, "eth"),
+        value: dec(200, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(20000, 18), B, B, {
         from: B,
-        value: dec(300, "eth"),
+        value: dec(300, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(30000, 18), C, C, {
         from: C,
-        value: dec(400, "eth"),
+        value: dec(400, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(10000, 18), D, D, {
         from: D,
-        value: dec(100, "eth"),
+        value: dec(100, "ether"),
       });
 
       // Check all HOG balances are initially 0
@@ -538,28 +538,28 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
         dec(10000, 18),
         whale,
         whale,
-        { from: whale, value: dec(10000, "eth") }
+        { from: whale, value: dec(10000, "ether") }
       );
 
       await borrowerOperations.openTrove(th._100pct, dec(10000, 18), A, A, {
         from: A,
-        value: dec(200, "eth"),
+        value: dec(200, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(20000, 18), B, B, {
         from: B,
-        value: dec(300, "eth"),
+        value: dec(300, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(30000, 18), C, C, {
         from: C,
-        value: dec(400, "eth"),
+        value: dec(400, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(40000, 18), D, D, {
         from: D,
-        value: dec(500, "eth"),
+        value: dec(500, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(40000, 18), E, E, {
         from: E,
-        value: dec(600, "eth"),
+        value: dec(600, "ether"),
       });
 
       await borrowerOperations.openTrove(
@@ -567,7 +567,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
         await getOpenTroveBaseFeeLMAAmount(dec(30000, 18)),
         defaulter_1,
         defaulter_1,
-        { from: defaulter_1, value: dec(300, "eth") }
+        { from: defaulter_1, value: dec(300, "ether") }
       );
 
       // Check all HOG balances are initially 0
@@ -749,7 +749,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
         await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
         whale,
         whale,
-        { from: whale, value: dec(10000, "eth") }
+        { from: whale, value: dec(10000, "ether") }
       );
 
       const allDepositors = [A, B, C, D, E, F, G, H];
@@ -759,28 +759,28 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
         await getOpenTroveBaseFeeLMAAmount(dec(20000, 18)),
         defaulter_1,
         defaulter_1,
-        { from: defaulter_1, value: dec(200, "eth") }
+        { from: defaulter_1, value: dec(200, "ether") }
       );
       await borrowerOperations.openTrove(
         th._100pct,
         await getOpenTroveBaseFeeLMAAmount(dec(20000, 18)),
         defaulter_2,
         defaulter_2,
-        { from: defaulter_2, value: dec(200, "eth") }
+        { from: defaulter_2, value: dec(200, "ether") }
       );
       await borrowerOperations.openTrove(
         th._100pct,
         await getOpenTroveBaseFeeLMAAmount(dec(20000, 18)),
         defaulter_3,
         defaulter_3,
-        { from: defaulter_3, value: dec(200, "eth") }
+        { from: defaulter_3, value: dec(200, "ether") }
       );
       await borrowerOperations.openTrove(
         th._100pct,
         await getOpenTroveBaseFeeLMAAmount(dec(20000, 18)),
         defaulter_4,
         defaulter_4,
-        { from: defaulter_4, value: dec(200, "eth") }
+        { from: defaulter_4, value: dec(200, "ether") }
       );
 
       // price drops by 50%: defaulter ICR falls to 100%
@@ -799,7 +799,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
           dec(10000, 18),
           account,
           account,
-          { from: account, value: dec(200, "eth") }
+          { from: account, value: dec(200, "ether") }
         );
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, {
           from: account,
@@ -823,7 +823,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
           dec(10000, 18),
           account,
           account,
-          { from: account, value: dec(200, "eth") }
+          { from: account, value: dec(200, "ether") }
         );
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, {
           from: account,
@@ -847,7 +847,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
           dec(10000, 18),
           account,
           account,
-          { from: account, value: dec(200, "eth") }
+          { from: account, value: dec(200, "ether") }
         );
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, {
           from: account,
@@ -871,7 +871,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
           dec(10000, 18),
           account,
           account,
-          { from: account, value: dec(200, "eth") }
+          { from: account, value: dec(200, "ether") }
         );
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, {
           from: account,
@@ -934,15 +934,15 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
 
       await borrowerOperations.openTrove(th._100pct, dec(16000, 18), A, A, {
         from: A,
-        value: dec(200, "eth"),
+        value: dec(200, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(10000, 18), B, B, {
         from: B,
-        value: dec(100, "eth"),
+        value: dec(100, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(16000, 18), C, C, {
         from: C,
-        value: dec(200, "eth"),
+        value: dec(200, "ether"),
       });
 
       const totalHOGissuance_0 = await communityIssuanceTester.totalHOGIssued();
@@ -1080,7 +1080,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
         await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
         whale,
         whale,
-        { from: whale, value: dec(100, "eth") }
+        { from: whale, value: dec(100, "ether") }
       );
 
       const fiveDefaulters = [
@@ -1096,42 +1096,42 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
         dec(10000, 18),
         ZERO_ADDRESS,
         ZERO_ADDRESS,
-        { from: A, value: dec(10000, "eth") }
+        { from: A, value: dec(10000, "ether") }
       );
       await borrowerOperations.openTrove(
         th._100pct,
         dec(10000, 18),
         ZERO_ADDRESS,
         ZERO_ADDRESS,
-        { from: B, value: dec(10000, "eth") }
+        { from: B, value: dec(10000, "ether") }
       );
       await borrowerOperations.openTrove(
         th._100pct,
         dec(10000, 18),
         ZERO_ADDRESS,
         ZERO_ADDRESS,
-        { from: C, value: dec(10000, "eth") }
+        { from: C, value: dec(10000, "ether") }
       );
       await borrowerOperations.openTrove(
         th._100pct,
         dec(10000, 18),
         ZERO_ADDRESS,
         ZERO_ADDRESS,
-        { from: D, value: dec(10000, "eth") }
+        { from: D, value: dec(10000, "ether") }
       );
       await borrowerOperations.openTrove(
         th._100pct,
         dec(10000, 18),
         ZERO_ADDRESS,
         ZERO_ADDRESS,
-        { from: E, value: dec(10000, "eth") }
+        { from: E, value: dec(10000, "ether") }
       );
       await borrowerOperations.openTrove(
         th._100pct,
         dec(10000, 18),
         ZERO_ADDRESS,
         ZERO_ADDRESS,
-        { from: F, value: dec(10000, "eth") }
+        { from: F, value: dec(10000, "ether") }
       );
 
       for (const defaulter of fiveDefaulters) {
@@ -1141,7 +1141,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
           await getOpenTroveBaseFeeLMAAmount("9999900000000000000000"),
           defaulter,
           defaulter,
-          { from: defaulter, value: dec(100, "eth") }
+          { from: defaulter, value: dec(100, "ether") }
         );
       }
 
@@ -1151,7 +1151,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
         await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
         defaulter_6,
         defaulter_6,
-        { from: defaulter_6, value: dec(100, "eth") }
+        { from: defaulter_6, value: dec(100, "ether") }
       );
 
       // Confirm all depositors have 0 HOG
@@ -1358,28 +1358,28 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
         dec(10000, 18),
         whale,
         whale,
-        { from: whale, value: dec(10000, "eth") }
+        { from: whale, value: dec(10000, "ether") }
       );
 
       await borrowerOperations.openTrove(th._100pct, dec(10000, 18), A, A, {
         from: A,
-        value: dec(100, "eth"),
+        value: dec(100, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(10000, 18), B, B, {
         from: B,
-        value: dec(100, "eth"),
+        value: dec(100, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(10000, 18), C, C, {
         from: C,
-        value: dec(100, "eth"),
+        value: dec(100, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(10000, 18), D, D, {
         from: D,
-        value: dec(100, "eth"),
+        value: dec(100, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(10000, 18), E, E, {
         from: E,
-        value: dec(100, "eth"),
+        value: dec(100, "ether"),
       });
 
       // Check all HOG balances are initially 0
@@ -1586,29 +1586,29 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
         dec(10000, 18),
         whale,
         whale,
-        { from: whale, value: dec(10000, "eth") }
+        { from: whale, value: dec(10000, "ether") }
       );
 
       await borrowerOperations.openTrove(th._100pct, dec(10000, 18), A, A, {
         from: A,
-        value: dec(200, "eth"),
+        value: dec(200, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(60000, 18), B, B, {
         from: B,
-        value: dec(800, "eth"),
+        value: dec(800, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(30000, 18), C, C, {
         from: C,
-        value: dec(400, "eth"),
+        value: dec(400, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(40000, 18), D, D, {
         from: D,
-        value: dec(500, "eth"),
+        value: dec(500, "ether"),
       });
 
       await borrowerOperations.openTrove(th._100pct, dec(30000, 18), E, E, {
         from: E,
-        value: dec(400, "eth"),
+        value: dec(400, "ether"),
       });
 
       // D1, D2, D3 open troves with total debt 50k, 30k, 10k respectively (inc. gas comp)
@@ -1617,21 +1617,21 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
         await getOpenTroveBaseFeeLMAAmount(dec(50000, 18)),
         defaulter_1,
         defaulter_1,
-        { from: defaulter_1, value: dec(500, "eth") }
+        { from: defaulter_1, value: dec(500, "ether") }
       );
       await borrowerOperations.openTrove(
         th._100pct,
         await getOpenTroveBaseFeeLMAAmount(dec(20000, 18)),
         defaulter_2,
         defaulter_2,
-        { from: defaulter_2, value: dec(200, "eth") }
+        { from: defaulter_2, value: dec(200, "ether") }
       );
       await borrowerOperations.openTrove(
         th._100pct,
         await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
         defaulter_3,
         defaulter_3,
-        { from: defaulter_3, value: dec(100, "eth") }
+        { from: defaulter_3, value: dec(100, "ether") }
       );
 
       // Check all HOG balances are initially 0
@@ -2217,7 +2217,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
         dec(10000, 18),
         whale,
         whale,
-        { from: whale, value: dec(10000, "eth") }
+        { from: whale, value: dec(10000, "ether") }
       );
 
       const _4_Defaulters = [
@@ -2234,7 +2234,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
           await getOpenTroveBaseFeeLMAAmount(dec(99999, 17)),
           defaulter,
           defaulter,
-          { from: defaulter, value: dec(100, "eth") }
+          { from: defaulter, value: dec(100, "ether") }
         );
       }
 
@@ -2253,12 +2253,12 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
       // A, B provides 5000 BaseFeeLMA to SP
       await borrowerOperations.openTrove(th._100pct, dec(5000, 18), A, A, {
         from: A,
-        value: dec(200, "eth"),
+        value: dec(200, "ether"),
       });
       await stabilityPool.provideToSP(dec(5000, 18), frontEnd_1, { from: A });
       await borrowerOperations.openTrove(th._100pct, dec(5000, 18), B, B, {
         from: B,
-        value: dec(200, "eth"),
+        value: dec(200, "ether"),
       });
       await stabilityPool.provideToSP(dec(5000, 18), frontEnd_1, { from: B });
 
@@ -2279,7 +2279,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
       // C provides to SP
       await borrowerOperations.openTrove(th._100pct, dec(99999, 17), C, C, {
         from: C,
-        value: dec(200, "eth"),
+        value: dec(200, "ether"),
       });
       await stabilityPool.provideToSP(dec(99999, 17), frontEnd_1, { from: C });
 
@@ -2300,7 +2300,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
       // D provides to SP
       await borrowerOperations.openTrove(th._100pct, dec(99999, 17), D, D, {
         from: D,
-        value: dec(200, "eth"),
+        value: dec(200, "ether"),
       });
       await stabilityPool.provideToSP(dec(99999, 17), frontEnd_1, { from: D });
 
@@ -2321,7 +2321,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
       // E provides to SP
       await borrowerOperations.openTrove(th._100pct, dec(99999, 17), E, E, {
         from: E,
-        value: dec(200, "eth"),
+        value: dec(200, "ether"),
       });
       await stabilityPool.provideToSP(dec(99999, 17), frontEnd_1, { from: E });
 

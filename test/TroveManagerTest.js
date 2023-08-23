@@ -493,7 +493,7 @@ contract("TroveManager", async (accounts) => {
   it("liquidate(): Liquidates undercollateralized trove if there are two troves in the system", async () => {
     await openTrove({
       ICR: toBN(dec(200, 18)),
-      extraParams: { from: bob, value: dec(100, "eth") },
+      extraParams: { from: bob, value: dec(100, "ether") },
     });
 
     // Alice creates a single trove with 0.7 StETH and a debt of 70 BaseFeeLMA, and provides 10 BaseFeeLMA to SP
@@ -3641,21 +3641,21 @@ contract("TroveManager", async (accounts) => {
       await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
       A,
       A,
-      { from: A, value: dec(1000, "eth") }
+      { from: A, value: dec(1000, "ether") }
     );
     await borrowerOperations.openTrove(
       th._100pct,
       await getOpenTroveBaseFeeLMAAmount(dec(20000, 18)),
       B,
       B,
-      { from: B, value: dec(1000, "eth") }
+      { from: B, value: dec(1000, "ether") }
     );
     await borrowerOperations.openTrove(
       th._100pct,
       await getOpenTroveBaseFeeLMAAmount(dec(30000, 18)),
       C,
       C,
-      { from: C, value: dec(1000, "eth") }
+      { from: C, value: dec(1000, "ether") }
     );
 
     // A and C send all their tokens to B
@@ -3699,21 +3699,21 @@ contract("TroveManager", async (accounts) => {
       await getOpenTroveBaseFeeLMAAmount(dec(6000, 18)),
       A,
       A,
-      { from: A, value: dec(1000, "eth") }
+      { from: A, value: dec(1000, "ether") }
     );
     await borrowerOperations.openTrove(
       th._100pct,
       await getOpenTroveBaseFeeLMAAmount(dec(20000, 18)),
       B,
       B,
-      { from: B, value: dec(1000, "eth") }
+      { from: B, value: dec(1000, "ether") }
     );
     await borrowerOperations.openTrove(
       th._100pct,
       await getOpenTroveBaseFeeLMAAmount(dec(30000, 18)),
       C,
       C,
-      { from: C, value: dec(1000, "eth") }
+      { from: C, value: dec(1000, "ether") }
     );
 
     // A and C send all their tokens to B
@@ -6185,7 +6185,7 @@ contract("TroveManager", async (accounts) => {
 
   it("computeICR(): Returns 0 if trove's coll is worth 0", async () => {
     const price = 0;
-    const coll = dec(1, "eth");
+    const coll = dec(1, "ether");
     const debt = dec(100, 18);
 
     const ICR = (await troveManager.computeICR(coll, debt, price)).toString();
@@ -6195,7 +6195,7 @@ contract("TroveManager", async (accounts) => {
 
   it("computeICR(): Returns 2^256-1 for StETH:USD = 100, coll = 1 StETH, debt = 100 BaseFeeLMA", async () => {
     const price = dec(100, 18);
-    const coll = dec(1, "eth");
+    const coll = dec(1, "ether");
     const debt = dec(100, 18);
 
     const ICR = (await troveManager.computeICR(coll, debt, price)).toString();
@@ -6205,7 +6205,7 @@ contract("TroveManager", async (accounts) => {
 
   it("computeICR(): returns correct ICR for StETH:USD = 100, coll = 200 StETH, debt = 30 BaseFeeLMA", async () => {
     const price = dec(100, 18);
-    const coll = dec(200, "eth");
+    const coll = dec(200, "ether");
     const debt = dec(30, 18);
 
     const ICR = (await troveManager.computeICR(coll, debt, price)).toString();
@@ -6225,7 +6225,7 @@ contract("TroveManager", async (accounts) => {
 
   it("computeICR(): returns correct ICR for StETH:USD = 100, coll = 1 StETH, debt = 54321 BaseFeeLMA", async () => {
     const price = dec(100, 18);
-    const coll = dec(1, "eth");
+    const coll = dec(1, "ether");
     const debt = "54321000000000000000000";
 
     const ICR = (await troveManager.computeICR(coll, debt, price)).toString();
@@ -6235,7 +6235,7 @@ contract("TroveManager", async (accounts) => {
 
   it("computeICR(): Returns 2^256-1 if trove has non-zero coll and zero debt", async () => {
     const price = dec(100, 18);
-    const coll = dec(1, "eth");
+    const coll = dec(1, "ether");
     const debt = 0;
 
     const ICR = web3.utils.toHex(

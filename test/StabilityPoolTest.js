@@ -202,7 +202,7 @@ contract("StabilityPool", async (accounts) => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: whale, value: dec(50, "eth") },
+        extraParams: { from: whale, value: dec(50, "ether") },
       });
       const whaleBaseFeeLMA = await baseFeeLMAToken.balanceOf(whale);
       await stabilityPool.provideToSP(whaleBaseFeeLMA, frontEnd_1, {
@@ -225,7 +225,7 @@ contract("StabilityPool", async (accounts) => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(100, 18)),
         ICR: toBN(dec(5, 18)),
-        extraParams: { from: alice, value: dec(50, "eth") },
+        extraParams: { from: alice, value: dec(50, "ether") },
       });
 
       // price drops: defaulter's Troves fall below MCR, whale doesn't
@@ -283,7 +283,7 @@ contract("StabilityPool", async (accounts) => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: whale, value: dec(50, "eth") },
+        extraParams: { from: whale, value: dec(50, "ether") },
       });
       const whaleBaseFeeLMA = await baseFeeLMAToken.balanceOf(whale);
       await stabilityPool.provideToSP(whaleBaseFeeLMA, frontEnd_1, {
@@ -294,17 +294,17 @@ contract("StabilityPool", async (accounts) => {
       await openTrove({
         extraBaseFeeLMAAmount: 0,
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: defaulter_1, value: dec(50, "eth") },
+        extraParams: { from: defaulter_1, value: dec(50, "ether") },
       });
       await openTrove({
         extraBaseFeeLMAAmount: 0,
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: defaulter_2, value: dec(50, "eth") },
+        extraParams: { from: defaulter_2, value: dec(50, "ether") },
       });
       await openTrove({
         extraBaseFeeLMAAmount: 0,
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: defaulter_3, value: dec(50, "eth") },
+        extraParams: { from: defaulter_3, value: dec(50, "ether") },
       });
 
       // --- TEST ---
@@ -400,18 +400,18 @@ contract("StabilityPool", async (accounts) => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: whale, value: dec(50, "eth") },
+        extraParams: { from: whale, value: dec(50, "ether") },
       });
 
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: alice, value: dec(50, "eth") },
+        extraParams: { from: alice, value: dec(50, "ether") },
       });
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: bob, value: dec(50, "eth") },
+        extraParams: { from: bob, value: dec(50, "ether") },
       });
       const aliceBaseFeeLMAbal = await baseFeeLMAToken.balanceOf(alice);
       const bobBaseFeeLMAbal = await baseFeeLMAToken.balanceOf(bob);
@@ -439,17 +439,17 @@ contract("StabilityPool", async (accounts) => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: whale, value: dec(50, "eth") },
+        extraParams: { from: whale, value: dec(50, "ether") },
       });
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: alice, value: dec(50, "eth") },
+        extraParams: { from: alice, value: dec(50, "ether") },
       });
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: bob, value: dec(50, "eth") },
+        extraParams: { from: bob, value: dec(50, "ether") },
       });
 
       const maxBytes32 = web3.utils.toBN(
@@ -473,7 +473,7 @@ contract("StabilityPool", async (accounts) => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: whale, value: dec(50, "eth") },
+        extraParams: { from: whale, value: dec(50, "ether") },
       });
       await stabilityPool.provideToSP(dec(1850, 18), frontEnd_1, {
         from: whale,
@@ -543,7 +543,7 @@ contract("StabilityPool", async (accounts) => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: whale, value: dec(50, "eth") },
+        extraParams: { from: whale, value: dec(50, "ether") },
       });
 
       // A, B, C open troves and make Stability Pool deposits
@@ -674,7 +674,7 @@ contract("StabilityPool", async (accounts) => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: whale, value: dec(50, "eth") },
+        extraParams: { from: whale, value: dec(50, "ether") },
       });
 
       // A, B, C open troves and make Stability Pool deposits
@@ -771,7 +771,7 @@ contract("StabilityPool", async (accounts) => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: whale, value: dec(50, "eth") },
+        extraParams: { from: whale, value: dec(50, "ether") },
       });
 
       // A, B, C open troves and make Stability Pool deposits
@@ -917,7 +917,7 @@ contract("StabilityPool", async (accounts) => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: whale, value: dec(50, "eth") },
+        extraParams: { from: whale, value: dec(50, "ether") },
       });
 
       // A, B, C open troves and make Stability Pool deposits
@@ -970,7 +970,7 @@ contract("StabilityPool", async (accounts) => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: whale, value: dec(50, "eth") },
+        extraParams: { from: whale, value: dec(50, "ether") },
       });
 
       // A, B, C open troves and make Stability Pool deposits
@@ -1018,7 +1018,7 @@ contract("StabilityPool", async (accounts) => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: whale, value: dec(50, "eth") },
+        extraParams: { from: whale, value: dec(50, "ether") },
       });
 
       // A, B, C open troves and make Stability Pool deposits
@@ -1071,7 +1071,7 @@ contract("StabilityPool", async (accounts) => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: whale, value: dec(50, "eth") },
+        extraParams: { from: whale, value: dec(50, "ether") },
       });
 
       // A, B, C open troves and make Stability Pool deposits
@@ -1138,7 +1138,7 @@ contract("StabilityPool", async (accounts) => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: whale, value: dec(50, "eth") },
+        extraParams: { from: whale, value: dec(50, "ether") },
       });
 
       // A, B, C, D open troves and make Stability Pool deposits
@@ -1197,7 +1197,7 @@ contract("StabilityPool", async (accounts) => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
-        extraParams: { from: whale, value: dec(50, "eth") },
+        extraParams: { from: whale, value: dec(50, "ether") },
       });
 
       // A, B, open troves
@@ -2977,7 +2977,7 @@ contract("StabilityPool", async (accounts) => {
         await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
         defaulter_1,
         defaulter_1,
-        { from: defaulter_1, value: dec(100, "eth") }
+        { from: defaulter_1, value: dec(100, "ether") }
       );
 
       const defaulterDebt = (
@@ -3815,7 +3815,7 @@ contract("StabilityPool", async (accounts) => {
         await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
         defaulter_1,
         defaulter_1,
-        { from: defaulter_1, value: dec(100, "eth") }
+        { from: defaulter_1, value: dec(100, "ether") }
       );
 
       // A, B, C provides 10000, 5000, 3000 BaseFeeLMA to SP

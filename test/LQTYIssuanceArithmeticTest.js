@@ -901,7 +901,7 @@ contract("HOG community issuance arithmetic tests", async (accounts) => {
     // Alice opens trove and deposits to SP
     await borrowerOperations.openTrove(th._100pct, dec(1, 18), alice, alice, {
       from: alice,
-      value: dec(1, "eth"),
+      value: dec(1, "ether"),
     });
     await stabilityPool.provideToSP(dec(1, 18), frontEnd_1, { from: alice });
 
@@ -938,7 +938,7 @@ contract("HOG community issuance arithmetic tests", async (accounts) => {
     // Alice opens trove and deposits to SP
     await borrowerOperations.openTrove(th._100pct, dec(1, 18), alice, alice, {
       from: alice,
-      value: dec(1, "eth"),
+      value: dec(1, "ether"),
     });
     await stabilityPool.provideToSP(dec(1, 18), frontEnd_1, { from: alice });
 
@@ -975,7 +975,7 @@ contract("HOG community issuance arithmetic tests", async (accounts) => {
     // Alice opens trove and deposits to SP
     await borrowerOperations.openTrove(th._100pct, dec(1, 18), alice, alice, {
       from: alice,
-      value: dec(1, "eth"),
+      value: dec(1, "ether"),
     });
     await stabilityPool.provideToSP(dec(1, 18), frontEnd_1, { from: alice });
 
@@ -1013,7 +1013,7 @@ contract("HOG community issuance arithmetic tests", async (accounts) => {
     // Alice opens trove and deposits to SP
     await borrowerOperations.openTrove(th._100pct, dec(1, 18), alice, alice, {
       from: alice,
-      value: dec(1, "eth"),
+      value: dec(1, "ether"),
     });
     await stabilityPool.provideToSP(dec(1, 18), frontEnd_1, { from: alice });
 

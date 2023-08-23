@@ -535,7 +535,7 @@ contract(
       assert.isAtMost(getDifference(E_entireColl_1, E_collAfterL1), 1e8);
 
       // Bob adds 1 StETH to his trove
-      const addedColl1 = toBN(dec(1, "eth"));
+      const addedColl1 = toBN(dec(1, "ether"));
       await borrowerOperations.addColl(B, B, { from: B, value: addedColl1 });
 
       // Liquidate C
@@ -578,7 +578,7 @@ contract(
       assert.isAtMost(getDifference(E_entireColl_2, E_collAfterL2), 1e8);
 
       // Bob adds 1 StETH to his trove
-      const addedColl2 = toBN(dec(1, "eth"));
+      const addedColl2 = toBN(dec(1, "ether"));
       await borrowerOperations.addColl(B, B, { from: B, value: addedColl2 });
 
       // Liquidate E
@@ -696,7 +696,7 @@ contract(
       // // Bob adds 1 StETH to his trove
       await borrowerOperations.addColl(B, B, {
         from: B,
-        value: dec(1, "eth"),
+        value: dec(1, "ether"),
       });
 
       // Check entireColl for each trove
@@ -748,7 +748,7 @@ contract(
       // // Bob adds 1 StETH to his trove
       await borrowerOperations.addColl(B, B, {
         from: B,
-        value: dec(1, "eth"),
+        value: dec(1, "ether"),
       });
 
       // Check entireColl for each trove
@@ -819,7 +819,7 @@ contract(
       await priceFeed.setPrice(dec(200, 18));
 
       //Bob adds StETH to his trove
-      const addedColl = toBN(dec(1, "eth"));
+      const addedColl = toBN(dec(1, "ether"));
       await borrowerOperations.addColl(bob, bob, {
         from: bob,
         value: addedColl,
@@ -898,7 +898,7 @@ contract(
       await priceFeed.setPrice(dec(200, 18));
 
       //Bob adds StETH to his trove
-      const addedColl = toBN(dec(1, "eth"));
+      const addedColl = toBN(dec(1, "ether"));
       await borrowerOperations.addColl(bob, bob, {
         from: bob,
         value: addedColl,
@@ -1011,7 +1011,7 @@ contract(
       const { collateral: D_coll } = await openTrove({
         ICR: toBN(dec(200, 16)),
         extraBaseFeeLMAAmount: dec(110, 18),
-        extraParams: { from: dennis, value: dec(1000, "eth") },
+        extraParams: { from: dennis, value: dec(1000, "ether") },
       });
 
       // Price drops to 100 $/E
@@ -1054,10 +1054,10 @@ contract(
       );
 
       //Carol adds 1 StETH to her trove, brings it to 1992.01 total coll
-      const C_addedColl = toBN(dec(1, "eth"));
+      const C_addedColl = toBN(dec(1, "ether"));
       await borrowerOperations.addColl(carol, carol, {
         from: carol,
-        value: dec(1, "eth"),
+        value: dec(1, "ether"),
       });
 
       //Expect 1996 StETH in system now
@@ -1177,7 +1177,7 @@ contract(
       const { collateral: D_coll } = await openTrove({
         ICR: toBN(dec(200, 16)),
         extraBaseFeeLMAAmount: dec(110, 18),
-        extraParams: { from: dennis, value: dec(1000, "eth") },
+        extraParams: { from: dennis, value: dec(1000, "ether") },
       });
 
       // Price drops to 100 $/E
@@ -1222,7 +1222,7 @@ contract(
       /* Alice, Bob, Carol each adds 1 StETH to their troves, 
     bringing them to 2.995, 2.995, 1992.01 total coll each. */
 
-      const addedColl = toBN(dec(1, "eth"));
+      const addedColl = toBN(dec(1, "ether"));
       await borrowerOperations.addColl(alice, alice, {
         from: alice,
         value: addedColl,
@@ -1582,7 +1582,7 @@ contract(
       const { collateral: D_coll } = await openTrove({
         ICR: toBN(dec(200, 16)),
         extraBaseFeeLMAAmount: dec(110, 18),
-        extraParams: { from: dennis, value: dec(1000, "eth") },
+        extraParams: { from: dennis, value: dec(1000, "ether") },
       });
 
       // Price drops to 100 $/E
@@ -1625,7 +1625,7 @@ contract(
       );
 
       //Carol wthdraws 1 StETH from her trove, brings it to 1990.01 total coll
-      const C_withdrawnColl = toBN(dec(1, "eth"));
+      const C_withdrawnColl = toBN(dec(1, "ether"));
       await borrowerOperations.withdrawColl(C_withdrawnColl, carol, carol, {
         from: carol,
       });
@@ -1747,7 +1747,7 @@ contract(
       const { collateral: D_coll } = await openTrove({
         ICR: toBN(dec(200, 16)),
         extraBaseFeeLMAAmount: dec(110, 18),
-        extraParams: { from: dennis, value: dec(1000, "eth") },
+        extraParams: { from: dennis, value: dec(1000, "ether") },
       });
 
       // Price drops to 100 $/E
@@ -2019,14 +2019,14 @@ contract(
       });
 
       //Bob adds 1 StETH to his trove
-      const B_addedColl = toBN(dec(1, "eth"));
+      const B_addedColl = toBN(dec(1, "ether"));
       await borrowerOperations.addColl(bob, bob, {
         from: bob,
         value: B_addedColl,
       });
 
       //Carol  withdraws 1 StETH from her trove
-      const C_withdrawnColl = toBN(dec(1, "eth"));
+      const C_withdrawnColl = toBN(dec(1, "ether"));
       await borrowerOperations.withdrawColl(C_withdrawnColl, carol, carol, {
         from: carol,
       });
@@ -2113,7 +2113,7 @@ contract(
       });
 
       // D tops up
-      const D_addedColl = toBN(dec(1, "eth"));
+      const D_addedColl = toBN(dec(1, "ether"));
       await borrowerOperations.addColl(dennis, dennis, {
         from: dennis,
         value: D_addedColl,
@@ -2320,7 +2320,7 @@ contract(
       });
 
       // Carol withdraws 15 StETH from her trove
-      const C_withdrawnColl = toBN(dec(15, "eth"));
+      const C_withdrawnColl = toBN(dec(15, "ether"));
       await borrowerOperations.withdrawColl(C_withdrawnColl, carol, carol, {
         from: carol,
       });
@@ -2409,7 +2409,7 @@ contract(
       });
 
       // D tops up
-      const D_addedColl = toBN(dec(1, "eth"));
+      const D_addedColl = toBN(dec(1, "ether"));
       await borrowerOperations.addColl(dennis, dennis, {
         from: dennis,
         value: D_addedColl,

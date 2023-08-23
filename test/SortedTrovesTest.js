@@ -317,49 +317,49 @@ contract("SortedTroves", async (accounts) => {
       // make several troves with 0 debt and collateral, in random order
       await borrowerOperations.openTrove(th._100pct, 0, whale, whale, {
         from: whale,
-        value: dec(50, "eth"),
+        value: dec(50, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, 0, A, A, {
         from: A,
-        value: dec(1, "eth"),
+        value: dec(1, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, 0, B, B, {
         from: B,
-        value: dec(37, "eth"),
+        value: dec(37, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, 0, C, C, {
         from: C,
-        value: dec(5, "eth"),
+        value: dec(5, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, 0, D, D, {
         from: D,
-        value: dec(4, "eth"),
+        value: dec(4, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, 0, E, E, {
         from: E,
-        value: dec(19, "eth"),
+        value: dec(19, "ether"),
       });
 
       // Make some troves with non-zero debt, in random order
       await borrowerOperations.openTrove(th._100pct, dec(5, 19), F, F, {
         from: F,
-        value: dec(1, "eth"),
+        value: dec(1, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(3, 18), G, G, {
         from: G,
-        value: dec(37, "eth"),
+        value: dec(37, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(2, 20), H, H, {
         from: H,
-        value: dec(5, "eth"),
+        value: dec(5, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(17, 18), I, I, {
         from: I,
-        value: dec(4, "eth"),
+        value: dec(4, "ether"),
       });
       await borrowerOperations.openTrove(th._100pct, dec(5, 21), J, J, {
         from: J,
-        value: dec(1345, "eth"),
+        value: dec(1345, "ether"),
       });
 
       const price_1 = await priceFeed.getPrice();
@@ -372,7 +372,7 @@ contract("SortedTroves", async (accounts) => {
         dec(100, 18),
         defaulter_1,
         defaulter_1,
-        { from: defaulter_1, value: dec(1, "eth") }
+        { from: defaulter_1, value: dec(1, "ether") }
       );
       assert.isTrue(await sortedTroves.contains(defaulter_1));
 

@@ -62,7 +62,7 @@ contract("CollSurplusPool", async (accounts) => {
     });
     await openTrove({
       extraBaseFeeLMAAmount: B_netDebt,
-      extraParams: { from: A, value: dec(3000, "eth") },
+      extraParams: { from: A, value: dec(3000, "ether") },
     });
 
     // skip bootstrapping phase
@@ -117,7 +117,7 @@ contract("CollSurplusPool", async (accounts) => {
     });
     await openTrove({
       extraBaseFeeLMAAmount: B_netDebt,
-      extraParams: { from: A, value: dec(3000, "eth") },
+      extraParams: { from: A, value: dec(3000, "ether") },
     });
 
     // skip bootstrapping phase

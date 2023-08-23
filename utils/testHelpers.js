@@ -4,12 +4,12 @@ const Destructible = artifacts.require("./TestContracts/Destructible.sol");
 
 const MoneyValues = {
   negative_5e17: "-" + web3.utils.toWei("500", "finney"),
-  negative_1e18: "-" + web3.utils.toWei("1", "eth"),
-  negative_10e18: "-" + web3.utils.toWei("10", "eth"),
-  negative_50e18: "-" + web3.utils.toWei("50", "eth"),
-  negative_100e18: "-" + web3.utils.toWei("100", "eth"),
-  negative_101e18: "-" + web3.utils.toWei("101", "eth"),
-  negative_eth: (amount) => "-" + web3.utils.toWei(amount, "eth"),
+  negative_1e18: "-" + web3.utils.toWei("1", "ether"),
+  negative_10e18: "-" + web3.utils.toWei("10", "ether"),
+  negative_50e18: "-" + web3.utils.toWei("50", "ether"),
+  negative_100e18: "-" + web3.utils.toWei("100", "ether"),
+  negative_101e18: "-" + web3.utils.toWei("101", "ether"),
+  negative_eth: (amount) => "-" + web3.utils.toWei(amount, "ether"),
 
   _zeroBN: web3.utils.toBN("0"),
   _1e18BN: web3.utils.toBN("1000000000000000000"),
@@ -41,7 +41,7 @@ class TestHelper {
   static dec(val, scale) {
     let zerosCount;
 
-    if (scale == "eth") {
+    if (scale == "ether") {
       zerosCount = 18;
     } else if (scale == "finney") zerosCount = 15;
     else {
@@ -124,13 +124,13 @@ class TestHelper {
 
   static randDecayFactor(min, max) {
     const amount = Math.random() * (max - min) + min;
-    const amountInWei = web3.utils.toWei(amount.toFixed(18), "eth");
+    const amountInWei = web3.utils.toWei(amount.toFixed(18), "ether");
     return amountInWei;
   }
 
   static randAmountInWei(min, max) {
     const amount = Math.random() * (max - min) + min;
-    const amountInWei = web3.utils.toWei(amount.toString(), "eth");
+    const amountInWei = web3.utils.toWei(amount.toString(), "ether");
     return amountInWei;
   }
 
@@ -141,7 +141,7 @@ class TestHelper {
   }
 
   static makeWei(num) {
-    return web3.utils.toWei(num.toString(), "eth");
+    return web3.utils.toWei(num.toString(), "ether");
   }
 
   static appendData(results, message, data) {
@@ -831,7 +831,7 @@ class TestHelper {
     let i = 0;
     for (const account of accounts) {
       const BaseFeeLMAAmount = (maxBaseFeeLMAAmount - i).toString();
-      const BaseFeeLMAAmountWei = web3.utils.toWei(BaseFeeLMAAmount, "eth");
+      const BaseFeeLMAAmountWei = web3.utils.toWei(BaseFeeLMAAmount, "ether");
       const totalDebt = await this.getOpenTroveTotalDebt(
         contracts,
         BaseFeeLMAAmountWei

@@ -8,7 +8,7 @@ const testHelpers = require("../utils/testHelpers.js");
 const th = testHelpers.TestHelper;
 const dec = th.dec;
 
-const _minus_1_Ether = web3.utils.toWei("-1", "eth");
+const _minus_1_Ether = web3.utils.toWei("-1", "ether");
 
 contract("StabilityPool", async (accounts) => {
   /* mock* are EOA’s, temporarily used to call protected functions.
@@ -133,7 +133,7 @@ contract("ActivePool", async (accounts) => {
     //await web3.eth.sendTransaction({ from: mockBorrowerOperationsAddress, to: activePool.address, value: dec(2, 'eth') })
     const tx1 = await mockBorrowerOperations.forward(activePool.address, "0x", {
       from: owner,
-      value: dec(2, "eth"),
+      value: dec(2, "ether"),
     });
     assert.isTrue(tx1.receipt.status);
 
@@ -144,13 +144,13 @@ contract("ActivePool", async (accounts) => {
       await web3.eth.getBalance(alice)
     );
 
-    assert.equal(activePool_BalanceBeforeTx, dec(2, "eth"));
+    assert.equal(activePool_BalanceBeforeTx, dec(2, "ether"));
 
     // send eth from pool to alice
     //await activePool.sendETH(alice, dec(1, 'eth'), { from: mockBorrowerOperationsAddress })
     const sendETHData = th.getTransactionData("sendETH(address,uint256)", [
       alice,
-      web3.utils.toHex(dec(1, "eth")),
+      web3.utils.toHex(dec(1, "ether")),
     ]);
     const tx2 = await mockBorrowerOperations.forward(
       activePool.address,
@@ -172,7 +172,7 @@ contract("ActivePool", async (accounts) => {
     const pool_BalanceChange = activePool_BalanceAfterTx.sub(
       activePool_BalanceBeforeTx
     );
-    assert.equal(alice_BalanceChange, dec(1, "eth"));
+    assert.equal(alice_BalanceChange, dec(1, "ether"));
     assert.equal(pool_BalanceChange, _minus_1_Ether);
   });
 });
@@ -267,7 +267,7 @@ contract("DefaultPool", async (accounts) => {
     //await web3.eth.sendTransaction({ from: mockActivePool.address, to: defaultPool.address, value: dec(2, 'eth') })
     const tx1 = await mockActivePool.forward(defaultPool.address, "0x", {
       from: owner,
-      value: dec(2, "eth"),
+      value: dec(2, "ether"),
     });
     assert.isTrue(tx1.receipt.status);
 
@@ -278,12 +278,12 @@ contract("DefaultPool", async (accounts) => {
       await web3.eth.getBalance(mockActivePool.address)
     );
 
-    assert.equal(defaultPool_BalanceBeforeTx, dec(2, "eth"));
+    assert.equal(defaultPool_BalanceBeforeTx, dec(2, "ether"));
 
     // send eth from pool to alice
     //await defaultPool.sendETHToActivePool(dec(1, 'eth'), { from: mockTroveManagerAddress })
     const sendETHData = th.getTransactionData("sendETHToActivePool(uint256)", [
-      web3.utils.toHex(dec(1, "eth")),
+      web3.utils.toHex(dec(1, "ether")),
     ]);
     await mockActivePool.setPayable(true);
     const tx2 = await mockTroveManager.forward(
@@ -306,7 +306,7 @@ contract("DefaultPool", async (accounts) => {
     const defaultPool_BalanceChange = defaultPool_BalanceAfterTx.sub(
       defaultPool_BalanceBeforeTx
     );
-    assert.equal(activePool_BalanceChange, dec(1, "eth"));
+    assert.equal(activePool_BalanceChange, dec(1, "ether"));
     assert.equal(defaultPool_BalanceChange, _minus_1_Ether);
   });
 });

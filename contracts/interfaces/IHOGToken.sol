@@ -21,4 +21,14 @@ interface IHOGToken is IERC20, IERC2612 {
     function getDeploymentStartTime() external view returns (uint256);
 
     function getLpRewardsEntitlement() external view returns (uint256);
+
+    function increaseAllowance(
+        address _spender,
+        uint256 _addedValues
+    ) external returns (bool);
+
+    function decreaseAllowance(
+        address _spender,
+        uint256 _decreasedValue
+    ) external returns (bool);
 }

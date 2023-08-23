@@ -105,7 +105,7 @@ contract("Gas compensation tests", async (accounts) => {
     await priceFeed.setPrice(dec(1, 18));
     // const price_1 = await priceFeed.getPrice()
     const gasCompensation_1 = (
-      await troveManagerTester.getCollGasCompensation(dec(1, "eth"))
+      await troveManagerTester.getCollGasCompensation(dec(1, "ether"))
     ).toString();
     assert.equal(gasCompensation_1, dec(5, 15));
 
@@ -175,7 +175,7 @@ contract("Gas compensation tests", async (accounts) => {
     0.5% of coll = 0.5 StETH. USD value: $10
     -> Expect 0.5% of collaterall as gas compensation */
     const gasCompensation = (
-      await troveManagerTester.getCollGasCompensation(dec(10, "eth"))
+      await troveManagerTester.getCollGasCompensation(dec(10, "ether"))
     ).toString();
     assert.equal(gasCompensation, "50000000000000000");
   });
@@ -190,7 +190,7 @@ contract("Gas compensation tests", async (accounts) => {
     0.5% of coll = 0.5 StETH. USD value: $100
     -> Expect $100 gas compensation, i.e. 0.5 StETH */
     const gasCompensation_1 = (
-      await troveManagerTester.getCollGasCompensation(dec(100, "eth"))
+      await troveManagerTester.getCollGasCompensation(dec(100, "ether"))
     ).toString();
     assert.equal(gasCompensation_1, dec(500, "finney"));
 
@@ -1765,7 +1765,7 @@ contract("Gas compensation tests", async (accounts) => {
       const debtString = debt.toString().concat("000000000000000000");
       await openTrove({
         extraBaseFeeLMAAmount: debtString,
-        extraParams: { from: account, value: dec(30, "eth") },
+        extraParams: { from: account, value: dec(30, "ether") },
       });
 
       const squeezedTroveAddr = th.squeezeAddr(account);
