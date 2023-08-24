@@ -136,7 +136,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     await hogStaking.stake(dec(100, 18), { from: A });
 
     // Check StETH fee per unit staked is zero
-    const F_ETH_Before = await hogStaking.F_ETH();
+    const F_ETH_Before = await hogStaking.F_StETH();
     assert.equal(F_ETH_Before, "0");
 
     const B_BalBeforeREdemption = await baseFeeLMAToken.balanceOf(B);
@@ -158,7 +158,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     assert.isTrue(emittedETHFee.gt(toBN("0")));
 
     // Check StETH fee per unit staked has increased by correct amount
-    const F_ETH_After = await hogStaking.F_ETH();
+    const F_ETH_After = await hogStaking.F_StETH();
 
     // Expect fee per unit staked = fee/100, since there is 100 BaseFeeLMA totalStaked
     const expected_F_ETH_After = emittedETHFee.div(toBN("100"));
@@ -206,7 +206,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     });
 
     // Check StETH fee per unit staked is zero
-    const F_ETH_Before = await hogStaking.F_ETH();
+    const F_ETH_Before = await hogStaking.F_StETH();
     assert.equal(F_ETH_Before, "0");
 
     const B_BalBeforeREdemption = await baseFeeLMAToken.balanceOf(B);
@@ -228,7 +228,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     assert.isTrue(emittedETHFee.gt(toBN("0")));
 
     // Check StETH fee per unit staked has not increased
-    const F_ETH_After = await hogStaking.F_ETH();
+    const F_ETH_After = await hogStaking.F_StETH();
     assert.equal(F_ETH_After, "0");
   });
 
@@ -273,7 +273,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     await hogStaking.stake(dec(100, 18), { from: A });
 
     // Check BaseFeeLMA fee per unit staked is zero
-    const F_BaseFeeLMA_Before = await hogStaking.F_ETH();
+    const F_BaseFeeLMA_Before = await hogStaking.F_StETH();
     assert.equal(F_BaseFeeLMA_Before, "0");
 
     const B_BalBeforeREdemption = await baseFeeLMAToken.balanceOf(B);
@@ -353,7 +353,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     await hogToken.transfer(A, dec(100, 18), { from: multisig });
 
     // Check BaseFeeLMA fee per unit staked is zero
-    const F_BaseFeeLMA_Before = await hogStaking.F_ETH();
+    const F_BaseFeeLMA_Before = await hogStaking.F_StETH();
     assert.equal(F_BaseFeeLMA_Before, "0");
 
     const B_BalBeforeREdemption = await baseFeeLMAToken.balanceOf(B);
@@ -742,7 +742,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
 
     const expectedTotalETHGain = emittedETHFee_1.add(emittedETHFee_2);
 
-    const A_ETHGain = await hogStaking.getPendingETHGain(A);
+    const A_ETHGain = await hogStaking.getPendingStETHGain(A);
 
     assert.isAtMost(th.getDifference(expectedTotalETHGain, A_ETHGain), 1000);
   });
@@ -1217,7 +1217,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
       (gasPrice = GAS_PRICE)
     );
 
-    const proxy_ETHGain = await hogStaking.getPendingETHGain(
+    const proxy_ETHGain = await hogStaking.getPendingStETHGain(
       nonPayable.address
     );
     assert.isTrue(proxy_ETHGain.gt(toBN("0")));

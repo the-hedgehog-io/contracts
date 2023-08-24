@@ -15,7 +15,6 @@ contract BaseFeeLMATokenTester is BaseFeeLMAToken {
         address _stabilityPoolAddress,
         address _borrowerOperationsAddress
     )
-        public
         BaseFeeLMAToken(
             _troveManagerAddress,
             _stabilityPoolAddress,

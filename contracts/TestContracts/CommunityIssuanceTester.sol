@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 contract CommunityIssuanceTester is CommunityIssuance {
     using SafeMath for uint256;
 
-    function obtainhog(uint _amount) external {
+    function obtainHOG(uint _amount) external {
         hogToken.transfer(msg.sender, _amount);
     }
 
@@ -16,7 +16,7 @@ contract CommunityIssuanceTester is CommunityIssuance {
         return _getCumulativeIssuanceFraction();
     }
 
-    function unprotectedIssuehog() external returns (uint) {
+    function unprotectedIssueHOG() external returns (uint) {
         // No checks on caller address
 
         uint latestTotalhogIssued = HOGSupplyCap

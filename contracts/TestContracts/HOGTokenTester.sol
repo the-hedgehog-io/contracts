@@ -30,7 +30,7 @@ contract HOGTokenTester is HOGToken {
         _mint(account, amount);
     }
 
-    function unprotectedSendTohogStaking(
+    function unprotectedSendToHOGStaking(
         address _sender,
         uint256 _amount
     ) external {

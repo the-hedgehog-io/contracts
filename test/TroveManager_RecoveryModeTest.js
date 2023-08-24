@@ -647,7 +647,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     const aliceDeposit = await stabilityPool.getCompoundedBaseFeeLMADeposit(
       alice
     );
-    const aliceETHGain = await stabilityPool.getDepositorETHGain(alice);
+    const aliceETHGain = await stabilityPool.getDepositorStETHGain(alice);
     const aliceExpectedETHGain = spDeposit
       .mul(th.applyLiquidationFee(B_coll))
       .div(B_totalDebt);
@@ -662,10 +662,10 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     Rewards-per-unit-staked from the redistribution should be:
   
     L_BaseFeeLMADebt = 1610 / 6 = 268.333 BaseFeeLMA
-    L_ETH = 16.820475 /6 =  2.8034125 eth
+    L_StETH = 16.820475 /6 =  2.8034125 eth
     */
     const L_BaseFeeLMADebt = (await troveManager.L_BaseFeeLMADebt()).toString();
-    const L_ETH = (await troveManager.L_ETH()).toString();
+    const L_StETH = (await troveManager.L_StETH()).toString();
 
     assert.isAtMost(
       th.getDifference(
@@ -676,7 +676,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     );
     assert.isAtMost(
       th.getDifference(
-        L_ETH,
+        L_StETH,
         th.applyLiquidationFee(
           B_coll.sub(B_coll.mul(spDeposit).div(B_totalDebt))
             .mul(mv._1e18BN)
@@ -742,10 +742,10 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
 
     // Check that redistribution rewards don't change
     const L_BaseFeeLMADebt = (await troveManager.L_BaseFeeLMADebt()).toString();
-    const L_ETH = (await troveManager.L_ETH()).toString();
+    const L_StETH = (await troveManager.L_StETH()).toString();
 
     assert.equal(L_BaseFeeLMADebt, "0");
-    assert.equal(L_ETH, "0");
+    assert.equal(L_StETH, "0");
 
     // Check that Bob's Trove and stake remains active with unchanged coll and debt
     const bob_Trove = await troveManager.Troves(bob);
@@ -813,7 +813,9 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     */
     const aliceExpectedDeposit =
       await stabilityPool.getCompoundedBaseFeeLMADeposit(alice);
-    const aliceExpectedETHGain = await stabilityPool.getDepositorETHGain(alice);
+    const aliceExpectedETHGain = await stabilityPool.getDepositorStETHGain(
+      alice
+    );
 
     assert.isAtMost(
       th.getDifference(
@@ -905,7 +907,9 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     */
     const aliceExpectedDeposit =
       await stabilityPool.getCompoundedBaseFeeLMADeposit(alice);
-    const aliceExpectedETHGain = await stabilityPool.getDepositorETHGain(alice);
+    const aliceExpectedETHGain = await stabilityPool.getDepositorStETHGain(
+      alice
+    );
 
     assert.isAtMost(
       th.getDifference(
@@ -1606,7 +1610,9 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
 
     const aliceExpectedDeposit =
       await stabilityPool.getCompoundedBaseFeeLMADeposit(alice);
-    const aliceExpectedETHGain = await stabilityPool.getDepositorETHGain(alice);
+    const aliceExpectedETHGain = await stabilityPool.getDepositorStETHGain(
+      alice
+    );
 
     assert.equal(aliceExpectedDeposit.toString(), dec(100, 18));
     assert.equal(aliceExpectedETHGain.toString(), "0");
@@ -1617,7 +1623,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     const L_BaseFeeLMADebt_After = (
       await troveManager.L_BaseFeeLMADebt()
     ).toString();
-    const L_ETH_After = (await troveManager.L_ETH()).toString();
+    const L_ETH_After = (await troveManager.L_StETH()).toString();
 
     assert.equal(L_BaseFeeLMADebt_After, "0");
     assert.equal(L_ETH_After, "0");
@@ -1753,7 +1759,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     const L_BaseFeeLMADebt_After = (
       await troveManager.L_BaseFeeLMADebt()
     ).toString();
-    const L_ETH_After = (await troveManager.L_ETH()).toString();
+    const L_ETH_After = (await troveManager.L_StETH()).toString();
 
     assert.equal(L_BaseFeeLMADebt_After, "0");
     assert.equal(L_ETH_After, "0");
@@ -2144,7 +2150,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
       await stabilityPool.getCompoundedBaseFeeLMADeposit(dennis)
     ).toString();
     const dennis_ETHGain_Before = (
-      await stabilityPool.getDepositorETHGain(dennis)
+      await stabilityPool.getDepositorStETHGain(dennis)
     ).toString();
     assert.isAtMost(
       th.getDifference(dennis_Deposit_Before, spDeposit.sub(C_totalDebt)),
@@ -2167,7 +2173,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
       await stabilityPool.getCompoundedBaseFeeLMADeposit(dennis)
     ).toString();
     const dennis_ETHGain_After = (
-      await stabilityPool.getDepositorETHGain(dennis)
+      await stabilityPool.getDepositorStETHGain(dennis)
     ).toString();
     assert.equal(dennis_Deposit_Before, dennis_Deposit_After);
     assert.equal(dennis_ETHGain_Before, dennis_ETHGain_After);
@@ -3475,7 +3481,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
 
     // Check A's collateral and debt remain the same
     const entireColl_A = (await troveManager.Troves(alice))[1].add(
-      await troveManager.getPendingETHReward(alice)
+      await troveManager.getPendingStETHReward(alice)
     );
     const entireDebt_A = (await troveManager.Troves(alice))[0].add(
       await troveManager.getPendingBaseFeeLMADebtReward(alice)
@@ -3724,7 +3730,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     const BaseFeeLMAinSP = (
       await stabilityPool.getTotalBaseFeeLMADeposits()
     ).toString();
-    const ETHinSP = (await stabilityPool.getETH()).toString();
+    const ETHinSP = (await stabilityPool.getStETH()).toString();
 
     // Check remaining BaseFeeLMA Deposits and StETH gain, for whale and depositors whose troves were liquidated
     const whale_Deposit_After = (
@@ -3738,13 +3744,13 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     ).toString();
 
     const whale_ETHGain = (
-      await stabilityPool.getDepositorETHGain(whale)
+      await stabilityPool.getDepositorStETHGain(whale)
     ).toString();
     const alice_ETHGain = (
-      await stabilityPool.getDepositorETHGain(alice)
+      await stabilityPool.getDepositorStETHGain(alice)
     ).toString();
     const bob_ETHGain = (
-      await stabilityPool.getDepositorETHGain(bob)
+      await stabilityPool.getDepositorStETHGain(bob)
     ).toString();
 
     const liquidatedDebt = A_totalDebt.add(B_totalDebt).add(C_totalDebt);
@@ -3812,7 +3818,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     const total_BaseFeeLMAinSP = (
       await stabilityPool.getTotalBaseFeeLMADeposits()
     ).toString();
-    const total_ETHinSP = (await stabilityPool.getETH()).toString();
+    const total_ETHinSP = (await stabilityPool.getStETH()).toString();
 
     assert.isAtMost(
       th.getDifference(total_BaseFeeLMAinSP, totalDeposit.sub(liquidatedDebt)),
@@ -3866,7 +3872,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     const BaseFeeLMAinSP_Before = (
       await stabilityPool.getTotalBaseFeeLMADeposits()
     ).toString();
-    const ETHinSP_Before = (await stabilityPool.getETH()).toString();
+    const ETHinSP_Before = (await stabilityPool.getStETH()).toString();
     assert.equal(BaseFeeLMAinSP_Before, dec(800, 18));
     assert.equal(ETHinSP_Before, "0");
 
@@ -3896,7 +3902,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     const BaseFeeLMAinSP_After = (
       await stabilityPool.getTotalBaseFeeLMADeposits()
     ).toString();
-    const ETHinSP_After = (await stabilityPool.getETH()).toString();
+    const ETHinSP_After = (await stabilityPool.getStETH()).toString();
     assert.equal(BaseFeeLMAinSP_Before, BaseFeeLMAinSP_After);
     assert.equal(ETHinSP_Before, ETHinSP_After);
 
@@ -3912,13 +3918,13 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     ).toString();
 
     const whale_ETHGain_After = (
-      await stabilityPool.getDepositorETHGain(whale)
+      await stabilityPool.getDepositorStETHGain(whale)
     ).toString();
     const alice_ETHGain_After = (
-      await stabilityPool.getDepositorETHGain(alice)
+      await stabilityPool.getDepositorStETHGain(alice)
     ).toString();
     const bob_ETHGain_After = (
-      await stabilityPool.getDepositorETHGain(bob)
+      await stabilityPool.getDepositorStETHGain(bob)
     ).toString();
 
     assert.equal(whale_Deposit_After, dec(400, 18));
@@ -5489,13 +5495,13 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     );
 
     const dennisColl_After = (await troveManager.Troves(dennis))[1].add(
-      await troveManager.getPendingETHReward(dennis)
+      await troveManager.getPendingStETHReward(dennis)
     );
     const bobColl_After = (await troveManager.Troves(bob))[1].add(
-      await troveManager.getPendingETHReward(bob)
+      await troveManager.getPendingStETHReward(bob)
     );
     const carolColl_After = (await troveManager.Troves(carol))[1].add(
-      await troveManager.getPendingETHReward(carol)
+      await troveManager.getPendingStETHReward(carol)
     );
 
     assert.isTrue(dennisColl_After.eq(dennisColl_Before));
@@ -5917,7 +5923,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
 
     // Check A's collateral and debt are the same
     const entireColl_A = (await troveManager.Troves(alice))[1].add(
-      await troveManager.getPendingETHReward(alice)
+      await troveManager.getPendingStETHReward(alice)
     );
     const entireDebt_A = (await troveManager.Troves(alice))[0].add(
       await troveManager.getPendingBaseFeeLMADebtReward(alice)

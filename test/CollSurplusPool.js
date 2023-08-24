@@ -49,8 +49,8 @@ contract("CollSurplusPool", async (accounts) => {
     await deploymentHelper.connectHOGContractsToCore(HOGContracts, contracts);
   });
 
-  it("CollSurplusPool::getETH(): Returns the StETH balance of the CollSurplusPool after redemption", async () => {
-    const ETH_1 = await collSurplusPool.getETH();
+  it("CollSurplusPool::getStETH(): Returns the StETH balance of the CollSurplusPool after redemption", async () => {
+    const ETH_1 = await collSurplusPool.getStETH();
     assert.equal(ETH_1, "0");
 
     const price = toBN(dec(100, 18));
@@ -74,7 +74,7 @@ contract("CollSurplusPool", async (accounts) => {
     // At StETH:USD = 100, this redemption should leave 1 eth of coll surplus
     await th.redeemCollateralAndGetTxObject(A, contracts, B_netDebt);
 
-    const ETH_2 = await collSurplusPool.getETH();
+    const ETH_2 = await collSurplusPool.getStETH();
     th.assertIsApproximatelyEqual(
       ETH_2,
       B_coll.sub(B_netDebt.mul(mv._1e18BN).div(price))
@@ -129,7 +129,7 @@ contract("CollSurplusPool", async (accounts) => {
     // At StETH:USD = 100, this redemption should leave 1 eth of coll surplus for B
     await th.redeemCollateralAndGetTxObject(A, contracts, B_netDebt);
 
-    const ETH_2 = await collSurplusPool.getETH();
+    const ETH_2 = await collSurplusPool.getStETH();
     th.assertIsApproximatelyEqual(
       ETH_2,
       B_coll.sub(B_netDebt.mul(mv._1e18BN).div(price))

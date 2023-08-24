@@ -1358,7 +1358,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
                 );
             }
         }
-
         // Loop through the Troves starting from the one with lowest collateral ratio until _amount of BaseFeeLMA is exchanged for collateral
         if (_maxIterations == 0) {
             // Previous implementation: _maxIterations = uint(-1);
@@ -1381,7 +1380,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
                 contractsCache.defaultPool,
                 currentBorrower
             );
-
             SingleRedemptionValues
                 memory singleRedemption = _redeemCollateralFromTrove(
                     contractsCache,
@@ -1394,7 +1392,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
                 );
 
             if (singleRedemption.cancelledPartial) break; // Partial redemption was cancelled (out-of-date hint, or new net debt < minimum), therefore we could not redeem from the last Trove
-
             totals.totalBaseFeeLMAToRedeem = totals.totalBaseFeeLMAToRedeem.add(
                 singleRedemption.BaseFeeLMALot
             );
@@ -1407,6 +1404,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             );
             currentBorrower = nextUserToCheck;
         }
+
         require(
             totals.totalStETHDrawn > 0,
             "TroveManager: Unable to redeem any amount"
@@ -1428,7 +1426,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             totals.totalStETHDrawn,
             _maxFeePercentage
         );
-
         // Send the StETH fee to the HOG staking contract
         contractsCache.activePool.sendStETH(
             address(contractsCache.hogStaking),
@@ -1446,7 +1443,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             totals.totalStETHDrawn,
             totals.StETHFee
         );
-
         // Burn the total BaseFeeLMA that is cancelled with debt, and send the redeemed StETH to msg.sender
         contractsCache.baseFeeLMAToken.burn(
             msg.sender,

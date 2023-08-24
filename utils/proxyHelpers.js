@@ -234,8 +234,8 @@ class TroveManagerProxy extends Proxy {
     return this.proxyFunction("totalStakes", []);
   }
 
-  async getPendingETHReward(...params) {
-    return this.proxyFunction("getPendingETHReward", params);
+  async getPendingStETHReward(...params) {
+    return this.proxyFunction("getPendingStETHReward", params);
   }
 
   async getPendingBaseFeeLMADebtReward(...params) {
@@ -269,8 +269,8 @@ class TroveManagerProxy extends Proxy {
     return this.proxyFunction("baseRate", []);
   }
 
-  async L_ETH() {
-    return this.proxyFunction("L_ETH", []);
+  async L_StETH() {
+    return this.proxyFunction("L_StETH", []);
   }
 
   async L_BaseFeeLMADebt() {
@@ -338,8 +338,8 @@ class StabilityPoolProxy extends Proxy {
     return this.proxyFunctionWithUser("deposits", user);
   }
 
-  async getDepositorETHGain(user) {
-    return this.proxyFunctionWithUser("getDepositorETHGain", user);
+  async getDepositorStETHGain(user) {
+    return this.proxyFunctionWithUser("getDepositorStETHGain", user);
   }
 }
 

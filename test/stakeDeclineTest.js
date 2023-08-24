@@ -158,7 +158,7 @@ contract("TroveManager", async (accounts) => {
     );
     console.log(`Snapshots ratio after L1: ${await getSnapshotsRatio()}`);
     console.log(
-      `B pending StETH reward after L1: ${await troveManager.getPendingETHReward(
+      `B pending StETH reward after L1: ${await troveManager.getPendingStETHReward(
         B
       )}`
     );

@@ -190,7 +190,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
       assert.equal(B_pendingHOGGain, "0");
 
       // Check depositor B has a pending StETH gain
-      const B_pendingETHGain = await stabilityPool.getDepositorETHGain(B);
+      const B_pendingETHGain = await stabilityPool.getDepositorStETHGain(B);
       assert.isTrue(B_pendingETHGain.gt(toBN("0")));
     });
 

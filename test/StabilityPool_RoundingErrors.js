@@ -65,7 +65,7 @@ contract("Pool Manager: Sum-Product rounding errors", async (accounts) => {
     }
 
     const SP_TotalDeposits = await stabilityPool.getTotalBaseFeeLMADeposits();
-    const SP_ETH = await stabilityPool.getETH();
+    const SP_ETH = await stabilityPool.getStETH();
     const compoundedDeposit =
       await stabilityPool.getCompoundedBaseFeeLMADeposit(depositors[0]);
     const ETH_Gain = await stabilityPool.getCurrentETHGain(depositors[0]);

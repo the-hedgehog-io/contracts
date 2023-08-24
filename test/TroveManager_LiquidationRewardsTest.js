@@ -138,10 +138,10 @@ contract(
 
       // Get entire coll of A and C
       const alice_Coll = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingETHReward(alice))
+        .add(await troveManager.getPendingStETHReward(alice))
         .toString();
       const carol_Coll = (await troveManager.Troves(carol))[1]
-        .add(await troveManager.getPendingETHReward(carol))
+        .add(await troveManager.getPendingStETHReward(carol))
         .toString();
 
       /* Expected collateral:
@@ -177,8 +177,8 @@ contract(
         1000
       );
 
-      const entireSystemColl = (await activePool.getETH())
-        .add(await defaultPool.getETH())
+      const entireSystemColl = (await activePool.getStETH())
+        .add(await defaultPool.getStETH())
         .toString();
       assert.equal(
         entireSystemColl,
@@ -248,16 +248,16 @@ contract(
 
       // Get entire coll of A, B, D and E
       const alice_Coll = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingETHReward(alice))
+        .add(await troveManager.getPendingStETHReward(alice))
         .toString();
       const bob_Coll = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingETHReward(bob))
+        .add(await troveManager.getPendingStETHReward(bob))
         .toString();
       const dennis_Coll = (await troveManager.Troves(dennis))[1]
-        .add(await troveManager.getPendingETHReward(dennis))
+        .add(await troveManager.getPendingStETHReward(dennis))
         .toString();
       const erin_Coll = (await troveManager.Troves(erin))[1]
-        .add(await troveManager.getPendingETHReward(erin))
+        .add(await troveManager.getPendingStETHReward(erin))
         .toString();
 
       /* Expected collateral:
@@ -299,8 +299,8 @@ contract(
       assert.isAtMost(th.getDifference(dennis_Coll, expected_D), 1000);
       assert.isAtMost(th.getDifference(erin_Coll, expected_E), 1000);
 
-      const entireSystemColl = (await activePool.getETH())
-        .add(await defaultPool.getETH())
+      const entireSystemColl = (await activePool.getStETH())
+        .add(await defaultPool.getStETH())
         .toString();
       assert.equal(
         entireSystemColl,
@@ -403,24 +403,24 @@ contract(
 
       // Get entire coll of A, B, D, E and F
       const alice_Coll = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingETHReward(alice))
+        .add(await troveManager.getPendingStETHReward(alice))
         .toString();
       const bob_Coll = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingETHReward(bob))
+        .add(await troveManager.getPendingStETHReward(bob))
         .toString();
       const carol_Coll = (await troveManager.Troves(carol))[1]
-        .add(await troveManager.getPendingETHReward(carol))
+        .add(await troveManager.getPendingStETHReward(carol))
         .toString();
       const dennis_Coll = (await troveManager.Troves(dennis))[1]
-        .add(await troveManager.getPendingETHReward(dennis))
+        .add(await troveManager.getPendingStETHReward(dennis))
         .toString();
       const erin_Coll = (await troveManager.Troves(erin))[1]
-        .add(await troveManager.getPendingETHReward(erin))
+        .add(await troveManager.getPendingStETHReward(erin))
         .toString();
 
       const freddy_rawColl = (await troveManager.Troves(freddy))[1].toString();
       const freddy_ETHReward = (
-        await troveManager.getPendingETHReward(freddy)
+        await troveManager.getPendingStETHReward(freddy)
       ).toString();
 
       /* Expected collateral:
@@ -451,8 +451,8 @@ contract(
       );
       assert.isAtMost(th.getDifference(freddy_ETHReward, gainedETH), 1000);
 
-      const entireSystemColl = (await activePool.getETH())
-        .add(await defaultPool.getETH())
+      const entireSystemColl = (await activePool.getStETH())
+        .add(await defaultPool.getStETH())
         .toString();
       assert.isAtMost(
         th.getDifference(entireSystemColl, F_coll.add(gainedETH)),
@@ -673,10 +673,10 @@ contract(
 
       // console.log(`A_collRedistribution: ${A_collRedistribution}`)
       // Check accumulated StETH gain for each trove
-      const B_ETHGain_1 = await troveManager.getPendingETHReward(B);
-      const C_ETHGain_1 = await troveManager.getPendingETHReward(C);
-      const D_ETHGain_1 = await troveManager.getPendingETHReward(D);
-      const E_ETHGain_1 = await troveManager.getPendingETHReward(E);
+      const B_ETHGain_1 = await troveManager.getPendingStETHReward(B);
+      const C_ETHGain_1 = await troveManager.getPendingStETHReward(C);
+      const D_ETHGain_1 = await troveManager.getPendingStETHReward(D);
+      const E_ETHGain_1 = await troveManager.getPendingStETHReward(E);
 
       // Check gains are what we'd expect from a distribution proportional to each trove's entire coll
       const B_expectedPendingETH_1 =
@@ -724,9 +724,9 @@ contract(
       ); // remove the gas comp
       // console.log(`C_collRedistribution: ${C_collRedistribution}`)
 
-      const B_ETHGain_2 = await troveManager.getPendingETHReward(B);
-      const D_ETHGain_2 = await troveManager.getPendingETHReward(D);
-      const E_ETHGain_2 = await troveManager.getPendingETHReward(E);
+      const B_ETHGain_2 = await troveManager.getPendingStETHReward(B);
+      const D_ETHGain_2 = await troveManager.getPendingStETHReward(D);
+      const E_ETHGain_2 = await troveManager.getPendingStETHReward(E);
 
       // Since B topped up, he has no previous pending StETH gain
       const B_expectedPendingETH_2 =
@@ -774,8 +774,8 @@ contract(
       ); // remove the gas comp
       // console.log(`E_collRedistribution: ${E_collRedistribution}`)
 
-      const B_ETHGain_3 = await troveManager.getPendingETHReward(B);
-      const D_ETHGain_3 = await troveManager.getPendingETHReward(D);
+      const B_ETHGain_3 = await troveManager.getPendingStETHReward(B);
+      const D_ETHGain_3 = await troveManager.getPendingStETHReward(D);
 
       // Since B topped up, he has no previous pending StETH gain
       const B_expectedPendingETH_3 =
@@ -844,7 +844,7 @@ contract(
 
       // Expect Bob now holds all Ether and BaseFeeLMADebt in the system: 2 + 0.4975+0.4975*0.995+0.995 Ether and 110*3 BaseFeeLMA (10 each for gas compensation)
       const bob_Coll = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingETHReward(bob))
+        .add(await troveManager.getPendingStETHReward(bob))
         .toString();
 
       const bob_BaseFeeLMADebt = (await troveManager.Troves(bob))[0]
@@ -937,7 +937,7 @@ contract(
     totalDebt 380 BaseFeeLMA (includes 50 each for gas compensation)
     */
       const bob_Coll = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingETHReward(bob))
+        .add(await troveManager.getPendingStETHReward(bob))
         .toString();
 
       const bob_BaseFeeLMADebt = (await troveManager.Troves(bob))[0]
@@ -945,7 +945,7 @@ contract(
         .toString();
 
       const alice_Coll = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingETHReward(alice))
+        .add(await troveManager.getPendingStETHReward(alice))
         .toString();
 
       const alice_BaseFeeLMADebt = (await troveManager.Troves(alice))[0]
@@ -1026,13 +1026,13 @@ contract(
       await priceFeed.setPrice(dec(200, 18));
 
       // Expected rewards:  alice: 1 StETH, bob: 1 StETH, carol: 998 StETH
-      const alice_ETHReward_1 = await troveManager.getPendingETHReward(alice);
-      const bob_ETHReward_1 = await troveManager.getPendingETHReward(bob);
-      const carol_ETHReward_1 = await troveManager.getPendingETHReward(carol);
+      const alice_ETHReward_1 = await troveManager.getPendingStETHReward(alice);
+      const bob_ETHReward_1 = await troveManager.getPendingStETHReward(bob);
+      const carol_ETHReward_1 = await troveManager.getPendingStETHReward(carol);
 
       //Expect 1000 + 1000*0.995 StETH in system now
-      const entireSystemColl_1 = (await activePool.getETH())
-        .add(await defaultPool.getETH())
+      const entireSystemColl_1 = (await activePool.getStETH())
+        .add(await defaultPool.getStETH())
         .toString();
       assert.equal(
         entireSystemColl_1,
@@ -1061,8 +1061,8 @@ contract(
       });
 
       //Expect 1996 StETH in system now
-      const entireSystemColl_2 = (await activePool.getETH()).add(
-        await defaultPool.getETH()
+      const entireSystemColl_2 = (await activePool.getStETH()).add(
+        await defaultPool.getStETH()
       );
       th.assertIsApproximatelyEqual(
         entireSystemColl_2,
@@ -1098,15 +1098,15 @@ contract(
     */
 
       const alice_Coll = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingETHReward(alice))
+        .add(await troveManager.getPendingStETHReward(alice))
         .toString();
 
       const bob_Coll = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingETHReward(bob))
+        .add(await troveManager.getPendingStETHReward(bob))
         .toString();
 
       const carol_Coll = (await troveManager.Troves(carol))[1]
-        .add(await troveManager.getPendingETHReward(carol))
+        .add(await troveManager.getPendingStETHReward(carol))
         .toString();
 
       const totalCollAfterL1 = A_coll.add(B_coll)
@@ -1143,8 +1143,8 @@ contract(
       assert.isAtMost(th.getDifference(carol_Coll, expected_C_coll), 1000);
 
       //Expect 3982.02 StETH in system now
-      const entireSystemColl_3 = (await activePool.getETH())
-        .add(await defaultPool.getETH())
+      const entireSystemColl_3 = (await activePool.getStETH())
+        .add(await defaultPool.getStETH())
         .toString();
       th.assertIsApproximatelyEqual(
         entireSystemColl_3,
@@ -1192,13 +1192,13 @@ contract(
       await priceFeed.setPrice(dec(200, 18));
 
       // Expected rewards:  alice: 1 StETH, bob: 1 StETH, carol: 998 StETH (*0.995)
-      const alice_ETHReward_1 = await troveManager.getPendingETHReward(alice);
-      const bob_ETHReward_1 = await troveManager.getPendingETHReward(bob);
-      const carol_ETHReward_1 = await troveManager.getPendingETHReward(carol);
+      const alice_ETHReward_1 = await troveManager.getPendingStETHReward(alice);
+      const bob_ETHReward_1 = await troveManager.getPendingStETHReward(bob);
+      const carol_ETHReward_1 = await troveManager.getPendingStETHReward(carol);
 
       //Expect 1995 StETH in system now
-      const entireSystemColl_1 = (await activePool.getETH())
-        .add(await defaultPool.getETH())
+      const entireSystemColl_1 = (await activePool.getStETH())
+        .add(await defaultPool.getStETH())
         .toString();
       assert.equal(
         entireSystemColl_1,
@@ -1237,8 +1237,8 @@ contract(
       });
 
       //Expect 1998 StETH in system now
-      const entireSystemColl_2 = (await activePool.getETH())
-        .add(await defaultPool.getETH())
+      const entireSystemColl_2 = (await activePool.getStETH())
+        .add(await defaultPool.getStETH())
         .toString();
       th.assertIsApproximatelyEqual(
         entireSystemColl_2,
@@ -1276,15 +1276,15 @@ contract(
     */
 
       const alice_Coll = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingETHReward(alice))
+        .add(await troveManager.getPendingStETHReward(alice))
         .toString();
 
       const bob_Coll = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingETHReward(bob))
+        .add(await troveManager.getPendingStETHReward(bob))
         .toString();
 
       const carol_Coll = (await troveManager.Troves(carol))[1]
-        .add(await troveManager.getPendingETHReward(carol))
+        .add(await troveManager.getPendingStETHReward(carol))
         .toString();
 
       const totalCollAfterL1 = A_coll.add(B_coll)
@@ -1321,8 +1321,8 @@ contract(
       assert.isAtMost(th.getDifference(carol_Coll, expected_C_coll), 1000);
 
       //Expect 3986.01 StETH in system now
-      const entireSystemColl_3 = (await activePool.getETH()).add(
-        await defaultPool.getETH()
+      const entireSystemColl_3 = (await activePool.getStETH()).add(
+        await defaultPool.getStETH()
       );
       th.assertIsApproximatelyEqual(
         entireSystemColl_3,
@@ -1392,7 +1392,7 @@ contract(
       // Expect Bob now holds all Ether and BaseFeeLMADebt in the system: 2.5 Ether and 300 BaseFeeLMA
       // 1 + 0.995/2 - 0.5 + 1.4975*0.995
       const bob_Coll = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingETHReward(bob))
+        .add(await troveManager.getPendingStETHReward(bob))
         .toString();
 
       const bob_BaseFeeLMADebt = (await troveManager.Troves(bob))[0]
@@ -1490,7 +1490,7 @@ contract(
     totalDebt 380 BaseFeeLMA (Includes 50 in each trove for gas compensation)
     */
       const bob_Coll = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingETHReward(bob))
+        .add(await troveManager.getPendingStETHReward(bob))
         .toString();
 
       const bob_BaseFeeLMADebt = (await troveManager.Troves(bob))[0]
@@ -1498,7 +1498,7 @@ contract(
         .toString();
 
       const alice_Coll = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingETHReward(alice))
+        .add(await troveManager.getPendingStETHReward(alice))
         .toString();
 
       const alice_BaseFeeLMADebt = (await troveManager.Troves(alice))[0]
@@ -1538,8 +1538,8 @@ contract(
         10000
       );
 
-      const entireSystemColl = (await activePool.getETH()).add(
-        await defaultPool.getETH()
+      const entireSystemColl = (await activePool.getStETH()).add(
+        await defaultPool.getStETH()
       );
       th.assertIsApproximatelyEqual(
         entireSystemColl,
@@ -1597,13 +1597,13 @@ contract(
       await priceFeed.setPrice(dec(200, 18));
 
       // Expected rewards:  alice: 1 StETH, bob: 1 StETH, carol: 998 StETH (*0.995)
-      const alice_ETHReward_1 = await troveManager.getPendingETHReward(alice);
-      const bob_ETHReward_1 = await troveManager.getPendingETHReward(bob);
-      const carol_ETHReward_1 = await troveManager.getPendingETHReward(carol);
+      const alice_ETHReward_1 = await troveManager.getPendingStETHReward(alice);
+      const bob_ETHReward_1 = await troveManager.getPendingStETHReward(bob);
+      const carol_ETHReward_1 = await troveManager.getPendingStETHReward(carol);
 
       //Expect 1995 StETH in system now
-      const entireSystemColl_1 = (await activePool.getETH()).add(
-        await defaultPool.getETH()
+      const entireSystemColl_1 = (await activePool.getStETH()).add(
+        await defaultPool.getStETH()
       );
       th.assertIsApproximatelyEqual(
         entireSystemColl_1,
@@ -1631,8 +1631,8 @@ contract(
       });
 
       //Expect 1994 StETH in system now
-      const entireSystemColl_2 = (await activePool.getETH()).add(
-        await defaultPool.getETH()
+      const entireSystemColl_2 = (await activePool.getStETH()).add(
+        await defaultPool.getStETH()
       );
       th.assertIsApproximatelyEqual(
         entireSystemColl_2,
@@ -1668,15 +1668,15 @@ contract(
     */
 
       const alice_Coll = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingETHReward(alice))
+        .add(await troveManager.getPendingStETHReward(alice))
         .toString();
 
       const bob_Coll = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingETHReward(bob))
+        .add(await troveManager.getPendingStETHReward(bob))
         .toString();
 
       const carol_Coll = (await troveManager.Troves(carol))[1]
-        .add(await troveManager.getPendingETHReward(carol))
+        .add(await troveManager.getPendingStETHReward(carol))
         .toString();
 
       const totalCollAfterL1 = A_coll.add(B_coll)
@@ -1713,8 +1713,8 @@ contract(
       assert.isAtMost(th.getDifference(carol_Coll, expected_C_coll), 1000);
 
       //Expect 3978.03 StETH in system now
-      const entireSystemColl_3 = (await activePool.getETH()).add(
-        await defaultPool.getETH()
+      const entireSystemColl_3 = (await activePool.getStETH()).add(
+        await defaultPool.getStETH()
       );
       th.assertIsApproximatelyEqual(
         entireSystemColl_3,
@@ -1762,13 +1762,13 @@ contract(
       await priceFeed.setPrice(dec(200, 18));
 
       // Expected rewards:  alice: 1 StETH, bob: 1 StETH, carol: 998 StETH (*0.995)
-      const alice_ETHReward_1 = await troveManager.getPendingETHReward(alice);
-      const bob_ETHReward_1 = await troveManager.getPendingETHReward(bob);
-      const carol_ETHReward_1 = await troveManager.getPendingETHReward(carol);
+      const alice_ETHReward_1 = await troveManager.getPendingStETHReward(alice);
+      const bob_ETHReward_1 = await troveManager.getPendingStETHReward(bob);
+      const carol_ETHReward_1 = await troveManager.getPendingStETHReward(carol);
 
       //Expect 1995 StETH in system now
-      const entireSystemColl_1 = (await activePool.getETH()).add(
-        await defaultPool.getETH()
+      const entireSystemColl_1 = (await activePool.getStETH()).add(
+        await defaultPool.getStETH()
       );
       th.assertIsApproximatelyEqual(
         entireSystemColl_1,
@@ -1803,15 +1803,15 @@ contract(
       });
 
       const alice_Coll_1 = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingETHReward(alice))
+        .add(await troveManager.getPendingStETHReward(alice))
         .toString();
 
       const bob_Coll_1 = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingETHReward(bob))
+        .add(await troveManager.getPendingStETHReward(bob))
         .toString();
 
       const carol_Coll_1 = (await troveManager.Troves(carol))[1]
-        .add(await troveManager.getPendingETHReward(carol))
+        .add(await troveManager.getPendingStETHReward(carol))
         .toString();
 
       const totalColl_1 = A_coll.add(B_coll).add(C_coll);
@@ -1844,8 +1844,8 @@ contract(
       );
 
       //Expect 1993.5 StETH in system now
-      const entireSystemColl_2 = (await activePool.getETH()).add(
-        await defaultPool.getETH()
+      const entireSystemColl_2 = (await activePool.getStETH()).add(
+        await defaultPool.getStETH()
       );
       th.assertIsApproximatelyEqual(
         entireSystemColl_2,
@@ -1883,15 +1883,15 @@ contract(
     */
 
       const alice_Coll_2 = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingETHReward(alice))
+        .add(await troveManager.getPendingStETHReward(alice))
         .toString();
 
       const bob_Coll_2 = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingETHReward(bob))
+        .add(await troveManager.getPendingStETHReward(bob))
         .toString();
 
       const carol_Coll_2 = (await troveManager.Troves(carol))[1]
-        .add(await troveManager.getPendingETHReward(carol))
+        .add(await troveManager.getPendingStETHReward(carol))
         .toString();
 
       const totalCollAfterL1 = A_coll.add(B_coll)
@@ -1928,8 +1928,8 @@ contract(
       assert.isAtMost(th.getDifference(carol_Coll_2, expected_C_coll), 1000);
 
       //Expect 3977.0325 StETH in system now
-      const entireSystemColl_3 = (await activePool.getETH()).add(
-        await defaultPool.getETH()
+      const entireSystemColl_3 = (await activePool.getStETH()).add(
+        await defaultPool.getStETH()
       );
       th.assertIsApproximatelyEqual(
         entireSystemColl_3,
@@ -1982,14 +1982,14 @@ contract(
         .div(B_coll.add(C_coll));
       assert.isAtMost(
         th.getDifference(
-          await troveManager.getPendingETHReward(bob),
+          await troveManager.getPendingStETHReward(bob),
           B_pendingRewardsAfterL1
         ),
         1000000
       );
       assert.isAtMost(
         th.getDifference(
-          await troveManager.getPendingETHReward(carol),
+          await troveManager.getPendingStETHReward(carol),
           C_pendingRewardsAfterL1
         ),
         1000000
@@ -2055,14 +2055,14 @@ contract(
       ).div(C_collAfterL1.add(D_coll));
       assert.isAtMost(
         th.getDifference(
-          await troveManager.getPendingETHReward(carol),
+          await troveManager.getPendingStETHReward(carol),
           C_pendingRewardsAfterL2
         ),
         1000000
       );
       assert.isAtMost(
         th.getDifference(
-          await troveManager.getPendingETHReward(dennis),
+          await troveManager.getPendingStETHReward(dennis),
           D_pendingRewardsAfterL2
         ),
         1000000
@@ -2130,17 +2130,17 @@ contract(
       // Grab remaining troves' collateral
       const carol_rawColl = (await troveManager.Troves(carol))[1].toString();
       const carol_pendingETHReward = (
-        await troveManager.getPendingETHReward(carol)
+        await troveManager.getPendingStETHReward(carol)
       ).toString();
 
       const dennis_rawColl = (await troveManager.Troves(dennis))[1].toString();
       const dennis_pendingETHReward = (
-        await troveManager.getPendingETHReward(dennis)
+        await troveManager.getPendingStETHReward(dennis)
       ).toString();
 
       const erin_rawColl = (await troveManager.Troves(erin))[1].toString();
       const erin_pendingETHReward = (
-        await troveManager.getPendingETHReward(erin)
+        await troveManager.getPendingStETHReward(erin)
       ).toString();
 
       // Check raw collateral of C, D, E
@@ -2183,8 +2183,8 @@ contract(
       );
 
       // Check systemic collateral
-      const activeColl = (await activePool.getETH()).toString();
-      const defaultColl = (await defaultPool.getETH()).toString();
+      const activeColl = (await activePool.getStETH()).toString();
+      const defaultColl = (await defaultPool.getStETH()).toString();
 
       assert.isAtMost(
         th.getDifference(
@@ -2277,14 +2277,14 @@ contract(
         .div(B_coll.add(C_coll));
       assert.isAtMost(
         th.getDifference(
-          await troveManager.getPendingETHReward(bob),
+          await troveManager.getPendingStETHReward(bob),
           B_pendingRewardsAfterL1
         ),
         1000000
       );
       assert.isAtMost(
         th.getDifference(
-          await troveManager.getPendingETHReward(carol),
+          await troveManager.getPendingStETHReward(carol),
           C_pendingRewardsAfterL1
         ),
         1000000
@@ -2350,14 +2350,14 @@ contract(
       const C_collAfterL2 = C_collAfterL1.add(C_pendingRewardsAfterL2);
       assert.isAtMost(
         th.getDifference(
-          await troveManager.getPendingETHReward(carol),
+          await troveManager.getPendingStETHReward(carol),
           C_pendingRewardsAfterL2
         ),
         10000000
       );
       assert.isAtMost(
         th.getDifference(
-          await troveManager.getPendingETHReward(dennis),
+          await troveManager.getPendingStETHReward(dennis),
           D_pendingRewardsAfterL2
         ),
         10000000
@@ -2430,19 +2430,19 @@ contract(
       // Grab remaining troves' collateral
       const carol_rawColl = (await troveManager.Troves(carol))[1].toString();
       const carol_pendingETHReward = (
-        await troveManager.getPendingETHReward(carol)
+        await troveManager.getPendingStETHReward(carol)
       ).toString();
       const carol_Stake = (await troveManager.Troves(carol))[2].toString();
 
       const dennis_rawColl = (await troveManager.Troves(dennis))[1].toString();
       const dennis_pendingETHReward = (
-        await troveManager.getPendingETHReward(dennis)
+        await troveManager.getPendingStETHReward(dennis)
       ).toString();
       const dennis_Stake = (await troveManager.Troves(dennis))[2].toString();
 
       const erin_rawColl = (await troveManager.Troves(erin))[1].toString();
       const erin_pendingETHReward = (
-        await troveManager.getPendingETHReward(erin)
+        await troveManager.getPendingStETHReward(erin)
       ).toString();
       const erin_Stake = (await troveManager.Troves(erin))[2].toString();
 
@@ -2482,8 +2482,8 @@ contract(
       );
 
       // Check systemic collateral
-      const activeColl = (await activePool.getETH()).toString();
-      const defaultColl = (await defaultPool.getETH()).toString();
+      const activeColl = (await activePool.getStETH()).toString();
+      const defaultColl = (await defaultPool.getStETH()).toString();
 
       assert.isAtMost(
         th.getDifference(

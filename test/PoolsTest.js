@@ -33,8 +33,8 @@ contract("StabilityPool", async (accounts) => {
     );
   });
 
-  it("getETH(): gets the recorded StETH balance", async () => {
-    const recordedETHBalance = await stabilityPool.getETH();
+  it("getStETH(): gets the recorded StETH balance", async () => {
+    const recordedETHBalance = await stabilityPool.getStETH();
     assert.equal(recordedETHBalance, 0);
   });
 
@@ -60,8 +60,8 @@ contract("ActivePool", async (accounts) => {
     );
   });
 
-  it("getETH(): gets the recorded StETH balance", async () => {
-    const recordedETHBalance = await activePool.getETH();
+  it("getStETH(): gets the recorded StETH balance", async () => {
+    const recordedETHBalance = await activePool.getStETH();
     assert.equal(recordedETHBalance, 0);
   });
 
@@ -123,7 +123,7 @@ contract("ActivePool", async (accounts) => {
   });
 
   // send raw eth
-  it("sendETH(): decreases the recorded StETH balance by the correct amount", async () => {
+  it("sendStETH(): decreases the recorded StETH balance by the correct amount", async () => {
     // setup: give pool 2 eth
     const activePool_initialBalance = web3.utils.toBN(
       await web3.eth.getBalance(activePool.address)
@@ -147,8 +147,8 @@ contract("ActivePool", async (accounts) => {
     assert.equal(activePool_BalanceBeforeTx, dec(2, "ether"));
 
     // send eth from pool to alice
-    //await activePool.sendETH(alice, dec(1, 'eth'), { from: mockBorrowerOperationsAddress })
-    const sendETHData = th.getTransactionData("sendETH(address,uint256)", [
+    //await activePool.sendStETH(alice, dec(1, 'eth'), { from: mockBorrowerOperationsAddress })
+    const sendETHData = th.getTransactionData("sendStETH(address,uint256)", [
       alice,
       web3.utils.toHex(dec(1, "ether")),
     ]);
@@ -191,8 +191,8 @@ contract("DefaultPool", async (accounts) => {
     );
   });
 
-  it("getETH(): gets the recorded BaseFeeLMA balance", async () => {
-    const recordedETHBalance = await defaultPool.getETH();
+  it("getStETH(): gets the recorded BaseFeeLMA balance", async () => {
+    const recordedETHBalance = await defaultPool.getStETH();
     assert.equal(recordedETHBalance, 0);
   });
 
@@ -256,7 +256,7 @@ contract("DefaultPool", async (accounts) => {
   });
 
   // send raw eth
-  it("sendETHToActivePool(): decreases the recorded StETH balance by the correct amount", async () => {
+  it("sendStETHToActivePool(): decreases the recorded StETH balance by the correct amount", async () => {
     // setup: give pool 2 eth
     const defaultPool_initialBalance = web3.utils.toBN(
       await web3.eth.getBalance(defaultPool.address)
@@ -281,10 +281,11 @@ contract("DefaultPool", async (accounts) => {
     assert.equal(defaultPool_BalanceBeforeTx, dec(2, "ether"));
 
     // send eth from pool to alice
-    //await defaultPool.sendETHToActivePool(dec(1, 'eth'), { from: mockTroveManagerAddress })
-    const sendETHData = th.getTransactionData("sendETHToActivePool(uint256)", [
-      web3.utils.toHex(dec(1, "ether")),
-    ]);
+    //await defaultPool.sendStETHToActivePool(dec(1, 'eth'), { from: mockTroveManagerAddress })
+    const sendETHData = th.getTransactionData(
+      "sendStETHToActivePool(uint256)",
+      [web3.utils.toHex(dec(1, "ether"))]
+    );
     await mockActivePool.setPayable(true);
     const tx2 = await mockTroveManager.forward(
       defaultPool.address,

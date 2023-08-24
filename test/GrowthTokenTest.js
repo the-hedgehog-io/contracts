@@ -200,7 +200,7 @@ contract("HOG Token", async (accounts) => {
 
   it("name(): returns the token's name", async () => {
     const name = await hogTokenTester.name();
-    assert.equal(name, "HOG");
+    assert.equal(name, "Hedgehog");
   });
 
   it("symbol(): returns the token's symbol", async () => {

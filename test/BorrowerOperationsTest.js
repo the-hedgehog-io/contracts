@@ -164,7 +164,7 @@ contract("BorrowerOperations", async (accounts) => {
         extraParams: { from: alice },
       });
 
-      const activePool_ETH_Before = await activePool.getETH();
+      const activePool_ETH_Before = await activePool.getStETH();
       const activePool_RawEther_Before = toBN(
         await web3.eth.getBalance(activePool.address)
       );
@@ -177,7 +177,7 @@ contract("BorrowerOperations", async (accounts) => {
         value: dec(1, "ether"),
       });
 
-      const activePool_ETH_After = await activePool.getETH();
+      const activePool_ETH_After = await activePool.getStETH();
       const activePool_RawEther_After = toBN(
         await web3.eth.getBalance(activePool.address)
       );
@@ -266,7 +266,7 @@ contract("BorrowerOperations", async (accounts) => {
       );
     });
 
-    it("addColl(), active Trove: applies pending rewards and updates user's L_ETH, L_BaseFeeLMADebt snapshots", async () => {
+    it("addColl(), active Trove: applies pending rewards and updates user's L_StETH, L_BaseFeeLMADebt snapshots", async () => {
       // --- SETUP ---
 
       const { collateral: aliceCollBefore, totalDebt: aliceDebtBefore } =
@@ -297,7 +297,7 @@ contract("BorrowerOperations", async (accounts) => {
 
       assert.isFalse(await sortedTroves.contains(carol));
 
-      const L_ETH = await troveManager.L_ETH();
+      const L_StETH = await troveManager.L_StETH();
       const L_BaseFeeLMADebt = await troveManager.L_BaseFeeLMADebt();
 
       // check Alice and Bob's reward snapshots are zero before they alter their Troves
@@ -318,10 +318,10 @@ contract("BorrowerOperations", async (accounts) => {
       assert.equal(bob_ETHrewardSnapshot_Before, 0);
       assert.equal(bob_BaseFeeLMADebtRewardSnapshot_Before, 0);
 
-      const alicePendingETHReward = await troveManager.getPendingETHReward(
+      const alicePendingETHReward = await troveManager.getPendingStETHReward(
         alice
       );
-      const bobPendingETHReward = await troveManager.getPendingETHReward(bob);
+      const bobPendingETHReward = await troveManager.getPendingStETHReward(bob);
       const alicePendingBaseFeeLMADebtReward =
         await troveManager.getPendingBaseFeeLMADebtReward(alice);
       const bobPendingBaseFeeLMADebtReward =
@@ -370,7 +370,7 @@ contract("BorrowerOperations", async (accounts) => {
       );
 
       /* Check that both Alice and Bob's snapshots of the rewards-per-unit-staked metrics should be updated
-       to the latest values of L_ETH and L_BaseFeeLMADebt */
+       to the latest values of L_StETH and L_BaseFeeLMADebt */
       const alice_rewardSnapshot_After = await troveManager.rewardSnapshots(
         alice
       );
@@ -384,7 +384,7 @@ contract("BorrowerOperations", async (accounts) => {
         bob_rewardSnapshot_After[1];
 
       assert.isAtMost(
-        th.getDifference(alice_ETHrewardSnapshot_After, L_ETH),
+        th.getDifference(alice_ETHrewardSnapshot_After, L_StETH),
         100
       );
       assert.isAtMost(
@@ -395,7 +395,7 @@ contract("BorrowerOperations", async (accounts) => {
         100
       );
       assert.isAtMost(
-        th.getDifference(bob_ETHrewardSnapshot_After, L_ETH),
+        th.getDifference(bob_ETHrewardSnapshot_After, L_StETH),
         100
       );
       assert.isAtMost(
@@ -737,7 +737,7 @@ contract("BorrowerOperations", async (accounts) => {
       const aliceCollBefore = await getTroveEntireColl(alice);
 
       // check before
-      const activePool_ETH_before = await activePool.getETH();
+      const activePool_ETH_before = await activePool.getStETH();
       const activePool_RawEther_before = toBN(
         await web3.eth.getBalance(activePool.address)
       );
@@ -747,7 +747,7 @@ contract("BorrowerOperations", async (accounts) => {
       });
 
       // check after
-      const activePool_ETH_After = await activePool.getETH();
+      const activePool_ETH_After = await activePool.getStETH();
       const activePool_RawEther_After = toBN(
         await web3.eth.getBalance(activePool.address)
       );
@@ -819,7 +819,7 @@ contract("BorrowerOperations", async (accounts) => {
       assert.isTrue(balanceDiff.eq(toBN(dec(1, "ether"))));
     });
 
-    it("withdrawColl(): applies pending rewards and updates user's L_ETH, L_BaseFeeLMADebt snapshots", async () => {
+    it("withdrawColl(): applies pending rewards and updates user's L_StETH, L_BaseFeeLMADebt snapshots", async () => {
       // --- SETUP ---
       // Alice adds 15 eth, Bob adds 5 eth, Carol adds 1 eth
       await openTrove({ ICR: toBN(dec(10, 18)), extraParams: { from: whale } });
@@ -849,7 +849,7 @@ contract("BorrowerOperations", async (accounts) => {
       // close Carol's Trove, liquidating her 1 eth and 180BaseFeeLMA.
       await troveManager.liquidate(carol, { from: owner });
 
-      const L_ETH = await troveManager.L_ETH();
+      const L_StETH = await troveManager.L_StETH();
       const L_BaseFeeLMADebt = await troveManager.L_BaseFeeLMADebt();
 
       // check Alice and Bob's reward snapshots are zero before they alter their Troves
@@ -871,10 +871,12 @@ contract("BorrowerOperations", async (accounts) => {
       assert.equal(bob_BaseFeeLMADebtRewardSnapshot_Before, 0);
 
       // Check A and B have pending rewards
-      const pendingCollReward_A = await troveManager.getPendingETHReward(alice);
+      const pendingCollReward_A = await troveManager.getPendingStETHReward(
+        alice
+      );
       const pendingDebtReward_A =
         await troveManager.getPendingBaseFeeLMADebtReward(alice);
-      const pendingCollReward_B = await troveManager.getPendingETHReward(bob);
+      const pendingCollReward_B = await troveManager.getPendingStETHReward(bob);
       const pendingDebtReward_B =
         await troveManager.getPendingBaseFeeLMADebtReward(bob);
       for (reward of [
@@ -926,7 +928,7 @@ contract("BorrowerOperations", async (accounts) => {
       );
 
       /* After top up, both Alice and Bob's snapshots of the rewards-per-unit-staked metrics should be updated
-       to the latest values of L_ETH and L_BaseFeeLMADebt */
+       to the latest values of L_StETH and L_BaseFeeLMADebt */
       const alice_rewardSnapshot_After = await troveManager.rewardSnapshots(
         alice
       );
@@ -940,7 +942,7 @@ contract("BorrowerOperations", async (accounts) => {
         bob_rewardSnapshot_After[1];
 
       assert.isAtMost(
-        th.getDifference(alice_ETHrewardSnapshot_After, L_ETH),
+        th.getDifference(alice_ETHrewardSnapshot_After, L_StETH),
         100
       );
       assert.isAtMost(
@@ -951,7 +953,7 @@ contract("BorrowerOperations", async (accounts) => {
         100
       );
       assert.isAtMost(
-        th.getDifference(bob_ETHrewardSnapshot_After, L_ETH),
+        th.getDifference(bob_ETHrewardSnapshot_After, L_StETH),
         100
       );
       assert.isAtMost(
@@ -3978,7 +3980,7 @@ contract("BorrowerOperations", async (accounts) => {
       });
 
       const aliceCollBefore = await getTroveEntireColl(alice);
-      const activePoolCollBefore = await activePool.getETH();
+      const activePoolCollBefore = await activePool.getStETH();
 
       assert.isTrue(aliceCollBefore.gt(toBN("0")));
       assert.isTrue(aliceCollBefore.eq(activePoolCollBefore));
@@ -3995,7 +3997,7 @@ contract("BorrowerOperations", async (accounts) => {
       );
 
       const aliceCollAfter = await getTroveEntireColl(alice);
-      const activePoolCollAfter = await activePool.getETH();
+      const activePoolCollAfter = await activePool.getStETH();
 
       assert.isTrue(aliceCollAfter.eq(activePoolCollAfter));
       assert.isTrue(activePoolCollAfter.eq(activePoolCollAfter));
@@ -4365,7 +4367,7 @@ contract("BorrowerOperations", async (accounts) => {
         extraParams: { from: alice },
       });
 
-      const activePool_ETH_Before = await activePool.getETH();
+      const activePool_ETH_Before = await activePool.getStETH();
       const activePool_RawEther_Before = toBN(
         await web3.eth.getBalance(activePool.address)
       );
@@ -4383,7 +4385,7 @@ contract("BorrowerOperations", async (accounts) => {
         { from: alice }
       );
 
-      const activePool_ETH_After = await activePool.getETH();
+      const activePool_ETH_After = await activePool.getStETH();
       const activePool_RawEther_After = toBN(
         await web3.eth.getBalance(activePool.address)
       );
@@ -4410,7 +4412,7 @@ contract("BorrowerOperations", async (accounts) => {
         extraParams: { from: alice },
       });
 
-      const activePool_ETH_Before = await activePool.getETH();
+      const activePool_ETH_Before = await activePool.getStETH();
       const activePool_RawEther_Before = toBN(
         await web3.eth.getBalance(activePool.address)
       );
@@ -4428,7 +4430,7 @@ contract("BorrowerOperations", async (accounts) => {
         { from: alice, value: dec(1, "ether") }
       );
 
-      const activePool_ETH_After = await activePool.getETH();
+      const activePool_ETH_After = await activePool.getStETH();
       const activePool_RawEther_After = toBN(
         await web3.eth.getBalance(activePool.address)
       );
@@ -4819,6 +4821,7 @@ contract("BorrowerOperations", async (accounts) => {
 
       // Bob successfully closes his trove
       const txBob = await borrowerOperations.closeTrove({ from: bob });
+
       assert.isTrue(txBob.receipt.status);
 
       await priceFeed.setPrice(dec(100, 18));
@@ -5095,7 +5098,7 @@ contract("BorrowerOperations", async (accounts) => {
       assert.isTrue(aliceColl.gt("0"));
 
       // Check active Pool StETH before
-      const activePool_ETH_before = await activePool.getETH();
+      const activePool_ETH_before = await activePool.getStETH();
       const activePool_RawEther_before = toBN(
         await web3.eth.getBalance(activePool.address)
       );
@@ -5116,7 +5119,7 @@ contract("BorrowerOperations", async (accounts) => {
       await borrowerOperations.closeTrove({ from: alice });
 
       // Check after
-      const activePool_ETH_After = await activePool.getETH();
+      const activePool_ETH_After = await activePool.getStETH();
       const activePool_RawEther_After = toBN(
         await web3.eth.getBalance(activePool.address)
       );
@@ -5376,7 +5379,7 @@ contract("BorrowerOperations", async (accounts) => {
       assert.equal(bob_ETHrewardSnapshot_Before, 0);
       assert.equal(bob_BaseFeeLMADebtRewardSnapshot_Before, 0);
 
-      const defaultPool_ETH = await defaultPool.getETH();
+      const defaultPool_ETH = await defaultPool.getStETH();
       const defaultPool_BaseFeeLMADebt = await defaultPool.getBaseFeeLMADebt();
 
       // Carol's liquidated coll (1 StETH) and drawn debt should have entered the Default Pool
@@ -5386,7 +5389,9 @@ contract("BorrowerOperations", async (accounts) => {
         100
       );
 
-      const pendingCollReward_A = await troveManager.getPendingETHReward(alice);
+      const pendingCollReward_A = await troveManager.getPendingStETHReward(
+        alice
+      );
       const pendingDebtReward_A =
         await troveManager.getPendingBaseFeeLMADebtReward(alice);
       assert.isTrue(pendingCollReward_A.gt("0"));
@@ -5395,7 +5400,7 @@ contract("BorrowerOperations", async (accounts) => {
       // Close Alice's trove. Alice's pending rewards should be removed from the DefaultPool when she close.
       await borrowerOperations.closeTrove({ from: alice });
 
-      const defaultPool_ETH_afterAliceCloses = await defaultPool.getETH();
+      const defaultPool_ETH_afterAliceCloses = await defaultPool.getStETH();
       const defaultPool_BaseFeeLMADebt_afterAliceCloses =
         await defaultPool.getBaseFeeLMADebt();
 
@@ -5428,7 +5433,7 @@ contract("BorrowerOperations", async (accounts) => {
       // Close Bob's trove. Expect DefaultPool coll and debt to drop to 0, since closing pulls his rewards out.
       await borrowerOperations.closeTrove({ from: bob });
 
-      const defaultPool_ETH_afterBobCloses = await defaultPool.getETH();
+      const defaultPool_ETH_afterBobCloses = await defaultPool.getStETH();
       const defaultPool_BaseFeeLMADebt_afterBobCloses =
         await defaultPool.getBaseFeeLMADebt();
 
@@ -6681,16 +6686,22 @@ contract("BorrowerOperations", async (accounts) => {
       assert.equal(status_Before, 0);
 
       const BaseFeeLMARequest = MIN_NET_DEBT;
-      borrowerOperations.openTrove(th._100pct, MIN_NET_DEBT, carol, carol, {
-        from: alice,
-        value: dec(100, "ether"),
-      });
+      await borrowerOperations.openTrove(
+        th._100pct,
+        MIN_NET_DEBT,
+        carol,
+        carol,
+        {
+          from: alice,
+          value: dec(100, "ether"),
+        }
+      );
 
       // Get the expected debt based on the BaseFeeLMA request (adding fee and liq. reserve on top)
       const expectedDebt = BaseFeeLMARequest.add(
         await troveManager.getBorrowingFee(BaseFeeLMARequest)
       ).add(BaseFeeLMA_GAS_COMPENSATION);
-
+      debugger;
       const debt_After = await getTroveEntireDebt(alice);
       const coll_After = await getTroveEntireColl(alice);
       const status_After = await troveManager.getTroveStatus(alice);
@@ -6766,7 +6777,7 @@ contract("BorrowerOperations", async (accounts) => {
     });
 
     it("openTrove(): Increases the activePool StETH and raw eth balance by correct amount", async () => {
-      const activePool_ETH_Before = await activePool.getETH();
+      const activePool_ETH_Before = await activePool.getStETH();
       const activePool_RawEther_Before = await web3.eth.getBalance(
         activePool.address
       );
@@ -6780,7 +6791,7 @@ contract("BorrowerOperations", async (accounts) => {
       });
       const aliceCollAfter = await getTroveEntireColl(alice);
 
-      const activePool_ETH_After = await activePool.getETH();
+      const activePool_ETH_After = await activePool.getStETH();
       const activePool_RawEther_After = toBN(
         await web3.eth.getBalance(activePool.address)
       );
@@ -6788,7 +6799,7 @@ contract("BorrowerOperations", async (accounts) => {
       assert.isTrue(activePool_RawEther_After.eq(aliceCollAfter));
     });
 
-    it("openTrove(): records up-to-date initial snapshots of L_ETH and L_BaseFeeLMADebt", async () => {
+    it("openTrove(): records up-to-date initial snapshots of L_StETH and L_BaseFeeLMADebt", async () => {
       // --- SETUP ---
 
       await openTrove({
@@ -6814,13 +6825,13 @@ contract("BorrowerOperations", async (accounts) => {
       const [liquidatedDebt, liquidatedColl, gasComp] =
         th.getEmittedLiquidationValues(liquidationTx);
 
-      /* with total stakes = 10 eth, after liquidation, L_ETH should equal 1/10 eth per-eth-staked,
+      /* with total stakes = 10 eth, after liquidation, L_StETH should equal 1/10 eth per-eth-staked,
        and L_BaseFeeLMA should equal 18 BaseFeeLMA per-eth-staked. */
 
-      const L_ETH = await troveManager.L_ETH();
+      const L_StETH = await troveManager.L_StETH();
       const L_BaseFeeLMA = await troveManager.L_BaseFeeLMADebt();
 
-      assert.isTrue(L_ETH.gt(toBN("0")));
+      assert.isTrue(L_StETH.gt(toBN("0")));
       assert.isTrue(L_BaseFeeLMA.gt(toBN("0")));
 
       // Bob opens trove
@@ -6830,12 +6841,12 @@ contract("BorrowerOperations", async (accounts) => {
         extraParams: { from: bob },
       });
 
-      // Check Bob's snapshots of L_ETH and L_BaseFeeLMA equal the respective current values
+      // Check Bob's snapshots of L_StETH and L_BaseFeeLMA equal the respective current values
       const bob_rewardSnapshot = await troveManager.rewardSnapshots(bob);
       const bob_ETHrewardSnapshot = bob_rewardSnapshot[0];
       const bob_BaseFeeLMADebtRewardSnapshot = bob_rewardSnapshot[1];
 
-      assert.isAtMost(th.getDifference(bob_ETHrewardSnapshot, L_ETH), 1000);
+      assert.isAtMost(th.getDifference(bob_ETHrewardSnapshot, L_StETH), 1000);
       assert.isAtMost(
         th.getDifference(bob_BaseFeeLMADebtRewardSnapshot, L_BaseFeeLMA),
         1000

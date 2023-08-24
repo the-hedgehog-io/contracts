@@ -91,10 +91,10 @@ contract(
 
       // --- Compounding tests ---
 
-      // --- withdrawETHGainToTrove() ---
+      // --- withdrawStETHGainToTrove() ---
 
       // --- Identical deposits, identical liquidation amounts---
-      it("withdrawETHGainToTrove(): Depositors with equal initial deposit withdraw correct compounded deposit and StETH Gain after one liquidation", async () => {
+      it("withdrawStETHGainToTrove(): Depositors with equal initial deposit withdraw correct compounded deposit and StETH Gain after one liquidation", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -154,17 +154,17 @@ contract(
         await troveManager.liquidate(defaulter_1, { from: owner });
 
         // Check depositors' compounded deposit is 6666.66 BaseFeeLMA and StETH Gain is 33.16 StETH
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
@@ -172,13 +172,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -223,7 +223,7 @@ contract(
         );
       });
 
-      it("withdrawETHGainToTrove(): Depositors with equal initial deposit withdraw correct compounded deposit and StETH Gain after two identical liquidations", async () => {
+      it("withdrawStETHGainToTrove(): Depositors with equal initial deposit withdraw correct compounded deposit and StETH Gain after two identical liquidations", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -291,30 +291,30 @@ contract(
         await troveManager.liquidate(defaulter_2, { from: owner });
 
         // Check depositors' compounded deposit is 3333.33 BaseFeeLMA and StETH Gain is 66.33 StETH
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
         );
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -359,7 +359,7 @@ contract(
         );
       });
 
-      it("withdrawETHGainToTrove():  Depositors with equal initial deposit withdraw correct compounded deposit and StETH Gain after three identical liquidations", async () => {
+      it("withdrawStETHGainToTrove():  Depositors with equal initial deposit withdraw correct compounded deposit and StETH Gain after three identical liquidations", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -435,17 +435,17 @@ contract(
         await troveManager.liquidate(defaulter_3, { from: owner });
 
         // Check depositors' compounded deposit is 0 BaseFeeLMA and StETH Gain is 99.5 StETH
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
@@ -453,13 +453,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -505,7 +505,7 @@ contract(
       });
 
       // --- Identical deposits, increasing liquidation amounts ---
-      it("withdrawETHGainToTrove(): Depositors with equal initial deposit withdraw correct compounded deposit and StETH Gain after two liquidations of increasing BaseFeeLMA", async () => {
+      it("withdrawStETHGainToTrove(): Depositors with equal initial deposit withdraw correct compounded deposit and StETH Gain after two liquidations of increasing BaseFeeLMA", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -573,17 +573,17 @@ contract(
         await troveManager.liquidate(defaulter_2, { from: owner });
 
         // Check depositors' compounded deposit
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
@@ -591,13 +591,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -643,7 +643,7 @@ contract(
         );
       });
 
-      it("withdrawETHGainToTrove(): Depositors with equal initial deposit withdraw correct compounded deposit and StETH Gain after three liquidations of increasing BaseFeeLMA", async () => {
+      it("withdrawStETHGainToTrove(): Depositors with equal initial deposit withdraw correct compounded deposit and StETH Gain after three liquidations of increasing BaseFeeLMA", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -719,17 +719,17 @@ contract(
         await troveManager.liquidate(defaulter_3, { from: owner });
 
         // Check depositors' compounded deposit
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
@@ -737,13 +737,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -790,7 +790,7 @@ contract(
       });
 
       // --- Increasing deposits, identical liquidation amounts ---
-      it("withdrawETHGainToTrove(): Depositors with varying deposits withdraw correct compounded deposit and StETH Gain after two identical liquidations", async () => {
+      it("withdrawStETHGainToTrove(): Depositors with varying deposits withdraw correct compounded deposit and StETH Gain after two identical liquidations", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -861,17 +861,17 @@ contract(
         await troveManager.liquidate(defaulter_2, { from: owner });
 
         // Depositors attempt to withdraw everything
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
@@ -879,13 +879,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -930,7 +930,7 @@ contract(
         );
       });
 
-      it("withdrawETHGainToTrove(): Depositors with varying deposits withdraw correct compounded deposit and StETH Gain after three identical liquidations", async () => {
+      it("withdrawStETHGainToTrove(): Depositors with varying deposits withdraw correct compounded deposit and StETH Gain after three identical liquidations", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -1009,17 +1009,17 @@ contract(
         await troveManager.liquidate(defaulter_3, { from: owner });
 
         // Depositors attempt to withdraw everything
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
@@ -1027,13 +1027,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -1079,7 +1079,7 @@ contract(
       });
 
       // --- Varied deposits and varied liquidation amount ---
-      it("withdrawETHGainToTrove(): Depositors with varying deposits withdraw correct compounded deposit and StETH Gain after three varying liquidations", async () => {
+      it("withdrawStETHGainToTrove(): Depositors with varying deposits withdraw correct compounded deposit and StETH Gain after three varying liquidations", async () => {
         // Whale opens Trove with 1m StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -1167,17 +1167,17 @@ contract(
         await troveManager.liquidate(defaulter_3, { from: owner });
 
         // Depositors attempt to withdraw everything
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
@@ -1185,13 +1185,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         // ()
@@ -1240,7 +1240,7 @@ contract(
 
       // --- Deposit enters at t > 0
 
-      it("withdrawETHGainToTrove(): A, B, C Deposit -> 2 liquidations -> D deposits -> 1 liquidation. All deposits and liquidations = 100 BaseFeeLMA.  A, B, C, D withdraw correct BaseFeeLMA deposit and StETH Gain", async () => {
+      it("withdrawStETHGainToTrove(): A, B, C Deposit -> 2 liquidations -> D deposits -> 1 liquidation. All deposits and liquidations = 100 BaseFeeLMA.  A, B, C, D withdraw correct BaseFeeLMA deposit and StETH Gain", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -1330,22 +1330,22 @@ contract(
         // Third defaulter liquidated
         await troveManager.liquidate(defaulter_3, { from: owner });
 
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
         );
-        const txD = await stabilityPool.withdrawETHGainToTrove(
+        const txD = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: dennis }
@@ -1353,16 +1353,16 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
         const dennis_ETHWithdrawn = th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         console.log();
@@ -1423,7 +1423,7 @@ contract(
         );
       });
 
-      it("withdrawETHGainToTrove(): A, B, C Deposit -> 2 liquidations -> D deposits -> 2 liquidations. All deposits and liquidations = 100 BaseFeeLMA.  A, B, C, D withdraw correct BaseFeeLMA deposit and StETH Gain", async () => {
+      it("withdrawStETHGainToTrove(): A, B, C Deposit -> 2 liquidations -> D deposits -> 2 liquidations. All deposits and liquidations = 100 BaseFeeLMA.  A, B, C, D withdraw correct BaseFeeLMA deposit and StETH Gain", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -1521,22 +1521,22 @@ contract(
         await troveManager.liquidate(defaulter_3, { from: owner });
         await troveManager.liquidate(defaulter_4, { from: owner });
 
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
         );
-        const txD = await stabilityPool.withdrawETHGainToTrove(
+        const txD = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: dennis }
@@ -1544,16 +1544,16 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
         const dennis_ETHWithdrawn = th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -1611,7 +1611,7 @@ contract(
         );
       });
 
-      it("withdrawETHGainToTrove(): A, B, C Deposit -> 2 liquidations -> D deposits -> 2 liquidations. Various deposit and liquidation vals.  A, B, C, D withdraw correct BaseFeeLMA deposit and StETH Gain", async () => {
+      it("withdrawStETHGainToTrove(): A, B, C Deposit -> 2 liquidations -> D deposits -> 2 liquidations. Various deposit and liquidation vals.  A, B, C, D withdraw correct BaseFeeLMA deposit and StETH Gain", async () => {
         // Whale opens Trove with 1m StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -1723,22 +1723,22 @@ contract(
         await troveManager.liquidate(defaulter_4, { from: owner });
 
         // Each depositor withdraws as much as possible
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
         );
-        const txD = await stabilityPool.withdrawETHGainToTrove(
+        const txD = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: dennis }
@@ -1746,16 +1746,16 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
         const dennis_ETHWithdrawn = th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -1816,7 +1816,7 @@ contract(
 
       // --- Depositor leaves ---
 
-      it("withdrawETHGainToTrove(): A, B, C, D deposit -> 2 liquidations -> D withdraws -> 2 liquidations. All deposits and liquidations = 100 BaseFeeLMA.  A, B, C, D withdraw correct BaseFeeLMA deposit and StETH Gain", async () => {
+      it("withdrawStETHGainToTrove(): A, B, C, D deposit -> 2 liquidations -> D withdraws -> 2 liquidations. All deposits and liquidations = 100 BaseFeeLMA.  A, B, C, D withdraw correct BaseFeeLMA deposit and StETH Gain", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -1907,7 +1907,7 @@ contract(
         // Dennis withdraws his deposit and StETH gain
         // Increasing the price for a moment to avoid pending liquidations to block withdrawal
         await priceFeed.setPrice(dec(200, 18));
-        const txD = await stabilityPool.withdrawETHGainToTrove(
+        const txD = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: dennis }
@@ -1915,7 +1915,7 @@ contract(
         await priceFeed.setPrice(dec(100, 18));
 
         const dennis_ETHWithdrawn = th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
         assert.isAtMost(
           th.getDifference(
@@ -1935,17 +1935,17 @@ contract(
         await troveManager.liquidate(defaulter_3, { from: owner });
         await troveManager.liquidate(defaulter_4, { from: owner });
 
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
@@ -1953,13 +1953,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -2004,7 +2004,7 @@ contract(
         );
       });
 
-      it("withdrawETHGainToTrove(): A, B, C, D deposit -> 2 liquidations -> D withdraws -> 2 liquidations. Various deposit and liquidation vals. A, B, C, D withdraw correct BaseFeeLMA deposit and StETH Gain", async () => {
+      it("withdrawStETHGainToTrove(): A, B, C, D deposit -> 2 liquidations -> D withdraws -> 2 liquidations. Various deposit and liquidation vals. A, B, C, D withdraw correct BaseFeeLMA deposit and StETH Gain", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -2112,7 +2112,7 @@ contract(
         await priceFeed.setPrice(dec(100, 18));
 
         const dennis_ETHWithdrawn = th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
         assert.isAtMost(
           th.getDifference(
@@ -2131,17 +2131,17 @@ contract(
         await troveManager.liquidate(defaulter_3, { from: owner });
         await troveManager.liquidate(defaulter_4, { from: owner });
 
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
@@ -2149,13 +2149,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -2202,7 +2202,7 @@ contract(
       });
 
       // --- One deposit enters at t > 0, and another leaves later ---
-      it("withdrawETHGainToTrove(): A, B, D deposit -> 2 liquidations -> C makes deposit -> 1 liquidation -> D withdraws -> 1 liquidation. All deposits: 100 BaseFeeLMA. Liquidations: 100,100,100,50.  A, B, C, D withdraw correct BaseFeeLMA deposit and StETH Gain", async () => {
+      it("withdrawStETHGainToTrove(): A, B, D deposit -> 2 liquidations -> C makes deposit -> 1 liquidation -> D withdraws -> 1 liquidation. All deposits: 100 BaseFeeLMA. Liquidations: 100,100,100,50.  A, B, C, D withdraw correct BaseFeeLMA deposit and StETH Gain", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -2300,7 +2300,7 @@ contract(
         await priceFeed.setPrice(dec(100, 18));
 
         const dennis_ETHWithdrawn = th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
         assert.isAtMost(
           th.getDifference(
@@ -2316,17 +2316,17 @@ contract(
 
         await troveManager.liquidate(defaulter_4, { from: owner });
 
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
@@ -2334,13 +2334,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -2394,7 +2394,7 @@ contract(
 
       // A, B withdraw 0BaseFeeLMA & 100e
       // C, D withdraw 5000BaseFeeLMA  & 500e
-      it("withdrawETHGainToTrove(): Depositor withdraws correct compounded deposit after liquidation empties the pool", async () => {
+      it("withdrawStETHGainToTrove(): Depositor withdraws correct compounded deposit after liquidation empties the pool", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -2484,38 +2484,38 @@ contract(
         // await borrowerOperations.openTrove(th._100pct, dec(1, 18), account, account, { from: erin, value: dec(2, 'eth') })
         // await stabilityPool.provideToSP(dec(1, 18), ZERO_ADDRESS, { from: erin })
 
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
         );
-        const txD = await stabilityPool.withdrawETHGainToTrove(
+        const txD = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: dennis }
         );
 
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
         const dennis_ETHWithdrawn = th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         // Expect Alice And Bob's compounded deposit to be 0 BaseFeeLMA
@@ -2585,7 +2585,7 @@ contract(
       // C, D deposit 10000
       // L3 cancels 10000, 1
       // L2 20000, 200 empties Pool
-      it("withdrawETHGainToTrove(): Pool-emptying liquidation increases epoch by one, resets scaleFactor to 0, and resets P to 1e18", async () => {
+      it("withdrawStETHGainToTrove(): Pool-emptying liquidation increases epoch by one, resets scaleFactor to 0, and resets P to 1e18", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -2744,7 +2744,7 @@ contract(
 
       // A, B withdraw 0 BaseFeeLMA & 100e
       // C, D withdraw 5000 BaseFeeLMA  & 50e
-      it("withdrawETHGainToTrove(): Depositors withdraw correct compounded deposit after liquidation empties the pool", async () => {
+      it("withdrawStETHGainToTrove(): Depositors withdraw correct compounded deposit after liquidation empties the pool", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -2843,46 +2843,46 @@ contract(
         // Defaulter 2 liquidated. 10000 BaseFeeLMA offset
         await troveManager.liquidate(defaulter_2, { from: owner });
 
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
         );
-        const txD = await stabilityPool.withdrawETHGainToTrove(
+        const txD = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: dennis }
         );
-        const txE = await stabilityPool.withdrawETHGainToTrove(
+        const txE = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: erin }
         );
 
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
         const dennis_ETHWithdrawn = th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
         const erin_ETHWithdrawn = th
-          .getEventArgByName(txE, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txE, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         // Expect Alice And Bob's compounded deposit to be 0 BaseFeeLMA
@@ -2961,7 +2961,7 @@ contract(
       // L1, L2, L3 liquidated with 10000 BaseFeeLMA each
       // A withdraws all
       // Expect A to withdraw 0 deposit and eth only from reward L1
-      it("withdrawETHGainToTrove(): single deposit fully offset. After subsequent liquidations, depositor withdraws 0 deposit and *only* the StETH Gain from one liquidation", async () => {
+      it("withdrawStETHGainToTrove(): single deposit fully offset. After subsequent liquidations, depositor withdraws 0 deposit and *only* the StETH Gain from one liquidation", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -3037,7 +3037,7 @@ contract(
         await troveManager.liquidate(defaulter_2, { from: owner });
         await troveManager.liquidate(defaulter_3, { from: owner });
 
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
@@ -3045,7 +3045,7 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -3076,7 +3076,7 @@ contract(
 
       // Expect all depositors withdraw 0 BaseFeeLMA and 100 StETH
 
-      it("withdrawETHGainToTrove(): Depositor withdraws correct compounded deposit after liquidation empties the pool", async () => {
+      it("withdrawStETHGainToTrove(): Depositor withdraws correct compounded deposit after liquidation empties the pool", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -3233,70 +3233,70 @@ contract(
         // Defaulter 4 liquidated. 10k BaseFeeLMA offset
         await troveManager.liquidate(defaulter_4, { from: owner });
 
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
         );
-        const txD = await stabilityPool.withdrawETHGainToTrove(
+        const txD = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: dennis }
         );
-        const txE = await stabilityPool.withdrawETHGainToTrove(
+        const txE = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: erin }
         );
-        const txF = await stabilityPool.withdrawETHGainToTrove(
+        const txF = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: flyn }
         );
-        const txG = await stabilityPool.withdrawETHGainToTrove(
+        const txG = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: graham }
         );
-        const txH = await stabilityPool.withdrawETHGainToTrove(
+        const txH = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: harriet }
         );
 
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
         const dennis_ETHWithdrawn = th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
         const erin_ETHWithdrawn = th
-          .getEventArgByName(txE, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txE, "StETHGainWithdrawn", "_StETH")
           .toString();
         const flyn_ETHWithdrawn = th
-          .getEventArgByName(txF, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txF, "StETHGainWithdrawn", "_StETH")
           .toString();
         const graham_ETHWithdrawn = th
-          .getEventArgByName(txG, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txG, "StETHGainWithdrawn", "_StETH")
           .toString();
         const harriet_ETHWithdrawn = th
-          .getEventArgByName(txH, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txH, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         // Expect all deposits to be 0 BaseFeeLMA
@@ -3422,7 +3422,7 @@ contract(
 
       // expect d(B) = d0(B)/100
       // expect correct StETH gain, i.e. all of the reward
-      it("withdrawETHGainToTrove(): deposit spans one scale factor change: Single depositor withdraws correct compounded deposit and StETH Gain after one liquidation", async () => {
+      it("withdrawStETHGainToTrove(): deposit spans one scale factor change: Single depositor withdraws correct compounded deposit and StETH Gain after one liquidation", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -3488,7 +3488,7 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = await th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         await baseFeeLMAToken.transfer(bob, dec(10000, 18), { from: whale });
@@ -3501,13 +3501,13 @@ contract(
 
         assert.equal(await stabilityPool.currentScale(), "1");
 
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
         const bob_ETHWithdrawn = await th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         // Expect Bob to retain 1% of initial deposit (100 BaseFeeLMA) and all the liquidated StETH (60 eth)
@@ -3534,7 +3534,7 @@ contract(
 
       // expect d(B) = d0(B)/100
       // expect correct StETH gain, i.e. all of the reward
-      it("withdrawETHGainToTrove(): Several deposits of varying amounts span one scale factor change. Depositors withdraw correct compounded deposit and StETH Gain after one liquidation", async () => {
+      it("withdrawStETHGainToTrove(): Several deposits of varying amounts span one scale factor change. Depositors withdraw correct compounded deposit and StETH Gain after one liquidation", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -3634,17 +3634,17 @@ contract(
 
         assert.equal(await stabilityPool.currentScale(), "1");
 
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
         );
-        const txD = await stabilityPool.withdrawETHGainToTrove(
+        const txD = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: dennis }
@@ -3688,13 +3688,13 @@ contract(
         );
 
         const bob_ETHWithdrawn = await th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = await th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
         const dennis_ETHWithdrawn = await th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -3721,7 +3721,7 @@ contract(
       // B withdraws
       // expect d(B) = d0(B) * 1e-5
       // expect B gets entire StETH gain from L2
-      it("withdrawETHGainToTrove(): deposit spans one scale factor change: Single depositor withdraws correct compounded deposit and StETH Gain after one liquidation", async () => {
+      it("withdrawStETHGainToTrove(): deposit spans one scale factor change: Single depositor withdraws correct compounded deposit and StETH Gain after one liquidation", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -3803,13 +3803,13 @@ contract(
         assert.equal(await stabilityPool.P(), dec(1, 17)); // Scale changes and P changes. P = 1e(13-5+9) = 1e17
         assert.equal(await stabilityPool.currentScale(), "1");
 
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
         const bob_ETHWithdrawn = await th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         // Bob should withdraw 1e-5 of initial deposit: 0.1 BaseFeeLMA and the full StETH gain of 100 eth
@@ -3836,7 +3836,7 @@ contract(
       // B withdraws
       // expect d(B) = d0(B) * 1e-5
       // expect B gets entire StETH gain from L2
-      it("withdrawETHGainToTrove(): Several deposits of varying amounts span one scale factor change. Depositors withdraws correct compounded deposit and StETH Gain after one liquidation", async () => {
+      it("withdrawStETHGainToTrove(): Several deposits of varying amounts span one scale factor change. Depositors withdraws correct compounded deposit and StETH Gain after one liquidation", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -3934,31 +3934,31 @@ contract(
         assert.equal(await stabilityPool.P(), dec(1, 17)); // P decreases. P = 1e(13-5+9) = 1e17
         assert.equal(await stabilityPool.currentScale(), "1");
 
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
         const bob_ETHWithdrawn = await th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
 
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
         );
         const carol_ETHWithdrawn = await th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
-        const txD = await stabilityPool.withdrawETHGainToTrove(
+        const txD = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: dennis }
         );
         const dennis_ETHWithdrawn = await th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         // {B, C, D} should have a compounded deposit of {0.1, 0.2, 0.3} BaseFeeLMA
@@ -4007,7 +4007,7 @@ contract(
       // A make deposit 10000 BaseFeeLMA
       // L1 brings P to (~1e-10)*P. L1: 9999.9999999000000000 BaseFeeLMA
       // Expect A to withdraw 0 deposit
-      it("withdrawETHGainToTrove(): Deposit that decreases to less than 1e-9 of it's original value is reduced to 0", async () => {
+      it("withdrawStETHGainToTrove(): Deposit that decreases to less than 1e-9 of it's original value is reduced to 0", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -4086,7 +4086,7 @@ contract(
     L4 decreases P by(~1e-5)P. L4:  9999.900000000000000000 BaseFeeLMA, 1 StETH
     expect A, B, C, D each withdraw ~100 Ether
     */
-      it("withdrawETHGainToTrove(): Several deposits of 10000 BaseFeeLMA span one scale factor change. Depositors withdraws correct compounded deposit and StETH Gain after one liquidation", async () => {
+      it("withdrawStETHGainToTrove(): Several deposits of 10000 BaseFeeLMA span one scale factor change. Depositors withdraws correct compounded deposit and StETH Gain after one liquidation", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -4205,38 +4205,38 @@ contract(
         assert.equal(await stabilityPool.P(), dec(1, 16)); // Scale changes and P changes to 1e(12-5+9) = 1e16
         assert.equal(await stabilityPool.currentScale(), "2");
 
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
         );
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: carol }
         );
-        const txD = await stabilityPool.withdrawETHGainToTrove(
+        const txD = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: dennis }
         );
 
         const alice_ETHWithdrawn = await th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = await th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = await th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
         const dennis_ETHWithdrawn = await th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         // A, B, C should retain 0 - their deposits have been completely used up
@@ -4291,7 +4291,7 @@ contract(
         );
       });
 
-      it("withdrawETHGainToTrove(): 2 depositors can withdraw after each receiving half of a pool-emptying liquidation", async () => {
+      it("withdrawStETHGainToTrove(): 2 depositors can withdraw after each receiving half of a pool-emptying liquidation", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -4408,12 +4408,12 @@ contract(
         // Attempt withdrawals
         // Increasing the price for a moment to avoid pending liquidations to block withdrawal
         await priceFeed.setPrice(dec(200, 18));
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: A }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: B }
@@ -4463,12 +4463,12 @@ contract(
         // Attempt withdrawals
         // Increasing the price for a moment to avoid pending liquidations to block withdrawal
         await priceFeed.setPrice(dec(200, 18));
-        const txC = await stabilityPool.withdrawETHGainToTrove(
+        const txC = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: C }
         );
-        const txD = await stabilityPool.withdrawETHGainToTrove(
+        const txD = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: D }
@@ -4515,12 +4515,12 @@ contract(
         assert.equal(SPBaseFeeLMABalance_3, "0");
 
         // Attempt withdrawals
-        const txE = await stabilityPool.withdrawETHGainToTrove(
+        const txE = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: E }
         );
-        const txF = await stabilityPool.withdrawETHGainToTrove(
+        const txF = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: F }
@@ -4531,7 +4531,7 @@ contract(
 
       // --- Extreme values, confirm no overflows ---
 
-      it("withdrawETHGainToTrove(): Large liquidated coll/debt, deposits and StETH price", async () => {
+      it("withdrawStETHGainToTrove(): Large liquidated coll/debt, deposits and StETH price", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -4573,12 +4573,12 @@ contract(
         // Defaulter liquidated
         await troveManager.liquidate(defaulter_1, { from: owner });
 
-        const txA = await stabilityPool.withdrawETHGainToTrove(
+        const txA = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txB = await stabilityPool.withdrawETHGainToTrove(
+        const txB = await stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }
@@ -4587,13 +4587,13 @@ contract(
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th.getEventArgByName(
           txA,
-          "ETHGainWithdrawn",
-          "_ETH"
+          "StETHGainWithdrawn",
+          "_StETH"
         );
         const bob_ETHWithdrawn = th.getEventArgByName(
           txB,
-          "ETHGainWithdrawn",
-          "_ETH"
+          "StETHGainWithdrawn",
+          "_StETH"
         );
 
         // Check BaseFeeLMA balances
@@ -4627,7 +4627,7 @@ contract(
         assert.isTrue(bobETHDiff.lte(toBN(dec(1, 18))));
       });
 
-      it("withdrawETHGainToTrove(): Small liquidated coll/debt, large deposits and StETH price", async () => {
+      it("withdrawStETHGainToTrove(): Small liquidated coll/debt, large deposits and StETH price", async () => {
         // Whale opens Trove with 100k StETH
         await borrowerOperations.openTrove(
           th._100pct,
@@ -4670,12 +4670,12 @@ contract(
         // Defaulter liquidated
         await troveManager.liquidate(defaulter_1, { from: owner });
 
-        const txAPromise = stabilityPool.withdrawETHGainToTrove(
+        const txAPromise = stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: alice }
         );
-        const txBPromise = stabilityPool.withdrawETHGainToTrove(
+        const txBPromise = stabilityPool.withdrawStETHGainToTrove(
           ZERO_ADDRESS,
           ZERO_ADDRESS,
           { from: bob }

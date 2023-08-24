@@ -523,7 +523,7 @@ class TestHelper {
     // console.log(`account: ${account}`)
     const rawColl = (await contracts.troveManager.Troves(account))[1];
     const rawDebt = (await contracts.troveManager.Troves(account))[0];
-    const pendingETHReward = await contracts.troveManager.getPendingETHReward(
+    const pendingETHReward = await contracts.troveManager.getPendingStETHReward(
       account
     );
     const pendingBaseFeeLMADebtReward =
@@ -1400,6 +1400,7 @@ class TestHelper {
       maxFee,
       gasPrice
     );
+    debugger;
     return tx;
   }
 
@@ -1564,7 +1565,7 @@ class TestHelper {
       );
       console.log(`entireColl: ${entireColl}`);
       console.log(`entireDebt: ${entireDebt}`);
-      const ETHGain = await contracts.stabilityPool.getDepositorETHGain(
+      const ETHGain = await contracts.stabilityPool.getDepositorStETHGain(
         account
       );
       const newColl = entireColl.add(ETHGain);
@@ -1574,7 +1575,7 @@ class TestHelper {
         entireDebt
       );
 
-      const tx = await contracts.stabilityPool.withdrawETHGainToTrove(
+      const tx = await contracts.stabilityPool.withdrawStETHGainToTrove(
         upperHint,
         lowerHint,
         { from: account }

@@ -576,7 +576,9 @@ contract("BorrowerWrappers", async (accounts) => {
     );
 
     // Expect Alice has withdrawn all StETH gain
-    const alice_pendingETHGain = await stabilityPool.getDepositorETHGain(alice);
+    const alice_pendingETHGain = await stabilityPool.getDepositorStETHGain(
+      alice
+    );
     assert.equal(alice_pendingETHGain, 0);
   });
 
@@ -746,7 +748,9 @@ contract("BorrowerWrappers", async (accounts) => {
     th.assertIsApproximatelyEqual(stakeAfter, stakeBefore);
 
     // Expect Alice has withdrawn all StETH gain
-    const alice_pendingETHGain = await stabilityPool.getDepositorETHGain(alice);
+    const alice_pendingETHGain = await stabilityPool.getDepositorStETHGain(
+      alice
+    );
     assert.equal(alice_pendingETHGain, 0);
   });
 
@@ -895,7 +899,9 @@ contract("BorrowerWrappers", async (accounts) => {
     );
 
     // Expect Alice has withdrawn all StETH gain
-    const alice_pendingETHGain = await stabilityPool.getDepositorETHGain(alice);
+    const alice_pendingETHGain = await stabilityPool.getDepositorStETHGain(
+      alice
+    );
     assert.equal(alice_pendingETHGain, 0);
   });
 
@@ -1001,7 +1007,9 @@ contract("BorrowerWrappers", async (accounts) => {
     th.assertIsApproximatelyEqual(hogBalanceBefore, hogBalanceAfter);
 
     // Expect Alice has withdrawn all StETH gain
-    const alice_pendingETHGain = await stabilityPool.getDepositorETHGain(alice);
+    const alice_pendingETHGain = await stabilityPool.getDepositorStETHGain(
+      alice
+    );
     assert.equal(alice_pendingETHGain, 0);
   });
 
@@ -1155,7 +1163,9 @@ contract("BorrowerWrappers", async (accounts) => {
     );
 
     // Expect Alice has withdrawn all StETH gain
-    const alice_pendingETHGain = await stabilityPool.getDepositorETHGain(alice);
+    const alice_pendingETHGain = await stabilityPool.getDepositorStETHGain(
+      alice
+    );
     assert.equal(alice_pendingETHGain, 0);
   });
 });

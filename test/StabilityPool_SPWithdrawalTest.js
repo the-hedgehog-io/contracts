@@ -143,13 +143,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -244,13 +244,13 @@ contract(
         });
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -354,13 +354,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -457,13 +457,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -568,13 +568,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -675,13 +675,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -788,13 +788,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -911,13 +911,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         // ()
@@ -1035,16 +1035,16 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
         const dennis_ETHWithdrawn = th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         console.log();
@@ -1180,16 +1180,16 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
         const dennis_ETHWithdrawn = th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -1336,16 +1336,16 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
         const dennis_ETHWithdrawn = th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -1465,7 +1465,7 @@ contract(
         await priceFeed.setPrice(dec(100, 18));
 
         const dennis_ETHWithdrawn = th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
         assert.isAtMost(
           th.getDifference(
@@ -1495,13 +1495,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -1625,7 +1625,7 @@ contract(
         await priceFeed.setPrice(dec(100, 18));
 
         const dennis_ETHWithdrawn = th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
         assert.isAtMost(
           th.getDifference(
@@ -1656,13 +1656,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -1778,7 +1778,7 @@ contract(
         await priceFeed.setPrice(dec(100, 18));
 
         const dennis_ETHWithdrawn = th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
         assert.isAtMost(
           th.getDifference(
@@ -1806,13 +1806,13 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -1934,16 +1934,16 @@ contract(
         });
 
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
         const dennis_ETHWithdrawn = th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         // Expect Alice And Bob's compounded deposit to be 0 BaseFeeLMA
@@ -2213,19 +2213,19 @@ contract(
         });
 
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
         const dennis_ETHWithdrawn = th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
         const erin_ETHWithdrawn = th
-          .getEventArgByName(txE, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txE, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         // Expect Alice And Bob's compounded deposit to be 0 BaseFeeLMA
@@ -2346,7 +2346,7 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -2500,28 +2500,28 @@ contract(
         });
 
         const alice_ETHWithdrawn = th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
         const dennis_ETHWithdrawn = th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
         const erin_ETHWithdrawn = th
-          .getEventArgByName(txE, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txE, "StETHGainWithdrawn", "_StETH")
           .toString();
         const flyn_ETHWithdrawn = th
-          .getEventArgByName(txF, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txF, "StETHGainWithdrawn", "_StETH")
           .toString();
         const graham_ETHWithdrawn = th
-          .getEventArgByName(txG, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txG, "StETHGainWithdrawn", "_StETH")
           .toString();
         const harriet_ETHWithdrawn = th
-          .getEventArgByName(txH, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txH, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         // Expect all deposits to be 0 BaseFeeLMA
@@ -2682,7 +2682,7 @@ contract(
 
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = await th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         await baseFeeLMAToken.transfer(bob, dec(10000, 18), { from: whale });
@@ -2699,7 +2699,7 @@ contract(
           from: bob,
         });
         const bob_ETHWithdrawn = await th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         // Expect Bob to withdraw 1% of initial deposit (100 BaseFeeLMA) and all the liquidated StETH (60 eth)
@@ -2837,13 +2837,13 @@ contract(
         );
 
         const bob_ETHWithdrawn = await th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = await th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
         const dennis_ETHWithdrawn = await th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         assert.isAtMost(
@@ -2934,7 +2934,7 @@ contract(
           from: bob,
         });
         const bob_ETHWithdrawn = await th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         // Bob should withdraw 1e-5 of initial deposit: 0.1 BaseFeeLMA and the full StETH gain of 100 eth
@@ -3032,21 +3032,21 @@ contract(
           from: bob,
         });
         const bob_ETHWithdrawn = await th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         const txC = await stabilityPool.withdrawFromSP(dec(20000, 18), {
           from: carol,
         });
         const carol_ETHWithdrawn = await th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         const txD = await stabilityPool.withdrawFromSP(dec(30000, 18), {
           from: dennis,
         });
         const dennis_ETHWithdrawn = await th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         // {B, C, D} should have a compounded deposit of {0.1, 0.2, 0.3} BaseFeeLMA
@@ -3243,16 +3243,16 @@ contract(
         });
 
         const alice_ETHWithdrawn = await th
-          .getEventArgByName(txA, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txA, "StETHGainWithdrawn", "_StETH")
           .toString();
         const bob_ETHWithdrawn = await th
-          .getEventArgByName(txB, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txB, "StETHGainWithdrawn", "_StETH")
           .toString();
         const carol_ETHWithdrawn = await th
-          .getEventArgByName(txC, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txC, "StETHGainWithdrawn", "_StETH")
           .toString();
         const dennis_ETHWithdrawn = await th
-          .getEventArgByName(txD, "ETHGainWithdrawn", "_ETH")
+          .getEventArgByName(txD, "StETHGainWithdrawn", "_StETH")
           .toString();
 
         // A, B, C should withdraw 0 - their deposits have been completely used up
@@ -3577,7 +3577,7 @@ contract(
         assert.equal(await stabilityPool.currentScale(), "2");
 
         const alice_ETHGainAt2ndScaleChange = (
-          await stabilityPool.getDepositorETHGain(alice)
+          await stabilityPool.getDepositorStETHGain(alice)
         ).toString();
 
         // E deposits 9999.9 BaseFeeLMA
@@ -3593,7 +3593,7 @@ contract(
         assert.equal(await stabilityPool.currentScale(), "2");
 
         const alice_ETHGainAfterFurtherLiquidation = (
-          await stabilityPool.getDepositorETHGain(alice)
+          await stabilityPool.getDepositorStETHGain(alice)
         ).toString();
 
         const alice_scaleSnapshot = (
@@ -3661,13 +3661,13 @@ contract(
         // Grab the StETH gain from the emitted event in the tx log
         const alice_ETHWithdrawn = th.getEventArgByName(
           txA,
-          "ETHGainWithdrawn",
-          "_ETH"
+          "StETHGainWithdrawn",
+          "_StETH"
         );
         const bob_ETHWithdrawn = th.getEventArgByName(
           txB,
-          "ETHGainWithdrawn",
-          "_ETH"
+          "StETHGainWithdrawn",
+          "_StETH"
         );
 
         // Check BaseFeeLMA balances
@@ -3751,13 +3751,13 @@ contract(
 
         const alice_ETHWithdrawn = th.getEventArgByName(
           txA,
-          "ETHGainWithdrawn",
-          "_ETH"
+          "StETHGainWithdrawn",
+          "_StETH"
         );
         const bob_ETHWithdrawn = th.getEventArgByName(
           txB,
-          "ETHGainWithdrawn",
-          "_ETH"
+          "StETHGainWithdrawn",
+          "_StETH"
         );
 
         const aliceBaseFeeLMABalance = await baseFeeLMAToken.balanceOf(alice);
