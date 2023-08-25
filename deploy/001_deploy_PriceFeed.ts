@@ -1,5 +1,6 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { ethers } from "hardhat";
+import { deployConfig } from "./deployConfig";
 
 const deploy: DeployFunction = async ({
   deployments: { deploy },
@@ -19,13 +20,12 @@ const deploy: DeployFunction = async ({
     throw Error("Incorrect config: Private key is not fed");
   }
 
+  const { mainOracle, backupOracle } = deployConfig;
+
   await deploy("BaseFeeOracle", {
     from: deployer,
     log: true,
-    args: [
-      "0xab72010e190256437eca08740212082ccfa14e18",
-      "0xab72010e190256437eca08740212082ccfa14e18",
-    ],
+    args: [mainOracle, backupOracle],
   });
 };
 

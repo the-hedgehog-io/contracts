@@ -6,13 +6,12 @@ const deploy: DeployFunction = async ({
 }) => {
   const { deployer } = await getNamedAccounts();
 
-  // TODO: Add proper HOG token params
-  await deploy("HOGToken", {
+  await deploy("CollSurplus", {
     from: deployer,
     log: true,
   });
 };
 
-deploy.tags = ["main", "HOGToken"];
+deploy.tags = ["main", "CollSurplus"];
 
 export default deploy;

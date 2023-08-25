@@ -1,0 +1,164 @@
+import { DeployFunction } from "hardhat-deploy/types";
+import { createExecuteWithLog, isOwnershipRenounced } from "./utils";
+import { deployConfig } from "./deployConfig";
+
+const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
+  const { deployer } = await getNamedAccounts();
+  const executeWithLog = createExecuteWithLog(deployments.execute);
+  const PriceFeed = await deployments.get("PriceFeed");
+  const SortedTroves = await deployments.get("SortedTroves");
+  const TroveManager = await deployments.get("TroveManager");
+  const ActivePool = await deployments.get("ActivePool");
+  const DefaultPool = await deployments.get("DefaultPool");
+  const GasPool = await deployments.get("GasPool");
+  const StabilityPool = await deployments.get("StabilityPool");
+  const CollSurplusPool = await deployments.get("CollSurplusPool");
+  const BaseFeeLMAToken = await deployments.get("BaseFeeLMAToken");
+  const BorrowerOperations = await deployments.get("BorrowerOperations");
+  const HOGToken = await deployments.get("HOGToken");
+  const HOGStaking = await deployments.get("HOGStaking");
+  const CommunityIssuance = await deployments.get("CommunityIssuance");
+  const HintHelpers = await deployments.get("HintHelpers");
+
+  if (!isOwnershipRenounced(SortedTroves.address)) {
+    console.log("Setting up SortedTroves...");
+    const maxBytes32 = "0x" + "f".repeat(64);
+    await executeWithLog(
+      "SortedTroves",
+      { from: deployer },
+      "setParams",
+      SortedTroves.address,
+      [maxBytes32, TroveManager.address, BorrowerOperations.address]
+    );
+  }
+  console.log("SortedTroves is set");
+
+  if (!isOwnershipRenounced(TroveManager.address)) {
+    console.log("Setting up Trove Manager...");
+    await executeWithLog("TroveManager", { from: deployer }, "setAddresses", [
+      BorrowerOperations.address,
+      ActivePool.address,
+      DefaultPool.address,
+      StabilityPool.address,
+      GasPool.address,
+      CollSurplusPool.address,
+      PriceFeed.address,
+      BaseFeeLMAToken.address,
+      SortedTroves.address,
+      HOGToken.address,
+      HOGStaking.address,
+    ]);
+  }
+  console.log("TroveManager is set");
+
+  if (!isOwnershipRenounced(BorrowerOperations.address)) {
+    console.log("Setting up BorrowerOperations...");
+    await executeWithLog(
+      "BorrowerOperations",
+      { from: deployer },
+      "setAddresses",
+      [
+        TroveManager.address,
+        ActivePool.address,
+        DefaultPool.address,
+        StabilityPool.address,
+        GasPool.address,
+        CollSurplusPool.address,
+        PriceFeed.address,
+        SortedTroves.address,
+        BaseFeeLMAToken.address,
+        HOGStaking.address,
+      ]
+    );
+  }
+  console.log("BorrowerOperations is set");
+
+  if (!isOwnershipRenounced(StabilityPool.address)) {
+    console.log("Setting up StabilityPool...");
+    await executeWithLog("StabilityPool", { from: deployer }, "setAddresses", [
+      BorrowerOperations.address,
+      TroveManager.address,
+      ActivePool.address,
+      BaseFeeLMAToken.address,
+      SortedTroves.address,
+      PriceFeed.address,
+      CommunityIssuance.address,
+    ]);
+  }
+  console.log("StabilityPool is set");
+
+  if (!isOwnershipRenounced(ActivePool.address)) {
+    console.log("Setting up ActivePool...");
+
+    await executeWithLog("ActivePool", { from: deployer }, "setAddresses", [
+      BorrowerOperations.address,
+      TroveManager.address,
+      StabilityPool.address,
+      DefaultPool.address,
+    ]);
+  }
+  console.log("ActivePool is set");
+
+  if (!isOwnershipRenounced(DefaultPool.address)) {
+    console.log("Setting up DefaultPool...");
+
+    await executeWithLog("DefaultPool", { from: deployer }, "setAddresses", [
+      TroveManager.address,
+      ActivePool.address,
+    ]);
+  }
+  console.log("DefaultPool is set");
+
+  if (!isOwnershipRenounced(DefaultPool.address)) {
+    console.log("Setting up DefaultPool...");
+
+    await executeWithLog("DefaultPool", { from: deployer }, "setAddresses", [
+      TroveManager.address,
+      ActivePool.address,
+    ]);
+  }
+  console.log("DefaultPool is set");
+
+  if (!isOwnershipRenounced(CollSurplusPool.address)) {
+    console.log("Setting up CollSurplusPool...");
+
+    await executeWithLog(
+      "CollSurplusPool",
+      { from: deployer },
+      "setAddresses",
+      [BorrowerOperations.address, TroveManager.address, ActivePool.address]
+    );
+  }
+  console.log("CollSurplusPool is set");
+
+  if (!isOwnershipRenounced(HintHelpers.address)) {
+    console.log("Setting up HintHelpers...");
+
+    await executeWithLog("HintHelpers", { from: deployer }, "setAddresses", [
+      SortedTroves.address,
+      TroveManager.address,
+    ]);
+  }
+  console.log("HintHelpers is set");
+
+  console.log("Core HOG contracts are set");
+};
+deploy.tags = ["main", "setCoreContracts"];
+deploy.dependencies = [
+  "PriceFeed",
+  "SortedTroves",
+  "TroveManager",
+  "ActivePool",
+  "DefaultPool",
+  "GasPool",
+  "StabilityPool",
+  "CollSurplusPool",
+  "BaseFeeLMAToken",
+  "BorrowerOperations",
+  "HOGToken",
+  "HOGStaking",
+  "CommunityIssuance",
+  "HintHelpers",
+];
+
+export default deploy;
