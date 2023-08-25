@@ -221,7 +221,7 @@ contract("BaseFeeLMAToken", async (accounts) => {
         const txPromise = baseFeeLMATokenTester.approve(ZERO_ADDRESS, 100, {
           from: bob,
         });
-        await assertAssert(txPromise);
+        await assertAssert(txPromise, "BaseFeeLMA: zero address param");
       });
 
       it("approve(): reverts when owner param is address(0)", async () => {
@@ -231,7 +231,7 @@ contract("BaseFeeLMAToken", async (accounts) => {
           dec(1000, 18),
           { from: bob }
         );
-        await assertAssert(txPromise);
+        await assertAssert(txPromise, "BaseFeeLMA: zero address param");
       });
     }
 
@@ -564,7 +564,8 @@ contract("BaseFeeLMAToken", async (accounts) => {
             "0x99",
             r,
             s
-          )
+          ),
+          "BaseFeeLMA: zero address param"
         );
       });
 

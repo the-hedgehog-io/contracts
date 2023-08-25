@@ -74,7 +74,7 @@ contract CommunityIssuance is Ownable, CheckContract, BaseMath {
 
         // When HOGToken deployed, it should have transferred CommunityIssuance's HOG entitlement
         uint HOGBalance = hogToken.balanceOf(address(this));
-        assert(HOGBalance >= HOGSupplyCap);
+        require(HOGBalance >= HOGSupplyCap, "CI: Ballance is not enough");
 
         emit HOGTokenAddressSet(_hogTokenAddress);
         emit StabilityPoolAddressSet(_stabilityPoolAddress);

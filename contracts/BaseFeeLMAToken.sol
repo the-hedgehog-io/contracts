@@ -323,8 +323,8 @@ contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
     }
 
     function _approve(address owner, address spender, uint256 amount) internal {
-        assert(owner != address(0));
-        assert(spender != address(0));
+        require(owner != address(0), "BaseFeeLMA: zero address param");
+        require(spender != address(0), "BaseFeeLMA: zero address param");
 
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
