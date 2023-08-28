@@ -88,6 +88,10 @@ const config: HardhatUserConfig = {
       gasPrice: 20000000000,
       initialBaseFeePerGas: 0,
     },
+    mumbai: {
+      accounts: [process.env.PK_DEPLOYER || ""],
+      url: "https://rpc.ankr.com/polygon_mumbai",
+    },
   },
 
   mocha: { timeout: 12000000 },

@@ -3,8 +3,8 @@ import {
   createExecuteWithLog,
   isOwnershipRenounced,
   timeValues,
-} from "./utils";
-import { deployConfig } from "./deployConfig";
+} from "../deploy-helpers";
+import { deployConfig } from "../deploy-helpers/deployConfig";
 import { ethers } from "hardhat";
 
 const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
@@ -16,7 +16,7 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const Unipool = await deployments.get("Unipool");
 
   // TODO: Get Move that to 21st step
-  if (!isOwnershipRenounced(Unipool.address)) {
+  if (!(await isOwnershipRenounced(Unipool.address))) {
     console.log("Setting up Unipool...");
     const uniswapV2Factory = await ethers.getContractAt(
       "UniswapV2Factory",
@@ -37,13 +37,22 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
     if (BaseFeeLMAStEthPairAddr != StEthBaseFeeLMAPairAddr) {
       throw console.error("Uniswap pair addresses are not equal");
     }
-    await executeWithLog("Unipool", { from: deployer }, "setAddresses", [
+
+    console.log(
+      "Params: ",
       HOGToken.address,
       BaseFeeLMAStEthPairAddr,
-      timeValues.SECONDS_IN_SIX_WEEKS,
-    ]);
+      timeValues.SECONDS_IN_SIX_WEEKS
+    );
+    await executeWithLog(
+      "Unipool",
+      { from: deployer },
+      "setParams",
+      HOGToken.address,
+      BaseFeeLMAStEthPairAddr,
+      timeValues.SECONDS_IN_SIX_WEEKS
+    );
   }
-  console.log("Unipool is set");
 };
 deploy.tags = ["main", "setUnipool"];
 deploy.dependencies = ["UniswapV2Factory", "Unipool"];

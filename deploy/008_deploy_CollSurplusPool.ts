@@ -6,12 +6,12 @@ const deploy: DeployFunction = async ({
 }) => {
   const { deployer } = await getNamedAccounts();
 
-  await deploy("CollSurplus", {
+  await deploy("CollSurplusPool", {
     from: deployer,
     log: true,
   });
 };
 
-deploy.tags = ["main", "CollSurplus"];
+deploy.tags = ["main", "CollSurplusPool"];
 
 export default deploy;

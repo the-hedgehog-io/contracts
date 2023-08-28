@@ -1,5 +1,5 @@
 import { DeployFunction } from "hardhat-deploy/types";
-import { deployConfig } from "./deployConfig";
+import { deployConfig } from "../deploy-helpers/deployConfig";
 
 const deploy: DeployFunction = async ({
   deployments: { deploy, get },

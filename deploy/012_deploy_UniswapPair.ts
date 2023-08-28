@@ -1,5 +1,5 @@
 import { DeployFunction } from "hardhat-deploy/types";
-import { deployConfig } from "./deployConfig";
+import { deployConfig } from "../deploy-helpers/deployConfig";
 import { deployments, ethers } from "hardhat";
 
 const deploy: DeployFunction = async ({
@@ -28,6 +28,7 @@ const deploy: DeployFunction = async ({
   }
 
   if (BaseFeeLMAStEthPairAddr == ethers.constants.AddressZero) {
+    console.log("deploying a uniswap pair");
     // Deploy Uniswap paid for StEth - BaseFeeLMA
     await uniswapV2Factory.createPair(
       deployConfig.stEth,

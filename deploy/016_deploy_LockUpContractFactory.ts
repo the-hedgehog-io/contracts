@@ -6,12 +6,12 @@ const deploy: DeployFunction = async ({
 }) => {
   const { deployer } = await getNamedAccounts();
 
-  await deploy("LockUpContractFactory", {
+  await deploy("LockupContractFactory", {
     from: deployer,
     log: true,
   });
 };
 
-deploy.tags = ["main", "LockUpContractFactory"];
+deploy.tags = ["main", "LockupContractFactory"];
 
 export default deploy;

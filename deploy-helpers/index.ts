@@ -18,7 +18,12 @@ export const createExecuteWithLog =
   };
 
 export const isOwnershipRenounced = async (contract: any) => {
-  const owner = await contract.owner();
+  const contractFactory = await ethers.getContractAt(
+    "OwnableContract",
+    contract
+  );
+  const owner = await contractFactory.owner();
+
   return owner == ethers.constants.AddressZero;
 };
 

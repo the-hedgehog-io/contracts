@@ -305,7 +305,7 @@ class MainnetDeploymentHelper {
   }
   // --- Connector methods ---
 
-  async isOwnershipRenounced(contract) {
+  async isOwnershipRenounced((contract) {
     const owner = await contract.owner();
     return owner == ZERO_ADDRESS;
   }
@@ -317,7 +317,7 @@ class MainnetDeploymentHelper {
   ) {
     const gasPrice = this.configParams.GAS_PRICE;
     // Set ChainlinkAggregatorProxy and TellorCaller in the PriceFeed
-    (await this.isOwnershipRenounced(contracts.priceFeed)) ||
+    (await this.isOwnershipRenounced((contracts.priceFeed)) ||
       (await this.sendAndWaitForTransaction(
         contracts.priceFeed.setAddresses(
           chainlinkProxyAddress,
@@ -327,7 +327,7 @@ class MainnetDeploymentHelper {
       ));
 
     // set TroveManager addr in SortedTroves
-    (await this.isOwnershipRenounced(contracts.sortedTroves)) ||
+    (await this.isOwnershipRenounced((contracts.sortedTroves)) ||
       (await this.sendAndWaitForTransaction(
         contracts.sortedTroves.setParams(
           maxBytes32,
@@ -338,7 +338,7 @@ class MainnetDeploymentHelper {
       ));
 
     // set contracts in the Trove Manager
-    (await this.isOwnershipRenounced(contracts.troveManager)) ||
+    (await this.isOwnershipRenounced((contracts.troveManager)) ||
       (await this.sendAndWaitForTransaction(
         contracts.troveManager.setAddresses(
           contracts.borrowerOperations.address,
@@ -357,7 +357,7 @@ class MainnetDeploymentHelper {
       ));
 
     // set contracts in BorrowerOperations
-    (await this.isOwnershipRenounced(contracts.borrowerOperations)) ||
+    (await this.isOwnershipRenounced((contracts.borrowerOperations)) ||
       (await this.sendAndWaitForTransaction(
         contracts.borrowerOperations.setAddresses(
           contracts.troveManager.address,
@@ -375,7 +375,7 @@ class MainnetDeploymentHelper {
       ));
 
     // set contracts in the Pools
-    (await this.isOwnershipRenounced(contracts.stabilityPool)) ||
+    (await this.isOwnershipRenounced((contracts.stabilityPool)) ||
       (await this.sendAndWaitForTransaction(
         contracts.stabilityPool.setAddresses(
           contracts.borrowerOperations.address,
@@ -389,7 +389,7 @@ class MainnetDeploymentHelper {
         )
       ));
 
-    (await this.isOwnershipRenounced(contracts.activePool)) ||
+    (await this.isOwnershipRenounced((contracts.activePool)) ||
       (await this.sendAndWaitForTransaction(
         contracts.activePool.setAddresses(
           contracts.borrowerOperations.address,
@@ -400,7 +400,7 @@ class MainnetDeploymentHelper {
         )
       ));
 
-    (await this.isOwnershipRenounced(contracts.defaultPool)) ||
+    (await this.isOwnershipRenounced((contracts.defaultPool)) ||
       (await this.sendAndWaitForTransaction(
         contracts.defaultPool.setAddresses(
           contracts.troveManager.address,
@@ -409,7 +409,7 @@ class MainnetDeploymentHelper {
         )
       ));
 
-    (await this.isOwnershipRenounced(contracts.collSurplusPool)) ||
+    (await this.isOwnershipRenounced((contracts.collSurplusPool)) ||
       (await this.sendAndWaitForTransaction(
         contracts.collSurplusPool.setAddresses(
           contracts.borrowerOperations.address,
@@ -420,7 +420,7 @@ class MainnetDeploymentHelper {
       ));
 
     // set contracts in HintHelpers
-    (await this.isOwnershipRenounced(contracts.hintHelpers)) ||
+    (await this.isOwnershipRenounced((contracts.hintHelpers)) ||
       (await this.sendAndWaitForTransaction(
         contracts.hintHelpers.setAddresses(
           contracts.sortedTroves.address,
@@ -433,7 +433,7 @@ class MainnetDeploymentHelper {
   async connectHOGContractsMainnet(HOGContracts) {
     const gasPrice = this.configParams.GAS_PRICE;
     // Set HOGToken address in LCF
-    (await this.isOwnershipRenounced(HOGContracts.hogStaking)) ||
+    (await this.isOwnershipRenounced((HOGContracts.hogStaking)) ||
       (await this.sendAndWaitForTransaction(
         HOGContracts.lockupContractFactory.setHOGTokenAddress(
           HOGContracts.hogToken.address,
@@ -444,7 +444,7 @@ class MainnetDeploymentHelper {
 
   async connectHOGContractsToCoreMainnet(HOGContracts, coreContracts) {
     const gasPrice = this.configParams.GAS_PRICE;
-    (await this.isOwnershipRenounced(HOGContracts.hogStaking)) ||
+    (await this.isOwnershipRenounced((HOGContracts.hogStaking)) ||
       (await this.sendAndWaitForTransaction(
         HOGContracts.hogStaking.setAddresses(
           HOGContracts.hogToken.address,
@@ -456,7 +456,7 @@ class MainnetDeploymentHelper {
         )
       ));
 
-    (await this.isOwnershipRenounced(HOGContracts.communityIssuance)) ||
+    (await this.isOwnershipRenounced((HOGContracts.communityIssuance)) ||
       (await this.sendAndWaitForTransaction(
         HOGContracts.communityIssuance.setAddresses(
           HOGContracts.hogToken.address,
@@ -473,7 +473,7 @@ class MainnetDeploymentHelper {
     duration
   ) {
     const gasPrice = this.configParams.GAS_PRICE;
-    (await this.isOwnershipRenounced(uniPool)) ||
+    (await this.isOwnershipRenounced((uniPool)) ||
       (await this.sendAndWaitForTransaction(
         uniPool.setParams(
           HOGContracts.hogToken.address,

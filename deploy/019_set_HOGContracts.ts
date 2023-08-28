@@ -1,5 +1,5 @@
 import { DeployFunction } from "hardhat-deploy/types";
-import { createExecuteWithLog, isOwnershipRenounced } from "./utils";
+import { createExecuteWithLog, isOwnershipRenounced } from "../deploy-helpers";
 
 const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const { deployer } = await getNamedAccounts();
@@ -9,26 +9,27 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const CommunityIssuance = await deployments.get("CommunityIssuance");
   const LockupContractFactory = await deployments.get("LockupContractFactory");
 
-  if (!isOwnershipRenounced(LockupContractFactory.address)) {
+  if (!(await isOwnershipRenounced(LockupContractFactory.address))) {
     console.log("Setting up HOGStaking...");
 
     await executeWithLog(
       "LockupContractFactory",
       { from: deployer },
       "setHOGTokenAddress",
-      [HOGToken.address]
+      HOGToken.address
     );
   }
   console.log("HOGStaking is set");
 
-  if (!isOwnershipRenounced(CommunityIssuance.address)) {
+  if (!(await isOwnershipRenounced(CommunityIssuance.address))) {
     console.log("Setting up CommunityIssuance...");
 
     await executeWithLog(
       "CommunityIssuance",
       { from: deployer },
       "setAddresses",
-      [HOGToken.address, StabilityPool.address]
+      HOGToken.address,
+      StabilityPool.address
     );
   }
   console.log("CommunityIssuance is set");

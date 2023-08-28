@@ -1,6 +1,6 @@
 import { DeployFunction } from "hardhat-deploy/types";
-import { createExecuteWithLog, isOwnershipRenounced } from "./utils";
-import { deployConfig } from "./deployConfig";
+import { createExecuteWithLog, isOwnershipRenounced } from "../deploy-helpers";
+import { deployConfig } from "../deploy-helpers/deployConfig";
 
 const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const { deployer } = await getNamedAccounts();
@@ -20,22 +20,33 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const CommunityIssuance = await deployments.get("CommunityIssuance");
   const HintHelpers = await deployments.get("HintHelpers");
 
-  if (!isOwnershipRenounced(SortedTroves.address)) {
+  if (!(await isOwnershipRenounced(SortedTroves.address))) {
     console.log("Setting up SortedTroves...");
+
     const maxBytes32 = "0x" + "f".repeat(64);
+    console.log(
+      "params: ",
+      maxBytes32,
+      TroveManager.address,
+      BorrowerOperations.address
+    );
     await executeWithLog(
       "SortedTroves",
       { from: deployer },
       "setParams",
-      SortedTroves.address,
-      [maxBytes32, TroveManager.address, BorrowerOperations.address]
+      maxBytes32,
+      TroveManager.address,
+      BorrowerOperations.address
     );
   }
   console.log("SortedTroves is set");
 
-  if (!isOwnershipRenounced(TroveManager.address)) {
+  if (!(await isOwnershipRenounced(TroveManager.address))) {
     console.log("Setting up Trove Manager...");
-    await executeWithLog("TroveManager", { from: deployer }, "setAddresses", [
+    await executeWithLog(
+      "TroveManager",
+      { from: deployer },
+      "setAddresses",
       BorrowerOperations.address,
       ActivePool.address,
       DefaultPool.address,
@@ -46,98 +57,114 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       BaseFeeLMAToken.address,
       SortedTroves.address,
       HOGToken.address,
-      HOGStaking.address,
-    ]);
+      HOGStaking.address
+    );
   }
   console.log("TroveManager is set");
 
-  if (!isOwnershipRenounced(BorrowerOperations.address)) {
+  if (!(await isOwnershipRenounced(BorrowerOperations.address))) {
     console.log("Setting up BorrowerOperations...");
     await executeWithLog(
       "BorrowerOperations",
       { from: deployer },
       "setAddresses",
-      [
-        TroveManager.address,
-        ActivePool.address,
-        DefaultPool.address,
-        StabilityPool.address,
-        GasPool.address,
-        CollSurplusPool.address,
-        PriceFeed.address,
-        SortedTroves.address,
-        BaseFeeLMAToken.address,
-        HOGStaking.address,
-      ]
+
+      TroveManager.address,
+      ActivePool.address,
+      DefaultPool.address,
+      StabilityPool.address,
+      GasPool.address,
+      CollSurplusPool.address,
+      PriceFeed.address,
+      SortedTroves.address,
+      BaseFeeLMAToken.address,
+      HOGStaking.address
     );
   }
   console.log("BorrowerOperations is set");
 
-  if (!isOwnershipRenounced(StabilityPool.address)) {
+  if (!(await isOwnershipRenounced(StabilityPool.address))) {
     console.log("Setting up StabilityPool...");
-    await executeWithLog("StabilityPool", { from: deployer }, "setAddresses", [
+    await executeWithLog(
+      "StabilityPool",
+      { from: deployer },
+      "setAddresses",
       BorrowerOperations.address,
       TroveManager.address,
       ActivePool.address,
       BaseFeeLMAToken.address,
       SortedTroves.address,
       PriceFeed.address,
-      CommunityIssuance.address,
-    ]);
+      CommunityIssuance.address
+    );
   }
   console.log("StabilityPool is set");
 
-  if (!isOwnershipRenounced(ActivePool.address)) {
+  if (!(await isOwnershipRenounced(ActivePool.address))) {
     console.log("Setting up ActivePool...");
 
-    await executeWithLog("ActivePool", { from: deployer }, "setAddresses", [
+    await executeWithLog(
+      "ActivePool",
+      { from: deployer },
+      "setAddresses",
       BorrowerOperations.address,
       TroveManager.address,
       StabilityPool.address,
-      DefaultPool.address,
-    ]);
+      DefaultPool.address
+    );
   }
   console.log("ActivePool is set");
 
-  if (!isOwnershipRenounced(DefaultPool.address)) {
+  if (!(await isOwnershipRenounced(DefaultPool.address))) {
     console.log("Setting up DefaultPool...");
 
-    await executeWithLog("DefaultPool", { from: deployer }, "setAddresses", [
+    await executeWithLog(
+      "DefaultPool",
+      { from: deployer },
+      "setAddresses",
       TroveManager.address,
-      ActivePool.address,
-    ]);
+      ActivePool.address
+    );
   }
   console.log("DefaultPool is set");
 
-  if (!isOwnershipRenounced(DefaultPool.address)) {
+  if (!(await isOwnershipRenounced(DefaultPool.address))) {
     console.log("Setting up DefaultPool...");
 
-    await executeWithLog("DefaultPool", { from: deployer }, "setAddresses", [
+    await executeWithLog(
+      "DefaultPool",
+      { from: deployer },
+      "setAddresses",
       TroveManager.address,
-      ActivePool.address,
-    ]);
+      ActivePool.address
+    );
   }
   console.log("DefaultPool is set");
 
-  if (!isOwnershipRenounced(CollSurplusPool.address)) {
+  if (!(await isOwnershipRenounced(CollSurplusPool.address))) {
     console.log("Setting up CollSurplusPool...");
 
     await executeWithLog(
       "CollSurplusPool",
       { from: deployer },
       "setAddresses",
-      [BorrowerOperations.address, TroveManager.address, ActivePool.address]
+      BorrowerOperations.address,
+      TroveManager.address,
+      ActivePool.address
     );
   }
   console.log("CollSurplusPool is set");
 
-  if (!isOwnershipRenounced(HintHelpers.address)) {
+  if (!(await isOwnershipRenounced(HintHelpers.address))) {
     console.log("Setting up HintHelpers...");
 
-    await executeWithLog("HintHelpers", { from: deployer }, "setAddresses", [
+    await executeWithLog(
+      "HintHelpers",
+      { from: deployer },
+      "setAddresses",
       SortedTroves.address,
-      TroveManager.address,
-    ]);
+      TroveManager.address
+    );
   }
   console.log("HintHelpers is set");
 

@@ -1,6 +1,5 @@
 import { DeployFunction } from "hardhat-deploy/types";
-import { ethers } from "hardhat";
-import { deployConfig } from "./deployConfig";
+import { deployConfig } from "../deploy-helpers/deployConfig";
 
 const deploy: DeployFunction = async ({
   deployments: { deploy },
@@ -8,24 +7,10 @@ const deploy: DeployFunction = async ({
 }) => {
   console.log("Starting deployment process...");
   const { deployer } = await getNamedAccounts();
-  if (process.env.PK_DEPLOYER) {
-    console.log("Deployer address is: ", deployer);
 
-    if (deployer !== process.env.PUBLIC_ADDRESS_DEPLOYER) {
-      throw Error(
-        "Incorrect config: Deployer address is not aligned with provided private key"
-      );
-    }
-  } else {
-    throw Error("Incorrect config: Private key is not fed");
-  }
-
-  const { mainOracle, backupOracle } = deployConfig;
-
-  await deploy("BaseFeeOracle", {
+  await deploy("PriceFeed", {
     from: deployer,
     log: true,
-    args: [mainOracle, backupOracle],
   });
 };
 
