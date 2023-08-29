@@ -1,6 +1,8 @@
-import { HardhatUserConfig } from "hardhat/config";
+import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "hardhat-deploy";
+import "hardhat-abi-exporter";
+import exportDeployment from "./tasks/export";
 require("@nomiclabs/hardhat-truffle5");
 
 import * as dotenv from "dotenv";
@@ -16,6 +18,19 @@ const accountsNew =
 const fs = require("fs");
 const accounts = require("./hardhatAccountsList2k.js");
 const accountsList = accounts.accountsList;
+
+task("deploy:export", "Export deployment data", async (_, hre, runSuper) => {
+  console.log("Exporting deployment data...");
+  await exportDeployment(hre);
+  console.log("Deployment data exported!");
+});
+
+task("deploy", "Export deployment data", async (_, hre, runSuper) => {
+  await runSuper();
+  console.log("Exporting deployment data...");
+  await exportDeployment(hre);
+  console.log("Deployment data exported!");
+});
 
 const getSecret = (secretKey: any, defaultValue = "") => {
   const SECRETS_FILE = "./secrets.js";
@@ -102,6 +117,17 @@ const config: HardhatUserConfig = {
 
   namedAccounts: {
     deployer: 0,
+  },
+
+  paths: {
+    deployments: `deployments/${packageJson.version}`,
+  },
+  abiExporter: {
+    path: "./dist",
+    runOnCompile: true,
+    clear: true,
+    flat: true,
+    pretty: false,
   },
 };
 
