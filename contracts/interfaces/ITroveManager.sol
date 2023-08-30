@@ -153,17 +153,25 @@ interface ITroveManager is IHedgehogBase {
 
     function removeStake(address _borrower) external;
 
-    function getRedemptionRate() external view returns (uint);
+    function getRedemptionRate(
+        uint _redemptionColl
+    ) external view returns (uint);
 
-    function getRedemptionRateWithDecay() external view returns (uint);
+    function getRedemptionRateWithDecay(
+        uint _redemptionColl
+    ) external view returns (uint);
 
     function getRedemptionFeeWithDecay(
         uint _StETHDrawn
     ) external view returns (uint);
 
-    function getBorrowingRate() external view returns (uint);
+    function getBorrowingRate(
+        uint _issuedBaseFeeLMA
+    ) external view returns (uint);
 
-    function getBorrowingRateWithDecay() external view returns (uint);
+    function getBorrowingRateWithDecay(
+        uint _issuedBaseFeeLMA
+    ) external view returns (uint);
 
     function getBorrowingFee(uint BaseFeeLMADebt) external view returns (uint);
 

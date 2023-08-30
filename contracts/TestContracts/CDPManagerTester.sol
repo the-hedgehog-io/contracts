@@ -29,7 +29,7 @@ contract TroveManagerTester is TroveManager {
     }
 
     function unprotectedDecayBaseRateFromBorrowing() external returns (uint) {
-        baseRate = _calcDecayedBaseRate();
+        baseRate = _calcDecayedRedemptionBaseRate();
         assert(baseRate >= 0 && baseRate <= DECIMAL_PRECISION);
 
         _updateLastFeeOpTime();

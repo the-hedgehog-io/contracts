@@ -66,10 +66,19 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
      */
     uint public constant BETA = 2;
 
-    uint public baseRate;
+    // HEDGEHOG LOGIC UPDATES: BaseRate is different for redemption and minting tokens
+    // 1) Remove baseRate variable
+    // 2) Create redemptionBaseRate public state variable
+    // 3) Create borrowBaseRate public state variable
+    uint public redemptionBaseRate;
+    uint public borrowBaseRate;
 
-    // The timestamp of the latest fee operation (redemption or new BaseFeeLMA issuance)
-    uint public lastFeeOperationTime;
+    // HEDGEHOG LOGIC UPDATES: lastFeeOperationTime is different for redemption and minting tokens
+    // 1) Remove lastFeeOperationTime variable
+    // 2) Create lastRedemptionTime public state variable
+    // 3) Create lastBorrowTime public state variable
+    uint public lastRedemptionTime;
+    uint public lastBorrowTime;
 
     enum Status {
         nonExistent,
@@ -197,7 +206,9 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint totalStETHDrawn;
         uint StETHFee;
         uint StETHToSendToRedeemer;
-        uint decayedBaseRate;
+        // HEDGEHOG LOGIC UPDATES: BaseRate is different for redemption and minting tokens
+        // Rename decayedBaseRate into decayedRedemptionBaseRate
+        uint decayedRedemptionBaseRate;
         uint price;
         uint totalBaseFeeLMASupplyAtStart;
     }
@@ -249,8 +260,20 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint _coll,
         TroveManagerOperation _operation
     );
-    event BaseRateUpdated(uint _baseRate);
-    event LastFeeOpTimeUpdated(uint _lastFeeOpTime);
+
+    // HEDGEHOG LOGIC UPDATES: BaseRate is different for redemption and minting tokens
+    // 1) Remove BaseRateUpdated event
+    // 2) Create RedemptionBaseRateUpdated event that accepts _redemptionBaseRate
+    // 3) Create BorrowBaseRateUpdated event that accepts _borrowBaseRate
+    event RedemptionBaseRateUpdated(uint _redemptionBaseRate);
+    event BorrowBaseRateUpdated(uint _borrowBaseRate);
+
+    // HEDGEHOG LOGIC UPDATES: BaseRate is different for redemption and minting tokens
+    // 1) Remove LastFeeOpTimeUpdated event
+    // 2) Create LastRedemptionTimeUpdated event that accepts _lastRedemptionTime
+    // 3) Create LastBorrowTimeUpdated event that accepts _lastBorrowTime
+    event LastRedemptionTimeUpdated(uint _lastRedemptionTime);
+    event LastBorrowTimeUpdated(uint _lastBorrowTime);
     event TotalStakesUpdated(uint _newTotalStakes);
     event SystemSnapshotsUpdated(
         uint _totalStakesSnapshot,
@@ -1409,10 +1432,12 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             totals.totalStETHDrawn > 0,
             "TroveManager: Unable to redeem any amount"
         );
-
-        // Decay the baseRate due to time passed, and then increase it according to the size of this redemption.
+        // HEDGEHOG LOGIC UPDATE:
+        // 1) rename _updateBaseRateFromRedemption into _updateRedemptionBaseRateFromRemeption
+        // 2) update commented explanation (baseRate => redemptionBaseRate)
+        // Decay the redemptionBaseRate due to time passed, and then increase it according to the size of this redemption.
         // Use the saved total BaseFeeLMA supply value, from before it was reduced by the redemption.
-        _updateBaseRateFromRedemption(
+        _updateRedemptionBaseRateFromRedemption(
             totals.totalStETHDrawn,
             totals.price,
             totals.totalBaseFeeLMASupplyAtStart
@@ -1889,17 +1914,24 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     // --- Redemption fee functions ---
 
     /*
-     * This function has two impacts on the baseRate state variable:
-     * 1) decays the baseRate based on time passed since last redemption or BaseFeeLMA borrowing operation.
+     * HEDGEHOG LOGIC UPDATES:
+     * 1) Rename variable in docs (baseRate => redemptionBaseRate)
+     * 2) decayedRemeptionBaseRate (decayedBaseRate) is now calculated by _calcDecayedRedemptionBaseRate();
+     * 3) Updating RedemptionBaseRate state variable instead of baseRate
+     * 4) Emiting RedemptionBaseRateUpdated instead of BaseRateUpdates();
+     * 5) Now updates time only of redemeption operation instead of both redemption and borrow
+     *
+     * This function has two impacts on the redemptionBaseRate state variable:
+     * 1) decays the redemptionBaseRate based on time passed since last redemption or BaseFeeLMA borrowing operation.
      * then,
-     * 2) increases the baseRate based on the amount redeemed, as a proportion of total supply
+     * 2) increases the redemptionBaseRate based on the amount redeemed, as a proportion of total supply
      */
-    function _updateBaseRateFromRedemption(
+    function _updateRedemptionBaseRateFromRedemption(
         uint _StETHDrawn,
         uint _price,
         uint _totalBaseFeeLMASupply
     ) internal returns (uint) {
-        uint decayedBaseRate = _calcDecayedBaseRate();
+        uint decayedRedemptionBaseRate = _calcDecayedRedemptionBaseRate();
 
         /* Convert the drawn StETH back to BaseFeeLMA at face value rate (1 BaseFeeLMA:1 USD), in order to get
          * the fraction of total supply that was redeemed at face value. */
@@ -1907,7 +1939,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             _totalBaseFeeLMASupply
         );
 
-        uint newBaseRate = decayedBaseRate.add(
+        uint newBaseRate = decayedRedemptionBaseRate.add(
             redeemedBaseFeeLMAFraction.div(BETA)
         );
         newBaseRate = LiquityMath._min(newBaseRate, DECIMAL_PRECISION); // cap baseRate at a maximum of 100%
@@ -1915,38 +1947,65 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         assert(newBaseRate > 0); // Base rate is always non-zero after redemption
 
         // Update the baseRate state variable
-        baseRate = newBaseRate;
-        emit BaseRateUpdated(newBaseRate);
+        redemptionBaseRate = newBaseRate;
+        emit RedemptionBaseRateUpdated(newBaseRate);
 
-        _updateLastFeeOpTime();
+        _updateLastRedemptionTime();
 
         return newBaseRate;
     }
 
-    function getRedemptionRate() public view returns (uint) {
-        return _calcRedemptionRate(baseRate);
+    /*
+     * HEDGEHOG LOGIC UPDATES:
+     * 1) Now passing redemptionBaseRate instead of combined baseRate
+     */
+    function getRedemptionRate(
+        uint _redemptionColl
+    ) public view returns (uint) {
+        return _calcRedemptionRate(redemptionBaseRate, _redemptionColl);
     }
 
-    function getRedemptionRateWithDecay() public view returns (uint) {
-        return _calcRedemptionRate(_calcDecayedBaseRate());
+    function getRedemptionRateWithDecay(
+        uint _redemptionColl
+    ) public view returns (uint) {
+        return
+            _calcRedemptionRate(
+                _calcDecayedRedemptionBaseRate(),
+                _redemptionColl
+            );
     }
 
-    function _calcRedemptionRate(uint _baseRate) internal pure returns (uint) {
+    /*
+     * HEDGEHOG UPDATES:
+     * Redemption Rate formula now is: RedFloor + RedBaseRate*MinuteDecayFactorMinutes + RedemptionETH/TotalColl
+     * 1) Rename param name (_baseRate => _redemptionBaseRate)
+     * 2) Now redeemed collateral divided by total collateral in active pool is added to the sum of redemption floor and redeem base rate
+     */
+    function _calcRedemptionRate(
+        uint _redemptionBaseRate,
+        uint _redemptionColl
+    ) internal view returns (uint) {
         return
             LiquityMath._min(
-                REDEMPTION_FEE_FLOOR.add(_baseRate),
+                REDEMPTION_FEE_FLOOR.add(_redemptionBaseRate).add(
+                    _redemptionColl.div(activePool.getStETH())
+                ),
                 DECIMAL_PRECISION // cap at a maximum of 100%
             );
     }
 
     function _getRedemptionFee(uint _StETHDrawn) internal view returns (uint) {
-        return _calcRedemptionFee(getRedemptionRate(), _StETHDrawn);
+        return _calcRedemptionFee(getRedemptionRate(_StETHDrawn), _StETHDrawn);
     }
 
     function getRedemptionFeeWithDecay(
         uint _StETHDrawn
     ) external view returns (uint) {
-        return _calcRedemptionFee(getRedemptionRateWithDecay(), _StETHDrawn);
+        return
+            _calcRedemptionFee(
+                getRedemptionRateWithDecay(_StETHDrawn),
+                _StETHDrawn
+            );
     }
 
     function _calcRedemptionFee(
@@ -1965,81 +2024,179 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
     // --- Borrowing fee functions ---
 
-    function getBorrowingRate() public view returns (uint) {
-        return _calcBorrowingRate(baseRate);
+    /*
+     * HEDGEHOG LOGIC UPDATES:
+     * 1) Now passing borrowBaseRate instead of combined baseRate
+     */
+    function getBorrowingRate(
+        uint _issuedBaseFeeLMA
+    ) public view returns (uint) {
+        return _calcBorrowingRate(borrowBaseRate, _issuedBaseFeeLMA);
     }
 
-    function getBorrowingRateWithDecay() public view returns (uint) {
-        return _calcBorrowingRate(_calcDecayedBaseRate());
+    /*
+     * HEDGEHOG LOGIC UPDATES:
+     * 1) Now passing _calcDecayedBorrowBaseRate instead of _calcDecayedBaseRate function to calculate the decayed borrowBaseRate
+     */
+    function getBorrowingRateWithDecay(
+        uint _issuedBaseFeeLMA
+    ) public view returns (uint) {
+        return
+            _calcBorrowingRate(
+                _calcDecayedRedemptionBaseRate(),
+                _issuedBaseFeeLMA
+            );
     }
 
-    function _calcBorrowingRate(uint _baseRate) internal pure returns (uint) {
+    /*
+     * HEDGEHOG UPDATES:
+     * Now full dynamic fees formula is as follows: RedRate = RedFloor + RedBaseRate*MinuteDecayFactorMinutes + RedemptionETH / Total Collateral in the system
+     * 1) Rename param name (_baseRate => _borrowBaseRate)
+     * 2) Now adding issued asset divided by total supply of the asset to the sum of borrow flor and borrow decayed baseRate
+     */
+    function _calcBorrowingRate(
+        uint _borrowBaseRate,
+        uint _issuedBaseFeeLMA
+    ) internal view returns (uint) {
         return
             LiquityMath._min(
-                BORROWING_FEE_FLOOR.add(_baseRate),
+                BORROWING_FEE_FLOOR.add(_borrowBaseRate).add(
+                    _issuedBaseFeeLMA.div(baseFeeLMAToken.totalSupply())
+                ),
                 MAX_BORROWING_FEE
             );
     }
 
     function getBorrowingFee(
-        uint _BaseFeeLMADebt
+        uint _BaseFeeLMADebt // TODO: Double check that it's only newly issues tokens and not the full debt
     ) external view returns (uint) {
-        return _calcBorrowingFee(getBorrowingRate(), _BaseFeeLMADebt);
+        return
+            _calcBorrowingFee(
+                getBorrowingRate(_BaseFeeLMADebt),
+                _BaseFeeLMADebt
+            );
     }
 
     function getBorrowingFeeWithDecay(
         uint _BaseFeeLMADebt
     ) external view returns (uint) {
-        return _calcBorrowingFee(getBorrowingRateWithDecay(), _BaseFeeLMADebt);
+        return
+            _calcBorrowingFee(
+                getBorrowingRateWithDecay(_BaseFeeLMADebt),
+                _BaseFeeLMADebt
+            );
     }
 
+    /**
+     * HEDGEHOG UPDATES:
+     * TODO: _BaseFeeLMADebt.div(baseFeeLMAToken.totalSupply()) is going to return 0, so have to adjust such calculations
+     */
     function _calcBorrowingFee(
         uint _borrowingRate,
-        uint _BaseFeeLMADebt
+        uint _BaseFeeLMADebt // TODO: Check that it's not total but newly issues tokens
     ) internal pure returns (uint) {
         return _borrowingRate.mul(_BaseFeeLMADebt).div(DECIMAL_PRECISION);
     }
 
-    // Updates the baseRate state variable based on time elapsed since the last redemption or BaseFeeLMA borrowing operation.
+    /*
+     * HEDGEHOG LOGIC UPDATES:
+     * 1) Now updates borrowBaseRate instead of baseRate used by both redemption and minting functions
+     * 2) Emit BorrowBaseRateUpdated instead of BaseRateUpdated
+     * 3) Now updates time only of borrow operation instead of both redemption and borrow
+     * 4) Update doc variable name baseRate => borrowBaseRate
+     */
+    // Updates the borrowBaseRate state variable based on time elapsed since the last redemption or BaseFeeLMA borrowing operation.
     function decayBaseRateFromBorrowing() external {
         _requireCallerIsBorrowerOperations();
 
-        uint decayedBaseRate = _calcDecayedBaseRate();
+        uint decayedBaseRate = _calcDecayedRedemptionBaseRate();
         assert(decayedBaseRate <= DECIMAL_PRECISION); // The baseRate can decay to 0
+        // HEDGEHOG LOGIC CHANGES: Updating borrowing base rate instead
+        borrowBaseRate = decayedBaseRate;
+        emit BorrowBaseRateUpdated(decayedBaseRate);
 
-        baseRate = decayedBaseRate;
-        emit BaseRateUpdated(decayedBaseRate);
-
-        _updateLastFeeOpTime();
+        _updateLastBorrowTime();
     }
 
     // --- Internal fee functions ---
 
+    /*
+     * HEDGEHOG LOGIC UPDATES:
+     * removed _updateLastFeeOpTime
+     * New function _updateLastRedemptionTime simmilar to _updateLastFeeOpTime, that sets lastRedemptionTime and emits respective event.
+     */
     // Update the last fee operation time only if time passed >= decay interval. This prevents base rate griefing.
-    function _updateLastFeeOpTime() internal {
-        uint timePassed = block.timestamp.sub(lastFeeOperationTime);
+    function _updateLastRedemptionTime() internal {
+        uint timePassed = block.timestamp.sub(lastRedemptionTime);
 
         if (timePassed >= SECONDS_IN_ONE_MINUTE) {
-            lastFeeOperationTime = block.timestamp;
-            emit LastFeeOpTimeUpdated(block.timestamp);
+            lastRedemptionTime = block.timestamp;
+            emit LastRedemptionTimeUpdated(block.timestamp);
         }
     }
 
-    function _calcDecayedBaseRate() internal view returns (uint) {
-        uint minutesPassed = _minutesPassedSinceLastFeeOp();
+    /*
+     * HEDGEHOG LOGIC UPDATES:
+     * removed _updateLastFeeOpTime
+     * New function _updateLastBorrowTime simmilar to _updateLastFeeOpTime, that sets lastBorrowTime and emits respective event.
+     */
+    // Update the last fee operation time only if time passed >= decay interval. This prevents base rate griefing.
+    function _updateLastBorrowTime() internal {
+        uint timePassed = block.timestamp.sub(lastBorrowTime);
+
+        if (timePassed >= SECONDS_IN_ONE_MINUTE) {
+            lastBorrowTime = block.timestamp;
+            emit LastBorrowTimeUpdated(block.timestamp);
+        }
+    }
+
+    /*
+     * HEDGEHOG LOGIC UPDATES:
+     * New function simmilar to _calcDecayedBaseRate. However used particularly for redemptionBaseRate calculation
+     */
+    function _calcDecayedRedemptionBaseRate() internal view returns (uint) {
+        uint minutesPassed = _minutesPassedSinceLastRedemption();
         uint decayFactor = LiquityMath._decPow(
             MINUTE_DECAY_FACTOR,
             minutesPassed
         );
 
-        return baseRate.mul(decayFactor).div(DECIMAL_PRECISION);
+        return redemptionBaseRate.mul(decayFactor).div(DECIMAL_PRECISION);
     }
 
-    function _minutesPassedSinceLastFeeOp() internal view returns (uint) {
+    /*
+     * HEDGEHOG LOGIC UPDATES:
+     * New function simmilar to _calcDecayedBaseRate. However used particularly for borrowBaseRate calculation
+     */
+    function _calcDecayedBorrowBaseRate() internal view returns (uint) {
+        uint minutesPassed = _minutesPassedSinceLastBorrow();
+        uint decayFactor = LiquityMath._decPow(
+            MINUTE_DECAY_FACTOR,
+            minutesPassed
+        );
+
+        return borrowBaseRate.mul(decayFactor).div(DECIMAL_PRECISION);
+    }
+
+    /*
+     * HEDGEHOG LOGIC UPDATES:
+     * removed _minutesPassedSinceLastFeeOp
+     * New function _minutesPassedSinceLastRedemption simmilar to _minutesPassedSinceLastFeeOp, that returns amount of minutes since last registered redemption
+     */
+    function _minutesPassedSinceLastRedemption() internal view returns (uint) {
         return
-            (block.timestamp.sub(lastFeeOperationTime)).div(
+            (block.timestamp.sub(lastRedemptionTime)).div(
                 SECONDS_IN_ONE_MINUTE
             );
+    }
+
+    /*
+     * HEDGEHOG LOGIC UPDATES:
+     * removed _minutesPassedSinceLastFeeOp
+     * New function _minutesPassedSinceLastBorrow simmilar to _minutesPassedSinceLastFeeOp, that returns amount of minutes since last registered borrow
+     */
+    function _minutesPassedSinceLastBorrow() internal view returns (uint) {
+        return (block.timestamp.sub(lastBorrowTime)).div(SECONDS_IN_ONE_MINUTE);
     }
 
     // --- 'require' wrapper functions ---

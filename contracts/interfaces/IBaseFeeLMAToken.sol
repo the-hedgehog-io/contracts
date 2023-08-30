@@ -33,4 +33,6 @@ interface IBaseFeeLMAToken is IERC20, IERC2612 {
         address user,
         uint256 _amount
     ) external;
+
+    function totalSupply() external view returns (uint256);
 }
