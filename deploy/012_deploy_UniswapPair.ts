@@ -27,7 +27,7 @@ const deploy: DeployFunction = async ({
     throw console.error("Uniswap pair addresses are not equal");
   }
 
-  if (BaseFeeLMAStEthPairAddr == ethers.constants.AddressZero) {
+  if (BaseFeeLMAStEthPairAddr == ethers.ZeroAddress) {
     console.log("deploying a uniswap pair");
     // Deploy Uniswap paid for StEth - BaseFeeLMA
     await uniswapV2Factory.createPair(
@@ -45,7 +45,7 @@ const deploy: DeployFunction = async ({
     deployConfig.stEth,
     BaseFeeLMAToken.address
   );
-  if (BaseFeeLMAStEthPairAddr === ethers.constants.AddressZero) {
+  if (BaseFeeLMAStEthPairAddr === ethers.ZeroAddress) {
     throw console.error("Uniswap pair is missing");
   }
   if (BaseFeeLMAStEthPairAddr != StEthBaseFeeLMAPairAddr) {

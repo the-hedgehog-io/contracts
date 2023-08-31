@@ -31,7 +31,7 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       deployConfig.stEth,
       BaseFeeLMAToken.address
     );
-    if (BaseFeeLMAStEthPairAddr === ethers.constants.AddressZero) {
+    if (BaseFeeLMAStEthPairAddr === ethers.ZeroAddress) {
       throw console.error("Uniswap pair is missing");
     }
     if (BaseFeeLMAStEthPairAddr != StEthBaseFeeLMAPairAddr) {

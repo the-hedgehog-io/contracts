@@ -24,12 +24,7 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
     console.log("Setting up SortedTroves...");
 
     const maxBytes32 = "0x" + "f".repeat(64);
-    console.log(
-      "params: ",
-      maxBytes32,
-      TroveManager.address,
-      BorrowerOperations.address
-    );
+
     await executeWithLog(
       "SortedTroves",
       { from: deployer },
@@ -114,19 +109,6 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
     );
   }
   console.log("ActivePool is set");
-
-  if (!(await isOwnershipRenounced(DefaultPool.address))) {
-    console.log("Setting up DefaultPool...");
-
-    await executeWithLog(
-      "DefaultPool",
-      { from: deployer },
-      "setAddresses",
-      TroveManager.address,
-      ActivePool.address
-    );
-  }
-  console.log("DefaultPool is set");
 
   if (!(await isOwnershipRenounced(DefaultPool.address))) {
     console.log("Setting up DefaultPool...");

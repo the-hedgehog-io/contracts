@@ -24,7 +24,7 @@ export const isOwnershipRenounced = async (contract: any) => {
   );
   const owner = await contractFactory.owner();
 
-  return owner == ethers.constants.AddressZero;
+  return owner == ethers.ZeroAddress;
 };
 
 export const timeValues = {

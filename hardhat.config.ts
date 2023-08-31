@@ -3,7 +3,6 @@ import "@nomicfoundation/hardhat-toolbox";
 import "hardhat-deploy";
 import "hardhat-abi-exporter";
 import exportDeployment from "./tasks/export";
-require("@nomiclabs/hardhat-truffle5");
 
 import * as dotenv from "dotenv";
 dotenv.config();
@@ -14,10 +13,6 @@ const accountsNew =
   process.env.PK_DEPLOYER !== undefined
     ? [process.env.PK_DEPLOYER as string]
     : [];
-
-const fs = require("fs");
-const accounts = require("./hardhatAccountsList2k.js");
-const accountsList = accounts.accountsList;
 
 task("deploy:export", "Export deployment data", async (_, hre, runSuper) => {
   console.log("Exporting deployment data...");
@@ -31,19 +26,6 @@ task("deploy", "Export deployment data", async (_, hre, runSuper) => {
   await exportDeployment(hre);
   console.log("Deployment data exported!");
 });
-
-const getSecret = (secretKey: any, defaultValue = "") => {
-  const SECRETS_FILE = "./secrets.js";
-  let secret = defaultValue;
-  if (fs.existsSync(SECRETS_FILE)) {
-    const { secrets } = require(SECRETS_FILE);
-    if (secrets[secretKey]) {
-      secret = secrets[secretKey];
-    }
-  }
-
-  return secret;
-};
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -96,13 +78,6 @@ const config: HardhatUserConfig = {
     ],
   },
   networks: {
-    hardhat: {
-      accounts: accountsList,
-      gas: 10000000, // tx gas limit
-      blockGasLimit: 15000000,
-      gasPrice: 20000000000,
-      initialBaseFeePerGas: 0,
-    },
     mumbai: {
       accounts: [process.env.PK_DEPLOYER || ""],
       url: "https://rpc.ankr.com/polygon_mumbai",

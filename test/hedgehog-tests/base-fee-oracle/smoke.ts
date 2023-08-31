@@ -1,15 +1,10 @@
-import { mine, time } from "@nomicfoundation/hardhat-network-helpers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { time, mine } from "@nomicfoundation/hardhat-toolbox/network-helpers";
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { BaseFeeOracle } from "../../typechain-types/contracts";
-
-const etheredValue = (value: string | number) => {
-  return ethers.utils.parseEther(
-    typeof value === "number" ? value.toString() : value
-  );
-};
+import { BaseFeeOracle } from "../../../typechain-types";
+import { etheredValue } from "../../utils";
 
 const { latestBlock } = time;
 
@@ -25,7 +20,7 @@ describe("BaseFeeOracle Tests", () => {
         await (
           await ethers.getContractFactory("BaseFeeOracle")
         ).deploy(setter.address, deployer.address)
-      ).deployed();
+      ).waitForDeployment();
     });
 
     let currentRoundAndValue: number = 1;
@@ -77,7 +72,7 @@ describe("BaseFeeOracle Tests", () => {
     });
     it("Should not let non-admin feed new base fee value", async () => {
       await expect(feed({ caller: hacker })).to.be.revertedWith(
-        `AccessControl: account ${hacker.address.toLowerCase()} is missing role ${ethers.utils.solidityKeccak256(
+        `AccessControl: account ${hacker.address.toLowerCase()} is missing role ${ethers.solidityPackedKeccak256(
           ["string"],
           ["SETTER"]
         )}`
@@ -85,7 +80,7 @@ describe("BaseFeeOracle Tests", () => {
     });
     it("Should not let ultimate admin feed new base fee value", async () => {
       await expect(feed({ caller: deployer })).to.be.revertedWith(
-        `AccessControl: account ${deployer.address.toLowerCase()} is missing role ${ethers.utils.solidityKeccak256(
+        `AccessControl: account ${deployer.address.toLowerCase()} is missing role ${ethers.solidityPackedKeccak256(
           ["string"],
           ["SETTER"]
         )}`
