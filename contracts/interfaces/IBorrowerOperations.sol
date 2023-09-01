@@ -50,15 +50,16 @@ interface IBorrowerOperations {
         uint _BaseFeeLMAAmount,
         address _upperHint,
         address _lowerHint
-    ) external payable;
+    ) external;
 
-    function addColl(address _upperHint, address _lowerHint) external payable;
+    function addColl(address _upperHint, address _lowerHint) external;
 
     function moveStETHGainToTrove(
         address _user,
         address _upperHint,
-        address _lowerHint
-    ) external payable;
+        address _lowerHint,
+        uint _amount
+    ) external;
 
     function withdrawColl(
         uint _amount,
@@ -88,7 +89,7 @@ interface IBorrowerOperations {
         bool isDebtIncrease,
         address _upperHint,
         address _lowerHint
-    ) external payable;
+    ) external;
 
     function claimCollateral() external;
 

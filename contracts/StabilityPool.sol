@@ -15,6 +15,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/LiquitySafeMath128.sol";
 import "./dependencies/CheckContract.sol";
 import "./dependencies/console.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
  * @notice Fork of Liquity's Stability Pool. Logic remains unchanged.
@@ -154,6 +156,7 @@ import "./dependencies/console.sol";
 contract StabilityPool is HedgehogBase, Ownable, CheckContract {
     using LiquitySafeMath128 for uint128;
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
     string public constant NAME = "StabilityPool";
 
@@ -169,6 +172,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
     ICommunityIssuance public communityIssuance;
 
     uint256 internal StETH; // deposited stETH tracker
+    IERC20 public StETHToken;
 
     // Tracker for BaseFeeLMA held in the pool. Changes when users deposit/withdraw, and when Trove debt is offset.
     uint256 internal totalBaseFeeLMADeposits;
@@ -256,6 +260,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
     event SortedTrovesAddressChanged(address _newSortedTrovesAddress);
     event PriceFeedAddressChanged(address _newPriceFeedAddress);
     event CommunityIssuanceAddressChanged(address _newCommunityIssuanceAddress);
+    event StETHTokenAddressUpdated(IERC20 _StEthAddress);
 
     event P_Updated(uint _P);
     event S_Updated(uint _S, uint128 _epoch, uint128 _scale);
@@ -291,6 +296,11 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
 
     // --- Contract setters ---
 
+    /**
+     * HEDGEHOG LOGIC UPDATES:
+     * ERC20 is used as a collateral instead of native token.
+     * Setting erc20 address in the initialisation
+     */
     function setAddresses(
         address _borrowerOperationsAddress,
         address _troveManagerAddress,
@@ -298,7 +308,8 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         address _baseFeeLMATokenAddress,
         address _sortedTrovesAddress,
         address _priceFeedAddress,
-        address _communityIssuanceAddress
+        address _communityIssuanceAddress,
+        IERC20 _StETHTokenAddress
     ) external onlyOwner {
         checkContract(_borrowerOperationsAddress);
         checkContract(_troveManagerAddress);
@@ -307,6 +318,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         checkContract(_sortedTrovesAddress);
         checkContract(_priceFeedAddress);
         checkContract(_communityIssuanceAddress);
+        checkContract(address(_StETHTokenAddress));
 
         borrowerOperations = IBorrowerOperations(_borrowerOperationsAddress);
         troveManager = ITroveManager(_troveManagerAddress);
@@ -315,6 +327,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         sortedTroves = ISortedTroves(_sortedTrovesAddress);
         priceFeed = IPriceFeed(_priceFeedAddress);
         communityIssuance = ICommunityIssuance(_communityIssuanceAddress);
+        StETHToken = _StETHTokenAddress;
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);
@@ -323,6 +336,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         emit SortedTrovesAddressChanged(_sortedTrovesAddress);
         emit PriceFeedAddressChanged(_priceFeedAddress);
         emit CommunityIssuanceAddressChanged(_communityIssuanceAddress);
+        emit StETHTokenAddressUpdated(_StETHTokenAddress);
 
         renounceOwnership();
     }
@@ -445,6 +459,10 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
     }
 
     /* withdrawStETHGainToTrove:
+
+     * HEDGEHOG UPDATES: use SafeERC20 safe transfer instead of native token transfer. Therefore 
+     * transfer value isn't paste anymore as a {value: }, but as a separate input param
+
      * - Triggers a HOG issuance, based on time passed since the last issuance. The HOG issuance is shared between *all* depositors and front ends
      * - Sends all depositor's HOG gain to  depositor
      * - Sends all tagged front end's HOG gain to the tagged front end
@@ -493,10 +511,11 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         emit StabilityPoolStETHBalanceUpdated(StETH);
         emit StETHSent(msg.sender, depositorStETHGain);
 
-        borrowerOperations.moveStETHGainToTrove{value: depositorStETHGain}(
+        borrowerOperations.moveStETHGainToTrove(
             msg.sender,
             _upperHint,
-            _lowerHint
+            _lowerHint,
+            depositorStETHGain
         );
     }
 
@@ -980,6 +999,9 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         emit StabilityPoolBaseFeeLMABalanceUpdated(newTotalBaseFeeLMADeposits);
     }
 
+    /**
+     * HEDGEHOG UPDATES: use SafeERC20 safe transfer instead of native token transfer
+     */
     function _sendStETHGainToDepositor(uint _amount) internal {
         if (_amount == 0) {
             return;
@@ -989,8 +1011,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         emit StabilityPoolStETHBalanceUpdated(newStETH);
         emit StETHSent(msg.sender, _amount);
 
-        (bool success, ) = msg.sender.call{value: _amount}("");
-        require(success, "StabilityPool: sending StETH failed");
+        StETHToken.safeTransfer(msg.sender, _amount);
     }
 
     // Send BaseFeeLMA to user and decrease BaseFeeLMA in Pool

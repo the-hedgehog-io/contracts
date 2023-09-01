@@ -3,6 +3,8 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
 import "./dependencies/console.sol";
@@ -14,6 +16,7 @@ import "./interfaces/IPool.sol";
  * - Raised pragma version
  * - Removed an import of ActivePool Interface
  * - Updated variable names and docs to refer to BaseFeeLMA token and stEth as a collateral
+ * - Collateral is now an ERC20 token instead of a native one
  * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  *
  * The Active Pool holds the stStETH collateral and BaseFeeLMA debt (but not BaseFeeLMA tokens) for all active troves.
@@ -24,6 +27,7 @@ import "./interfaces/IPool.sol";
  */
 contract ActivePool is Ownable, CheckContract, IPool {
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
     string public constant NAME = "ActivePool";
 
@@ -31,6 +35,7 @@ contract ActivePool is Ownable, CheckContract, IPool {
     address public troveManagerAddress;
     address public stabilityPoolAddress;
     address public defaultPoolAddress;
+    IERC20 public StETHToken;
     uint256 internal StETH; // deposited stEth tracker
     uint256 internal BaseFeeLMADebt;
 
@@ -42,29 +47,39 @@ contract ActivePool is Ownable, CheckContract, IPool {
     event TroveManagerAddressChanged(address _newTroveManagerAddress);
     event ActivePoolBaseFeeLMADebtUpdated(uint _BaseFeeLMADebt);
     event ActivePoolStETHBalanceUpdated(uint _stStETH);
+    event StETHTokenAddressUpdated(IERC20 _StEthAddress);
 
     // --- Contract setters ---
 
+    /**
+     * HEDGEHOG LOGIC UPDATES:
+     * ERC20 is used as a collateral instead of native token.
+     * Setting erc20 address in the initialisation
+     */
     function setAddresses(
         address _borrowerOperationsAddress,
         address _troveManagerAddress,
         address _stabilityPoolAddress,
-        address _defaultPoolAddress
+        address _defaultPoolAddress,
+        IERC20 _stETHTokenAddress
     ) external onlyOwner {
         checkContract(_borrowerOperationsAddress);
         checkContract(_troveManagerAddress);
         checkContract(_stabilityPoolAddress);
         checkContract(_defaultPoolAddress);
+        checkContract(address(_stETHTokenAddress));
 
         borrowerOperationsAddress = _borrowerOperationsAddress;
         troveManagerAddress = _troveManagerAddress;
         stabilityPoolAddress = _stabilityPoolAddress;
         defaultPoolAddress = _defaultPoolAddress;
+        StETHToken = _stETHTokenAddress;
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit StabilityPoolAddressChanged(_stabilityPoolAddress);
         emit DefaultPoolAddressChanged(_defaultPoolAddress);
+        emit StETHTokenAddressUpdated(_stETHTokenAddress);
 
         renounceOwnership();
     }
@@ -86,14 +101,15 @@ contract ActivePool is Ownable, CheckContract, IPool {
 
     // --- Pool functionality ---
 
+    /**
+     * HEDGEHOG UPDATES: use SafeERC20 safe transfer instead of native token transfer
+     */
     function sendStETH(address _account, uint _amount) external {
         _requireCallerIsBOorTroveMorSP();
         StETH = StETH.sub(_amount);
         emit ActivePoolStETHBalanceUpdated(StETH);
         emit StETHSent(_account, _amount);
-
-        (bool success, ) = _account.call{value: _amount}("");
-        require(success, "ActivePool: sending StETH failed");
+        StETHToken.safeTransfer(_account, _amount);
     }
 
     function increaseBaseFeeLMADebt(uint _amount) external override {

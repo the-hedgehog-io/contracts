@@ -11,15 +11,19 @@ import "../interfaces/IHOGToken.sol";
 import "../interfaces/IHOGStaking.sol";
 import "../dependencies/LiquityMath.sol";
 import "../interfaces/IBaseFeeLMAToken.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract HOGStaking is Ownable, CheckContract, BaseMath {
     using SafeMath for uint;
+    using SafeERC20 for IERC20;
 
     // --- Data ---
     string public constant NAME = "HOGStaking";
 
     mapping(address => uint) public stakes;
     uint public totalHOGStaked;
+    IERC20 StETHToken;
 
     uint public F_StETH; // Running sum of StETH fees per-HOG-staked
     uint public F_BaseFeeLMA; // Running sum of HOG fees per-HOG-staked
@@ -46,6 +50,7 @@ contract HOGStaking is Ownable, CheckContract, BaseMath {
     event TroveManagerAddressSet(address _troveManager);
     event BorrowerOperationsAddressSet(address _borrowerOperationsAddress);
     event ActivePoolAddressSet(address _activePoolAddress);
+    event StETHTokenAddressUpdated(IERC20 _StEthAddress);
 
     event StakeChanged(address indexed staker, uint newStake);
     event StakingGainsWithdrawn(
@@ -70,25 +75,29 @@ contract HOGStaking is Ownable, CheckContract, BaseMath {
         address _baseFeeLMATokenAddress,
         address _troveManagerAddress,
         address _borrowerOperationsAddress,
-        address _activePoolAddress
+        address _activePoolAddress,
+        IERC20 _stETHTokenAddress
     ) external onlyOwner {
         checkContract(_hogTokenAddress);
         checkContract(_baseFeeLMATokenAddress);
         checkContract(_troveManagerAddress);
         checkContract(_borrowerOperationsAddress);
         checkContract(_activePoolAddress);
+        checkContract(address(_stETHTokenAddress));
 
         hogToken = IHOGToken(_hogTokenAddress);
         baseFeeLMAToken = IBaseFeeLMAToken(_baseFeeLMATokenAddress);
         troveManagerAddress = _troveManagerAddress;
         borrowerOperationsAddress = _borrowerOperationsAddress;
         activePoolAddress = _activePoolAddress;
+        StETHToken = _stETHTokenAddress;
 
         emit HOGTokenAddressSet(_hogTokenAddress);
         emit HOGTokenAddressSet(_baseFeeLMATokenAddress);
         emit TroveManagerAddressSet(_troveManagerAddress);
         emit BorrowerOperationsAddressSet(_borrowerOperationsAddress);
         emit ActivePoolAddressSet(_activePoolAddress);
+        emit StETHTokenAddressUpdated(_stETHTokenAddress);
 
         renounceOwnership();
     }
@@ -232,10 +241,12 @@ contract HOGStaking is Ownable, CheckContract, BaseMath {
         emit StakerSnapshotsUpdated(_user, F_StETH, F_BaseFeeLMA);
     }
 
+    /**
+     * HEDGEHOG UPDATES: use SafeERC20 safe transfer instead of native token transfer
+     */
     function _sendStETHGainToUser(uint StETHGain) internal {
         emit StETHSent(msg.sender, StETHGain);
-        (bool success, ) = msg.sender.call{value: StETHGain}("");
-        require(success, "HOGStaking: Failed to send accumulated StETHGain");
+        StETHToken.transfer(msg.sender, StETHGain);
     }
 
     // --- 'require' functions ---

@@ -11,6 +11,8 @@ import "./dependencies/HedgehogBase.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
 import "./dependencies/console.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
  * @notice Fork of Liquity's BorrowerOperations. Logic remains unchanged.
@@ -23,6 +25,7 @@ import "./dependencies/console.sol";
 
 contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
     string public constant NAME = "BorrowerOperations";
 
@@ -33,6 +36,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     address stabilityPoolAddress;
 
     address gasPoolAddress;
+
+    IERC20 StETHToken;
 
     ICollSurplusPool collSurplusPool;
 
@@ -98,6 +103,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
     event BaseFeeLMATokenAddressChanged(address _BaseFeeLMATokenAddress);
     event HOGStakingAddressChanged(address _hogStakingAddress);
+    event StETHTokenAddressUpdated(IERC20 _StEthAddress);
 
     event TroveCreated(address indexed _borrower, uint arrayIndex);
     event TroveUpdated(
@@ -114,6 +120,11 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     // --- Dependency setters ---
 
+    /**
+     * HEDGEHOG LOGIC UPDATES:
+     * ERC20 is used as a collateral instead of native token.
+     * Setting erc20 address in the initialisation
+     */
     function setAddresses(
         address _troveManagerAddress,
         address _activePoolAddress,
@@ -124,7 +135,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _priceFeedAddress,
         address _sortedTrovesAddress,
         address _baseFeeLMATokenAddress,
-        address _hogStakingAddress
+        address _hogStakingAddress,
+        IERC20 _stETHTokenAddress
     ) external onlyOwner {
         // This makes impossible to open a trove with zero withdrawn BaseFeeLMA
         assert(MIN_NET_DEBT > 0);
@@ -139,6 +151,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         checkContract(_sortedTrovesAddress);
         checkContract(_baseFeeLMATokenAddress);
         checkContract(_hogStakingAddress);
+        checkContract(address(_stETHTokenAddress));
 
         troveManager = ITroveManager(_troveManagerAddress);
         activePool = IActivePool(_activePoolAddress);
@@ -151,6 +164,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         baseFeeLMAToken = IBaseFeeLMAToken(_baseFeeLMATokenAddress);
         hogStakingAddress = _hogStakingAddress;
         hogStaking = IHOGStaking(_hogStakingAddress);
+        StETHToken = _stETHTokenAddress;
 
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit ActivePoolAddressChanged(_activePoolAddress);
@@ -162,18 +176,27 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         emit SortedTrovesAddressChanged(_sortedTrovesAddress);
         emit BaseFeeLMATokenAddressChanged(_baseFeeLMATokenAddress);
         emit HOGStakingAddressChanged(_hogStakingAddress);
+        emit StETHTokenAddressUpdated(_stETHTokenAddress);
 
         renounceOwnership();
     }
 
     // --- Borrower Trove Operations ---
 
+    /**
+     * HEDGEHOG UPDATES:
+     * ERC20 is used as a collateral, therefore function may not rely on msg.value anymore
+     * now passing a new param _collAmount
+     * checking if _amount is greater then 0
+     * Function is no longer payable
+     */
     function openTrove(
         uint _maxFeePercentage,
         uint _BaseFeeLMAAmount,
+        uint _collAmount,
         address _upperHint,
         address _lowerHint
-    ) external payable {
+    ) external {
         ContractsCache memory contractsCache = ContractsCache(
             troveManager,
             activePool,
@@ -206,12 +229,12 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         assert(vars.compositeDebt > 0);
 
         vars.ICR = LiquityMath._computeCR(
-            msg.value,
+            _collAmount,
             vars.compositeDebt,
             vars.price
         );
         vars.NICR = LiquityMath._computeNominalCR(
-            msg.value,
+            _collAmount,
             vars.compositeDebt
         );
 
@@ -220,7 +243,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         } else {
             _requireICRisAboveMCR(vars.ICR);
             uint newTCR = _getNewTCRFromTroveChange(
-                msg.value,
+                _collAmount,
                 true,
                 vars.compositeDebt,
                 true,
@@ -231,7 +254,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         // Set the trove struct's properties
         contractsCache.troveManager.setTroveStatus(msg.sender, 1);
-        contractsCache.troveManager.increaseTroveColl(msg.sender, msg.value);
+        contractsCache.troveManager.increaseTroveColl(msg.sender, _collAmount);
         contractsCache.troveManager.increaseTroveDebt(
             msg.sender,
             vars.compositeDebt
@@ -249,7 +272,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         emit TroveCreated(msg.sender, vars.arrayIndex);
 
         // Move the stETH to the Active Pool, and mint the BaseFeeLMAAmount to the borrower
-        _activePoolAddColl(contractsCache.activePool, msg.value);
+        _activePoolAddColl(contractsCache.activePool, _collAmount);
         _withdrawBaseFeeLMA(
             contractsCache.activePool,
             contractsCache.baseFeeLMAToken,
@@ -269,28 +292,73 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         emit TroveUpdated(
             msg.sender,
             vars.compositeDebt,
-            msg.value,
+            _collAmount,
             vars.stake,
             BorrowerOperation.openTrove
         );
         emit BaseFeeLMABorrowingFeePaid(msg.sender, vars.BaseFeeLMAFee);
     }
 
+    /**
+     * HEDGEHOG UPDATES:
+     * ERC20 is used as a collateral, therefore function may not rely on msg.value anymore
+     * now passing a new param _collIncrease in _adjustTrove function - in this particular case it is a passed param _amount
+     * checking if _amount is greater then 0
+     * Function is no longer payable
+     */
     // Send StETH as collateral to a trove
-    function addColl(address _upperHint, address _lowerHint) external payable {
-        _adjustTrove(msg.sender, 0, 0, false, _upperHint, _lowerHint, 0);
+    function addColl(
+        address _upperHint,
+        address _lowerHint,
+        uint _amount
+    ) external {
+        require(_amount > 0, "Borrower Operations: Invalid amount");
+
+        _adjustTrove(
+            msg.sender,
+            0,
+            _amount,
+            0,
+            false,
+            _upperHint,
+            _lowerHint,
+            0
+        );
     }
 
+    /**
+     * HEDGEHOG UPDATES:
+     * ERC20 is used as a collateral, therefore function may not rely on msg.value anymore
+     * now passing a new param _collIncrease in _adjustTrove function - in this particular case it is a passed param _amount
+     * checking if _amount is greater then 0
+     * Function is no longer payable
+     */
     // Send StETH as collateral to a trove. Called by only the Stability Pool.
     function moveStETHGainToTrove(
         address _borrower,
         address _upperHint,
-        address _lowerHint
-    ) external payable {
+        address _lowerHint,
+        uint _amount
+    ) external {
+        require(_amount > 0, "Borrower Operations: Invalid amount");
         _requireCallerIsStabilityPool();
-        _adjustTrove(_borrower, 0, 0, false, _upperHint, _lowerHint, 0);
+        _adjustTrove(
+            _borrower,
+            0,
+            _amount,
+            0,
+            false,
+            _upperHint,
+            _lowerHint,
+            0
+        );
     }
 
+    /**
+     * HEDGEHOG UPDATES:
+     * ERC20 is used as a collateral, therefore function may not rely on msg.value anymore
+     * now passing a new param _collIncrease - in this particular case it is 0
+     */
     // Withdraw StETH collateral from a trove
     function withdrawColl(
         uint _collWithdrawal,
@@ -301,6 +369,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             msg.sender,
             _collWithdrawal,
             0,
+            0,
             false,
             _upperHint,
             _lowerHint,
@@ -308,6 +377,11 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
     }
 
+    /**
+     * HEDGEHOG UPDATES:
+     * ERC20 is used as a collateral, therefore function may not rely on msg.value anymore
+     * now passing a new param _collIncrease - in this particular case it is 0
+     */
     // Withdraw BaseFeeLMA tokens from a trove: mint new BaseFeeLMA tokens to the owner, and increase the trove's debt accordingly
     function withdrawBaseFeeLMA(
         uint _maxFeePercentage,
@@ -318,6 +392,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         _adjustTrove(
             msg.sender,
             0,
+            0,
             _BaseFeeLMAAmount,
             true,
             _upperHint,
@@ -326,6 +401,11 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
     }
 
+    /**
+     * HEDGEHOG UPDATES:
+     * ERC20 is used as a collateral, therefore function may not rely on msg.value anymore
+     * now passing a new param _collIncrease - in this particular case it is 0
+     */
     // Repay BaseFeeLMA tokens to a Trove: Burn the repaid BaseFeeLMA tokens, and reduce the trove's debt accordingly
     function repayBaseFeeLMA(
         uint _BaseFeeLMAAmount,
@@ -335,6 +415,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         _adjustTrove(
             msg.sender,
             0,
+            0,
             _BaseFeeLMAAmount,
             false,
             _upperHint,
@@ -343,17 +424,26 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
     }
 
+    /**
+     * HEDGEHOG UPDATES:
+     * ERC20 is used as a collateral, therefore function may not rely on msg.value anymore
+     * now passing a new param _collIncrease
+     *
+     * Function is no longer payable
+     */
     function adjustTrove(
         uint _maxFeePercentage,
         uint _collWithdrawal,
+        uint _collIncrease,
         uint _BaseFeeLMAChange,
         bool _isDebtIncrease,
         address _upperHint,
         address _lowerHint
-    ) external payable {
+    ) external {
         _adjustTrove(
             msg.sender,
             _collWithdrawal,
+            _collIncrease,
             _BaseFeeLMAChange,
             _isDebtIncrease,
             _upperHint,
@@ -365,13 +455,14 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     /*
      * _adjustTrove(): Alongside a debt change, this function can perform either a collateral top-up or a collateral withdrawal.
      *
-     * It therefore expects either a positive msg.value, or a positive _collWithdrawal argument.
+     * It therefore expects either a positive _collIncrease, or a positive _collWithdrawal argument.
      *
      * If both are positive, it will revert.
      */
     function _adjustTrove(
         address _borrower,
         uint _collWithdrawal,
+        uint _collIncrease,
         uint _BaseFeeLMAChange,
         bool _isDebtIncrease,
         address _upperHint,
@@ -392,15 +483,19 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             _requireValidMaxFeePercentage(_maxFeePercentage, isRecoveryMode);
             _requireNonZeroDebtChange(_BaseFeeLMAChange);
         }
-        _requireSingularCollChange(_collWithdrawal);
-        _requireNonZeroAdjustment(_collWithdrawal, _BaseFeeLMAChange);
+        _requireSingularCollChange(_collWithdrawal, _collIncrease);
+        _requireNonZeroAdjustment(
+            _collWithdrawal,
+            _collIncrease,
+            _BaseFeeLMAChange
+        );
         _requireTroveisActive(contractsCache.troveManager, _borrower);
 
         // Confirm the operation is either a borrower adjusting their own trove, or a pure StETH transfer from the Stability Pool to a trove
         assert(
             msg.sender == _borrower ||
                 (msg.sender == stabilityPoolAddress &&
-                    msg.value > 0 &&
+                    _collIncrease > 0 &&
                     _BaseFeeLMAChange == 0)
         );
 
@@ -408,7 +503,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         // Get the collChange based on whether or not StETH was sent in the transaction
         (vars.collChange, vars.isCollIncrease) = _getCollChange(
-            msg.value,
+            _collIncrease,
             _collWithdrawal
         );
 
@@ -665,13 +760,16 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         }
     }
 
+    /**
+     * HEDGEHOG UPDATES: use SafeERC20 safe transfer instead of native token transfer
+     */
     // Send StETH to Active Pool and increase its recorded StETH balance
     function _activePoolAddColl(
         IActivePool _activePool,
         uint _amount
     ) internal {
-        (bool success, ) = address(_activePool).call{value: _amount}("");
-        require(success, "BorrowerOps: Sending StETH to ActivePool failed");
+        StETHToken.safeTransfer(address(_activePool), _amount);
+        // TODO: Increase it's recorded StETH?
     }
 
     // Issue the specified amount of BaseFeeLMA to _account and increases the total active debt (_netDebtIncrease potentially includes a BaseFeeLMAFee)
@@ -699,9 +797,15 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     // --- 'Require' wrapper functions ---
 
-    function _requireSingularCollChange(uint _collWithdrawal) internal view {
+    /**
+     * HEDGEHOG UPDATES: checking passed param instead of msg.value
+     */
+    function _requireSingularCollChange(
+        uint _collWithdrawal,
+        uint _collIncrease
+    ) internal pure {
         require(
-            msg.value == 0 || _collWithdrawal == 0,
+            _collIncrease == 0 || _collWithdrawal == 0,
             "BorrowerOperations: Cannot withdraw and add coll"
         );
     }
@@ -713,12 +817,18 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
     }
 
+    /**
+     * HEDGEHOG UPDATES: checking passed param instead of msg.value
+     */
     function _requireNonZeroAdjustment(
         uint _collWithdrawal,
+        uint _collIncrease,
         uint _BaseFeeLMAChange
-    ) internal view {
+    ) internal pure {
         require(
-            msg.value != 0 || _collWithdrawal != 0 || _BaseFeeLMAChange != 0,
+            _collIncrease != 0 ||
+                _collWithdrawal != 0 ||
+                _BaseFeeLMAChange != 0,
             "BorrowerOps: There must be either a collateral change or a debt change"
         );
     }

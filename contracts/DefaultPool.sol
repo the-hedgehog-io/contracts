@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
 import "./dependencies/console.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
  * @notice Fork of Liquity's Default Pool. Logic remains unchanged.
@@ -24,6 +26,7 @@ import "./dependencies/console.sol";
  */
 contract DefaultPool is Ownable, CheckContract, IPool {
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
     string public constant NAME = "DefaultPool";
 
@@ -31,25 +34,36 @@ contract DefaultPool is Ownable, CheckContract, IPool {
     address public activePoolAddress;
     uint256 internal StETH; // deposited StETH tracker
     uint256 internal BaseFeeLMADebt; // debt
+    IERC20 public StETHToken;
 
     event TroveManagerAddressChanged(address _newTroveManagerAddress);
     event DefaultPoolBaseFeeLMADebtUpdated(uint _BaseFeeLMADebt);
     event DefaultPoolStETHBalanceUpdated(uint _StETH);
+    event StETHTokenAddressUpdated(IERC20 _StEthAddress);
 
     // --- Dependency setters ---
 
+    /**
+     * HEDGEHOG LOGIC UPDATES:
+     * ERC20 is used as a collateral instead of native token.
+     * Setting erc20 address in the initialisation
+     */
     function setAddresses(
         address _troveManagerAddress,
-        address _activePoolAddress
+        address _activePoolAddress,
+        IERC20 _StETHTokenAddress
     ) external onlyOwner {
         checkContract(_troveManagerAddress);
         checkContract(_activePoolAddress);
+        checkContract(address(_StETHTokenAddress));
 
         troveManagerAddress = _troveManagerAddress;
         activePoolAddress = _activePoolAddress;
+        StETHToken = _StETHTokenAddress;
 
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit ActivePoolAddressChanged(_activePoolAddress);
+        emit StETHTokenAddressUpdated(_StETHTokenAddress);
 
         renounceOwnership();
     }
@@ -71,6 +85,9 @@ contract DefaultPool is Ownable, CheckContract, IPool {
 
     // --- Pool functionality ---
 
+    /**
+     * HEDGEHOG UPDATES: use SafeERC20 safe transfer instead of native token transfer
+     */
     function sendStETHToActivePool(uint _amount) external {
         _requireCallerIsTroveManager();
         address activePool = activePoolAddress; // cache to save an SLOAD
@@ -78,8 +95,7 @@ contract DefaultPool is Ownable, CheckContract, IPool {
         emit DefaultPoolStETHBalanceUpdated(StETH);
         emit StETHSent(activePool, _amount);
 
-        (bool success, ) = activePool.call{value: _amount}("");
-        require(success, "DefaultPool: sending StETH failed");
+        StETHToken.safeTransfer(activePool, _amount);
     }
 
     function increaseBaseFeeLMADebt(uint _amount) external override {

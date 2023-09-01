@@ -3,18 +3,22 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
 import "./dependencies/console.sol";
 
 contract CollSurplusPool is Ownable, CheckContract {
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
     string public constant NAME = "CollSurplusPool";
 
     address public borrowerOperationsAddress;
     address public troveManagerAddress;
     address public activePoolAddress;
+    IERC20 public StETHToken;
 
     // deposited stETH tracker
     uint256 internal StETH;
@@ -32,24 +36,35 @@ contract CollSurplusPool is Ownable, CheckContract {
     event CollBalanceUpdated(address indexed _account, uint _newBalance);
     event EtherSent(address _to, uint _amount);
 
+    event StETHTokenAddressUpdated(IERC20 _StEthAddress);
+
     // --- Contract setters ---
 
+    /**
+     * HEDGEHOG LOGIC UPDATES:
+     * ERC20 is used as a collateral instead of native token.
+     * Setting erc20 address in the initialisation
+     */
     function setAddresses(
         address _borrowerOperationsAddress,
         address _troveManagerAddress,
-        address _activePoolAddress
+        address _activePoolAddress,
+        IERC20 _StETHTokenAddress
     ) external onlyOwner {
         checkContract(_borrowerOperationsAddress);
         checkContract(_troveManagerAddress);
         checkContract(_activePoolAddress);
+        checkContract(address(_StETHTokenAddress));
 
         borrowerOperationsAddress = _borrowerOperationsAddress;
         troveManagerAddress = _troveManagerAddress;
         activePoolAddress = _activePoolAddress;
+        StETHToken = _StETHTokenAddress;
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit ActivePoolAddressChanged(_activePoolAddress);
+        emit StETHTokenAddressUpdated(_StETHTokenAddress);
 
         renounceOwnership();
     }
@@ -75,6 +90,9 @@ contract CollSurplusPool is Ownable, CheckContract {
         emit CollBalanceUpdated(_account, newAmount);
     }
 
+    /**
+     * HEDGEHOG UPDATES: use SafeERC20 safe transfer instead of native token transfer
+     */
     function claimColl(address _account) external {
         _requireCallerIsBorrowerOperations();
         uint claimableColl = balances[_account];
@@ -89,8 +107,7 @@ contract CollSurplusPool is Ownable, CheckContract {
         StETH = StETH.sub(claimableColl);
         emit EtherSent(_account, claimableColl);
 
-        (bool success, ) = _account.call{value: claimableColl}("");
-        require(success, "CollSurplusPool: sending StETH failed");
+        StETHToken.safeTransfer(_account, claimableColl);
     }
 
     // --- 'require' functions ---
