@@ -126,7 +126,7 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         checkContract(_communityIssuanceAddress);
         checkContract(_hogStakingAddress);
         checkContract(_lockupFactoryAddress);
-
+        // TODO: Pass addresses of all core contract to be able to restrict transfers to them
         multisigAddress = _multisigAddress;
         deploymentStartTime = block.timestamp;
 
@@ -372,7 +372,7 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
     ) internal {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
-
+        // TODO: Restrict access to all core contracts, unless msg.sender is another core contract
         _balances[sender] = _balances[sender].sub(
             amount,
             "ERC20: transfer amount exceeds balance"

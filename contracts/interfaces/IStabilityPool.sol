@@ -56,21 +56,11 @@ interface IStabilityPool {
     event EpochUpdated(uint128 _currentEpoch);
     event ScaleUpdated(uint128 _currentScale);
 
-    event FrontEndRegistered(address indexed _frontEnd, uint _kickbackRate);
-    event FrontEndTagSet(address indexed _depositor, address indexed _frontEnd);
-
     event DepositSnapshotUpdated(
         address indexed _depositor,
         uint _P,
         uint _S,
         uint _G
-    );
-    event FrontEndSnapshotUpdated(address indexed _frontEnd, uint _P, uint _G);
-    event UserDepositChanged(address indexed _depositor, uint _newDeposit);
-    event FrontEndStakeChanged(
-        address indexed _frontEnd,
-        uint _newFrontEndStake,
-        address _depositor
     );
 
     event StETHGainWithdrawn(
@@ -79,7 +69,6 @@ interface IStabilityPool {
         uint _BaseFeeLMALoss
     );
     event HOGPaidToDepositor(address indexed _depositor, uint _HOG);
-    event HOGPaidToFrontEnd(address indexed _frontEnd, uint _HOG);
     event StETHSent(address _to, uint _amount);
 
     // --- Functions ---
@@ -100,8 +89,6 @@ interface IStabilityPool {
 
     /*
      * Initial checks:
-     * - Frontend is registered or zero address
-     * - Sender is not a registered frontend
      * - _amount is not zero
      * ---
      * - Triggers a HOG issuance, based on time passed since the last issuance. The HOG issuance is shared between *all* depositors and front ends
@@ -110,7 +97,7 @@ interface IStabilityPool {
      * - Sends the tagged front end's accumulated HOG gains to the tagged front end
      * - Increases deposit and tagged front end's stake, and takes new snapshots for each.
      */
-    function provideToSP(uint _amount, address _frontEndTag) external;
+    function provideToSP(uint _amount) external;
 
     /*
      * Initial checks:
@@ -144,16 +131,6 @@ interface IStabilityPool {
         address _upperHint,
         address _lowerHint
     ) external;
-
-    /*
-     * Initial checks:
-     * - Frontend (sender) not already registered
-     * - User (sender) has no deposit
-     * - _kickbackRate is in the range [0, 100%]
-     * ---
-     * Front end makes a one-time selection of kickback rate upon registering
-     */
-    function registerFrontEnd(uint _kickbackRate) external;
 
     /*
      * Initial checks:
@@ -194,29 +171,9 @@ interface IStabilityPool {
     ) external view returns (uint);
 
     /*
-     * Return the HOG gain earned by the front end.
-     */
-    function getFrontEndHOGGain(address _frontEnd) external view returns (uint);
-
-    /*
      * Return the user's compounded deposit.
      */
     function getCompoundedBaseFeeLMADeposit(
         address _depositor
     ) external view returns (uint);
-
-    /*
-     * Return the front end's compounded stake.
-     *
-     * The front end's compounded stake is equal to the sum of its depositors' compounded deposits.
-     */
-    function getCompoundedFrontEndStake(
-        address _frontEnd
-    ) external view returns (uint);
-
-    /*
-     * Fallback function
-     * Only callable by Active Pool, it just accounts for StETH received
-     * receive() external payable;
-     */
 }

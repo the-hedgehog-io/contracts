@@ -48,11 +48,16 @@ interface IBorrowerOperations {
     function openTrove(
         uint _maxFee,
         uint _BaseFeeLMAAmount,
+        uint _collAmount,
         address _upperHint,
         address _lowerHint
     ) external;
 
-    function addColl(address _upperHint, address _lowerHint) external;
+    function addColl(
+        address _upperHint,
+        address _lowerHint,
+        uint _amount
+    ) external;
 
     function moveStETHGainToTrove(
         address _user,
@@ -85,6 +90,7 @@ interface IBorrowerOperations {
     function adjustTrove(
         uint _maxFee,
         uint _collWithdrawal,
+        uint _collIncrease,
         uint _debtChange,
         bool isDebtIncrease,
         address _upperHint,

@@ -179,14 +179,8 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
 
     // --- Data structures ---
 
-    struct FrontEnd {
-        uint kickbackRate;
-        bool registered;
-    }
-
     struct Deposit {
         uint initialValue;
-        address frontEndTag;
     }
 
     struct Snapshots {
@@ -199,10 +193,6 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
 
     mapping(address => Deposit) public deposits; // depositor address -> Deposit struct
     mapping(address => Snapshots) public depositSnapshots; // depositor address -> snapshots struct
-
-    mapping(address => FrontEnd) public frontEnds; // front end address -> FrontEnd struct
-    mapping(address => uint) public frontEndStakes; // front end address -> last recorded total deposits, tagged with that front end
-    mapping(address => Snapshots) public frontEndSnapshots; // front end address -> snapshots struct
 
     /*  Product 'P': Running product by which to multiply an initial deposit, in order to find the current compounded deposit,
      * after a series of liquidations have occurred, each of which cancel some BaseFeeLMA debt with the deposit.
@@ -268,22 +258,14 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
     event EpochUpdated(uint128 _currentEpoch);
     event ScaleUpdated(uint128 _currentScale);
 
-    event FrontEndRegistered(address indexed _frontEnd, uint _kickbackRate);
-    event FrontEndTagSet(address indexed _depositor, address indexed _frontEnd);
-
     event DepositSnapshotUpdated(
         address indexed _depositor,
         uint _P,
         uint _S,
         uint _G
     );
-    event FrontEndSnapshotUpdated(address indexed _frontEnd, uint _P, uint _G);
+
     event UserDepositChanged(address indexed _depositor, uint _newDeposit);
-    event FrontEndStakeChanged(
-        address indexed _frontEnd,
-        uint _newFrontEndStake,
-        address _depositor
-    );
 
     event StETHGainWithdrawn(
         address indexed _depositor,
@@ -291,7 +273,6 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         uint _BaseFeeLMALoss
     );
     event HOGPaidToDepositor(address indexed _depositor, uint _HOG);
-    event HOGPaidToFrontEnd(address indexed _frontEnd, uint _HOG);
     event StETHSent(address _to, uint _amount);
 
     // --- Contract setters ---
@@ -361,9 +342,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
      * - Sends the tagged front end's accumulated HOG gains to the tagged front end
      * - Increases deposit and tagged front end's stake, and takes new snapshots for each.
      */
-    function provideToSP(uint _amount, address _frontEndTag) external {
-        _requireFrontEndIsRegisteredOrZero(_frontEndTag);
-        _requireFrontEndNotRegistered(msg.sender);
+    function provideToSP(uint _amount) external {
         _requireNonZeroAmount(_amount);
 
         uint initialDeposit = deposits[msg.sender].initialValue;
@@ -372,9 +351,6 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
 
         _triggerHOGIssuance(communityIssuanceCached);
 
-        if (initialDeposit == 0) {
-            _setFrontEndTag(msg.sender, _frontEndTag);
-        }
         uint depositorStETHGain = getDepositorStETHGain(msg.sender);
         uint compoundedBaseFeeLMADeposit = getCompoundedBaseFeeLMADeposit(
             msg.sender
@@ -382,14 +358,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         uint BaseFeeLMALoss = initialDeposit.sub(compoundedBaseFeeLMADeposit); // Needed only for event log
 
         // First pay out any HOG gains
-        address frontEnd = deposits[msg.sender].frontEndTag;
-        _payOutHOGGains(communityIssuanceCached, msg.sender, frontEnd);
-
-        // Update front end stake
-        uint compoundedFrontEndStake = getCompoundedFrontEndStake(frontEnd);
-        uint newFrontEndStake = compoundedFrontEndStake.add(_amount);
-        _updateFrontEndStakeAndSnapshots(frontEnd, newFrontEndStake);
-        emit FrontEndStakeChanged(frontEnd, newFrontEndStake, msg.sender);
+        _payOutHOGGains(communityIssuanceCached, msg.sender);
 
         _sendBaseFeeLMAtoStabilityPool(msg.sender, _amount);
 
@@ -435,16 +404,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         uint BaseFeeLMALoss = initialDeposit.sub(compoundedBaseFeeLMADeposit); // Needed only for event log
 
         // First pay out any HOG gains
-        address frontEnd = deposits[msg.sender].frontEndTag;
-        _payOutHOGGains(communityIssuanceCached, msg.sender, frontEnd);
-
-        // Update front end stake
-        uint compoundedFrontEndStake = getCompoundedFrontEndStake(frontEnd);
-        uint newFrontEndStake = compoundedFrontEndStake.sub(
-            BaseFeeLMAtoWithdraw
-        );
-        _updateFrontEndStakeAndSnapshots(frontEnd, newFrontEndStake);
-        emit FrontEndStakeChanged(frontEnd, newFrontEndStake, msg.sender);
+        _payOutHOGGains(communityIssuanceCached, msg.sender);
 
         _sendBaseFeeLMAToDepositor(msg.sender, BaseFeeLMAtoWithdraw);
 
@@ -490,14 +450,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         uint BaseFeeLMALoss = initialDeposit.sub(compoundedBaseFeeLMADeposit); // Needed only for event log
 
         // First pay out any HOG gains
-        address frontEnd = deposits[msg.sender].frontEndTag;
-        _payOutHOGGains(communityIssuanceCached, msg.sender, frontEnd);
-
-        // Update front end stake
-        uint compoundedFrontEndStake = getCompoundedFrontEndStake(frontEnd);
-        uint newFrontEndStake = compoundedFrontEndStake;
-        _updateFrontEndStakeAndSnapshots(frontEnd, newFrontEndStake);
-        emit FrontEndStakeChanged(frontEnd, newFrontEndStake, msg.sender);
+        _payOutHOGGains(communityIssuanceCached, msg.sender);
 
         _updateDepositAndSnapshots(msg.sender, compoundedBaseFeeLMADeposit);
 
@@ -819,46 +772,10 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
             return 0;
         }
 
-        address frontEndTag = deposits[_depositor].frontEndTag;
-
-        /*
-         * If not tagged with a front end, the depositor gets a 100% cut of what their deposit earned.
-         * Otherwise, their cut of the deposit's earnings is equal to the kickbackRate, set by the front end through
-         * which they made their deposit.
-         */
-        uint kickbackRate = frontEndTag == address(0)
-            ? DECIMAL_PRECISION
-            : frontEnds[frontEndTag].kickbackRate;
-
         Snapshots memory snapshots = depositSnapshots[_depositor];
 
-        uint HOGGain = kickbackRate
-            .mul(_getHOGGainFromSnapshots(initialDeposit, snapshots))
-            .div(DECIMAL_PRECISION);
+        uint HOGGain = _getHOGGainFromSnapshots(initialDeposit, snapshots);
 
-        return HOGGain;
-    }
-
-    /*
-     * Return the HOG gain earned by the front end. Given by the formula:  E = D0 * (G - G(0))/P(0)
-     * where G(0) and P(0) are the depositor's snapshots of the sum G and product P, respectively.
-     *
-     * D0 is the last recorded value of the front end's total tagged deposits.
-     */
-    function getFrontEndHOGGain(address _frontEnd) public view returns (uint) {
-        uint frontEndStake = frontEndStakes[_frontEnd];
-        if (frontEndStake == 0) {
-            return 0;
-        }
-
-        uint kickbackRate = frontEnds[_frontEnd].kickbackRate;
-        uint frontEndShare = uint(DECIMAL_PRECISION).sub(kickbackRate);
-
-        Snapshots memory snapshots = frontEndSnapshots[_frontEnd];
-
-        uint HOGGain = frontEndShare
-            .mul(_getHOGGainFromSnapshots(frontEndStake, snapshots))
-            .div(DECIMAL_PRECISION);
         return HOGGain;
     }
 
@@ -912,30 +829,6 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
             snapshots
         );
         return compoundedDeposit;
-    }
-
-    /*
-     * Return the front end's compounded stake. Given by the formula:  D = D0 * P/P(0)
-     * where P(0) is the depositor's snapshot of the product P, taken at the last time
-     * when one of the front end's tagged deposits updated their deposit.
-     *
-     * The front end's compounded stake is equal to the sum of its depositors' compounded deposits.
-     */
-    function getCompoundedFrontEndStake(
-        address _frontEnd
-    ) public view returns (uint) {
-        uint frontEndStake = frontEndStakes[_frontEnd];
-        if (frontEndStake == 0) {
-            return 0;
-        }
-
-        Snapshots memory snapshots = frontEndSnapshots[_frontEnd];
-
-        uint compoundedFrontEndStake = _getCompoundedStakeFromSnapshots(
-            frontEndStake,
-            snapshots
-        );
-        return compoundedFrontEndStake;
     }
 
     // Internal function, used to calculcate compounded deposits and compounded front end stakes.
@@ -1031,30 +924,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         _decreaseBaseFeeLMA(BaseFeeLMAWithdrawal);
     }
 
-    // --- External Front End functions ---
-
-    // Front end makes a one-time selection of kickback rate upon registering
-    function registerFrontEnd(uint _kickbackRate) external {
-        _requireFrontEndNotRegistered(msg.sender);
-        _requireUserHasNoDeposit(msg.sender);
-        _requireValidKickbackRate(_kickbackRate);
-
-        frontEnds[msg.sender].kickbackRate = _kickbackRate;
-        frontEnds[msg.sender].registered = true;
-
-        emit FrontEndRegistered(msg.sender, _kickbackRate);
-    }
-
     // --- Stability Pool Deposit Functionality ---
-
-    function _setFrontEndTag(
-        address _depositor,
-        address _frontEndTag
-    ) internal {
-        deposits[_depositor].frontEndTag = _frontEndTag;
-        emit FrontEndTagSet(_depositor, _frontEndTag);
-    }
-
     function _updateDepositAndSnapshots(
         address _depositor,
         uint _newValue
@@ -1062,7 +932,6 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         deposits[_depositor].initialValue = _newValue;
 
         if (_newValue == 0) {
-            delete deposits[_depositor].frontEndTag;
             delete depositSnapshots[_depositor];
             emit DepositSnapshotUpdated(_depositor, 0, 0, 0);
             return;
@@ -1087,46 +956,10 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         emit DepositSnapshotUpdated(_depositor, currentP, currentS, currentG);
     }
 
-    function _updateFrontEndStakeAndSnapshots(
-        address _frontEnd,
-        uint _newValue
-    ) internal {
-        frontEndStakes[_frontEnd] = _newValue;
-
-        if (_newValue == 0) {
-            delete frontEndSnapshots[_frontEnd];
-            emit FrontEndSnapshotUpdated(_frontEnd, 0, 0);
-            return;
-        }
-
-        uint128 currentScaleCached = currentScale;
-        uint128 currentEpochCached = currentEpoch;
-        uint currentP = P;
-
-        // Get G for the current epoch and current scale
-        uint currentG = epochToScaleToG[currentEpochCached][currentScaleCached];
-
-        // Record new snapshots of the latest running product P and sum G for the front end
-        frontEndSnapshots[_frontEnd].P = currentP;
-        frontEndSnapshots[_frontEnd].G = currentG;
-        frontEndSnapshots[_frontEnd].scale = currentScaleCached;
-        frontEndSnapshots[_frontEnd].epoch = currentEpochCached;
-
-        emit FrontEndSnapshotUpdated(_frontEnd, currentP, currentG);
-    }
-
     function _payOutHOGGains(
         ICommunityIssuance _communityIssuance,
-        address _depositor,
-        address _frontEnd
+        address _depositor
     ) internal {
-        // Pay out front end's HOG gain
-        if (_frontEnd != address(0)) {
-            uint frontEndHOGGain = getFrontEndHOGGain(_frontEnd);
-            _communityIssuance.sendHOG(_frontEnd, frontEndHOGGain);
-            emit HOGPaidToFrontEnd(_frontEnd, frontEndHOGGain);
-        }
-
         // Pay out depositor's HOG gain
         uint depositorHOGGain = getDepositorHOGGain(_depositor);
         _communityIssuance.sendHOG(_depositor, depositorHOGGain);
@@ -1190,22 +1023,6 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         require(
             StETHGain > 0,
             "StabilityPool: caller must have non-zero StETH Gain"
-        );
-    }
-
-    function _requireFrontEndNotRegistered(address _address) internal view {
-        require(
-            !frontEnds[_address].registered,
-            "StabilityPool: must not already be a registered front end"
-        );
-    }
-
-    function _requireFrontEndIsRegisteredOrZero(
-        address _address
-    ) internal view {
-        require(
-            frontEnds[_address].registered || _address == address(0),
-            "StabilityPool: Tag must be a registered front end, or the zero address"
         );
     }
 

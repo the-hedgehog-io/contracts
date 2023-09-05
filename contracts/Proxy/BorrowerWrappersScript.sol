@@ -90,9 +90,10 @@ contract BorrowerWrappersScript is
         uint totalCollateral = balanceAfter.sub(balanceBefore).add(msg.value);
 
         // Open trove with obtained collateral, plus collateral sent by user
-        borrowerOperations.openTrove{value: totalCollateral}(
+        borrowerOperations.openTrove(
             _maxFee,
             _BaseFeeLMAAmount,
+            totalCollateral,
             _upperHint,
             _lowerHint
         );
@@ -117,9 +118,10 @@ contract BorrowerWrappersScript is
         if (claimedCollateral > 0) {
             _requireUserHasTrove(address(this));
             uint BaseFeeLMAAmount = _getNetBaseFeeLMAAmount(claimedCollateral);
-            borrowerOperations.adjustTrove{value: claimedCollateral}(
+            borrowerOperations.adjustTrove(
                 _maxFee,
                 0,
+                claimedCollateral,
                 BaseFeeLMAAmount,
                 true,
                 _upperHint,
@@ -127,7 +129,7 @@ contract BorrowerWrappersScript is
             );
             // Provide withdrawn BaseFeeLMA to Stability Pool
             if (BaseFeeLMAAmount > 0) {
-                stabilityPool.provideToSP(BaseFeeLMAAmount, address(0));
+                stabilityPool.provideToSP(BaseFeeLMAAmount);
             }
         }
 
@@ -160,9 +162,10 @@ contract BorrowerWrappersScript is
         if (gainedCollateral > 0) {
             _requireUserHasTrove(address(this));
             netBaseFeeLMAAmount = _getNetBaseFeeLMAAmount(gainedCollateral);
-            borrowerOperations.adjustTrove{value: gainedCollateral}(
+            borrowerOperations.adjustTrove(
                 _maxFee,
                 0,
+                gainedCollateral,
                 netBaseFeeLMAAmount,
                 true,
                 _upperHint,
@@ -172,7 +175,7 @@ contract BorrowerWrappersScript is
 
         uint totalBaseFeeLMA = gainedBaseFeeLMA.add(netBaseFeeLMAAmount);
         if (totalBaseFeeLMA > 0) {
-            stabilityPool.provideToSP(totalBaseFeeLMA, address(0));
+            stabilityPool.provideToSP(totalBaseFeeLMA);
 
             // Providing to Stability Pool also triggers HOG claim, so stake it if any
             uint hogBalanceAfter = hogToken.balanceOf(address(this));
