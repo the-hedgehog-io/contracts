@@ -20,6 +20,7 @@ import { etheredValue, setupContracts } from "../../utils";
 import { Contract } from "hardhat/internal/hardhat-network/stack-traces/model";
 import {
   CommunityIssuance,
+  ERC20Mock,
   HOGStaking,
   HOGToken,
   LockupContractFactory,
@@ -31,7 +32,10 @@ describe("BaseFeeOracle Tests", () => {
   context("Base functionality and Access Control", () => {
     let deployer: SignerWithAddress, //ultimate admin
       setter: SignerWithAddress,
-      hacker: SignerWithAddress;
+      hacker: SignerWithAddress,
+      alice: SignerWithAddress,
+      bob: SignerWithAddress,
+      carol: SignerWithAddress;
     let oracle: BaseFeeOracle;
     let priceFeed: PriceFeed;
     let sortedTroves: SortedTroves;
@@ -48,8 +52,9 @@ describe("BaseFeeOracle Tests", () => {
     let hogStaking: HOGStaking;
     let lockupContractFactory: LockupContractFactory;
     let hogToken: HOGToken;
+    let payToken: ERC20Mock;
     before(async () => {
-      [deployer, setter, hacker] = await ethers.getSigners();
+      [deployer, setter, hacker, alice, bob, carol] = await ethers.getSigners();
       oracle = await (
         await (
           await ethers.getContractFactory("BaseFeeOracle")
@@ -72,6 +77,7 @@ describe("BaseFeeOracle Tests", () => {
         hogStaking,
         lockupContractFactory,
         hogToken,
+        payToken,
       ] = await setupContracts();
     });
 

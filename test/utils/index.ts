@@ -2,7 +2,23 @@ import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
 export const setupContracts = async () => {
-  const [deployer] = await ethers.getSigners();
+  const [deployer, , hacker, alice, bob, carol] = await ethers.getSigners();
+
+  const payToken = await (
+    await (
+      await ethers.getContractFactory("ERC20Mock")
+    ).deploy(
+      "Test StETH",
+      "TSTETH",
+      deployer.address,
+      ethers.parseEther("1000000")
+    )
+  ).waitForDeployment();
+
+  await payToken.transfer(hacker.address, ethers.parseEther("10000"));
+  await payToken.transfer(alice.address, ethers.parseEther("10000"));
+  await payToken.transfer(bob.address, ethers.parseEther("10000"));
+  await payToken.transfer(carol.address, ethers.parseEther("10000"));
 
   const priceFeed = await (
     await (await ethers.getContractFactory("PriceFeed")).deploy()
@@ -111,7 +127,8 @@ export const setupContracts = async () => {
     await priceFeed.getAddress(),
     await sortedTroves.getAddress(),
     await baseFeeLMAToken.getAddress(),
-    await hogStaking.getAddress()
+    await hogStaking.getAddress(),
+    await payToken.getAddress()
   );
 
   await stabilityPool.setAddresses(
@@ -121,25 +138,29 @@ export const setupContracts = async () => {
     await baseFeeLMAToken.getAddress(),
     await sortedTroves.getAddress(),
     await priceFeed.getAddress(),
-    await communityIssuance.getAddress()
+    await communityIssuance.getAddress(),
+    await payToken.getAddress()
   );
 
   await activePool.setAddresses(
     await borrowerOperations.getAddress(),
     await troveManager.getAddress(),
     await stabilityPool.getAddress(),
-    await defaultPool.getAddress()
+    await defaultPool.getAddress(),
+    await payToken.getAddress()
   );
 
   await defaultPool.setAddresses(
     await troveManager.getAddress(),
-    await activePool.getAddress()
+    await activePool.getAddress(),
+    await payToken.getAddress()
   );
 
   await collSurplusPool.setAddresses(
     await borrowerOperations.getAddress(),
     await troveManager.getAddress(),
-    await activePool.getAddress()
+    await activePool.getAddress(),
+    await payToken.getAddress()
   );
 
   await hintHelpers.setAddresses(
@@ -170,6 +191,7 @@ export const setupContracts = async () => {
     hogStaking,
     lockupContractFactory,
     hogToken,
+    payToken,
   ];
 };
 
