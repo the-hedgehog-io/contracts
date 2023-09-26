@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
-import "./dependencies/console.sol";
+
 import "./interfaces/IPool.sol";
 
 /**
@@ -87,12 +87,14 @@ contract ActivePool is Ownable, CheckContract, IPool {
     // --- Getters for public variables. Required by IPool interface ---
 
     /*
+     * Hedgehog Updates:
+     * In case StETH is 0 return 1 to avoid division by zero in base rate calculations
      * Returns the stStETH state variable.
      *
      *Not necessarily equal to the the contract's raw StETH balance - stETH can be forcibly sent to contracts.
      */
     function getStETH() external view override returns (uint) {
-        return StETH;
+        return StETH > 0 ? StETH : 1;
     }
 
     function getBaseFeeLMADebt() external view override returns (uint) {
@@ -153,9 +155,8 @@ contract ActivePool is Ownable, CheckContract, IPool {
 
     // --- Fallback function ---
 
-    receive() external payable {
-        _requireCallerIsBorrowerOperationsOrDefaultPool();
-        StETH = StETH.add(msg.value);
-        emit ActivePoolStETHBalanceUpdated(StETH);
-    }
+    /**
+     * Hedgehog Updates:
+     * Remove native token fallback function
+     */
 }

@@ -1,5 +1,9 @@
 import { ethers } from "hardhat";
+import { time, mine } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
+import { BorrowerOperations, TroveManager } from "../../typechain-types";
+
+const { latestBlock } = time;
 
 export const setupContracts = async () => {
   const [deployer, , hacker, alice, bob, carol] = await ethers.getSigners();
@@ -20,8 +24,25 @@ export const setupContracts = async () => {
   await payToken.transfer(bob.address, ethers.parseEther("10000"));
   await payToken.transfer(carol.address, ethers.parseEther("10000"));
 
+  const mainOracle = await (
+    await (
+      await ethers.getContractFactory("BaseFeeOracle")
+    ).deploy(deployer.address, deployer.address)
+  ).waitForDeployment();
+
+  const secondaryOracle = await (
+    await (
+      await ethers.getContractFactory("BaseFeeOracle")
+    ).deploy(deployer.address, deployer.address)
+  ).waitForDeployment();
+
+  await mainOracle.feedBaseFeeValue("29", await latestBlock());
+  await secondaryOracle.feedBaseFeeValue("29", await latestBlock());
+  await mainOracle.feedBaseFeeValue("30", await latestBlock());
+  await secondaryOracle.feedBaseFeeValue("30", await latestBlock());
+
   const priceFeed = await (
-    await (await ethers.getContractFactory("PriceFeed")).deploy()
+    await (await ethers.getContractFactory("TestPriceFeed")).deploy()
   ).waitForDeployment();
 
   const sortedTroves = await (
@@ -75,7 +96,7 @@ export const setupContracts = async () => {
   ).waitForDeployment();
 
   const hogStaking = await (
-    await (await ethers.getContractFactory("HogStaking")).deploy()
+    await (await ethers.getContractFactory("HOGStaking")).deploy()
   ).waitForDeployment();
 
   const lockupContractFactory = await (
@@ -96,6 +117,11 @@ export const setupContracts = async () => {
   ).waitForDeployment();
 
   const maxBytes32 = "0x" + "f".repeat(64);
+
+  await priceFeed.setAddresses(
+    await mainOracle.getAddress(),
+    await secondaryOracle.getAddress()
+  );
 
   await sortedTroves.setParams(
     maxBytes32,
@@ -163,6 +189,15 @@ export const setupContracts = async () => {
     await payToken.getAddress()
   );
 
+  await hogStaking.setAddresses(
+    await hogToken.getAddress(),
+    await baseFeeLMAToken.getAddress(),
+    await troveManager.getAddress(),
+    await borrowerOperations.getAddress(),
+    await activePool.getAddress(),
+    await payToken.getAddress()
+  );
+
   await hintHelpers.setAddresses(
     await sortedTroves.getAddress(),
     await troveManager.getAddress()
@@ -192,7 +227,7 @@ export const setupContracts = async () => {
     lockupContractFactory,
     hogToken,
     payToken,
-  ];
+  ] as const;
 };
 
 export const etheredValue = (value: string | number) => {

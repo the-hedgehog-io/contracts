@@ -15,7 +15,7 @@ import "../SortedTroves.sol";
 import "./EchidnaProxy.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-//import "../dependencies/console.sol";
+//
 
 // Run with:
 // rm -f fuzzTests/corpus/* # (optional)

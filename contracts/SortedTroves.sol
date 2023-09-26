@@ -8,7 +8,6 @@ import "./interfaces/IBorrowerOperations.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
-import "./dependencies/console.sol";
 
 /*
  * A sorted doubly linked list with nodes sorted in descending order.

@@ -13,7 +13,7 @@ import "./dependencies/HedgehogBase.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
-import "./dependencies/console.sol";
+import "hardhat/console.sol";
 
 /**
  * @notice Fork of Liquity's TroveManager. Logic remains unchanged.
@@ -2058,10 +2058,14 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint _borrowBaseRate,
         uint _issuedBaseFeeLMA
     ) internal view returns (uint) {
+        // Checking if there are tokens in supply, otherwise return 1 to avoid division by zero
+        uint256 supply = baseFeeLMAToken.totalSupply() > 0
+            ? baseFeeLMAToken.totalSupply()
+            : 1;
         return
             LiquityMath._min(
                 BORROWING_FEE_FLOOR.add(_borrowBaseRate).add(
-                    _issuedBaseFeeLMA.div(baseFeeLMAToken.totalSupply())
+                    _issuedBaseFeeLMA.div(supply)
                 ),
                 MAX_BORROWING_FEE
             );

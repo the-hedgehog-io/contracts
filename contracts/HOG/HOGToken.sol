@@ -5,7 +5,7 @@ pragma solidity 0.8.19;
 import "../dependencies/CheckContract.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "../interfaces/ILockupContractFactory.sol";
-import "../dependencies/console.sol";
+
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../dependencies/IERC2612.sol";
 

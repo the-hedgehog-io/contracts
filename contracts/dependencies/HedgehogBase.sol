@@ -31,7 +31,7 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
     uint public constant BaseFeeLMA_GAS_COMPENSATION = 200e18;
 
     // Minimum amount of net BaseFeeLMA debt a trove must have
-    uint public constant MIN_NET_DEBT = 1800e18;
+    uint public constant MIN_NET_DEBT = 1; // TODO: Update that value
     // uint constant public MIN_NET_DEBT = 0;
 
     uint public constant PERCENT_DIVISOR = 200; // dividing by 200 yields 0.5%

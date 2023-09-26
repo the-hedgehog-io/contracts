@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 
-const ABCConfig = () => {
+export const ABCConfig = () => {
   const gasPrice010 = 30;
 
   const AliceTroveColl = ethers.parseEther("0.35");
@@ -26,13 +26,52 @@ const ABCConfig = () => {
   const BobTroveCollAfterLuquid = "2059754172045110000";
   const BobTroveDebtAfterLuquid = "5805881";
   const BobCRAfterLiquid = 591;
-  // TODO: Stopped on I37. Update Carol's variables
 
   const BobTroveIncreaseDebtSecond = "3000000";
 
   const CarolTroveColl = ethers.parseEther("3");
   const CarolTroveDebt = "4000000";
   const CarolInitialCR = 2500;
+  const CarolTroveCollAfterLiquid = "3065768314496680000";
+  const CarolTroveDebtAfterLiquid = 4644705;
+  const CarolCRAfterLiquid = 1100;
   const CarolIncreaseDebt = "400000";
   const CarolRepayment = "100000";
+
+  return {
+    gasPrice010,
+    AliceTroveColl,
+    AliceTroveDebtWithError,
+    AliceTroveDebt,
+    AliceInitialCR,
+    AliceDecreaseDebtFirst,
+    AliceDebtAfterFirstDecrease,
+    AliceCRAfterFirstDecrease,
+    AliceTroveCollAfterBobRedemption,
+    AliceTroveDebtAfterBobRedemption,
+    AliceCRAfterBobRedemption,
+    AliceRedemptionFirst,
+
+    BobTroveColl,
+    BobTroveDebt,
+    BobInitialCR,
+    BobUnstakeFirst,
+    BobRedemptionFirst,
+    BobTroveIncreaseCollFirst,
+    BobTroveCollAfterIncrease,
+    BobCRAfterIncrease,
+    BobTroveCollAfterLuquid,
+    BobTroveDebtAfterLuquid,
+    BobCRAfterLiquid,
+    BobTroveIncreaseDebtSecond,
+
+    CarolTroveColl,
+    CarolTroveDebt,
+    CarolInitialCR,
+    CarolTroveCollAfterLiquid,
+    CarolTroveDebtAfterLiquid,
+    CarolCRAfterLiquid,
+    CarolIncreaseDebt,
+    CarolRepayment,
+  } as const;
 };

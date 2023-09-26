@@ -13,7 +13,6 @@ import "../interfaces/IHOGStaking.sol";
 import "./BorrowerOperationsScript.sol";
 import "./ETHTransferScript.sol";
 import "./HOGStakingScript.sol";
-import "../dependencies/console.sol";
 
 contract BorrowerWrappersScript is
     BorrowerOperationsScript,

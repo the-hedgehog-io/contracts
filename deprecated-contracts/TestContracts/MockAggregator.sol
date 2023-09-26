@@ -3,7 +3,7 @@
 pragma solidity 0.8.19;
 
 import "../dependencies/AggregatorV3Interface.sol";
-import "../dependencies/console.sol";
+
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract MockAggregator is AggregatorV3Interface {

@@ -10,7 +10,7 @@ import "./interfaces/IHOGStaking.sol";
 import "./dependencies/HedgehogBase.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
-import "./dependencies/console.sol";
+import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -228,6 +228,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         vars.compositeDebt = _getCompositeDebt(vars.netDebt);
         assert(vars.compositeDebt > 0);
 
+        console.log("_collAmount: ", _collAmount);
+        console.log("compositeDebt: ", vars.compositeDebt);
+        console.log("price: ", vars.price);
         vars.ICR = LiquityMath._computeCR(
             _collAmount,
             vars.compositeDebt,
@@ -910,6 +913,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     }
 
     function _requireICRisAboveMCR(uint _newICR) internal pure {
+        console.log(_newICR);
         require(
             _newICR >= MCR,
             "BorrowerOps: An operation that would result in ICR < MCR is not permitted"

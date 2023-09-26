@@ -3,7 +3,6 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "./console.sol";
 
 /**
  * @notice A fork of Liquity Math library with an upgraded pragma

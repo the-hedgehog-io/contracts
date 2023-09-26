@@ -6,13 +6,13 @@ import "../dependencies/BaseMath.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../dependencies/CheckContract.sol";
-import "../dependencies/console.sol";
 import "../interfaces/IHOGToken.sol";
 import "../interfaces/IHOGStaking.sol";
 import "../dependencies/LiquityMath.sol";
 import "../interfaces/IBaseFeeLMAToken.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "hardhat/console.sol";
 
 contract HOGStaking is Ownable, CheckContract, BaseMath {
     using SafeMath for uint;
