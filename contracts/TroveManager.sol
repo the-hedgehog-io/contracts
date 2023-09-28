@@ -1499,6 +1499,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         return NICR;
     }
 
+    /**
+     * Hedgehog changes:
+     * Get Price directly from the price feed instead of param passing
+     */
     // Return the current collateral ratio (ICR) of a given Trove. Takes a trove's pending coll and debt rewards from redistributions into account.
     function getCurrentICR(
         address _borrower,
@@ -1513,6 +1517,23 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             currentStETH,
             currentBaseFeeLMADebt,
             _price
+        );
+        return ICR;
+    }
+
+    function getUnreliableTroveICR(
+        address _borrower
+    ) public view returns (uint) {
+        uint256 price = priceFeed.lastGoodPrice();
+        (
+            uint currentStETH,
+            uint currentBaseFeeLMADebt
+        ) = _getCurrentTroveAmounts(_borrower);
+
+        uint ICR = LiquityMath._computeCR(
+            currentStETH,
+            currentBaseFeeLMADebt,
+            price
         );
         return ICR;
     }

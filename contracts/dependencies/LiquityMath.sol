@@ -3,6 +3,7 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "hardhat/console.sol";
 
 /**
  * @notice A fork of Liquity Math library with an upgraded pragma
@@ -115,14 +116,21 @@ library LiquityMath {
         }
     }
 
+    /**
+     * HEDGEHOG UPDATES:
+     * Change coll ration calculation from [coll] * [price] / [debt] to
+     * [coll] / [debt] / [gasPrice]
+     */
     function _computeCR(
         uint _coll,
         uint _debt,
         uint _price
     ) internal pure returns (uint) {
         if (_debt > 0) {
-            uint newCollRatio = _coll.mul(_price).div(_debt);
-
+            // TODO: Check precision
+            uint newCollRatio = _coll.mul(DECIMAL_PRECISION).div(_debt).div(
+                _price
+            );
             return newCollRatio;
         }
         // Return the maximal value for uint256 if the Trove has a debt of 0. Represents "infinite" CR.

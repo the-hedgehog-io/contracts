@@ -228,9 +228,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         vars.compositeDebt = _getCompositeDebt(vars.netDebt);
         assert(vars.compositeDebt > 0);
 
-        console.log("_collAmount: ", _collAmount);
-        console.log("compositeDebt: ", vars.compositeDebt);
-        console.log("price: ", vars.price);
         vars.ICR = LiquityMath._computeCR(
             _collAmount,
             vars.compositeDebt,
@@ -684,6 +681,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         // Send fee to HOG staking contract
         hogStaking.increaseF_BaseFeeLMA(BaseFeeLMAFee);
+        // TODO: Update where does the token go to (some part to the staking and some part to treasury)
         _baseFeeLMAToken.mint(hogStakingAddress, BaseFeeLMAFee);
 
         return BaseFeeLMAFee;
@@ -765,14 +763,15 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     /**
      * HEDGEHOG UPDATES: use SafeERC20 safe transfer instead of native token transfer
+     * Send funds from User's accound instead of relaying native token through address(this)
      */
     // Send StETH to Active Pool and increase its recorded StETH balance
     function _activePoolAddColl(
         IActivePool _activePool,
         uint _amount
     ) internal {
-        StETHToken.safeTransfer(address(_activePool), _amount);
-        // TODO: Increase it's recorded StETH?
+        StETHToken.safeTransferFrom(msg.sender, address(_activePool), _amount);
+        activePool.increaseBalance(_amount);
     }
 
     // Issue the specified amount of BaseFeeLMA to _account and increases the total active debt (_netDebtIncrease potentially includes a BaseFeeLMAFee)
@@ -913,7 +912,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     }
 
     function _requireICRisAboveMCR(uint _newICR) internal pure {
-        console.log(_newICR);
         require(
             _newICR >= MCR,
             "BorrowerOps: An operation that would result in ICR < MCR is not permitted"

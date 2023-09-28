@@ -153,6 +153,16 @@ contract ActivePool is Ownable, CheckContract, IPool {
         );
     }
 
+    /**
+     * Hedgehog Updates:
+     * Using increaseBalance function to increase activePool balance instead of fallback function
+     */
+    function increaseBalance(uint256 _amount) external {
+        _requireCallerIsBorrowerOperationsOrDefaultPool();
+        StETH = StETH.add(_amount);
+        emit ActivePoolStETHBalanceUpdated(StETH);
+    }
+
     // --- Fallback function ---
 
     /**

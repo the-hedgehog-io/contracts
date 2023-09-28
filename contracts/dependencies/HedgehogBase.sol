@@ -28,7 +28,7 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
     uint public constant CCR = 1500000000000000000; // 150%
 
     // Amount of BaseFeeLMA to be locked in gas pool on opening troves
-    uint public constant BaseFeeLMA_GAS_COMPENSATION = 200e18;
+    uint public constant BaseFeeLMA_GAS_COMPENSATION = 50000;
 
     // Minimum amount of net BaseFeeLMA debt a trove must have
     uint public constant MIN_NET_DEBT = 1; // TODO: Update that value

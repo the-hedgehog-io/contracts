@@ -17,4 +17,6 @@ interface IActivePool is IPool {
     function sendStETH(address _account, uint _amount) external;
 
     function getStETH() external view returns (uint256);
+
+    function increaseBalance(uint256 _amount) external;
 }

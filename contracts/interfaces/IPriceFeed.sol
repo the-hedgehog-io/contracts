@@ -8,4 +8,6 @@ interface IPriceFeed {
 
     // --- Function ---
     function fetchPrice() external returns (uint);
+
+    function lastGoodPrice() external view returns (uint);
 }
