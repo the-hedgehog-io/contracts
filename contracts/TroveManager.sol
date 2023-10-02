@@ -1917,6 +1917,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         return _checkRecoveryMode(_price);
     }
 
+    function checkUnreliableRecoveryMode() external view returns (bool) {
+        return _checkRecoveryMode(priceFeed.lastGoodPrice());
+    }
+
     // Check whether or not the system *would be* in Recovery Mode, given an StETH:USD price, and the entire system coll and debt.
     function _checkPotentialRecoveryMode(
         uint _entireSystemColl,
@@ -2083,6 +2087,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint256 supply = baseFeeLMAToken.totalSupply() > 0
             ? baseFeeLMAToken.totalSupply()
             : 1;
+
+        console.log("supply: ", supply);
+        console.log("borrow base rate: ", _borrowBaseRate);
+        console.log("issued :", _issuedBaseFeeLMA);
+        console.log("ratio: ", _issuedBaseFeeLMA.div(supply));
         return
             LiquityMath._min(
                 BORROWING_FEE_FLOOR.add(_borrowBaseRate).add(
@@ -2120,6 +2129,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint _borrowingRate,
         uint _BaseFeeLMADebt // TODO: Check that it's not total but newly issues tokens
     ) internal pure returns (uint) {
+        console.log("rate: ", _borrowingRate);
+        console.log("debt: ", _BaseFeeLMADebt);
         return _borrowingRate.mul(_BaseFeeLMADebt).div(DECIMAL_PRECISION);
     }
 

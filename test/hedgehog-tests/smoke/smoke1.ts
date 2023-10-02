@@ -63,6 +63,8 @@ describe("BaseFeeOracle Tests", () => {
     const AliceTroveColl = BigInt("350000000000000000");
     const AliceTroveDebtWithError = BigInt("100000000");
     const AliceTroveDebt = BigInt("7000000");
+    const AliceTroveOpeningFee = BigInt("35000");
+    const AliceBFEBalanceAtOpening = BigInt("6915000");
     const AliceInitialCR = 167;
     const AliceDecreaseDebtFirst = BigInt("2000000");
     const AliceDebtAfterFirstDecrease = BigInt("5000000");
@@ -75,6 +77,8 @@ describe("BaseFeeOracle Tests", () => {
     const BobTroveColl = ethers.parseEther("2");
     const BobTroveDebt = BigInt("5000000");
     const BobInitialCR = 1333;
+    const BobTroveOpeningFee = BigInt("3571099");
+    const BobBFEBalanceAtOpening = BigInt("3571099");
     const BobUnstakeFirst = BigInt("560000");
     const BobRedemptionFirst = BigInt("560000");
     const BobTroveIncreaseCollFirst = BigInt("16663244859813100");
@@ -180,6 +184,32 @@ describe("BaseFeeOracle Tests", () => {
       await stabilityPool.connect(caller).provideToSP(amount);
     };
 
+    type DecreaseDebtParams = {
+      caller: SignerWithAddress;
+      amount: string | BigNumberish;
+      maxFeePercentage: string | BigNumberish;
+      upperHint: string;
+      lowerHint: string;
+    };
+
+    const decreaseDebt = async ({
+      caller = bob,
+      amount = 0,
+      maxFeePercentage = ethers.parseEther("1"),
+    }: Partial<DecreaseDebtParams> = {}) => {
+      await borrowerOperations
+        .connect(caller)
+        .adjustTrove(
+          maxFeePercentage,
+          0,
+          0,
+          amount,
+          false,
+          ethers.ZeroAddress,
+          ethers.ZeroAddress
+        );
+    };
+
     it("Should not let open trove if CR is below minimum", async () => {
       await priceFeed.setLastGoodPrice(gasPrice010);
 
@@ -204,27 +234,29 @@ describe("BaseFeeOracle Tests", () => {
 
     it("Should calculate and return correct CR for alice's position", async () => {
       const cr = await getCR({ owner: alice });
-      console.log(cr);
 
       // TODO: Add expect
     });
 
-    it("Should have a correct amount of collateral in position record (alice position)", async () => {
+    it("Should have a correct amount of collateral and debt in position record (alice position)", async () => {
       const { debt, coll } = await getTrove(alice);
 
-      expect(debt).to.be.equal(AliceTroveDebt - gasCompensationReserve);
+      expect(debt).to.be.equal(AliceTroveDebt + gasCompensationReserve);
       expect(coll).to.be.equal(AliceTroveColl);
     });
 
-    it("Should have taken a correct fee during position opening (alice position)", async () => {
-      // TODO: Do the test after the math is done
-    });
+    it("Should have transferred the correct amount BFE token during position opening (alice position)", async () => {
+      const balance = await baseFeeLMAToken.balanceOf(alice.address);
 
-    it("Should have taken a correct fee during position opening (alice position)", async () => {
-      // TODO: Do the test after the math is done
+      expect(AliceBFEBalanceAtOpening).to.be.equal(
+        AliceTroveDebt - AliceTroveOpeningFee - gasCompensationReserve
+      );
+
+      expect(balance).to.be.equal(AliceBFEBalanceAtOpening);
     });
 
     it("Should let another user(bob) open a position", async () => {
+      console.log("Opening Bob");
       await openTrove({
         caller: bob,
         baseFeeLMAAmount: BobTroveDebt,
@@ -235,8 +267,17 @@ describe("BaseFeeOracle Tests", () => {
     it("Should have a correct amount of collateral in position record (bob position)", async () => {
       const { debt, coll } = await getTrove(bob);
 
-      expect(debt).to.be.equal(BobTroveDebt - gasCompensationReserve);
+      expect(debt).to.be.equal(BobTroveDebt + gasCompensationReserve);
       expect(coll).to.be.equal(BobTroveColl);
+    });
+
+    it("Should have transferred the correct amount BFE token during position opening (bob position)", async () => {
+      const balance = await baseFeeLMAToken.balanceOf(bob.address);
+
+      expect(BobBFEBalanceAtOpening).to.be.equal(
+        BobTroveDebt - BobTroveOpeningFee - gasCompensationReserve
+      );
+      expect(balance).to.be.equal(BobBFEBalanceAtOpening);
     });
 
     it("Should have taken a correct fee during position opening (bob position)", async () => {
@@ -252,12 +293,63 @@ describe("BaseFeeOracle Tests", () => {
       await provide({ amount: BobTroveDebt });
     });
 
-    it("Should record correct amount", async () => {
+    it("Shouldn't have the system in the recovery mode", async () => {
+      expect(await troveManager.checkUnreliableRecoveryMode()).to.be.equal(
+        false
+      );
+    });
+
+    it("Should record correct staked amount", async () => {
       const deposit = await stabilityPool.getCompoundedBaseFeeLMADeposit(
         bob.address
       );
 
       expect(deposit).to.be.equal(BobTroveDebt);
     });
+
+    it("Should let adjust the position (alice position)", async () => {
+      await decreaseDebt({ caller: alice, amount: AliceDecreaseDebtFirst });
+    });
+
+    it("Should record correct amount of deft after decrease (alice position)", async () => {
+      // TODO: Do the test after the math is done
+    });
+
+    it("Should let open another position in the system (carol position)", async () => {
+      await openTrove({
+        caller: carol,
+        collAmount: CarolTroveColl,
+        baseFeeLMAAmount: CarolTroveDebt,
+      });
+    });
+
+    it("Should have taken a correct fee during position opening (carol position)", async () => {
+      // TODO: Do the test after the math is done
+    });
+
+    it("Should have taken a correct fee during position opening (carol position)", async () => {
+      // TODO: Do the test after the math is done
+    });
+
+    it("Should let another user provide to stability pool (carol)", async () => {
+      await provide({ caller: carol, amount: CarolTroveDebt });
+      const deposit = await stabilityPool.getCompoundedBaseFeeLMADeposit(
+        carol.address
+      );
+
+      expect(deposit).to.be.equal(CarolTroveDebt);
+    });
+
+    it("Should let withdraw provided funds", async () => {
+      await stabilityPool.connect(bob).withdrawFromSP(BobUnstakeFirst);
+    });
+
+    it("Withdrawn funds should result in a correct balance", async () => {
+      expect(baseFeeLMAToken.balanceOf(bob.address)).to.be.equal(
+        BobUnstakeFirst
+      );
+    });
+
+    it("Should");
   });
 });

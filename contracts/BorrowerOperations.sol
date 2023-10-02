@@ -220,11 +220,13 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
                 _BaseFeeLMAAmount,
                 _maxFeePercentage
             );
-            vars.netDebt = vars.netDebt.add(vars.BaseFeeLMAFee);
+            console.log(vars.BaseFeeLMAFee);
+            // Hedgehog changes: Do no subtract the fee from the debt
+            // vars.netDebt = vars.netDebt.sub(vars.BaseFeeLMAFee);
         }
         _requireAtLeastMinNetDebt(vars.netDebt);
 
-        // ICR is based on the composite debt, i.e. the requested BaseFeeLMA amount + BaseFeeLMA borrowing fee + BaseFeeLMA gas comp.
+        // Hedgehog changes: composite debt now is BaseFeeLMA amount + gas comp. Without borrowing fee
         vars.compositeDebt = _getCompositeDebt(vars.netDebt);
         assert(vars.compositeDebt > 0);
 
@@ -277,7 +279,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             contractsCache.activePool,
             contractsCache.baseFeeLMAToken,
             msg.sender,
-            _BaseFeeLMAAmount,
+            _BaseFeeLMAAmount -
+                vars.BaseFeeLMAFee -
+                BaseFeeLMA_GAS_COMPENSATION,
             vars.netDebt
         );
         // Move the BaseFeeLMA gas compensation to the Gas Pool
@@ -672,7 +676,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     ) internal returns (uint) {
         _troveManager.decayBaseRateFromBorrowing(); // decay the baseRate state variable
         uint BaseFeeLMAFee = _troveManager.getBorrowingFee(_BaseFeeLMAAmount);
-
+        console.log(BaseFeeLMAFee);
         _requireUserAcceptsFee(
             BaseFeeLMAFee,
             _BaseFeeLMAAmount,
