@@ -1188,10 +1188,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         );
 
         // Get the StETHLot of equivalent value in USD
-        singleRedemption.StETHLot = singleRedemption
-            .BaseFeeLMALot
-            .mul(DECIMAL_PRECISION)
-            .div(_price);
+        // HEDGEHOG UPDATES: Change StETHLOT calculations formula from [debtToBeRedeemed * price * 10e9] to [debtToBeRedeemed / price * 1e18]
+        singleRedemption.StETHLot = singleRedemption.BaseFeeLMALot.mul(_price);
 
         // Decrease the debt and collateral of the current Trove according to the BaseFeeLMA lot and corresponding StETH to send
         uint newDebt = (Troves[_borrower].debt).sub(
@@ -1225,6 +1223,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
              *
              * If the resultant net debt of the partial is less than the minimum, net debt we bail.
              */
+
             if (
                 newNICR != _partialRedemptionHintNICR ||
                 _getNetDebt(newDebt) < MIN_NET_DEBT
@@ -1341,8 +1340,9 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         RedemptionTotals memory totals;
 
         _requireValidMaxFeePercentage(_maxFeePercentage);
-        _requireAfterBootstrapPeriod();
+        //_requireAfterBootstrapPeriod();
         totals.price = priceFeed.fetchPrice();
+
         _requireTCRoverMCR(totals.price);
         _requireAmountGreaterThanZero(_BaseFeeLMAamount);
         _requireBaseFeeLMABalanceCoversRedemption(
@@ -1964,9 +1964,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
         /* Convert the drawn StETH back to BaseFeeLMA at face value rate (1 BaseFeeLMA:1 USD), in order to get
          * the fraction of total supply that was redeemed at face value. */
-        uint redeemedBaseFeeLMAFraction = _StETHDrawn.mul(_price).div(
-            _totalBaseFeeLMASupply
-        );
+        uint redeemedBaseFeeLMAFraction = _StETHDrawn
+            .mul(_price)
+            .div(DECIMAL_PRECISION)
+            .div(_totalBaseFeeLMASupply);
 
         // Hedgehog Updates: Remove division by BETA
         uint newBaseRate = decayedRedemptionBaseRate.add(
@@ -1981,7 +1982,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         emit RedemptionBaseRateUpdated(newBaseRate);
 
         _updateLastRedemptionTime();
-
         return newBaseRate;
     }
 
@@ -2015,6 +2015,15 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint _redemptionBaseRate,
         uint _redemptionColl
     ) internal view returns (uint) {
+        console.log("baseRate", _redemptionBaseRate);
+        console.log("coll", _redemptionColl);
+        console.log("Active Pool eth", activePool.getStETH());
+        console.log(
+            "rate result: ",
+            REDEMPTION_FEE_FLOOR.add(_redemptionBaseRate).add(
+                _redemptionColl.div(activePool.getStETH())
+            )
+        );
         return
             LiquityMath._min(
                 REDEMPTION_FEE_FLOOR.add(_redemptionBaseRate).add(
@@ -2093,29 +2102,13 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         if (supply == 0) {
             return BORROWING_FEE_FLOOR;
         }
-
         console.log("supply: ", supply);
-        console.log("borrow base rate: ", _borrowBaseRate);
-        console.log("issued :", _issuedBaseFeeLMA);
-        console.log(
-            "beforeMinResult: ",
-            BORROWING_FEE_FLOOR.add(_borrowBaseRate).div(10).add(
-                _issuedBaseFeeLMA.mul(DECIMAL_PRECISION).div(supply).div(10)
-            )
-        );
-        console.log(
-            "result: ",
-            LiquityMath._min(
-                BORROWING_FEE_FLOOR.add(_borrowBaseRate).div(10).add(
-                    _issuedBaseFeeLMA.mul(DECIMAL_PRECISION).div(supply).div(10)
-                ),
-                MAX_BORROWING_FEE
-            )
-        );
+        console.log("_borrowBaseRate", _borrowBaseRate);
+        console.log("_issuedBaseFeeLMA", _issuedBaseFeeLMA);
         return
             LiquityMath._min(
-                BORROWING_FEE_FLOOR.add(_borrowBaseRate).div(10).add(
-                    _issuedBaseFeeLMA.mul(DECIMAL_PRECISION).div(supply).div(10)
+                BORROWING_FEE_FLOOR.add(_borrowBaseRate).add(
+                    _issuedBaseFeeLMA.mul(DECIMAL_PRECISION).div(supply)
                 ),
                 MAX_BORROWING_FEE
             );

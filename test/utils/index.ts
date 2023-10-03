@@ -40,6 +40,8 @@ export const setupContracts = async () => {
   await secondaryOracle.feedBaseFeeValue("28000000000", await latestBlock());
   await mainOracle.feedBaseFeeValue("29000000000", await latestBlock());
   await secondaryOracle.feedBaseFeeValue("29000000000", await latestBlock());
+  await mainOracle.feedBaseFeeValue("30000000000", await latestBlock());
+  await secondaryOracle.feedBaseFeeValue("30000000000", await latestBlock());
 
   const priceFeed = await (
     await (await ethers.getContractFactory("TestPriceFeed")).deploy()

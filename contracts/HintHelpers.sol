@@ -116,16 +116,17 @@ contract HintHelpers is HedgehogBase, Ownable, CheckContract {
                             troveManager.getPendingStETHReward(currentTroveuser)
                         );
 
+                    // HEDGEHOG UPDATES: Change StETHLOT calculations formula from [debtToBeRedeemed * price * 10e9] to [debtToBeRedeemed / price * 1e18]
                     uint newColl = StETH.sub(
-                        maxRedeemableBaseFeeLMA.mul(DECIMAL_PRECISION).div(
-                            _price
-                        )
+                        maxRedeemableBaseFeeLMA.mul(_price)
                     );
                     uint newDebt = netBaseFeeLMADebt.sub(
                         maxRedeemableBaseFeeLMA
                     );
 
                     uint compositeDebt = _getCompositeDebt(newDebt);
+                    console.log("New Coll: ", newColl);
+                    console.log("Composite Debt: ", compositeDebt);
                     partialRedemptionHintNICR = LiquityMath._computeNominalCR(
                         newColl,
                         compositeDebt

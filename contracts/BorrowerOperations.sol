@@ -220,7 +220,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
                 _BaseFeeLMAAmount,
                 _maxFeePercentage
             );
-            console.log(vars.BaseFeeLMAFee);
+            console.log("Fee: ", vars.BaseFeeLMAFee);
             // Hedgehog changes: Do no subtract the fee from the debt
             // vars.netDebt = vars.netDebt.sub(vars.BaseFeeLMAFee);
         }
@@ -275,6 +275,13 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         // Move the stETH to the Active Pool, and mint the BaseFeeLMAAmount to the borrower
         _activePoolAddColl(contractsCache.activePool, _collAmount);
+        console.log("BFE_Amount:", _BaseFeeLMAAmount);
+        console.log("fee: ", vars.BaseFeeLMAFee);
+        console.log("gas comp: ", BaseFeeLMA_GAS_COMPENSATION);
+        console.log(
+            "Result: ",
+            _BaseFeeLMAAmount - vars.BaseFeeLMAFee - BaseFeeLMA_GAS_COMPENSATION
+        );
         _withdrawBaseFeeLMA(
             contractsCache.activePool,
             contractsCache.baseFeeLMAToken,
@@ -676,7 +683,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     ) internal returns (uint) {
         _troveManager.decayBaseRateFromBorrowing(); // decay the baseRate state variable
         uint BaseFeeLMAFee = _troveManager.getBorrowingFee(_BaseFeeLMAAmount);
-        console.log(BaseFeeLMAFee);
+        console.log("Fee: ", BaseFeeLMAFee);
         _requireUserAcceptsFee(
             BaseFeeLMAFee,
             _BaseFeeLMAAmount,
@@ -787,6 +794,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint _netDebtIncrease
     ) internal {
         _activePool.increaseBaseFeeLMADebt(_netDebtIncrease);
+        console.log("end amount: ", _BaseFeeLMAAmount);
         _baseFeeLMAToken.mint(_account, _BaseFeeLMAAmount);
     }
 

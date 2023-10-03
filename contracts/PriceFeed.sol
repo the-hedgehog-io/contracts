@@ -126,6 +126,7 @@ contract PriceFeed is Ownable, BaseMath {
         // --- CASE 1: System fetched last price from Main Oracle  ---
         if (status == Status.mainOracleWorking) {
             // If Main Oracle is broken, try backup
+
             if (
                 _mainOracleIsBroken(mainOracleResponse, prevMainOracleResponse)
             ) {
@@ -600,6 +601,7 @@ contract PriceFeed is Ownable, BaseMath {
             uint256(_response.answer),
             _decimals
         );
+
         _storePrice(scaledPrice);
 
         return scaledPrice;
