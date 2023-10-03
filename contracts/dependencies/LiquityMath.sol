@@ -139,4 +139,48 @@ library LiquityMath {
             return 2 ** 256 - 1;
         }
     }
+
+    function _findPriceBelowMCR(
+        uint256 _coll,
+        uint256 _debt,
+        uint256 _startPrice,
+        uint _mcr
+    ) internal pure returns (uint256) {
+        uint256 step = 1; // Starting with the smallest step size
+        uint256 GWEI = 10 ** 9;
+        uint256 previousPrice = _startPrice * GWEI; // To track previous iteration's price
+
+        for (
+            uint256 price = _startPrice * GWEI;
+            price <= 750 * GWEI;
+            price += step
+        ) {
+            uint256 cr = _computeCR(_coll, _debt, price);
+
+            if (cr < _mcr) {
+                // Start decreasing the price to find the exact threshold
+                for (
+                    uint256 decreasedPrice = previousPrice;
+                    decreasedPrice <= price &&
+                        decreasedPrice >= _startPrice * GWEI; // Added protection against underflow
+                    decreasedPrice -= GWEI
+                ) {
+                    if (_computeCR(_coll, _debt, decreasedPrice) < _mcr) {
+                        return decreasedPrice;
+                    }
+                }
+            }
+
+            // Dynamically adjust step size
+            if (cr < (_mcr - 200000000000000000)) {
+                step = 20 * GWEI; // Increase step size if CR is much lower than MCR
+            } else if (cr > (_mcr + 50000000000000000)) {
+                step = GWEI; // Decrease step size if CR is much higher than MCR
+            }
+
+            previousPrice = price; // Update previous price for the next iteration
+        }
+
+        return 0; // return 0 if no price was found that brings the CR below MCR
+    }
 }

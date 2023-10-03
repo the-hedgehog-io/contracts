@@ -1035,9 +1035,10 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
 
     // --- Fallback function ---
 
-    receive() external payable {
-        _requireCallerIsActivePool();
-        StETH = StETH.add(msg.value);
-        emit StabilityPoolStETHBalanceUpdated(StETH);
-    }
+    /**
+     * Hedgehog Updates:
+     * Remove native token fallback function and not replace with StEth increaser count in attempt to break something
+     *
+     * TODO: Figure if something got broken
+     */
 }

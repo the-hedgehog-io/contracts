@@ -22,7 +22,7 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
     uint public constant _100pct = 1000000000000000000; // 1e18 == 100%
 
     // Minimum collateral ratio for individual troves
-    uint public constant MCR = 1100000000000000000; // 110%
+    uint public constant MCR = 1500000000000000000; // 150%
 
     // Critical system collateral ratio. If the system's total collateral ratio (TCR) falls below the CCR, Recovery Mode is triggered.
     uint public constant CCR = 1500000000000000000; // 150%

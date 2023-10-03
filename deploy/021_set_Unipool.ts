@@ -40,6 +40,7 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
 
     console.log(
       "Params: ",
+      Unipool.address,
       HOGToken.address,
       BaseFeeLMAStEthPairAddr,
       timeValues.SECONDS_IN_SIX_WEEKS

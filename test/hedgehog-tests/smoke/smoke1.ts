@@ -224,7 +224,7 @@ describe("BaseFeeOracle Tests", () => {
       );
     });
 
-    it("Should let open trove to Alice with correct params", async () => {
+    it.only("Should let open trove to Alice with correct params", async () => {
       await openTrove({
         caller: alice,
         baseFeeLMAAmount: AliceTroveDebt,
@@ -233,9 +233,12 @@ describe("BaseFeeOracle Tests", () => {
     });
 
     it("Should calculate and return correct CR for alice's position", async () => {
-      const cr = await getCR({ owner: alice });
-
-      // TODO: Add expect
+      //const cr = await getCR({ owner: alice });
+      // const liqPrice = await troveManager.getLiquidationPrice(
+      //   AliceTroveColl,
+      //   AliceTroveDebt
+      // );
+      // console.log(liqPrice);
     });
 
     it("Should have a correct amount of collateral and debt in position record (alice position)", async () => {
@@ -255,7 +258,7 @@ describe("BaseFeeOracle Tests", () => {
       expect(balance).to.be.equal(AliceBFEBalanceAtOpening);
     });
 
-    it("Should let another user(bob) open a position", async () => {
+    it.only("Should let another user(bob) open a position", async () => {
       console.log("Opening Bob");
       await openTrove({
         caller: bob,

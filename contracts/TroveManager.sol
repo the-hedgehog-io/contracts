@@ -55,7 +55,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
      */
     uint public constant MINUTE_DECAY_FACTOR = 999037758833783000;
     uint public constant REDEMPTION_FEE_FLOOR = (DECIMAL_PRECISION / 1000) * 5; // 0.5%
-    uint public constant MAX_BORROWING_FEE = (DECIMAL_PRECISION / 100) * 5; // 5%
+    uint public constant MAX_BORROWING_FEE = DECIMAL_PRECISION; // 100%
 
     // During bootsrap period redemptions are not allowed
     uint public constant BOOTSTRAP_PERIOD = 14 days;
@@ -1433,7 +1433,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             "TroveManager: Unable to redeem any amount"
         );
         // HEDGEHOG LOGIC UPDATE:
-        // 1) rename _updateBaseRateFromRedemption into _updateRedemptionBaseRateFromRemeption
+        // 1) rename _updateBaseRateFromRedemption into _updateRedemptionBaseRateFromRedemption
         // 2) update commented explanation (baseRate => redemptionBaseRate)
         // Decay the redemptionBaseRate due to time passed, and then increase it according to the size of this redemption.
         // Use the saved total BaseFeeLMA supply value, from before it was reduced by the redemption.
@@ -1913,6 +1913,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         return _getTCR(_price);
     }
 
+    function getUnreliableTCR() external view returns (uint) {
+        return _getTCR(priceFeed.lastGoodPrice());
+    }
+
     function checkRecoveryMode(uint _price) external view returns (bool) {
         return _checkRecoveryMode(_price);
     }
@@ -1964,8 +1968,9 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             _totalBaseFeeLMASupply
         );
 
+        // Hedgehog Updates: Remove division by BETA
         uint newBaseRate = decayedRedemptionBaseRate.add(
-            redeemedBaseFeeLMAFraction.div(BETA)
+            redeemedBaseFeeLMAFraction
         );
         newBaseRate = LiquityMath._min(newBaseRate, DECIMAL_PRECISION); // cap baseRate at a maximum of 100%
         //assert(newBaseRate <= DECIMAL_PRECISION); // This is already enforced in the line above
@@ -2083,19 +2088,34 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint _borrowBaseRate,
         uint _issuedBaseFeeLMA
     ) internal view returns (uint) {
+        uint256 supply = baseFeeLMAToken.totalSupply();
         // Checking if there are tokens in supply, otherwise return 1 to avoid division by zero
-        uint256 supply = baseFeeLMAToken.totalSupply() > 0
-            ? baseFeeLMAToken.totalSupply()
-            : 1;
+        if (supply == 0) {
+            return BORROWING_FEE_FLOOR;
+        }
 
         console.log("supply: ", supply);
         console.log("borrow base rate: ", _borrowBaseRate);
         console.log("issued :", _issuedBaseFeeLMA);
-        console.log("ratio: ", _issuedBaseFeeLMA.div(supply));
+        console.log(
+            "beforeMinResult: ",
+            BORROWING_FEE_FLOOR.add(_borrowBaseRate).div(10).add(
+                _issuedBaseFeeLMA.mul(DECIMAL_PRECISION).div(supply).div(10)
+            )
+        );
+        console.log(
+            "result: ",
+            LiquityMath._min(
+                BORROWING_FEE_FLOOR.add(_borrowBaseRate).div(10).add(
+                    _issuedBaseFeeLMA.mul(DECIMAL_PRECISION).div(supply).div(10)
+                ),
+                MAX_BORROWING_FEE
+            )
+        );
         return
             LiquityMath._min(
-                BORROWING_FEE_FLOOR.add(_borrowBaseRate).add(
-                    _issuedBaseFeeLMA.div(supply)
+                BORROWING_FEE_FLOOR.add(_borrowBaseRate).div(10).add(
+                    _issuedBaseFeeLMA.mul(DECIMAL_PRECISION).div(supply).div(10)
                 ),
                 MAX_BORROWING_FEE
             );
@@ -2129,8 +2149,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint _borrowingRate,
         uint _BaseFeeLMADebt // TODO: Check that it's not total but newly issues tokens
     ) internal pure returns (uint) {
-        console.log("rate: ", _borrowingRate);
-        console.log("debt: ", _BaseFeeLMADebt);
         return _borrowingRate.mul(_BaseFeeLMADebt).div(DECIMAL_PRECISION);
     }
 
@@ -2363,5 +2381,31 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint newDebt = Troves[_borrower].debt.sub(_debtDecrease);
         Troves[_borrower].debt = newDebt;
         return newDebt;
+    }
+
+    function getNormalLiquidationPrice(
+        uint256 _coll,
+        uint256 _debt
+    ) external pure returns (uint256) {
+        uint256 price = LiquityMath._findPriceBelowMCR(
+            _coll,
+            _debt,
+            20,
+            HedgehogBase.MCR
+        );
+        return price;
+    }
+
+    function getRecoveryLiquidationPrice(
+        uint256 _coll,
+        uint256 _debt
+    ) external pure returns (uint256) {
+        uint256 price = LiquityMath._findPriceBelowMCR(
+            _coll,
+            _debt,
+            20,
+            HedgehogBase._100pct
+        );
+        return price;
     }
 }

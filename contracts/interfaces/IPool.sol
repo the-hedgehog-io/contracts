@@ -22,4 +22,6 @@ interface IPool {
     function increaseBaseFeeLMADebt(uint _amount) external;
 
     function decreaseBaseFeeLMADebt(uint _amount) external;
+
+    // function increaseCollCountInPool(uint256 _amount) external;
 }

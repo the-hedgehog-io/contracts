@@ -19,6 +19,7 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const HOGStaking = await deployments.get("HOGStaking");
   const CommunityIssuance = await deployments.get("CommunityIssuance");
   const HintHelpers = await deployments.get("HintHelpers");
+  const { stEth: StETHAddress } = deployConfig;
 
   if (!(await isOwnershipRenounced(SortedTroves.address))) {
     console.log("Setting up SortedTroves...");
@@ -73,7 +74,8 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       PriceFeed.address,
       SortedTroves.address,
       BaseFeeLMAToken.address,
-      HOGStaking.address
+      HOGStaking.address,
+      StETHAddress
     );
   }
   console.log("BorrowerOperations is set");
@@ -90,7 +92,8 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       BaseFeeLMAToken.address,
       SortedTroves.address,
       PriceFeed.address,
-      CommunityIssuance.address
+      CommunityIssuance.address,
+      StETHAddress
     );
   }
   console.log("StabilityPool is set");
@@ -105,7 +108,8 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       BorrowerOperations.address,
       TroveManager.address,
       StabilityPool.address,
-      DefaultPool.address
+      DefaultPool.address,
+      StETHAddress
     );
   }
   console.log("ActivePool is set");
@@ -118,7 +122,8 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       { from: deployer },
       "setAddresses",
       TroveManager.address,
-      ActivePool.address
+      ActivePool.address,
+      StETHAddress
     );
   }
   console.log("DefaultPool is set");
