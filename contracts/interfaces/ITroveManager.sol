@@ -173,11 +173,15 @@ interface ITroveManager is IHedgehogBase {
         uint _issuedBaseFeeLMA
     ) external view returns (uint);
 
-    function getBorrowingFee(uint BaseFeeLMADebt) external view returns (uint);
+    function getBorrowingFee(
+        uint BaseFeeLMADebt
+    ) external view returns (uint, uint);
 
     function getBorrowingFeeWithDecay(
         uint _BaseFeeLMADebt
     ) external view returns (uint);
+
+    function updateBaseRateFromBorrowing(uint _baseRate) external;
 
     function decayBaseRateFromBorrowing() external;
 

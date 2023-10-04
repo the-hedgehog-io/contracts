@@ -229,6 +229,8 @@ export const setupContracts = async () => {
     lockupContractFactory,
     hogToken,
     payToken,
+    mainOracle,
+    secondaryOracle,
   ] as const;
 };
 

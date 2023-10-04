@@ -101,7 +101,7 @@ const config: HardhatUserConfig = {
     path: "./dist",
     runOnCompile: true,
     clear: true,
-    flat: false,
+    flat: true,
     pretty: false,
   },
 };

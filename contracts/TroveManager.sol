@@ -53,7 +53,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
      * Half-life of 12h. 12h = 720 min
      * (1/2) = d^720 => d = (1/2)^(1/720)
      */
-    uint public constant MINUTE_DECAY_FACTOR = 999037758833783000;
+    uint public constant MINUTE_DECAY_REDEMPTION_FACTOR = 999037758833783000;
+    uint public constant MINUTE_DECAY_BORROWING_FACTOR = 991152865945140000;
     uint public constant REDEMPTION_FEE_FLOOR = (DECIMAL_PRECISION / 1000) * 5; // 0.5%
     uint public constant MAX_BORROWING_FEE = DECIMAL_PRECISION; // 100%
 
@@ -1442,9 +1443,9 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             totals.price,
             totals.totalBaseFeeLMASupplyAtStart
         );
-
         // Calculate the StETH fee
         totals.StETHFee = _getRedemptionFee(totals.totalStETHDrawn);
+        console.log("Redemption fee: ", totals.StETHFee);
 
         _requireUserAcceptsFee(
             totals.StETHFee,
@@ -1461,7 +1462,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         totals.StETHToSendToRedeemer = totals.totalStETHDrawn.sub(
             totals.StETHFee
         );
-
+        console.log(
+            "What actually gets transferred: ",
+            totals.StETHToSendToRedeemer
+        );
         emit Redemption(
             _BaseFeeLMAamount,
             totals.totalBaseFeeLMAToRedeem,
@@ -1961,18 +1965,20 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint _totalBaseFeeLMASupply
     ) internal returns (uint) {
         uint decayedRedemptionBaseRate = _calcDecayedRedemptionBaseRate();
-
+        // Hedgehog updates: Now calculating what part of total collateral is getting withdrawn from the
+        // system
         /* Convert the drawn StETH back to BaseFeeLMA at face value rate (1 BaseFeeLMA:1 USD), in order to get
          * the fraction of total supply that was redeemed at face value. */
+        console.log("total coll: ", activePool.getStETH());
         uint redeemedBaseFeeLMAFraction = _StETHDrawn
-            .mul(_price)
-            .div(DECIMAL_PRECISION)
-            .div(_totalBaseFeeLMASupply);
+            .mul(DECIMAL_PRECISION)
+            .div(activePool.getStETH()); // TODO: Fix the error
 
         // Hedgehog Updates: Remove division by BETA
         uint newBaseRate = decayedRedemptionBaseRate.add(
             redeemedBaseFeeLMAFraction
         );
+        console.log("redeemed lma fraction", redeemedBaseFeeLMAFraction);
         newBaseRate = LiquityMath._min(newBaseRate, DECIMAL_PRECISION); // cap baseRate at a maximum of 100%
         //assert(newBaseRate <= DECIMAL_PRECISION); // This is already enforced in the line above
         assert(newBaseRate > 0); // Base rate is always non-zero after redemption
@@ -2102,9 +2108,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         if (supply == 0) {
             return BORROWING_FEE_FLOOR;
         }
-        console.log("supply: ", supply);
         console.log("_borrowBaseRate", _borrowBaseRate);
-        console.log("_issuedBaseFeeLMA", _issuedBaseFeeLMA);
+
         return
             LiquityMath._min(
                 BORROWING_FEE_FLOOR.add(_borrowBaseRate).add(
@@ -2116,12 +2121,9 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
     function getBorrowingFee(
         uint _BaseFeeLMADebt // TODO: Double check that it's only newly issues tokens and not the full debt
-    ) external view returns (uint) {
-        return
-            _calcBorrowingFee(
-                getBorrowingRate(_BaseFeeLMADebt),
-                _BaseFeeLMADebt
-            );
+    ) external view returns (uint, uint) {
+        uint baseRate = getBorrowingRate(_BaseFeeLMADebt);
+        return (_calcBorrowingFee(baseRate, _BaseFeeLMADebt), baseRate);
     }
 
     function getBorrowingFeeWithDecay(
@@ -2145,6 +2147,20 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         return _borrowingRate.mul(_BaseFeeLMADebt).div(DECIMAL_PRECISION);
     }
 
+    function updateBaseRateFromBorrowing(uint _newBaseRate) external {
+        require(
+            msg.sender == borrowerOperationsAddress,
+            "TroveManager: Only Borrower operations may call"
+        );
+        if (_newBaseRate >= BORROWING_FEE_FLOOR) {
+            borrowBaseRate = _newBaseRate - BORROWING_FEE_FLOOR;
+        } else {
+            borrowBaseRate = 0;
+        }
+
+        emit BorrowBaseRateUpdated(_newBaseRate);
+    }
+
     /*
      * HEDGEHOG LOGIC UPDATES:
      * 1) Now updates borrowBaseRate instead of baseRate used by both redemption and minting functions
@@ -2155,11 +2171,13 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     // Updates the borrowBaseRate state variable based on time elapsed since the last redemption or BaseFeeLMA borrowing operation.
     function decayBaseRateFromBorrowing() external {
         _requireCallerIsBorrowerOperations();
-
-        uint decayedBaseRate = _calcDecayedRedemptionBaseRate();
+        console.log("BASE RATE BEFORE DECAY: ", borrowBaseRate);
+        uint decayedBaseRate = _calcDecayedBorrowBaseRate();
         assert(decayedBaseRate <= DECIMAL_PRECISION); // The baseRate can decay to 0
         // HEDGEHOG LOGIC CHANGES: Updating borrowing base rate instead
         borrowBaseRate = decayedBaseRate;
+        console.log("BASE RATE AFTER DECAY: ", borrowBaseRate);
+
         emit BorrowBaseRateUpdated(decayedBaseRate);
 
         _updateLastBorrowTime();
@@ -2202,9 +2220,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
      * New function simmilar to _calcDecayedBaseRate. However used particularly for redemptionBaseRate calculation
      */
     function _calcDecayedRedemptionBaseRate() internal view returns (uint) {
+        console.log("Starting Base Rate: ", redemptionBaseRate);
         uint minutesPassed = _minutesPassedSinceLastRedemption();
+
         uint decayFactor = LiquityMath._decPow(
-            MINUTE_DECAY_FACTOR,
+            MINUTE_DECAY_REDEMPTION_FACTOR,
             minutesPassed
         );
 
@@ -2218,10 +2238,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     function _calcDecayedBorrowBaseRate() internal view returns (uint) {
         uint minutesPassed = _minutesPassedSinceLastBorrow();
         uint decayFactor = LiquityMath._decPow(
-            MINUTE_DECAY_FACTOR,
+            MINUTE_DECAY_BORROWING_FACTOR,
             minutesPassed
         );
 
+        console.log("minutes passed: ", minutesPassed);
         return borrowBaseRate.mul(decayFactor).div(DECIMAL_PRECISION);
     }
 

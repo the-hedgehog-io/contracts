@@ -226,8 +226,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         }
         _requireAtLeastMinNetDebt(vars.netDebt);
 
-        // Hedgehog changes: composite debt now is BaseFeeLMA amount + gas comp. Without borrowing fee
-        vars.compositeDebt = _getCompositeDebt(vars.netDebt);
+        // Hedgehog changes: composite debt now is just BaseFeeLMA amount. Without borrowing fee and without gas comp
+        vars.compositeDebt = vars.netDebt;
         assert(vars.compositeDebt > 0);
 
         vars.ICR = LiquityMath._computeCR(
@@ -275,13 +275,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         // Move the stETH to the Active Pool, and mint the BaseFeeLMAAmount to the borrower
         _activePoolAddColl(contractsCache.activePool, _collAmount);
-        console.log("BFE_Amount:", _BaseFeeLMAAmount);
-        console.log("fee: ", vars.BaseFeeLMAFee);
-        console.log("gas comp: ", BaseFeeLMA_GAS_COMPENSATION);
-        console.log(
-            "Result: ",
-            _BaseFeeLMAAmount - vars.BaseFeeLMAFee - BaseFeeLMA_GAS_COMPENSATION
-        );
+
         _withdrawBaseFeeLMA(
             contractsCache.activePool,
             contractsCache.baseFeeLMAToken,
@@ -682,8 +676,12 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint _maxFeePercentage
     ) internal returns (uint) {
         _troveManager.decayBaseRateFromBorrowing(); // decay the baseRate state variable
-        uint BaseFeeLMAFee = _troveManager.getBorrowingFee(_BaseFeeLMAAmount);
-        console.log("Fee: ", BaseFeeLMAFee);
+        (uint BaseFeeLMAFee, uint baseRate) = _troveManager.getBorrowingFee(
+            _BaseFeeLMAAmount
+        );
+
+        troveManager.updateBaseRateFromBorrowing(baseRate);
+
         _requireUserAcceptsFee(
             BaseFeeLMAFee,
             _BaseFeeLMAAmount,

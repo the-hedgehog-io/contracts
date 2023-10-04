@@ -125,8 +125,6 @@ contract HintHelpers is HedgehogBase, Ownable, CheckContract {
                     );
 
                     uint compositeDebt = _getCompositeDebt(newDebt);
-                    console.log("New Coll: ", newColl);
-                    console.log("Composite Debt: ", compositeDebt);
                     partialRedemptionHintNICR = LiquityMath._computeNominalCR(
                         newColl,
                         compositeDebt
