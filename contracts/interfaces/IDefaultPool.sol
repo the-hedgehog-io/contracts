@@ -12,4 +12,6 @@ interface IDefaultPool is IPool {
 
     // --- Functions ---
     function sendStETHToActivePool(uint _amount) external;
+
+    function increaseBalance(uint256 _amount) external;
 }

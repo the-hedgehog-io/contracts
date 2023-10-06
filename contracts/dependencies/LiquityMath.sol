@@ -131,9 +131,7 @@ library LiquityMath {
             uint newCollRatio = _coll.mul(DECIMAL_PRECISION).div(_debt).div(
                 _price
             );
-            console.log(_coll);
-            console.log(_debt);
-            console.log(newCollRatio);
+
             return newCollRatio;
         }
         // Return the maximal value for uint256 if the Trove has a debt of 0. Represents "infinite" CR.

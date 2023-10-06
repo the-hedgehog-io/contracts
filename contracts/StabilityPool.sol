@@ -698,6 +698,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         // Burn the debt that was successfully offset
         baseFeeLMAToken.burn(address(this), _debtToOffset);
 
+        _increaseBalance(_collToAdd);
         activePoolCached.sendStETH(address(this), _collToAdd);
     }
 
@@ -1033,12 +1034,14 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         );
     }
 
-    // --- Fallback function ---
-
     /**
      * Hedgehog Updates:
-     * Remove native token fallback function and not replace with StEth increaser count in attempt to break something
+     * Remove native token fallback function and replace with internal balance increaser as it is used only in the offset function
      *
-     * TODO: Figure if something got broken
      */
+    function _increaseBalance(uint256 _amount) internal {
+        StETH = StETH.add(_amount);
+    }
+
+    // --- Fallback function ---
 }

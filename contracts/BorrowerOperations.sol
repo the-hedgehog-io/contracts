@@ -220,7 +220,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
                 _BaseFeeLMAAmount,
                 _maxFeePercentage
             );
-            console.log("Fee: ", vars.BaseFeeLMAFee);
             // Hedgehog changes: Do no subtract the fee from the debt
             // vars.netDebt = vars.netDebt.sub(vars.BaseFeeLMAFee);
         }
@@ -276,6 +275,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         // Move the stETH to the Active Pool, and mint the BaseFeeLMAAmount to the borrower
         _activePoolAddColl(contractsCache.activePool, _collAmount);
 
+        // Hedgehog Updates: Now amount transferred to the user is decrease by Fee and Gas Compensation reserve
         _withdrawBaseFeeLMA(
             contractsCache.activePool,
             contractsCache.baseFeeLMAToken,
@@ -285,13 +285,15 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
                 BaseFeeLMA_GAS_COMPENSATION,
             vars.netDebt
         );
+
+        // Hedgehog changes: Not increasing net debt anymore. only transferring the gas comp tokens
         // Move the BaseFeeLMA gas compensation to the Gas Pool
         _withdrawBaseFeeLMA(
             contractsCache.activePool,
             contractsCache.baseFeeLMAToken,
             gasPoolAddress,
             BaseFeeLMA_GAS_COMPENSATION,
-            BaseFeeLMA_GAS_COMPENSATION
+            0
         );
 
         emit TroveUpdated(
@@ -792,7 +794,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint _netDebtIncrease
     ) internal {
         _activePool.increaseBaseFeeLMADebt(_netDebtIncrease);
-        console.log("end amount: ", _BaseFeeLMAAmount);
+
         _baseFeeLMAToken.mint(_account, _BaseFeeLMAAmount);
     }
 

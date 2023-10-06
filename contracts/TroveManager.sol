@@ -937,6 +937,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             totals.totalCollToRedistribute
         );
         if (totals.totalCollSurplus > 0) {
+            collSurplusPool.increaseBalance(totals.totalCollSurplus);
             activePoolCached.sendStETH(
                 address(collSurplusPool),
                 totals.totalCollSurplus
@@ -1445,7 +1446,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         );
         // Calculate the StETH fee
         totals.StETHFee = _getRedemptionFee(totals.totalStETHDrawn);
-        console.log("Redemption fee: ", totals.StETHFee);
 
         _requireUserAcceptsFee(
             totals.StETHFee,
@@ -1462,10 +1462,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         totals.StETHToSendToRedeemer = totals.totalStETHDrawn.sub(
             totals.StETHFee
         );
-        console.log(
-            "What actually gets transferred: ",
-            totals.StETHToSendToRedeemer
-        );
+
         emit Redemption(
             _BaseFeeLMAamount,
             totals.totalBaseFeeLMAToRedeem,
@@ -1803,6 +1800,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         // Transfer coll and debt from ActivePool to DefaultPool
         _activePool.decreaseBaseFeeLMADebt(_debt);
         _defaultPool.increaseBaseFeeLMADebt(_debt);
+        _defaultPool.increaseBalance(_coll);
         _activePool.sendStETH(address(_defaultPool), _coll);
     }
 
@@ -1969,7 +1967,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         // system
         /* Convert the drawn StETH back to BaseFeeLMA at face value rate (1 BaseFeeLMA:1 USD), in order to get
          * the fraction of total supply that was redeemed at face value. */
-        console.log("total coll: ", activePool.getStETH());
         uint redeemedBaseFeeLMAFraction = _StETHDrawn
             .mul(DECIMAL_PRECISION)
             .div(activePool.getStETH()); // TODO: Fix the error
@@ -1978,7 +1975,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint newBaseRate = decayedRedemptionBaseRate.add(
             redeemedBaseFeeLMAFraction
         );
-        console.log("redeemed lma fraction", redeemedBaseFeeLMAFraction);
+
         newBaseRate = LiquityMath._min(newBaseRate, DECIMAL_PRECISION); // cap baseRate at a maximum of 100%
         //assert(newBaseRate <= DECIMAL_PRECISION); // This is already enforced in the line above
         assert(newBaseRate > 0); // Base rate is always non-zero after redemption
@@ -2021,8 +2018,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint _redemptionBaseRate,
         uint _redemptionColl
     ) internal view returns (uint) {
-        console.log("Active Pool eth", activePool.getStETH());
-
         return
             LiquityMath._min(
                 REDEMPTION_FEE_FLOOR.add(_redemptionBaseRate).add(
@@ -2163,12 +2158,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     // Updates the borrowBaseRate state variable based on time elapsed since the last redemption or BaseFeeLMA borrowing operation.
     function decayBaseRateFromBorrowing() external {
         _requireCallerIsBorrowerOperations();
-        console.log("BASE RATE BEFORE DECAY: ", borrowBaseRate);
         uint decayedBaseRate = _calcDecayedBorrowBaseRate();
         assert(decayedBaseRate <= DECIMAL_PRECISION); // The baseRate can decay to 0
         // HEDGEHOG LOGIC CHANGES: Updating borrowing base rate instead
         borrowBaseRate = decayedBaseRate;
-        console.log("BASE RATE AFTER DECAY: ", borrowBaseRate);
 
         emit BorrowBaseRateUpdated(decayedBaseRate);
 

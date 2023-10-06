@@ -126,11 +126,13 @@ contract DefaultPool is Ownable, CheckContract, IPool {
         );
     }
 
-    // --- Fallback function ---
-
-    receive() external payable {
-        _requireCallerIsActivePool();
-        StETH = StETH.add(msg.value);
+    /**
+     * Hedgehog Updates:
+     * New function that can be called only by active pool instead of a native token fallback
+     *  */
+    function increaseBalance(uint256 _amount) external {
+        _requireCallerIsTroveManager();
+        StETH = StETH.add(_amount);
         emit DefaultPoolStETHBalanceUpdated(StETH);
     }
 }

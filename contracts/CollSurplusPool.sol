@@ -132,10 +132,12 @@ contract CollSurplusPool is Ownable, CheckContract {
         );
     }
 
-    // --- Fallback function ---
-
-    receive() external payable {
-        _requireCallerIsActivePool();
-        StETH = StETH.add(msg.value);
+    // Hedgehog Updates:
+    // New function, that increases balance tracker instead of a native token fallback
+    function increaseBalance(uint256 _amount) external {
+        _requireCallerIsTroveManager();
+        StETH = StETH.add(_amount);
     }
+
+    // --- Fallback function ---
 }
