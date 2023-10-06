@@ -2021,15 +2021,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint _redemptionBaseRate,
         uint _redemptionColl
     ) internal view returns (uint) {
-        console.log("baseRate", _redemptionBaseRate);
-        console.log("coll", _redemptionColl);
         console.log("Active Pool eth", activePool.getStETH());
-        console.log(
-            "rate result: ",
-            REDEMPTION_FEE_FLOOR.add(_redemptionBaseRate).add(
-                _redemptionColl.div(activePool.getStETH())
-            )
-        );
+
         return
             LiquityMath._min(
                 REDEMPTION_FEE_FLOOR.add(_redemptionBaseRate).add(
@@ -2108,7 +2101,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         if (supply == 0) {
             return BORROWING_FEE_FLOOR;
         }
-        console.log("_borrowBaseRate", _borrowBaseRate);
 
         return
             LiquityMath._min(
@@ -2220,7 +2212,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
      * New function simmilar to _calcDecayedBaseRate. However used particularly for redemptionBaseRate calculation
      */
     function _calcDecayedRedemptionBaseRate() internal view returns (uint) {
-        console.log("Starting Base Rate: ", redemptionBaseRate);
         uint minutesPassed = _minutesPassedSinceLastRedemption();
 
         uint decayFactor = LiquityMath._decPow(

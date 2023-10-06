@@ -99,7 +99,8 @@ describe("BaseFeeOracle Tests", () => {
     const BobActualBFEBalanceAtOpening = BigInt("1353572");
     const BobUnstakeFirst = BigInt("560000");
     const BobRedemptionFirst = BigInt("560000");
-    const BobBalanceAfterRedemption = BigInt("16663244859813100");
+    const BobCollBalanceAfterRedemption = BigInt("16663244859813100");
+    const BobBfeBalanceAfterRedemption = BigInt("");
     const BobTroveIncreaseCollFirst = BigInt("16663244859813100");
     const BobTroveCollAfterIncrease = BigInt("2016663244859813100");
     const BobCRAfterIncrease = 672;
@@ -108,10 +109,12 @@ describe("BaseFeeOracle Tests", () => {
     const BobCRAfterLiquid = 591;
     const BobTroveCollAfterRedemption = BigInt("1765316870103330000");
     const BobTroveDebtAfterRedemption = BigInt("899402");
-
     const BobTroveIncreaseDebtSecond = BigInt("3000000");
+    const BobTroveCollAfterSecondIncrease = BigInt("1775365589023270000");
+    const BobTroveDebtAfterSecondIncrease = BigInt("3590770");
+    const BobCRAfterSecondIncrease = 824;
 
-    const CarolTroveColl = "350000000000000000";
+    const CarolTroveColl = "3000000000000000000";
     const CarolTroveDebt = BigInt("4000000");
     const CarolTroveOpeningFee = BigInt("1754157");
     const CarolInitialCR = 2500;
@@ -274,6 +277,16 @@ describe("BaseFeeOracle Tests", () => {
       );
     });
 
+    it.skip("Should correctly calculate estimated cr", async () => {
+      expect(
+        await borrowerOperations.computeUnreliableCR(
+          AliceTroveColl,
+          AliceTroveDebt
+        )
+      ).to.be.equal("1666666666666666666");
+      // TODO: Check if value is correct
+    });
+
     it("Should let open trove to Alice with correct params", async () => {
       await openTrove({
         caller: alice,
@@ -291,6 +304,10 @@ describe("BaseFeeOracle Tests", () => {
 
       expect(debt).to.be.equal(AliceTroveDebt);
       expect(coll).to.be.equal(AliceTroveColl);
+      console.log(
+        "Total Coll after alice position: ",
+        await activePool.getStETH()
+      );
     });
 
     it("Should have transferred the correct amount BFE token during position opening (alice position)", async () => {
@@ -314,6 +331,10 @@ describe("BaseFeeOracle Tests", () => {
         baseFeeLMAAmount: BobTroveDebt,
         collAmount: BobTroveColl,
       });
+      console.log(
+        "Total Coll after bob position: ",
+        await activePool.getStETH()
+      );
     });
 
     it("Should have a correct amount of collateral and debt in position record (bob position)", async () => {
@@ -373,6 +394,11 @@ describe("BaseFeeOracle Tests", () => {
         collAmount: CarolTroveColl,
         baseFeeLMAAmount: CarolTroveDebt,
       });
+
+      console.log(
+        "Total Coll after carol position: ",
+        await activePool.getStETH()
+      );
     });
     it("Should have a correct amount of collateral and debt in position record (carol position)", async () => {
       const { debt, coll } = await getTrove(carol);
@@ -436,8 +462,12 @@ describe("BaseFeeOracle Tests", () => {
       ).not.to.be.reverted;
       const balanceCollAfter = await payToken.balanceOf(bob.address);
       const balanceDebtAfter = await baseFeeLMAToken.balanceOf(bob.address);
+      compareWithFault(
+        balanceCollAfter - balanceCollBefore,
+        BobCollBalanceAfterRedemption
+      );
       expect(balanceCollAfter - balanceCollBefore).to.be.equal(
-        BobBalanceAfterRedemption
+        BobCollBalanceAfterRedemption
       );
     });
 
@@ -519,6 +549,13 @@ describe("BaseFeeOracle Tests", () => {
 
       expect(debt).to.be.equal(BobTroveDebtAfterRedemption);
       expect(coll).to.be.equal(BobTroveCollAfterRedemption);
+    });
+
+    it("should allow increasing debt in the position (bob position)", async () => {
+      await increaseDebt({ caller: bob, amount: BobTroveIncreaseDebtSecond });
+      await expect(
+        increaseDebt({ caller: bob, amount: BobTroveIncreaseDebtSecond })
+      ).not.to.be.reverted;
     });
   });
 });

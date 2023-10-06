@@ -27,7 +27,7 @@ contract PriceFeed is Ownable, BaseMath {
     IBaseFeeOracle public backupOracle; // Backup Oracle
 
     // Use to convert a price answer to an 18-digit precision uint
-    uint public constant TARGET_DIGITS = 18;
+    uint public constant TARGET_DIGITS = 1;
 
     // Maximum time period allowed since Main Oracle's latest round data blockNumber, beyond which Main Oracle is considered frozen.
     uint public constant TIMEOUT = 69;
@@ -615,7 +615,7 @@ contract PriceFeed is Ownable, BaseMath {
         // Try to get latest price data:
         try mainOracle.latestRoundData() returns (
             int256 answer,
-            uint64 blockNumber,
+            uint64 blockNumber, 
             uint80 roundId
         ) {
             response.roundId = roundId;

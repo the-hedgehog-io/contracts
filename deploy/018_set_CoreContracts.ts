@@ -19,7 +19,7 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const HOGStaking = await deployments.get("HOGStaking");
   const CommunityIssuance = await deployments.get("CommunityIssuance");
   const HintHelpers = await deployments.get("HintHelpers");
-  const { stEth: StETHAddress } = deployConfig;
+  const { stEth: StETHAddress, mainOracle, backupOracle } = deployConfig;
 
   if (!(await isOwnershipRenounced(SortedTroves.address))) {
     console.log("Setting up SortedTroves...");
@@ -54,6 +54,18 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       SortedTroves.address,
       HOGToken.address,
       HOGStaking.address
+    );
+  }
+  console.log("TroveManager is set");
+
+  if (!(await isOwnershipRenounced(PriceFeed.address))) {
+    console.log("Setting up Price Feed...");
+    await executeWithLog(
+      "PriceFeed",
+      { from: deployer },
+      "setAddresses",
+      mainOracle,
+      backupOracle
     );
   }
   console.log("TroveManager is set");
@@ -137,7 +149,8 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       "setAddresses",
       BorrowerOperations.address,
       TroveManager.address,
-      ActivePool.address
+      ActivePool.address,
+      StETHAddress
     );
   }
   console.log("CollSurplusPool is set");

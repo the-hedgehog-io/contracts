@@ -80,7 +80,7 @@ const config: HardhatUserConfig = {
   networks: {
     mumbai: {
       accounts: [process.env.PK_DEPLOYER || ""],
-      url: "https://rpc.ankr.com/polygon_mumbai",
+      url: "https://polygon-mumbai-bor.publicnode.com",
     },
   },
 

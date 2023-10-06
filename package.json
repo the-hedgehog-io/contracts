@@ -1,6 +1,6 @@
 {
   "name": "@the-hedgehog-io/contracts",
-  "version": "0.2.1",
+  "version": "0.2.4",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "@openzeppelin/contracts": "^4.9.0",

@@ -14,6 +14,6 @@ export const deployConfig: DeploymentConfig = {
   bountyAddress: "0x796EcfBe7a2A424f9D905dfC38b8994aB2db9FD6",
   lpRewardsAddress: "0x796EcfBe7a2A424f9D905dfC38b8994aB2db9FD6",
   multisigAddress: "0x796EcfBe7a2A424f9D905dfC38b8994aB2db9FD6",
-  mainOracle: "0xc8D7361Ab99e05DEFbF1c5C79069116BD03cF329",
-  backupOracle: "0x61EC927923798fd164444D881aac1CD61D69524b",
+  mainOracle: "0x2Ab614712dB21c46470fE088c6DB44b7d973cac1",
+  backupOracle: "0x2Ab614712dB21c46470fE088c6DB44b7d973cac1",
 };

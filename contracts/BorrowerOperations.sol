@@ -1097,4 +1097,13 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     function getCompositeDebt(uint _debt) external pure returns (uint) {
         return _getCompositeDebt(_debt);
     }
+
+    function computeUnreliableCR(
+        uint _coll,
+        uint _debt
+    ) external view returns (uint) {
+        uint price = priceFeed.lastGoodPrice();
+
+        return LiquityMath._computeCR(_coll, _debt, price);
+    }
 }
