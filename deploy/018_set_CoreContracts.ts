@@ -58,17 +58,17 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   }
   console.log("TroveManager is set");
 
-  if (!(await isOwnershipRenounced(PriceFeed.address))) {
-    console.log("Setting up Price Feed...");
-    await executeWithLog(
-      "PriceFeed",
-      { from: deployer },
-      "setAddresses",
-      mainOracle,
-      backupOracle
-    );
-  }
-  console.log("TroveManager is set");
+  // if (!(await isOwnershipRenounced(PriceFeed.address))) {
+  //   console.log("Setting up Price Feed...");
+  //   await executeWithLog(
+  //     "PriceFeed",
+  //     { from: deployer },
+  //     "setAddresses",
+  //     mainOracle,
+  //     backupOracle
+  //   );
+  // }
+  // console.log("TroveManager is set");
 
   if (!(await isOwnershipRenounced(BorrowerOperations.address))) {
     console.log("Setting up BorrowerOperations...");

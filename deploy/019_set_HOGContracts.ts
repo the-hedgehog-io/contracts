@@ -7,8 +7,13 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const executeWithLog = createExecuteWithLog(deployments.execute);
   const StabilityPool = await deployments.get("StabilityPool");
   const HOGToken = await deployments.get("HOGToken");
+  const HOGStaking = await deployments.get("HOGStaking");
   const CommunityIssuance = await deployments.get("CommunityIssuance");
   const LockupContractFactory = await deployments.get("LockupContractFactory");
+  const BaseFeeLMAToken = await deployments.get("BaseFeeLMAToken");
+  const TroveManager = await deployments.get("TroveManager");
+  const BorrowerOperations = await deployments.get("BorrowerOperations");
+  const ActivePool = await deployments.get("ActivePool");
   const { stEth: StETHAddress } = deployConfig;
 
   if (!(await isOwnershipRenounced(LockupContractFactory.address))) {
@@ -19,6 +24,23 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       { from: deployer },
       "setHOGTokenAddress",
       HOGToken.address
+    );
+  }
+  console.log("LockupContractFactory is set");
+
+  if (!(await isOwnershipRenounced(HOGStaking.address))) {
+    console.log("Setting up HOGStaking...");
+
+    await executeWithLog(
+      "HOGStaking",
+      { from: deployer },
+      "setAddresses",
+      HOGToken.address,
+      BaseFeeLMAToken.address,
+      TroveManager.address,
+      BorrowerOperations.address,
+      ActivePool.address,
+      StETHAddress
     );
   }
   console.log("HOGStaking is set");
