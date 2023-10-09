@@ -118,7 +118,7 @@ describe("BaseFeeOracle Tests", () => {
     const CarolTroveDebt = BigInt("4000000");
     const CarolTroveOpeningFee = BigInt("1754157");
     const CarolInitialCR = 2500;
-    const CarolBFEBalanceAtOpening = BigInt("2195843");
+    const CarolBFEBalanceAtOpening = BigInt("2180506");
     const CarolTroveCollAfterLiquid = BigInt("3065768314496680000");
     const CarolTroveDebtAfterLiquid = BigInt(4644705);
     const CarolCRAfterLiquid = 1100;
@@ -417,6 +417,14 @@ describe("BaseFeeOracle Tests", () => {
       expect(deposit).to.be.equal(BobActualBFEBalanceAtOpening);
     });
 
+    it("should result into a correct staked amount", async () => {
+      const balance = await baseFeeLMAToken.balanceOf(
+        await stabilityPool.getAddress()
+      );
+
+      expect(balance).to.be.equal("1353572");
+    });
+
     it("Should let adjust the position (alice position)", async () => {
       await expect(
         decreaseDebt({ caller: alice, amount: AliceDecreaseDebtFirst })
@@ -461,7 +469,6 @@ describe("BaseFeeOracle Tests", () => {
     // TODO: Check if correct
     it("Should have transferred the correct amount BFE token during position opening (carol position)", async () => {
       const balance = await baseFeeLMAToken.balanceOf(carol.address);
-
       compareWithFault(
         CarolBFEBalanceAtOpening,
         CarolTroveDebt - CarolTroveOpeningFee - gasCompensationReserve
@@ -471,13 +478,20 @@ describe("BaseFeeOracle Tests", () => {
     });
 
     it("Should let another user provide to stability pool (carol)", async () => {
-      const balance = await baseFeeLMAToken.balanceOf(carol.address);
-      await provide({ caller: carol, amount: balance });
+      await provide({ caller: carol, amount: CarolBFEBalanceAtOpening });
       const deposit = await stabilityPool.getCompoundedBaseFeeLMADeposit(
         carol.address
       );
 
-      expect(deposit).to.be.equal(balance);
+      expect(deposit).to.be.equal(CarolBFEBalanceAtOpening);
+    });
+
+    it("should result into a correct balance of stability pool", async () => {
+      const balance = await baseFeeLMAToken.balanceOf(
+        await stabilityPool.getAddress()
+      );
+
+      expect(balance).to.be.equal("3534078");
     });
 
     it("Should let withdraw provided funds", async () => {
@@ -561,6 +575,13 @@ describe("BaseFeeOracle Tests", () => {
       expect(await getCR()).to.be.equal(BobCRAfterIncrease);
     });
 
+    it("Should have a correct entire system debt (just before bob liquidates alice)", async () => {
+      await checkCollDebtCorrectness(
+        BigInt("5349863244859813100"),
+        BigInt("13440000")
+      );
+    });
+
     it("Should let liquidate troves with CR below minimal", async () => {
       await expect(troveManager.batchLiquidateTroves([alice.address])).not.be
         .reverted;
@@ -571,6 +592,14 @@ describe("BaseFeeOracle Tests", () => {
         totalCollAliceLiquidated,
         totalDebtAliceLiquidated
       );
+    });
+
+    it("should result into empty stability pool", async () => {
+      const balance = await baseFeeLMAToken.balanceOf(
+        await stabilityPool.getAddress()
+      );
+
+      expect(balance).to.be.equal(0);
     });
 
     it("should be no position after liquidation", async () => {
@@ -604,7 +633,7 @@ describe("BaseFeeOracle Tests", () => {
       );
 
       const hint = await hintHelpers.getRedemptionHints(
-        BobRedemptionFirst,
+        AliceRedemptionFirst,
         gasPrice010,
         0
       );
@@ -612,7 +641,7 @@ describe("BaseFeeOracle Tests", () => {
         troveManager
           .connect(bob)
           .redeemCollateral(
-            BobRedemptionFirst,
+            AliceRedemptionFirst,
             hint[0],
             ethers.ZeroAddress,
             ethers.ZeroAddress,
@@ -637,7 +666,11 @@ describe("BaseFeeOracle Tests", () => {
       ).not.to.be.reverted;
     });
 
-    it("Should correctly set system into a recovery mode", async () => {
+    it("should still allow to provide to stability pool", async () => {
+      await expect(provide({ amount: "1240228" })).not.to.be.reverted;
+    });
+
+    it("should correctly set system into a recovery mode", async () => {
       await setNewBaseFeePrice(65);
       await setNewBaseFeePrice(70);
       await setNewBaseFeePrice(75);
@@ -646,9 +679,39 @@ describe("BaseFeeOracle Tests", () => {
       await setNewBaseFeePrice(105);
       await setNewBaseFeePrice(112);
       await setNewBaseFeePrice(120);
+      console.log("current price: ", await priceFeed.lastGoodPrice());
+      console.log("current tcr: ", await troveManager.getUnreliableTCR());
       expect(await troveManager.checkUnreliableRecoveryMode()).to.be.equal(
         true
       );
+    });
+
+    it("should let borrow more tokens during the recovery mode and transfer tokens correctly", async () => {
+      const debtIncrease = BigInt("400000");
+      const carolBFEBalanceBefore = await baseFeeLMAToken.balanceOf(
+        carol.address
+      );
+      const carolCollBalanceBefore = await payToken.balanceOf(carol.address);
+      await expect(increaseDebt({ caller: carol, amount: debtIncrease })).not.to
+        .be.reverted;
+
+      expect(carolBFEBalanceBefore + debtIncrease).to.be.equal(
+        await baseFeeLMAToken.balanceOf(carol.address)
+      );
+      expect(carolCollBalanceBefore).to.be.equal(
+        await payToken.balanceOf(carol.address)
+      );
+    });
+
+    it("should let carol liquidate bob", async () => {
+      await expect(
+        troveManager.connect(carol).batchLiquidateTroves([bob.address])
+      ).not.to.be.reverted;
+    });
+
+    it("should let carol close position", async () => {
+      await expect(borrowerOperations.connect(carol).closeTrove()).not.to.be
+        .reverted;
     });
   });
 });

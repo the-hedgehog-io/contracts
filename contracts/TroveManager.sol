@@ -397,6 +397,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         singleLiquidation.collGasCompensation = _getCollGasCompensation(
             singleLiquidation.entireTroveColl
         );
+
         singleLiquidation
             .BaseFeeLMAGasCompensation = BaseFeeLMA_GAS_COMPENSATION; // TODO: Why is that being done if BaseFeeLMA_GAS_COMP is static
         uint collToLiquidate = singleLiquidation.entireTroveColl.sub(
@@ -936,6 +937,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             totals.totalDebtToRedistribute,
             totals.totalCollToRedistribute
         );
+
         if (totals.totalCollSurplus > 0) {
             collSurplusPool.increaseBalance(totals.totalCollSurplus);
             activePoolCached.sendStETH(
@@ -951,10 +953,12 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         );
 
         vars.liquidatedDebt = totals.totalDebtInSequence;
+
         vars.liquidatedColl = totals
             .totalCollInSequence
             .sub(totals.totalCollGasCompensation)
             .sub(totals.totalCollSurplus);
+
         emit Liquidation(
             vars.liquidatedDebt,
             vars.liquidatedColl,
@@ -1089,6 +1093,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
                     vars.user,
                     vars.remainingBaseFeeLMAInStabPool
                 );
+
                 vars.remainingBaseFeeLMAInStabPool = vars
                     .remainingBaseFeeLMAInStabPool
                     .sub(singleLiquidation.debtToOffset);

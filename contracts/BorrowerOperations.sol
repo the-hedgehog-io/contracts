@@ -609,6 +609,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
     }
 
+    // Hedgehog Updates: Do not deduct gas fee compensation from trove Debt as user just received less tokens during position opening
     function closeTrove() external {
         ITroveManager troveManagerCached = troveManager;
         IActivePool activePoolCached = activePool;
@@ -626,7 +627,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         _requireSufficientBaseFeeLMABalance(
             baseFeeLMATokenCached,
             msg.sender,
-            debt.sub(BaseFeeLMA_GAS_COMPENSATION)
+            debt // Hedgehog Updates: do not deduct gas comp anymore
         );
 
         uint newTCR = _getNewTCRFromTroveChange(
@@ -648,7 +649,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             activePoolCached,
             baseFeeLMATokenCached,
             msg.sender,
-            debt.sub(BaseFeeLMA_GAS_COMPENSATION)
+            debt // TODO: Adjust this to new debt calculations
         );
         _repayBaseFeeLMA(
             activePoolCached,
@@ -983,6 +984,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _borrower,
         uint _debtRepayment
     ) internal view {
+        console.log(_baseFeeLMAToken.balanceOf(_borrower));
+        console.log(_debtRepayment);
         require(
             _baseFeeLMAToken.balanceOf(_borrower) >= _debtRepayment,
             "BorrowerOps: Caller doesnt have enough BaseFeeLMA to make repayment"
