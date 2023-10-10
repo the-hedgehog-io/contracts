@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.19;
 
-import "./interfaces/ITroveManager.sol"; // TODO: Check if used and if should be included into changes list
+import "./interfaces/ITroveManager.sol";
 import "./interfaces/IBaseFeeLMAToken.sol";
 import "./interfaces/ICollSurplusPool.sol";
 import "./interfaces/ISortedTroves.sol";
@@ -644,12 +644,13 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         emit TroveUpdated(msg.sender, 0, 0, 0, BorrowerOperation.closeTrove);
 
+        // Hedgehog Updates: No longer deduction
         // Burn the repaid BaseFeeLMA from the user's balance and the gas compensation from the Gas Pool
         _repayBaseFeeLMA(
             activePoolCached,
             baseFeeLMATokenCached,
             msg.sender,
-            debt // TODO: Adjust this to new debt calculations
+            debt
         );
         _repayBaseFeeLMA(
             activePoolCached,

@@ -32,9 +32,10 @@ contract PriceFeed is Ownable, BaseMath {
     // Maximum time period allowed since Main Oracle's latest round data blockNumber, beyond which Main Oracle is considered frozen.
     uint public constant TIMEOUT = 69;
 
-    // Maximum deviation allowed between two consecutive Main oracle prices. 18-digit precision.
-    // TODO: Update price deviation to 12.5%
-    uint public constant MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND = 5e17; // 50%
+    // Maximum deviation allowed between two consecutive Main oracle prices. Hedgehog oracles are getting updated in case there is a 5% diviation price
+    // Meaning that there might be max 17.5% price diviation between rounds
+    uint public constant MAX_PRICE_DEVIATION_PERCENTAGE_FROM_PREVIOUS_ROUND =
+        176;
 
     /*
      * The maximum relative price difference between two oracle responses allowed in order for the PriceFeed
@@ -95,7 +96,7 @@ contract PriceFeed is Ownable, BaseMath {
 
         _storeGoodPrice(mainOracleResponse, mainOracle.decimals());
 
-        //renounceOwnership(); TODO: Do we keep the ownership renounce that?
+        renounceOwnership();
     }
 
     // --- Functions ---
@@ -111,6 +112,7 @@ contract PriceFeed is Ownable, BaseMath {
      * Uses a main oracle and a fallback oracle in case main one fails. If both fail,
      * it uses the last good price seen by Hedgehog.
      *
+     * Hedgehog updates: now both oracles are not allowed to have a price diviation of more then 12.5% between consecutive block
      */
     function fetchPrice() external returns (uint256) {
         // Get current and previous price data from Main oracle, and current price data from Backup
@@ -121,6 +123,9 @@ contract PriceFeed is Ownable, BaseMath {
             mainOracleResponse.roundId
         );
         Response memory backupOracleResponse = _getCurrentBackupResponse();
+        Response memory prevBackupOracleResponse = _getPrevBackupOracleResponse(
+            backupOracleResponse.roundId
+        );
         uint8 backupDecimals = backupOracle.decimals();
 
         // --- CASE 1: System fetched last price from Main Oracle  ---
@@ -140,7 +145,7 @@ contract PriceFeed is Ownable, BaseMath {
                  */
                 if (_backupIsFrozen(backupOracleResponse)) {
                     _changeStatus(Status.usingBackupMainUntrusted);
-                    return lastGoodPrice; //TODO: How does this price get set? Why does it get returned
+                    return lastGoodPrice;
                 }
 
                 // If Main Oracle is broken and Backup is working, switch to Backup and return current Backup price
@@ -168,48 +173,36 @@ contract PriceFeed is Ownable, BaseMath {
             }
 
             // If MainOracle price has changed by > 12,5% between two consecutive rounds, compare it to Backup's price
-            // TODO: Change that, so that it would just return last good price
-            // TODO: What happens on 3rd block tho?
             if (
-                _mainOraclePriceChangeAboveMax(
+                _priceChangeAboveMax(
                     mainOracleResponse,
                     prevMainOracleResponse,
                     decimals
                 )
             ) {
                 // If Backup is broken, both oracles are untrusted, and return last good price
-                if (_backupOracleIsBroken(backupOracleResponse)) {
+                if (
+                    _backupOracleIsBroken(backupOracleResponse) ||
+                    _priceChangeAboveMax(
+                        backupOracleResponse,
+                        prevBackupOracleResponse,
+                        decimals
+                    )
+                ) {
                     _changeStatus(Status.bothOraclesUntrusted);
                     return lastGoodPrice;
                 }
 
-                // If backup is frozen, switch to backup and return last good price
-                if (_backupIsFrozen(backupOracleResponse)) {
+                if (
+                    _backupIsFrozen(backupOracleResponse)
+                ) // If backup is frozen, switch to backup and return last good price
+                {
                     _changeStatus(Status.usingBackupMainUntrusted);
                     return lastGoodPrice;
                 }
 
-                /*
-                 * If Backup is live and both oracles have a similar price, conclude that Main Oracle's large price deviation between
-                 * two consecutive rounds was likely a legitimate market price movement, and so continue using Main Oracle
-                 * TODO: That's not the case for us? Probably should remove that. And then what?
-                 */
-                if (
-                    _bothOraclesSimilarPrice(
-                        mainOracleResponse,
-                        backupOracleResponse,
-                        decimals,
-                        backupDecimals
-                    )
-                ) {
-                    return _storeGoodPrice(mainOracleResponse, decimals);
-                }
-
-                // If Backup is live but the oracles differ too much in price, conclude that Main Oracle's initial price deviation was
-                // an oracle failure. Switch to Backup, and use Backup price
-                // TODO: Most likely store just that
                 _changeStatus(Status.usingBackupMainUntrusted);
-                return _storeGoodPrice(backupOracleResponse, backupDecimals);
+                return _storeGoodPrice(backupOracleResponse, decimals);
             }
 
             // If Main oracle is working and Backup is broken, remember Backup is broken
@@ -223,6 +216,16 @@ contract PriceFeed is Ownable, BaseMath {
 
         // --- CASE 2: The system fetched last price from Backup ---
         if (status == Status.usingBackupMainUntrusted) {
+            if (
+                _priceChangeAboveMax(
+                    backupOracleResponse,
+                    prevBackupOracleResponse,
+                    decimals
+                )
+            ) {
+                _changeStatus(Status.bothOraclesUntrusted);
+                return lastGoodPrice;
+            }
             // If both Backup and Main oracle are live, unbroken, and reporting similar prices, switch back to Main
             if (
                 _bothOraclesLiveAndUnbrokenAndSimilarPrice(
@@ -327,7 +330,6 @@ contract PriceFeed is Ownable, BaseMath {
             }
 
             // If Main Oracle is live and Backup is working, compare prices. Switch to Main Oracle
-            // TODO: Update the prices within % range
             // if prices are within 5%, and return Main Oracle price.
             if (
                 _bothOraclesSimilarPrice(
@@ -375,11 +377,10 @@ contract PriceFeed is Ownable, BaseMath {
                 return _storeGoodPrice(mainOracleResponse, decimals);
             }
 
-            //TODO: Update price deviation
-            // If Main Oracle is live but deviated >50% from it's previous price and Backup is still untrusted, switch
+            // If Main Oracle is live but deviated >17.5% from it's previous price and Backup is still untrusted, switch
             // to bothOraclesUntrusted and return last good price
             if (
-                _mainOraclePriceChangeAboveMax(
+                _priceChangeAboveMax(
                     mainOracleResponse,
                     prevMainOracleResponse,
                     decimals
@@ -417,10 +418,6 @@ contract PriceFeed is Ownable, BaseMath {
     function _badMainOracleResponse(
         Response memory _response
     ) internal view returns (bool) {
-        // // Check for response call reverted
-        // if (!_response.success) {
-        //     return true;
-        // } TODO: Double check if we need success
         // Check for an invalid roundId that is 0
         if (_response.roundId == 0) {
             return true;
@@ -445,7 +442,7 @@ contract PriceFeed is Ownable, BaseMath {
         return (block.number - _response.blockNumber) > TIMEOUT;
     }
 
-    function _mainOraclePriceChangeAboveMax(
+    function _priceChangeAboveMax(
         Response memory _currentResponse,
         Response memory _prevResponse,
         uint8 _decimals
@@ -467,20 +464,17 @@ contract PriceFeed is Ownable, BaseMath {
          * - If price decreased, the percentage deviation is in relation to the the previous price.
          * - If price increased, the percentage deviation is in relation to the current price.
          */
-        uint percentDeviation = ((maxPrice - minPrice) * DECIMAL_PRECISION) /
-            maxPrice;
+        uint difference = maxPrice - minPrice;
+        uint threshold = (maxPrice *
+            MAX_PRICE_DEVIATION_PERCENTAGE_FROM_PREVIOUS_ROUND) / 1000; // 17.5% of max price
 
         // Return true if price has more than doubled, or more than halved.
-        return percentDeviation > MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND;
+        return difference > threshold;
     }
 
     function _backupOracleIsBroken(
         Response memory _response
     ) internal view returns (bool) {
-        // Check for response call reverted
-        // if (!_response.success) {
-        //     return true;
-        // } TODO: Check if success field needed
         // Check for an invalid timeStamp that is 0, or in the future
         if (
             _response.blockNumber == 0 ||
@@ -499,7 +493,7 @@ contract PriceFeed is Ownable, BaseMath {
     function _backupIsFrozen(
         Response memory _backupResponse
     ) internal view returns (bool) {
-        return block.timestamp - _backupResponse.blockNumber > TIMEOUT;
+        return block.number - _backupResponse.blockNumber > TIMEOUT;
     }
 
     function _bothOraclesLiveAndUnbrokenAndSimilarPrice(
@@ -615,13 +609,13 @@ contract PriceFeed is Ownable, BaseMath {
         // Try to get latest price data:
         try mainOracle.latestRoundData() returns (
             int256 answer,
-            uint64 blockNumber, 
+            uint64 blockNumber,
             uint80 roundId
         ) {
             response.roundId = roundId;
             response.answer = answer;
             response.blockNumber = blockNumber;
-            // response.success = true; TODO: Check if that is needed
+
             return response;
         } catch {
             // If call to Main Oracle aggregator reverts, return a zero response with success = false
@@ -643,7 +637,7 @@ contract PriceFeed is Ownable, BaseMath {
             response.roundId = roundId;
             response.answer = answer;
             response.blockNumber = blockNumber;
-            // response.success = true; TODO: Check if that is needed
+
             return response;
         } catch {
             // If call to Backup aggregator reverts, return a zero response with success = false
@@ -652,7 +646,6 @@ contract PriceFeed is Ownable, BaseMath {
     }
 
     function _getPrevOracleResponse(
-        //TODO: Do we need to get previous oracle response from backup?
         uint80 _currentRoundId
     ) internal view returns (Response memory prevMainOracleResponse) {
         /*
@@ -670,11 +663,35 @@ contract PriceFeed is Ownable, BaseMath {
             prevMainOracleResponse.roundId = roundId;
             prevMainOracleResponse.answer = answer;
             prevMainOracleResponse.blockNumber = blockNumber;
-            // prevMainOracleResponse.success = true; TODO: Check if that field is needed
             return prevMainOracleResponse;
         } catch {
             // If call to Main Oracle aggregator reverts, return a zero response with success = false
             return prevMainOracleResponse;
+        }
+    }
+
+    function _getPrevBackupOracleResponse(
+        uint80 _currentRoundId
+    ) internal view returns (Response memory prevBackupOracleResponse) {
+        /*
+         * NOTE: Oracle only offers a current decimals() value - there is no way to obtain the decimal precision used in a
+         * previous round.  We assume the decimals used in the previous round are the same as the current round.
+         */
+
+        // Try to get the price data from the previous round:
+        try backupOracle.getRoundData(_currentRoundId - 1) returns (
+            int256 answer,
+            uint64 blockNumber,
+            uint80 roundId
+        ) {
+            // If call to Hedgehog succeeds, return the response and success = true
+            prevBackupOracleResponse.roundId = roundId;
+            prevBackupOracleResponse.answer = answer;
+            prevBackupOracleResponse.blockNumber = blockNumber;
+            return prevBackupOracleResponse;
+        } catch {
+            // If call to Main Oracle aggregator reverts, return a zero response with success = false
+            return prevBackupOracleResponse;
         }
     }
 }

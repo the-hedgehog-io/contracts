@@ -190,7 +190,7 @@ contract BorrowerWrappersScript is
         uint ICR = troveManager.getCurrentICR(address(this), price);
 
         uint BaseFeeLMAAmount = _collateral.mul(price).div(ICR);
-        uint borrowingRate = troveManager.getBorrowingRateWithDecay(0); // TODO: Figure out how is that used // TODO: Passed 0 for now. Check
+        uint borrowingRate = troveManager.getBorrowingRateWithDecay(price);
         uint netDebt = BaseFeeLMAAmount.mul(LiquityMath.DECIMAL_PRECISION).div(
             LiquityMath.DECIMAL_PRECISION.add(borrowingRate)
         );

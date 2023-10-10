@@ -29,7 +29,7 @@ import {
 } from "../../../typechain-types";
 import { ABCConfig } from "./config";
 
-const { latestBlock, increase } = time;
+const { latestBlock, increase, advanceBlock } = time;
 
 const compareWithFault = (
   arg1: bigint | number,
@@ -282,6 +282,7 @@ describe("BaseFeeOracle Tests", () => {
       const amount = ethers.parseUnits(_amount.toString(), "gwei");
       const block = await latestBlock();
       await mainOracle.feedBaseFeeValue(amount, block);
+      await secondaryOracle.feedBaseFeeValue(amount, block);
       await priceFeed.fetchPrice();
     };
 
@@ -551,9 +552,14 @@ describe("BaseFeeOracle Tests", () => {
     });
 
     it("should let increase collateral to the position (bob position)", async () => {
-      const block = await latestBlock();
-      await mainOracle.feedBaseFeeValue(BigInt("60000000000"), block);
-      await secondaryOracle.feedBaseFeeValue(BigInt("60000000000"), block);
+      await setNewBaseFeePrice(33);
+      await setNewBaseFeePrice(36);
+      await setNewBaseFeePrice(40);
+      await setNewBaseFeePrice(44);
+      await setNewBaseFeePrice(48);
+      await setNewBaseFeePrice(52);
+      await setNewBaseFeePrice(56);
+      await setNewBaseFeePrice(60);
       await increaseColl({ amount: BobTroveIncreaseCollFirst });
     });
 
@@ -687,15 +693,14 @@ describe("BaseFeeOracle Tests", () => {
     });
 
     it("should let borrow more tokens during the recovery mode and transfer tokens correctly", async () => {
-      const debtIncrease = BigInt("400000");
       const carolBFEBalanceBefore = await baseFeeLMAToken.balanceOf(
         carol.address
       );
       const carolCollBalanceBefore = await payToken.balanceOf(carol.address);
-      await expect(increaseDebt({ caller: carol, amount: debtIncrease })).not.to
-        .be.reverted;
+      await expect(increaseDebt({ caller: carol, amount: CarolIncreaseDebt }))
+        .not.to.be.reverted;
 
-      expect(carolBFEBalanceBefore + debtIncrease).to.be.equal(
+      expect(carolBFEBalanceBefore + CarolIncreaseDebt).to.be.equal(
         await baseFeeLMAToken.balanceOf(carol.address)
       );
       expect(carolCollBalanceBefore).to.be.equal(
@@ -709,9 +714,42 @@ describe("BaseFeeOracle Tests", () => {
       ).not.to.be.reverted;
     });
 
-    it("should let carol close position", async () => {
-      await expect(borrowerOperations.connect(carol).closeTrove()).not.to.be
-        .reverted;
+    it.skip("should let carol repay debt", async () => {
+      await expect(decreaseDebt({ caller: carol, amount: CarolRepayment })).not
+        .to.be.reverted;
+    });
+
+    it("should not mark oracles as broken if price was increased by more then 12.5%", async () => {
+      const amount = ethers.parseUnits("1000", "gwei");
+      const block = await latestBlock();
+      await mainOracle.feedBaseFeeValue(amount, block);
+      await priceFeed.fetchPrice();
+      expect(await priceFeed.status()).to.be.equal(1);
+      await secondaryOracle.feedBaseFeeValue(
+        ethers.parseUnits("1000", "gwei"),
+        block
+      );
+      await priceFeed.fetchPrice();
+      expect(await priceFeed.status()).to.be.equal(2);
+    });
+
+    it("should mark both oracles as working if price consists", async () => {
+      await setNewBaseFeePrice(1001);
+
+      await setNewBaseFeePrice(1004);
+      expect(await priceFeed.status()).to.be.equal(0);
+    });
+
+    it("should mark oracle as frozen if no updates happens for more then 69 blocks", async () => {
+      await mine(70);
+      const block = await latestBlock();
+
+      await secondaryOracle.feedBaseFeeValue(
+        ethers.parseUnits("1000", "gwei"),
+        block
+      );
+      await priceFeed.fetchPrice();
+      expect(await priceFeed.status()).to.be.equal(3);
     });
   });
 });

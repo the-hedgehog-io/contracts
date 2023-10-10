@@ -1974,7 +1974,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
          * the fraction of total supply that was redeemed at face value. */
         uint redeemedBaseFeeLMAFraction = _StETHDrawn
             .mul(DECIMAL_PRECISION)
-            .div(activePool.getStETH()); // TODO: Fix the error
+            .div(activePool.getStETH());
 
         // Hedgehog Updates: Remove division by BETA
         uint newBaseRate = decayedRedemptionBaseRate.add(
@@ -2112,7 +2112,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     }
 
     function getBorrowingFee(
-        uint _BaseFeeLMADebt // TODO: Double check that it's only newly issues tokens and not the full debt
+        uint _BaseFeeLMADebt
     ) external view returns (uint, uint) {
         uint baseRate = getBorrowingRate(_BaseFeeLMADebt);
         return (_calcBorrowingFee(baseRate, _BaseFeeLMADebt), baseRate);
@@ -2128,13 +2128,9 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             );
     }
 
-    /**
-     * HEDGEHOG UPDATES:
-     * TODO: _BaseFeeLMADebt.div(baseFeeLMAToken.totalSupply()) is going to return 0, so have to adjust such calculations
-     */
     function _calcBorrowingFee(
         uint _borrowingRate,
-        uint _BaseFeeLMADebt // TODO: Check that it's not total but newly issues tokens
+        uint _BaseFeeLMADebt
     ) internal pure returns (uint) {
         return _borrowingRate.mul(_BaseFeeLMADebt).div(DECIMAL_PRECISION);
     }

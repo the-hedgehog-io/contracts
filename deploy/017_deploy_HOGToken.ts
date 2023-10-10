@@ -12,7 +12,6 @@ const deploy: DeployFunction = async ({
 
   const { bountyAddress, lpRewardsAddress, multisigAddress } = deployConfig;
 
-  // TODO: Add proper HOG token params
   await deploy("HOGToken", {
     from: deployer,
     log: true,
