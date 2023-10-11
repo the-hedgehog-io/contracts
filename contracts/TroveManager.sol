@@ -385,6 +385,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             vars.pendingDebtReward,
             vars.pendingCollReward
         ) = getEntireDebtAndColl(_borrower);
+        console.log(singleLiquidation.entireTroveDebt);
+        console.log(singleLiquidation.entireTroveColl);
 
         _movePendingTroveRewardsToActivePool(
             _activePool,
@@ -1179,6 +1181,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     // --- Redemption functions ---
 
     // Redeem as much collateral as possible from _borrower's Trove in exchange for BaseFeeLMA up to _maxBaseFeeLMAamount
+    // HEDGEHOG Updates: Not subtracting gas compensation from the debt anymore
     function _redeemCollateralFromTrove(
         ContractsCache memory _contractsCache,
         address _borrower,
@@ -1191,7 +1194,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         // Determine the remaining amount (lot) to be redeemed, capped by the entire debt of the Trove minus the liquidation reserve
         singleRedemption.BaseFeeLMALot = LiquityMath._min(
             _maxBaseFeeLMAamount,
-            Troves[_borrower].debt.sub(BaseFeeLMA_GAS_COMPENSATION)
+            Troves[_borrower].debt
         );
 
         // Get the StETHLot of equivalent value in USD

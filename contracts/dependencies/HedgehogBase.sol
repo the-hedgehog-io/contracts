@@ -11,10 +11,13 @@ import "../interfaces/IHedgehogBase.sol";
 
 /**
  * @notice Fork of LiquityMath with an upgraded pragma and:
- * [ - Get OZ contracts from a package
- * TODO: List changes to HedgehogBase File and variables ]
  * Base contract for TroveManager, BorrowerOperations and StabilityPool. Contains global system constants and
  * common functions.
+ *
+ * Hedgehog updates:
+ * Rename variables,
+ * Increase MCR and CCR,
+ * Update Min Net Debt
  */
 contract HedgehogBase is BaseMath, IHedgehogBase {
     using SafeMath for uint;
@@ -46,12 +49,16 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
     // --- Gas compensation functions ---
 
     // Returns the composite debt (drawn debt + gas compensation) of a trove, for the purpose of ICR calculation
+    // HEDGEHOG UPDATES:
+    // No longer deduct gas comp from a net debt
     function _getCompositeDebt(uint _debt) internal pure returns (uint) {
-        return _debt.add(BaseFeeLMA_GAS_COMPENSATION);
+        return _debt;
     }
 
+    // HEDGEHOG UPDATES:
+    // No longer deduct gas comp from a net debt
     function _getNetDebt(uint _debt) internal pure returns (uint) {
-        return _debt.sub(BaseFeeLMA_GAS_COMPENSATION);
+        return _debt;
     }
 
     // Return the amount of StETH to be drawn from a trove's collateral and sent as gas compensation.

@@ -963,12 +963,13 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
     }
 
+    // Hedgehog updates: not subtracting gas compensation from the debt
     function _requireValidBaseFeeLMARepayment(
         uint _currentDebt,
         uint _debtRepayment
     ) internal pure {
         require(
-            _debtRepayment <= _currentDebt.sub(BaseFeeLMA_GAS_COMPENSATION),
+            _debtRepayment <= _currentDebt,
             "BorrowerOps: Amount repaid must not be larger than the Trove's debt"
         );
     }
