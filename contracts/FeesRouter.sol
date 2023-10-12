@@ -11,6 +11,7 @@ import "hardhat/console.sol";
 error InvalidIndex();
 error InvalidAddress();
 error InvalidLength();
+error InvalidInput();
 error TooManyConfigValues();
 
 contract FeesRouter is AccessControl {
@@ -93,6 +94,8 @@ contract FeesRouter is AccessControl {
         address _addressC
     ) external onlyRole(SETTER) {
         if (_percentage % 5 != 0) revert InvalidIndex();
+        if (_addressA == address(0)) revert InvalidAddress(); // At least A address should be initiated
+        if (_amountA == 0) revert InvalidInput(); // At least A amount should be initiated
 
         debtFeeConfigs[_percentage] = FeeConfig(
             _amountA,
@@ -145,6 +148,8 @@ contract FeesRouter is AccessControl {
         address _addressC
     ) external onlyRole(SETTER) {
         if (_percentage % 5 != 0) revert InvalidIndex();
+        if (_addressA == address(0)) revert InvalidAddress(); // At least A address should be initiated
+        if (_amountA == 0) revert InvalidInput(); // At least A amount should be initiated
 
         debtFeeConfigs[_percentage] = FeeConfig(
             _amountA,
@@ -177,6 +182,8 @@ contract FeesRouter is AccessControl {
         address _addressC
     ) external onlyRole(SETTER) {
         if (_percentage % 5 != 0) revert InvalidIndex();
+        if (_addressA == address(0)) revert InvalidAddress(); // At least A address should be initiated
+        if (_amountA == 0) revert InvalidInput(); // At least A amount should be initiated
 
         collFeeConfigs[_percentage] = FeeConfig(
             _amountA,
