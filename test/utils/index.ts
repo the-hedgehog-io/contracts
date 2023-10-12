@@ -83,13 +83,20 @@ export const setupContracts = async () => {
     await (await ethers.getContractFactory("HintHelpers")).deploy()
   ).waitForDeployment();
 
+  const feesRouter = await (
+    await (
+      await ethers.getContractFactory("FeesRouter")
+    ).deploy(deployer.address, deployer.address)
+  ).waitForDeployment();
+
   const baseFeeLMAToken = await (
     await (
       await ethers.getContractFactory("BaseFeeLMAToken")
     ).deploy(
       await troveManager.getAddress(),
       await stabilityPool.getAddress(),
-      await borrowerOperations.getAddress()
+      await borrowerOperations.getAddress(),
+      await feesRouter.getAddress()
     )
   ).waitForDeployment();
 
@@ -118,6 +125,18 @@ export const setupContracts = async () => {
     )
   ).waitForDeployment();
 
+  for (let i = 0; i < 100; i = i + 5) {
+    await feesRouter.setFeeConfigs(
+      i,
+      100,
+      0,
+      0,
+      await hogStaking.getAddress(),
+      ethers.ZeroAddress,
+      ethers.ZeroAddress
+    );
+  }
+
   const maxBytes32 = "0x" + "f".repeat(64);
 
   await priceFeed.setAddresses(
@@ -142,7 +161,8 @@ export const setupContracts = async () => {
     await baseFeeLMAToken.getAddress(),
     await sortedTroves.getAddress(),
     await hogToken.getAddress(),
-    await hogStaking.getAddress()
+    await hogStaking.getAddress(),
+    await feesRouter.getAddress()
   );
 
   await borrowerOperations.setAddresses(
@@ -156,7 +176,8 @@ export const setupContracts = async () => {
     await sortedTroves.getAddress(),
     await baseFeeLMAToken.getAddress(),
     await hogStaking.getAddress(),
-    await payToken.getAddress()
+    await payToken.getAddress(),
+    await feesRouter.getAddress()
   );
 
   await stabilityPool.setAddresses(
@@ -175,7 +196,8 @@ export const setupContracts = async () => {
     await troveManager.getAddress(),
     await stabilityPool.getAddress(),
     await defaultPool.getAddress(),
-    await payToken.getAddress()
+    await payToken.getAddress(),
+    await feesRouter.getAddress()
   );
 
   await defaultPool.setAddresses(
@@ -197,7 +219,8 @@ export const setupContracts = async () => {
     await troveManager.getAddress(),
     await borrowerOperations.getAddress(),
     await activePool.getAddress(),
-    await payToken.getAddress()
+    await payToken.getAddress(),
+    await feesRouter.getAddress()
   );
 
   await hintHelpers.setAddresses(
@@ -210,6 +233,11 @@ export const setupContracts = async () => {
   await communityIssuance.setAddresses(
     await hogToken.getAddress(),
     await stabilityPool.getAddress()
+  );
+  await feesRouter.setAddresses(
+    await activePool.getAddress(),
+    await baseFeeLMAToken.getAddress(),
+    await hogStaking.getAddress()
   );
 
   return [

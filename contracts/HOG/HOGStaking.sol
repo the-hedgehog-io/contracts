@@ -42,6 +42,7 @@ contract HOGStaking is Ownable, CheckContract, BaseMath {
     address public troveManagerAddress;
     address public borrowerOperationsAddress;
     address public activePoolAddress;
+    address public feesRouter;
 
     // --- Events ---
 
@@ -51,6 +52,7 @@ contract HOGStaking is Ownable, CheckContract, BaseMath {
     event BorrowerOperationsAddressSet(address _borrowerOperationsAddress);
     event ActivePoolAddressSet(address _activePoolAddress);
     event StETHTokenAddressUpdated(IERC20 _StEthAddress);
+    event FeesRouterAddressUpdated(address _feesRouter);
 
     event StakeChanged(address indexed staker, uint newStake);
     event StakingGainsWithdrawn(
@@ -76,7 +78,8 @@ contract HOGStaking is Ownable, CheckContract, BaseMath {
         address _troveManagerAddress,
         address _borrowerOperationsAddress,
         address _activePoolAddress,
-        IERC20 _stETHTokenAddress
+        IERC20 _stETHTokenAddress,
+        address _feesRouter
     ) external onlyOwner {
         checkContract(_hogTokenAddress);
         checkContract(_baseFeeLMATokenAddress);
@@ -84,6 +87,7 @@ contract HOGStaking is Ownable, CheckContract, BaseMath {
         checkContract(_borrowerOperationsAddress);
         checkContract(_activePoolAddress);
         checkContract(address(_stETHTokenAddress));
+        checkContract(_feesRouter);
 
         hogToken = IHOGToken(_hogTokenAddress);
         baseFeeLMAToken = IBaseFeeLMAToken(_baseFeeLMATokenAddress);
@@ -91,6 +95,7 @@ contract HOGStaking is Ownable, CheckContract, BaseMath {
         borrowerOperationsAddress = _borrowerOperationsAddress;
         activePoolAddress = _activePoolAddress;
         StETHToken = _stETHTokenAddress;
+        feesRouter = _feesRouter;
 
         emit HOGTokenAddressSet(_hogTokenAddress);
         emit HOGTokenAddressSet(_baseFeeLMATokenAddress);
@@ -98,6 +103,7 @@ contract HOGStaking is Ownable, CheckContract, BaseMath {
         emit BorrowerOperationsAddressSet(_borrowerOperationsAddress);
         emit ActivePoolAddressSet(_activePoolAddress);
         emit StETHTokenAddressUpdated(_stETHTokenAddress);
+        emit FeesRouterAddressUpdated(_feesRouter);
 
         renounceOwnership();
     }
@@ -176,7 +182,7 @@ contract HOGStaking is Ownable, CheckContract, BaseMath {
     // --- Reward-per-unit-staked increase functions. Called by Liquity core contracts ---
 
     function increaseF_StETH(uint _StETHFee) external {
-        _requireCallerIsTroveManager();
+        _requireCallerIsTMorFRoute();
         uint StETHFeePerHOGStaked;
 
         if (totalHOGStaked > 0) {
@@ -190,7 +196,7 @@ contract HOGStaking is Ownable, CheckContract, BaseMath {
     }
 
     function increaseF_BaseFeeLMA(uint _BaseFeeLMAFee) external {
-        _requireCallerIsBorrowerOperations();
+        _requireCallerIsBOorFRoute();
         uint BaseFeeLMAFeePerHOGStaked;
 
         if (totalHOGStaked > 0) {
@@ -258,10 +264,24 @@ contract HOGStaking is Ownable, CheckContract, BaseMath {
         );
     }
 
+    function _requireCallerIsTMorFRoute() internal view {
+        require(
+            msg.sender == troveManagerAddress || msg.sender == feesRouter,
+            "HOGStaking: caller is not TroveM or FeesR"
+        );
+    }
+
     function _requireCallerIsBorrowerOperations() internal view {
         require(
             msg.sender == borrowerOperationsAddress,
             "HOGStaking: caller is not BorrowerOps"
+        );
+    }
+
+    function _requireCallerIsBOorFRoute() internal view {
+        require(
+            msg.sender == borrowerOperationsAddress || msg.sender == feesRouter,
+            "HOGStaking: caller is not BorrowerOps or FRoute"
         );
     }
 

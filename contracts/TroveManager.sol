@@ -9,6 +9,7 @@ import "./interfaces/IBaseFeeLMAToken.sol";
 import "./interfaces/ISortedTroves.sol";
 import "./interfaces/IHOGToken.sol";
 import "./interfaces/IHOGStaking.sol";
+import "./interfaces/IFeesRouter.sol";
 import "./dependencies/HedgehogBase.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -16,10 +17,11 @@ import "./dependencies/CheckContract.sol";
 import "hardhat/console.sol";
 
 /**
- * @notice Fork of Liquity's TroveManager. Logic remains unchanged.
+ * @notice Fork of Liquity's TroveManager. Most of the Logic remains unchanged.
  * Changes to the contract:
  * - Raised pragma version
  * - Removed an import of ActivePool Interface
+ * - Logic updates with redemption & borrowing fees calculation and their distribution
  * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  */
 
@@ -42,6 +44,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     IHOGToken public hogToken;
 
     IHOGStaking public hogStaking;
+
+    IFeesRouter public feesRouter;
 
     // A doubly linked list of Troves, sorted by their sorted by their collateral ratios
     ISortedTroves public sortedTroves;
@@ -235,6 +239,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
     event HOGTokenAddressChanged(address _hogTokenAddress);
     event HOGStakingAddressChanged(address _hogStakingAddress);
+    event FeesRouterAddressUpdated(IFeesRouter _feesRouter);
 
     event Liquidation(
         uint _liquidatedDebt,
@@ -304,7 +309,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         address _baseFeeLMATokenAddress,
         address _sortedTrovesAddress,
         address _hogTokenAddress,
-        address _hogStakingAddress
+        address _hogStakingAddress,
+        IFeesRouter _feesRouterAddress
     ) external onlyOwner {
         checkContract(_borrowerOperationsAddress);
         checkContract(_activePoolAddress);
@@ -317,6 +323,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         checkContract(_sortedTrovesAddress);
         checkContract(_hogTokenAddress);
         checkContract(_hogStakingAddress);
+        checkContract(address(_feesRouterAddress));
 
         borrowerOperationsAddress = _borrowerOperationsAddress;
         activePool = IActivePool(_activePoolAddress);
@@ -329,6 +336,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         sortedTroves = ISortedTroves(_sortedTrovesAddress);
         hogToken = IHOGToken(_hogTokenAddress);
         hogStaking = IHOGStaking(_hogStakingAddress);
+        feesRouter = IFeesRouter(_feesRouterAddress);
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit ActivePoolAddressChanged(_activePoolAddress);
@@ -341,6 +349,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         emit SortedTrovesAddressChanged(_sortedTrovesAddress);
         emit HOGTokenAddressChanged(_hogTokenAddress);
         emit HOGStakingAddressChanged(_hogStakingAddress);
+        emit FeesRouterAddressUpdated(_feesRouterAddress);
 
         renounceOwnership();
     }
@@ -385,8 +394,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             vars.pendingDebtReward,
             vars.pendingCollReward
         ) = getEntireDebtAndColl(_borrower);
-        console.log(singleLiquidation.entireTroveDebt);
-        console.log(singleLiquidation.entireTroveColl);
 
         _movePendingTroveRewardsToActivePool(
             _activePool,
@@ -1460,12 +1467,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             totals.totalStETHDrawn,
             _maxFeePercentage
         );
-        // Send the StETH fee to the HOG staking contract
-        contractsCache.activePool.sendStETH(
-            address(contractsCache.hogStaking),
-            totals.StETHFee
-        );
-        contractsCache.hogStaking.increaseF_StETH(totals.StETHFee);
+
+        // HEDGHEHOG UPDATES:
+        // Fees are now distributed among different addresses based on how big they are
+        feesRouter.distributeCollFee(totals.totalStETHDrawn, totals.StETHFee);
 
         totals.StETHToSendToRedeemer = totals.totalStETHDrawn.sub(
             totals.StETHFee
@@ -2230,7 +2235,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             minutesPassed
         );
 
-        console.log("minutes passed: ", minutesPassed);
         return borrowBaseRate.mul(decayFactor).div(DECIMAL_PRECISION);
     }
 

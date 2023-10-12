@@ -7,6 +7,7 @@ import "./interfaces/IBaseFeeLMAToken.sol";
 import "./interfaces/ICollSurplusPool.sol";
 import "./interfaces/ISortedTroves.sol";
 import "./interfaces/IHOGStaking.sol";
+import "./interfaces/IFeesRouter.sol";
 import "./dependencies/HedgehogBase.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
@@ -15,11 +16,13 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
- * @notice Fork of Liquity's BorrowerOperations. Logic remains unchanged.
+ * @notice Fork of Liquity's BorrowerOperations. . Most of the Logic remains unchanged..
  * Changes to the contract:
  * - Raised pragma version
  * - Removed an import of IBorrowerOperations Interface
+ * - Collateral is now an ERC20 token instead of a native one
  * - Updated variable names and docs to refer to BaseFeeLMA token and stEth as a collateral
+ * - Logic updates with borrowing fees calculation and their distribution
  * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  */
 
@@ -43,6 +46,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     IHOGStaking public hogStaking;
     address public hogStakingAddress;
+    IFeesRouter public feesRouter;
 
     IBaseFeeLMAToken baseFeeLMAToken;
 
@@ -104,6 +108,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     event BaseFeeLMATokenAddressChanged(address _BaseFeeLMATokenAddress);
     event HOGStakingAddressChanged(address _hogStakingAddress);
     event StETHTokenAddressUpdated(IERC20 _StEthAddress);
+    event FeesRouterAddressUpdated(IFeesRouter _feesRouter);
 
     event TroveCreated(address indexed _borrower, uint arrayIndex);
     event TroveUpdated(
@@ -136,7 +141,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _sortedTrovesAddress,
         address _baseFeeLMATokenAddress,
         address _hogStakingAddress,
-        IERC20 _stETHTokenAddress
+        IERC20 _stETHTokenAddress,
+        IFeesRouter _feesRouter
     ) external onlyOwner {
         // This makes impossible to open a trove with zero withdrawn BaseFeeLMA
         assert(MIN_NET_DEBT > 0);
@@ -152,6 +158,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         checkContract(_baseFeeLMATokenAddress);
         checkContract(_hogStakingAddress);
         checkContract(address(_stETHTokenAddress));
+        checkContract(address(_feesRouter));
 
         troveManager = ITroveManager(_troveManagerAddress);
         activePool = IActivePool(_activePoolAddress);
@@ -165,6 +172,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         hogStakingAddress = _hogStakingAddress;
         hogStaking = IHOGStaking(_hogStakingAddress);
         StETHToken = _stETHTokenAddress;
+        feesRouter = _feesRouter;
 
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit ActivePoolAddressChanged(_activePoolAddress);
@@ -177,6 +185,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         emit BaseFeeLMATokenAddressChanged(_baseFeeLMATokenAddress);
         emit HOGStakingAddressChanged(_hogStakingAddress);
         emit StETHTokenAddressUpdated(_stETHTokenAddress);
+        emit FeesRouterAddressUpdated(_feesRouter);
 
         renounceOwnership();
     }
@@ -216,7 +225,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         if (!isRecoveryMode) {
             vars.BaseFeeLMAFee = _triggerBorrowingFee(
                 contractsCache.troveManager,
-                contractsCache.baseFeeLMAToken,
                 _BaseFeeLMAAmount,
                 _maxFeePercentage
             );
@@ -520,7 +528,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         if (_isDebtIncrease && !isRecoveryMode) {
             vars.BaseFeeLMAFee = _triggerBorrowingFee(
                 contractsCache.troveManager,
-                contractsCache.baseFeeLMAToken,
                 _BaseFeeLMAChange,
                 _maxFeePercentage
             );
@@ -673,9 +680,10 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     // --- Helper functions ---
 
+    // HEDGHEHOG UPDATES:
+    // No longer passing token address param as it's not needed anymore
     function _triggerBorrowingFee(
         ITroveManager _troveManager,
-        IBaseFeeLMAToken _baseFeeLMAToken,
         uint _BaseFeeLMAAmount,
         uint _maxFeePercentage
     ) internal returns (uint) {
@@ -692,10 +700,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             _maxFeePercentage
         );
 
-        // Send fee to HOG staking contract
-        hogStaking.increaseF_BaseFeeLMA(BaseFeeLMAFee);
-        // TODO: Update where does the token go to (some part to the staking and some part to treasury)
-        _baseFeeLMAToken.mint(hogStakingAddress, BaseFeeLMAFee);
+        // HEDGHEHOG UPDATES:
+        // Fees are now distributed among different addresses based on how big they are
+        feesRouter.distributeDebtFee(_BaseFeeLMAAmount, BaseFeeLMAFee);
 
         return BaseFeeLMAFee;
     }
@@ -986,8 +993,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _borrower,
         uint _debtRepayment
     ) internal view {
-        console.log(_baseFeeLMAToken.balanceOf(_borrower));
-        console.log(_debtRepayment);
         require(
             _baseFeeLMAToken.balanceOf(_borrower) >= _debtRepayment,
             "BorrowerOps: Caller doesnt have enough BaseFeeLMA to make repayment"

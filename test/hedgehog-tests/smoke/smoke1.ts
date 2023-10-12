@@ -103,7 +103,7 @@ describe("BaseFeeOracle Tests", () => {
     const BobBfeBalanceAfterRedemption = BigInt("");
     const BobTroveIncreaseCollFirst = BigInt("16663244859813100");
     const BobTroveCollAfterIncrease = BigInt("2016663244859813100");
-    const BobCRAfterIncrease = 672;
+    const BobCRAfterIncrease = BigInt("6722210816199377000");
     const BobTroveCollAfterLuquid = BigInt("2059754172045110000");
     const BobTroveDebtAfterLuquid = BigInt("5805881");
     const BobCRAfterLiquid = 591;
@@ -394,7 +394,7 @@ describe("BaseFeeOracle Tests", () => {
       compareWithFault(balance, BobIdealBFEBalanceAtOpening);
     });
 
-    it.skip("Should have a correct CR in a new position (bob position)", async () => {
+    it("Should have a correct CR in a new position (bob position)", async () => {
       expect(await getCR()).to.be.equal(BobInitialCR);
     });
 
@@ -580,7 +580,7 @@ describe("BaseFeeOracle Tests", () => {
       expect(coll).to.be.equal(BobTroveCollAfterIncrease);
     });
 
-    it.skip("Should have a correct CR after coll increase in position (bob position)", async () => {
+    it("Should have a correct CR after coll increase in position (bob position)", async () => {
       expect(await getCR()).to.be.equal(BobCRAfterIncrease);
     });
 

@@ -61,6 +61,7 @@ contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
     address public immutable troveManagerAddress;
     address public immutable stabilityPoolAddress;
     address public immutable borrowerOperationsAddress;
+    address public feesRouter;
 
     // --- Events ---
     event TroveManagerAddressChanged(address _troveManagerAddress);
@@ -68,17 +69,20 @@ contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
     event BorrowerOperationsAddressChanged(
         address _newBorrowerOperationsAddress
     );
+    event FeesRouterAddressUpdated(address _feesRouter);
 
     event BaseFeeLMATokenBalanceUpdated(address _user, uint _amount);
 
     constructor(
         address _troveManagerAddress,
         address _stabilityPoolAddress,
-        address _borrowerOperationsAddress
+        address _borrowerOperationsAddress,
+        address _feesRouter
     ) {
         checkContract(_troveManagerAddress);
         checkContract(_stabilityPoolAddress);
         checkContract(_borrowerOperationsAddress);
+        checkContract(_feesRouter);
 
         troveManagerAddress = _troveManagerAddress;
         emit TroveManagerAddressChanged(_troveManagerAddress);
@@ -88,6 +92,9 @@ contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
 
         borrowerOperationsAddress = _borrowerOperationsAddress;
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
+
+        feesRouter = _feesRouter;
+        emit FeesRouterAddressUpdated(_feesRouter);
 
         bytes32 hashedName = keccak256(bytes(_NAME));
         bytes32 hashedVersion = keccak256(bytes(_VERSION));
@@ -104,8 +111,9 @@ contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
 
     // --- Functions for intra-Liquity calls ---
 
+    // Hedgehog Updates: Now also fees router may call mint function
     function mint(address _account, uint256 _amount) external {
-        _requireCallerIsBorrowerOperations();
+        _requireCallerIsBOorFRoute();
         _mint(_account, _amount);
     }
 
@@ -347,6 +355,13 @@ contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
     function _requireCallerIsBorrowerOperations() internal view {
         require(
             msg.sender == borrowerOperationsAddress,
+            "BaseFeeLMAToken: Caller is not BorrowerOperations"
+        );
+    }
+
+    function _requireCallerIsBOorFRoute() internal view {
+        require(
+            msg.sender == borrowerOperationsAddress || msg.sender == feesRouter,
             "BaseFeeLMAToken: Caller is not BorrowerOperations"
         );
     }

@@ -11,7 +11,7 @@ import "./dependencies/CheckContract.sol";
 import "./interfaces/IPool.sol";
 
 /**
- * @notice Fork of Liquity's Active Pool. Logic remains unchanged.
+ * @notice Fork of Liquity's Active Pool. Most of the logic remains unchanged.
  * Changes to the contract:
  * - Raised pragma version
  * - Removed an import of ActivePool Interface
@@ -35,6 +35,7 @@ contract ActivePool is Ownable, CheckContract, IPool {
     address public troveManagerAddress;
     address public stabilityPoolAddress;
     address public defaultPoolAddress;
+    address public feesRouter;
     IERC20 public StETHToken;
     uint256 internal StETH; // deposited stEth tracker
     uint256 internal BaseFeeLMADebt;
@@ -48,6 +49,7 @@ contract ActivePool is Ownable, CheckContract, IPool {
     event ActivePoolBaseFeeLMADebtUpdated(uint _BaseFeeLMADebt);
     event ActivePoolStETHBalanceUpdated(uint _stStETH);
     event StETHTokenAddressUpdated(IERC20 _StEthAddress);
+    event FeesRouterAddressUpdated(address _feesRouter);
 
     // --- Contract setters ---
 
@@ -61,25 +63,29 @@ contract ActivePool is Ownable, CheckContract, IPool {
         address _troveManagerAddress,
         address _stabilityPoolAddress,
         address _defaultPoolAddress,
-        IERC20 _stETHTokenAddress
+        IERC20 _stETHTokenAddress,
+        address _feesRouter
     ) external onlyOwner {
         checkContract(_borrowerOperationsAddress);
         checkContract(_troveManagerAddress);
         checkContract(_stabilityPoolAddress);
         checkContract(_defaultPoolAddress);
         checkContract(address(_stETHTokenAddress));
+        checkContract(_feesRouter);
 
         borrowerOperationsAddress = _borrowerOperationsAddress;
         troveManagerAddress = _troveManagerAddress;
         stabilityPoolAddress = _stabilityPoolAddress;
         defaultPoolAddress = _defaultPoolAddress;
         StETHToken = _stETHTokenAddress;
+        feesRouter = _feesRouter;
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit StabilityPoolAddressChanged(_stabilityPoolAddress);
         emit DefaultPoolAddressChanged(_defaultPoolAddress);
         emit StETHTokenAddressUpdated(_stETHTokenAddress);
+        emit FeesRouterAddressUpdated(_feesRouter);
 
         renounceOwnership();
     }
@@ -105,9 +111,10 @@ contract ActivePool is Ownable, CheckContract, IPool {
 
     /**
      * HEDGEHOG UPDATES: use SafeERC20 safe transfer instead of native token transfer
+     *      Now also fees router may call sendStETH function
      */
     function sendStETH(address _account, uint _amount) external {
-        _requireCallerIsBOorTroveMorSP();
+        _requireCallerIsBOorTroveMorSPorFRoute();
         StETH = StETH.sub(_amount);
         emit ActivePoolStETHBalanceUpdated(StETH);
         emit StETHSent(_account, _amount);
@@ -141,6 +148,16 @@ contract ActivePool is Ownable, CheckContract, IPool {
             msg.sender == borrowerOperationsAddress ||
                 msg.sender == troveManagerAddress ||
                 msg.sender == stabilityPoolAddress,
+            "ActivePool: Caller is neither BorrowerOperations nor TroveManager nor StabilityPool"
+        );
+    }
+
+    function _requireCallerIsBOorTroveMorSPorFRoute() internal view {
+        require(
+            msg.sender == borrowerOperationsAddress ||
+                msg.sender == troveManagerAddress ||
+                msg.sender == stabilityPoolAddress ||
+                msg.sender == feesRouter,
             "ActivePool: Caller is neither BorrowerOperations nor TroveManager nor StabilityPool"
         );
     }
