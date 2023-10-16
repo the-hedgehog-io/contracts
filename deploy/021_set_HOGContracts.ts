@@ -1,6 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { createExecuteWithLog, isOwnershipRenounced } from "../deploy-helpers";
 import { deployConfig } from "../deploy-helpers/deployConfig";
+import { ethers } from "hardhat";
 
 const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const { deployer } = await getNamedAccounts();
@@ -14,10 +15,11 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const TroveManager = await deployments.get("TroveManager");
   const BorrowerOperations = await deployments.get("BorrowerOperations");
   const ActivePool = await deployments.get("ActivePool");
+  const FeesRouter = await deployments.get("FeesRouter");
   const { stEth: StETHAddress } = deployConfig;
 
   if (!(await isOwnershipRenounced(LockupContractFactory.address))) {
-    console.log("Setting up HOGStaking...");
+    console.log("Setting up LockupContractFactory...");
 
     await executeWithLog(
       "LockupContractFactory",
@@ -40,7 +42,8 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       TroveManager.address,
       BorrowerOperations.address,
       ActivePool.address,
-      StETHAddress
+      StETHAddress,
+      FeesRouter.address
     );
   }
   console.log("HOGStaking is set");
@@ -58,6 +61,44 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   }
   console.log("CommunityIssuance is set");
 
+  console.log("Setting Fees Router...");
+
+  const feesRouter = await ethers.getContractAt(
+    "FeesRouter",
+    FeesRouter.address
+  );
+
+  if ((await feesRouter.debtFeeConfigs(0)).addressA == ethers.ZeroAddress) {
+    await executeWithLog(
+      "FeesRouter",
+      { from: deployer },
+      "setAddresses",
+      ActivePool.address,
+      BaseFeeLMAToken.address,
+      HOGStaking.address
+    );
+  }
+
+  for (let i = 0; i < 100; i = i + 5) {
+    if ((await feesRouter.debtFeeConfigs(i)).addressA == ethers.ZeroAddress) {
+      console.log("setting now % of ", i);
+      await (
+        await feesRouter.setFeeConfigs(
+          i,
+          100,
+          0,
+          0,
+          HOGStaking.address,
+          ethers.ZeroAddress,
+          ethers.ZeroAddress
+        )
+      ).wait();
+      console.log(i, " is set");
+    }
+  }
+
+  console.log("Fees Router is set");
+
   console.log("HOG Token Contracts are set");
 };
 deploy.tags = ["main", "updateHogTokenContracts"];
@@ -66,6 +107,7 @@ deploy.dependencies = [
   "HOGToken",
   "CommunityIssuance",
   "LockupContractFactory",
+  "FeesRouter",
 ];
 
 export default deploy;

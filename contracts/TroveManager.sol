@@ -1207,6 +1207,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         // Get the StETHLot of equivalent value in USD
         // HEDGEHOG UPDATES: Change StETHLOT calculations formula from [debtToBeRedeemed * price * 10e9] to [debtToBeRedeemed / price * 1e18]
         singleRedemption.StETHLot = singleRedemption.BaseFeeLMALot.mul(_price);
+        console.log(singleRedemption.StETHLot);
 
         // Decrease the debt and collateral of the current Trove according to the BaseFeeLMA lot and corresponding StETH to send
         uint newDebt = (Troves[_borrower].debt).sub(
@@ -1240,7 +1241,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
              *
              * If the resultant net debt of the partial is less than the minimum, net debt we bail.
              */
-
+            console.log("hint again?: ", newNICR != _partialRedemptionHintNICR);
             if (
                 newNICR != _partialRedemptionHintNICR ||
                 _getNetDebt(newDebt) < MIN_NET_DEBT
@@ -1420,6 +1421,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
                 contractsCache.defaultPool,
                 currentBorrower
             );
+
             SingleRedemptionValues
                 memory singleRedemption = _redeemCollateralFromTrove(
                     contractsCache,
@@ -1430,7 +1432,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
                     _lowerPartialRedemptionHint,
                     _partialRedemptionHintNICR
                 );
-
+            console.log(singleRedemption.cancelledPartial);
             if (singleRedemption.cancelledPartial) break; // Partial redemption was cancelled (out-of-date hint, or new net debt < minimum), therefore we could not redeem from the last Trove
             totals.totalBaseFeeLMAToRedeem = totals.totalBaseFeeLMAToRedeem.add(
                 singleRedemption.BaseFeeLMALot
@@ -1770,7 +1772,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         if (_debt == 0) {
             return;
         }
-
+        console.log("DEBT DURING LIQ: ", _debt);
         /*
          * Add distributed coll and debt rewards-per-unit-staked to the running totals. Division uses a "feedback"
          * error correction, to keep the cumulative error low in the running totals L_StETH and L_BaseFeeLMADebt:
@@ -2280,6 +2282,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         address _redeemer,
         uint _amount
     ) internal view {
+        console.log("balance alice: ", _baseFeeLMAToken.balanceOf(_redeemer));
+        console.log(_amount);
         require(
             _baseFeeLMAToken.balanceOf(_redeemer) >= _amount,
             "TroveManager: Requested redemption amount must be <= user's BaseFeeLMA token balance"

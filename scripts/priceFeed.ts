@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 
 const config = {
   admin: "0x796EcfBe7a2A424f9D905dfC38b8994aB2db9FD6",
-  oracle: "0xD44f568C0ABf6Be814986CD40B35bAFF4c5FFCae",
+  oracle: "0x60733d043772C90251d1A807EE235Bec70162aA8",
 };
 
 async function main() {
@@ -10,11 +10,12 @@ async function main() {
     "PriceFeed",
     "0xE15fE01995312eD902B69d08fd7025cb3950dED5"
   );
-  //   const oracle = await (
-  //     await (
-  //       await ethers.getContractFactory("BaseFeeOracle")
-  //     ).deploy(config.admin, config.admin)
-  //   ).waitForDeployment();
+  // const oracle = await (
+  //   await (
+  //     await ethers.getContractFactory("BaseFeeOracle")
+  //   ).deploy(config.admin, config.admin)
+  // ).waitForDeployment();
+  // console.log("Oracle is deployed", await oracle.getAddress());
 
   const oracle = await ethers.getContractAt("BaseFeeOracle", config.oracle);
 
@@ -29,8 +30,8 @@ async function main() {
     await oracle.feedBaseFeeValue("3000000000", secondBlock!.number)
   ).wait();
 
-  console.log("Setting address: "),
-    await priceFeed.setAddresses(oracleAddress, oracleAddress);
+  // console.log("Setting address: "),
+  //   await priceFeed.setAddresses(oracleAddress, oracleAddress);
 
   console.log("Success");
 }

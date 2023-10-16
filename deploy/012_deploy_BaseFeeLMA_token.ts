@@ -9,6 +9,7 @@ const deploy: DeployFunction = async ({
   const TroveManager = await get("TroveManager");
   const StabilityPool = await get("StabilityPool");
   const BorrowerOperations = await get("BorrowerOperations");
+  const FeesRouter = await get("FeesRouter");
 
   await deploy("BaseFeeLMAToken", {
     from: deployer,
@@ -17,6 +18,7 @@ const deploy: DeployFunction = async ({
       TroveManager.address,
       StabilityPool.address,
       BorrowerOperations.address,
+      FeesRouter.address,
     ],
   });
 };

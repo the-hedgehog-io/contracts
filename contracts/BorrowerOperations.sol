@@ -531,7 +531,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
                 _BaseFeeLMAChange,
                 _maxFeePercentage
             );
-            vars.netDebtChange = vars.netDebtChange.add(vars.BaseFeeLMAFee); // The raw debt change includes the fee
+            // Hedgehog Updates: Not adding fee to the position debt anymore
+            vars.netDebtChange = vars.netDebtChange;
         }
 
         vars.debt = contractsCache.troveManager.getTroveDebt(_borrower);

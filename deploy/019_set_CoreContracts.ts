@@ -19,6 +19,7 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const HOGStaking = await deployments.get("HOGStaking");
   const CommunityIssuance = await deployments.get("CommunityIssuance");
   const HintHelpers = await deployments.get("HintHelpers");
+  const FeesRouter = await deployments.get("FeesRouter");
   const { stEth: StETHAddress, mainOracle, backupOracle } = deployConfig;
 
   if (!(await isOwnershipRenounced(SortedTroves.address))) {
@@ -53,22 +54,23 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       BaseFeeLMAToken.address,
       SortedTroves.address,
       HOGToken.address,
-      HOGStaking.address
+      HOGStaking.address,
+      FeesRouter.address
     );
   }
   console.log("TroveManager is set");
 
-  // if (!(await isOwnershipRenounced(PriceFeed.address))) {
-  //   console.log("Setting up Price Feed...");
-  //   await executeWithLog(
-  //     "PriceFeed",
-  //     { from: deployer },
-  //     "setAddresses",
-  //     mainOracle,
-  //     backupOracle
-  //   );
-  // }
-  // console.log("TroveManager is set");
+  if (!(await isOwnershipRenounced(PriceFeed.address))) {
+    console.log("Setting up Price Feed...");
+    await executeWithLog(
+      "PriceFeed",
+      { from: deployer },
+      "setAddresses",
+      mainOracle,
+      backupOracle
+    );
+  }
+  console.log("PriceFeed is set");
 
   if (!(await isOwnershipRenounced(BorrowerOperations.address))) {
     console.log("Setting up BorrowerOperations...");
@@ -87,7 +89,8 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       SortedTroves.address,
       BaseFeeLMAToken.address,
       HOGStaking.address,
-      StETHAddress
+      StETHAddress,
+      FeesRouter.address
     );
   }
   console.log("BorrowerOperations is set");
@@ -121,7 +124,8 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       TroveManager.address,
       StabilityPool.address,
       DefaultPool.address,
-      StETHAddress
+      StETHAddress,
+      FeesRouter.address
     );
   }
   console.log("ActivePool is set");
