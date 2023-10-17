@@ -233,9 +233,6 @@ contract EchidnaTester {
             CCR
         );
 
-        //console.log('StETH', StETH);
-        //console.log('BaseFeeLMAAmount', BaseFeeLMAAmount);
-
         echidnaProxy.openTrovePrx(
             StETH,
             BaseFeeLMAAmount,

@@ -15,7 +15,7 @@ contract NonPayable {
         (bool success, bytes memory returnData) = _dest.call{value: msg.value}(
             _data
         );
-        //console.logBytes(returnData);
+
         require(success, string(returnData));
     }
 
