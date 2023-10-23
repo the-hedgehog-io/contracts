@@ -10,6 +10,7 @@ contract BaseFeeOracle is AccessControl {
     struct Response {
         int256 answer;
         uint64 blockNumber;
+        uint256 currentChainBN;
         uint80 roundId;
     }
 
@@ -21,7 +22,7 @@ contract BaseFeeOracle is AccessControl {
 
     uint256 public constant decimals = 1;
 
-    event BaseFeeSet(int256 newValue, uint80 roundId);
+    event BaseFeeSet(int256 newValue, uint80 roundId, uint256 blockNumber);
 
     constructor(address _admin, address _ultimateAdmin) {
         _grantRole(ULTIMATE_ADMIN, _ultimateAdmin);
@@ -34,7 +35,7 @@ contract BaseFeeOracle is AccessControl {
         uint64 _blockNumber
     ) external onlyRole(SETTER) {
         uint80 round = latestRound + 1;
-        (, uint256 blockNumber, ) = getRoundData(latestRound);
+        (, uint256 blockNumber, , ) = getRoundData(latestRound);
 
         if (_blockNumber <= blockNumber) {
             revert OutdatedRequest();
@@ -42,22 +43,32 @@ contract BaseFeeOracle is AccessControl {
         responseById[round] = Response({
             answer: _newValue,
             blockNumber: _blockNumber,
+            currentChainBN: block.number,
             roundId: round
         });
 
         latestRound++;
 
-        emit BaseFeeSet(_newValue, round);
+        emit BaseFeeSet(_newValue, round, block.number);
     }
 
     function getRoundData(
         uint80 _roundId
-    ) public view returns (int256, uint256, uint80) {
+    ) public view returns (int256, uint256, uint256, uint80) {
         Response memory response = responseById[_roundId];
-        return (response.answer, response.blockNumber, response.roundId);
+        return (
+            response.answer,
+            response.blockNumber,
+            response.currentChainBN,
+            response.roundId
+        );
     }
 
-    function latestRoundData() external view returns (int256, uint256, uint80) {
+    function latestRoundData()
+        external
+        view
+        returns (int256, uint256, uint256, uint80)
+    {
         return getRoundData(latestRound);
     }
 }

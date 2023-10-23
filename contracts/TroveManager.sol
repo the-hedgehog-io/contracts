@@ -406,7 +406,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         singleLiquidation.collGasCompensation = _getCollGasCompensation(
             singleLiquidation.entireTroveColl
         );
-
         singleLiquidation
             .BaseFeeLMAGasCompensation = BaseFeeLMA_GAS_COMPENSATION; // TODO: Why is that being done if BaseFeeLMA_GAS_COMP is static
         uint collToLiquidate = singleLiquidation.entireTroveColl.sub(
@@ -946,7 +945,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             totals.totalDebtToRedistribute,
             totals.totalCollToRedistribute
         );
-
+        console.log("sending coll to coll surplas: ", totals.totalCollSurplus);
         if (totals.totalCollSurplus > 0) {
             collSurplusPool.increaseBalance(totals.totalCollSurplus);
             activePoolCached.sendStETH(
@@ -1106,6 +1105,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
                 vars.remainingBaseFeeLMAInStabPool = vars
                     .remainingBaseFeeLMAInStabPool
                     .sub(singleLiquidation.debtToOffset);
+                console.log(
+                    "remaining bfe in stab pool: ",
+                    vars.remainingBaseFeeLMAInStabPool
+                );
 
                 // Add liquidation values to their respective running totals
                 totals = _addLiquidationValuesToTotals(

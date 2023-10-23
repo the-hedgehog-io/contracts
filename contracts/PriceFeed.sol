@@ -610,11 +610,12 @@ contract PriceFeed is Ownable, BaseMath {
         try mainOracle.latestRoundData() returns (
             int256 answer,
             uint64 blockNumber,
+            uint256 currentChainBN,
             uint80 roundId
         ) {
             response.roundId = roundId;
             response.answer = answer;
-            response.blockNumber = blockNumber;
+            response.blockNumber = uint64(currentChainBN);
 
             return response;
         } catch {
@@ -632,11 +633,12 @@ contract PriceFeed is Ownable, BaseMath {
         try backupOracle.latestRoundData() returns (
             int256 answer,
             uint64 blockNumber,
+            uint256 currentChainBN,
             uint80 roundId
         ) {
             response.roundId = roundId;
             response.answer = answer;
-            response.blockNumber = blockNumber;
+            response.blockNumber = uint64(currentChainBN);
 
             return response;
         } catch {
@@ -657,12 +659,13 @@ contract PriceFeed is Ownable, BaseMath {
         try mainOracle.getRoundData(_currentRoundId - 1) returns (
             int256 answer,
             uint64 blockNumber,
+            uint256 currentChainBN,
             uint80 roundId
         ) {
             // If call to Hedgehog succeeds, return the response and success = true
             prevMainOracleResponse.roundId = roundId;
             prevMainOracleResponse.answer = answer;
-            prevMainOracleResponse.blockNumber = blockNumber;
+            prevMainOracleResponse.blockNumber = uint64(currentChainBN);
             return prevMainOracleResponse;
         } catch {
             // If call to Main Oracle aggregator reverts, return a zero response with success = false
@@ -682,12 +685,13 @@ contract PriceFeed is Ownable, BaseMath {
         try backupOracle.getRoundData(_currentRoundId - 1) returns (
             int256 answer,
             uint64 blockNumber,
+            uint256 currentChainBN,
             uint80 roundId
         ) {
             // If call to Hedgehog succeeds, return the response and success = true
             prevBackupOracleResponse.roundId = roundId;
             prevBackupOracleResponse.answer = answer;
-            prevBackupOracleResponse.blockNumber = blockNumber;
+            prevBackupOracleResponse.blockNumber = uint64(currentChainBN);
             return prevBackupOracleResponse;
         } catch {
             // If call to Main Oracle aggregator reverts, return a zero response with success = false

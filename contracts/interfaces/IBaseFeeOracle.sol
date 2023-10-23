@@ -12,10 +12,23 @@ interface IBaseFeeOracle {
     // which could be misinterpreted as actual reported values.
     function getRoundData(
         uint80 _roundId
-    ) external view returns (int256 answer, uint64 blockNumber, uint80 roundId);
+    )
+        external
+        view
+        returns (
+            int256 answer,
+            uint64 blockNumber,
+            uint256 currentChainBN,
+            uint80 roundId
+        );
 
     function latestRoundData()
         external
         view
-        returns (int256 answer, uint64 blockNumber, uint80 roundId);
+        returns (
+            int256 answer,
+            uint64 blockNumber,
+            uint256 currentChainBN,
+            uint80 roundId
+        );
 }

@@ -1,0 +1,687 @@
+{
+  "address": "0x60d37d34341135cE64fb0CE3dBE8EDBD9F2e8349",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "_borrowerOperationsAddress",
+          "type": "address"
+        }
+      ],
+      "name": "BorrowerOperationsAddressChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "_id",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "_NICR",
+          "type": "uint256"
+        }
+      ],
+      "name": "NodeAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "_id",
+          "type": "address"
+        }
+      ],
+      "name": "NodeRemoved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "_troveManagerAddress",
+          "type": "address"
+        }
+      ],
+      "name": "TroveManagerAddressChanged",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "NAME",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "borrowerOperationsAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_id",
+          "type": "address"
+        }
+      ],
+      "name": "contains",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "data",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "head",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "tail",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "maxSize",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "size",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_NICR",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_prevId",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_nextId",
+          "type": "address"
+        }
+      ],
+      "name": "findInsertPosition",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getFirst",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getLast",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getMaxSize",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_id",
+          "type": "address"
+        }
+      ],
+      "name": "getNext",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_id",
+          "type": "address"
+        }
+      ],
+      "name": "getPrev",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getSize",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_id",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_NICR",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_prevId",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_nextId",
+          "type": "address"
+        }
+      ],
+      "name": "insert",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "isEmpty",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "isFull",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_id",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_newNICR",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_prevId",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_nextId",
+          "type": "address"
+        }
+      ],
+      "name": "reInsert",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_id",
+          "type": "address"
+        }
+      ],
+      "name": "remove",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_size",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_troveManagerAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_borrowerOperationsAddress",
+          "type": "address"
+        }
+      ],
+      "name": "setParams",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "troveManager",
+      "outputs": [
+        {
+          "internalType": "contract ITroveManager",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_NICR",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_prevId",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_nextId",
+          "type": "address"
+        }
+      ],
+      "name": "validInsertPosition",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xb090fc8cc28135332a8cebd672f31a488a0dfa62dff5054edc564d4bd82e1cf7",
+  "receipt": {
+    "to": null,
+    "from": "0x796EcfBe7a2A424f9D905dfC38b8994aB2db9FD6",
+    "contractAddress": "0x60d37d34341135cE64fb0CE3dBE8EDBD9F2e8349",
+    "transactionIndex": 2,
+    "gasUsed": "1336172",
+    "logsBloom": "0x40000000000000000000000000000000000000000000000100800000020000000000000002000000000000000000000000008000000000000000000000000000000000080000000000000000000000800001000000000000000100000000000000000004020000000000000000000800000000000080000080000000000000400000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000004000000000000000000001000000000000000000000000000000100000000020000004000000000080000000000000000000000000000000000000000000100000",
+    "blockHash": "0x879e8f7203503a631c51cf0812b6d4604cf4d64ec5e819da8d4ab56a099752cc",
+    "transactionHash": "0xb090fc8cc28135332a8cebd672f31a488a0dfa62dff5054edc564d4bd82e1cf7",
+    "logs": [
+      {
+        "transactionIndex": 2,
+        "blockNumber": 41545155,
+        "transactionHash": "0xb090fc8cc28135332a8cebd672f31a488a0dfa62dff5054edc564d4bd82e1cf7",
+        "address": "0x60d37d34341135cE64fb0CE3dBE8EDBD9F2e8349",
+        "topics": [
+          "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x000000000000000000000000796ecfbe7a2a424f9d905dfc38b8994ab2db9fd6"
+        ],
+        "data": "0x",
+        "logIndex": 3,
+        "blockHash": "0x879e8f7203503a631c51cf0812b6d4604cf4d64ec5e819da8d4ab56a099752cc"
+      },
+      {
+        "transactionIndex": 2,
+        "blockNumber": 41545155,
+        "transactionHash": "0xb090fc8cc28135332a8cebd672f31a488a0dfa62dff5054edc564d4bd82e1cf7",
+        "address": "0x0000000000000000000000000000000000001010",
+        "topics": [
+          "0x4dfe1bbbcf077ddc3e01291eea2d5c70c2b422b415d95645b9adcfd678cb1d63",
+          "0x0000000000000000000000000000000000000000000000000000000000001010",
+          "0x000000000000000000000000796ecfbe7a2a424f9d905dfc38b8994ab2db9fd6",
+          "0x0000000000000000000000005082f249cdb2f2c1ee035e4f423c46ea2dab3ab1"
+        ],
+        "data": "0x000000000000000000000000000000000000000000000000000ad4cb80ad30b00000000000000000000000000000000000000000000000000c78f6590232ca490000000000000000000000000000000000000000000003042dcdfb03661cde5e0000000000000000000000000000000000000000000000000c6e218d818599990000000000000000000000000000000000000000000003042dd8cfcee6ca0f0e",
+        "logIndex": 4,
+        "blockHash": "0x879e8f7203503a631c51cf0812b6d4604cf4d64ec5e819da8d4ab56a099752cc"
+      }
+    ],
+    "blockNumber": 41545155,
+    "cumulativeGasUsed": "1432905",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "d5f53fb866e459e87a9a24e89566d411",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"_borrowerOperationsAddress\",\"type\":\"address\"}],\"name\":\"BorrowerOperationsAddressChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"_id\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_NICR\",\"type\":\"uint256\"}],\"name\":\"NodeAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"_id\",\"type\":\"address\"}],\"name\":\"NodeRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"_troveManagerAddress\",\"type\":\"address\"}],\"name\":\"TroveManagerAddressChanged\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"NAME\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"borrowerOperationsAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_id\",\"type\":\"address\"}],\"name\":\"contains\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"data\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"head\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tail\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"maxSize\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"size\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_NICR\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_prevId\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_nextId\",\"type\":\"address\"}],\"name\":\"findInsertPosition\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getFirst\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getLast\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getMaxSize\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_id\",\"type\":\"address\"}],\"name\":\"getNext\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_id\",\"type\":\"address\"}],\"name\":\"getPrev\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getSize\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_id\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_NICR\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_prevId\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_nextId\",\"type\":\"address\"}],\"name\":\"insert\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"isEmpty\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"isFull\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_id\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_newNICR\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_prevId\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_nextId\",\"type\":\"address\"}],\"name\":\"reInsert\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_id\",\"type\":\"address\"}],\"name\":\"remove\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_size\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_troveManagerAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_borrowerOperationsAddress\",\"type\":\"address\"}],\"name\":\"setParams\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"troveManager\",\"outputs\":[{\"internalType\":\"contract ITroveManager\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_NICR\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_prevId\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_nextId\",\"type\":\"address\"}],\"name\":\"validInsertPosition\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.\"},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/SortedTroves.sol\":\"SortedTroves\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":100},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/access/Ownable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.9.0) (access/Ownable.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../utils/Context.sol\\\";\\n\\n/**\\n * @dev Contract module which provides a basic access control mechanism, where\\n * there is an account (an owner) that can be granted exclusive access to\\n * specific functions.\\n *\\n * By default, the owner account will be the one that deploys the contract. This\\n * can later be changed with {transferOwnership}.\\n *\\n * This module is used through inheritance. It will make available the modifier\\n * `onlyOwner`, which can be applied to your functions to restrict their use to\\n * the owner.\\n */\\nabstract contract Ownable is Context {\\n    address private _owner;\\n\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\n\\n    /**\\n     * @dev Initializes the contract setting the deployer as the initial owner.\\n     */\\n    constructor() {\\n        _transferOwnership(_msgSender());\\n    }\\n\\n    /**\\n     * @dev Throws if called by any account other than the owner.\\n     */\\n    modifier onlyOwner() {\\n        _checkOwner();\\n        _;\\n    }\\n\\n    /**\\n     * @dev Returns the address of the current owner.\\n     */\\n    function owner() public view virtual returns (address) {\\n        return _owner;\\n    }\\n\\n    /**\\n     * @dev Throws if the sender is not the owner.\\n     */\\n    function _checkOwner() internal view virtual {\\n        require(owner() == _msgSender(), \\\"Ownable: caller is not the owner\\\");\\n    }\\n\\n    /**\\n     * @dev Leaves the contract without owner. It will not be possible to call\\n     * `onlyOwner` functions. Can only be called by the current owner.\\n     *\\n     * NOTE: Renouncing ownership will leave the contract without an owner,\\n     * thereby disabling any functionality that is only available to the owner.\\n     */\\n    function renounceOwnership() public virtual onlyOwner {\\n        _transferOwnership(address(0));\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Can only be called by the current owner.\\n     */\\n    function transferOwnership(address newOwner) public virtual onlyOwner {\\n        require(newOwner != address(0), \\\"Ownable: new owner is the zero address\\\");\\n        _transferOwnership(newOwner);\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Internal function without access restriction.\\n     */\\n    function _transferOwnership(address newOwner) internal virtual {\\n        address oldOwner = _owner;\\n        _owner = newOwner;\\n        emit OwnershipTransferred(oldOwner, newOwner);\\n    }\\n}\\n\",\"keccak256\":\"0xba43b97fba0d32eb4254f6a5a297b39a19a247082a02d6e69349e071e2946218\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.9.0) (token/ERC20/IERC20.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC20 standard as defined in the EIP.\\n */\\ninterface IERC20 {\\n    /**\\n     * @dev Emitted when `value` tokens are moved from one account (`from`) to\\n     * another (`to`).\\n     *\\n     * Note that `value` may be zero.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /**\\n     * @dev Emitted when the allowance of a `spender` for an `owner` is set by\\n     * a call to {approve}. `value` is the new allowance.\\n     */\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n\\n    /**\\n     * @dev Returns the amount of tokens in existence.\\n     */\\n    function totalSupply() external view returns (uint256);\\n\\n    /**\\n     * @dev Returns the amount of tokens owned by `account`.\\n     */\\n    function balanceOf(address account) external view returns (uint256);\\n\\n    /**\\n     * @dev Moves `amount` tokens from the caller's account to `to`.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transfer(address to, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Returns the remaining number of tokens that `spender` will be\\n     * allowed to spend on behalf of `owner` through {transferFrom}. This is\\n     * zero by default.\\n     *\\n     * This value changes when {approve} or {transferFrom} are called.\\n     */\\n    function allowance(address owner, address spender) external view returns (uint256);\\n\\n    /**\\n     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * IMPORTANT: Beware that changing an allowance with this method brings the risk\\n     * that someone may use both the old and the new allowance by unfortunate\\n     * transaction ordering. One possible solution to mitigate this race\\n     * condition is to first reduce the spender's allowance to 0 and set the\\n     * desired value afterwards:\\n     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address spender, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Moves `amount` tokens from `from` to `to` using the\\n     * allowance mechanism. `amount` is then deducted from the caller's\\n     * allowance.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(address from, address to, uint256 amount) external returns (bool);\\n}\\n\",\"keccak256\":\"0x287b55befed2961a7eabd7d7b1b2839cbca8a5b80ef8dcbb25ed3d4c2002c305\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract Context {\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n}\\n\",\"keccak256\":\"0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/math/SafeMath.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.9.0) (utils/math/SafeMath.sol)\\n\\npragma solidity ^0.8.0;\\n\\n// CAUTION\\n// This version of SafeMath should only be used with Solidity 0.8 or later,\\n// because it relies on the compiler's built in overflow checks.\\n\\n/**\\n * @dev Wrappers over Solidity's arithmetic operations.\\n *\\n * NOTE: `SafeMath` is generally not needed starting with Solidity 0.8, since the compiler\\n * now has built in overflow checking.\\n */\\nlibrary SafeMath {\\n    /**\\n     * @dev Returns the addition of two unsigned integers, with an overflow flag.\\n     *\\n     * _Available since v3.4._\\n     */\\n    function tryAdd(uint256 a, uint256 b) internal pure returns (bool, uint256) {\\n        unchecked {\\n            uint256 c = a + b;\\n            if (c < a) return (false, 0);\\n            return (true, c);\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the subtraction of two unsigned integers, with an overflow flag.\\n     *\\n     * _Available since v3.4._\\n     */\\n    function trySub(uint256 a, uint256 b) internal pure returns (bool, uint256) {\\n        unchecked {\\n            if (b > a) return (false, 0);\\n            return (true, a - b);\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the multiplication of two unsigned integers, with an overflow flag.\\n     *\\n     * _Available since v3.4._\\n     */\\n    function tryMul(uint256 a, uint256 b) internal pure returns (bool, uint256) {\\n        unchecked {\\n            // Gas optimization: this is cheaper than requiring 'a' not being zero, but the\\n            // benefit is lost if 'b' is also tested.\\n            // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522\\n            if (a == 0) return (true, 0);\\n            uint256 c = a * b;\\n            if (c / a != b) return (false, 0);\\n            return (true, c);\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the division of two unsigned integers, with a division by zero flag.\\n     *\\n     * _Available since v3.4._\\n     */\\n    function tryDiv(uint256 a, uint256 b) internal pure returns (bool, uint256) {\\n        unchecked {\\n            if (b == 0) return (false, 0);\\n            return (true, a / b);\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the remainder of dividing two unsigned integers, with a division by zero flag.\\n     *\\n     * _Available since v3.4._\\n     */\\n    function tryMod(uint256 a, uint256 b) internal pure returns (bool, uint256) {\\n        unchecked {\\n            if (b == 0) return (false, 0);\\n            return (true, a % b);\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the addition of two unsigned integers, reverting on\\n     * overflow.\\n     *\\n     * Counterpart to Solidity's `+` operator.\\n     *\\n     * Requirements:\\n     *\\n     * - Addition cannot overflow.\\n     */\\n    function add(uint256 a, uint256 b) internal pure returns (uint256) {\\n        return a + b;\\n    }\\n\\n    /**\\n     * @dev Returns the subtraction of two unsigned integers, reverting on\\n     * overflow (when the result is negative).\\n     *\\n     * Counterpart to Solidity's `-` operator.\\n     *\\n     * Requirements:\\n     *\\n     * - Subtraction cannot overflow.\\n     */\\n    function sub(uint256 a, uint256 b) internal pure returns (uint256) {\\n        return a - b;\\n    }\\n\\n    /**\\n     * @dev Returns the multiplication of two unsigned integers, reverting on\\n     * overflow.\\n     *\\n     * Counterpart to Solidity's `*` operator.\\n     *\\n     * Requirements:\\n     *\\n     * - Multiplication cannot overflow.\\n     */\\n    function mul(uint256 a, uint256 b) internal pure returns (uint256) {\\n        return a * b;\\n    }\\n\\n    /**\\n     * @dev Returns the integer division of two unsigned integers, reverting on\\n     * division by zero. The result is rounded towards zero.\\n     *\\n     * Counterpart to Solidity's `/` operator.\\n     *\\n     * Requirements:\\n     *\\n     * - The divisor cannot be zero.\\n     */\\n    function div(uint256 a, uint256 b) internal pure returns (uint256) {\\n        return a / b;\\n    }\\n\\n    /**\\n     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),\\n     * reverting when dividing by zero.\\n     *\\n     * Counterpart to Solidity's `%` operator. This function uses a `revert`\\n     * opcode (which leaves remaining gas untouched) while Solidity uses an\\n     * invalid opcode to revert (consuming all remaining gas).\\n     *\\n     * Requirements:\\n     *\\n     * - The divisor cannot be zero.\\n     */\\n    function mod(uint256 a, uint256 b) internal pure returns (uint256) {\\n        return a % b;\\n    }\\n\\n    /**\\n     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on\\n     * overflow (when the result is negative).\\n     *\\n     * CAUTION: This function is deprecated because it requires allocating memory for the error\\n     * message unnecessarily. For custom revert reasons use {trySub}.\\n     *\\n     * Counterpart to Solidity's `-` operator.\\n     *\\n     * Requirements:\\n     *\\n     * - Subtraction cannot overflow.\\n     */\\n    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {\\n        unchecked {\\n            require(b <= a, errorMessage);\\n            return a - b;\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the integer division of two unsigned integers, reverting with custom message on\\n     * division by zero. The result is rounded towards zero.\\n     *\\n     * Counterpart to Solidity's `/` operator. Note: this function uses a\\n     * `revert` opcode (which leaves remaining gas untouched) while Solidity\\n     * uses an invalid opcode to revert (consuming all remaining gas).\\n     *\\n     * Requirements:\\n     *\\n     * - The divisor cannot be zero.\\n     */\\n    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {\\n        unchecked {\\n            require(b > 0, errorMessage);\\n            return a / b;\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),\\n     * reverting with custom message when dividing by zero.\\n     *\\n     * CAUTION: This function is deprecated because it requires allocating memory for the error\\n     * message unnecessarily. For custom revert reasons use {tryMod}.\\n     *\\n     * Counterpart to Solidity's `%` operator. This function uses a `revert`\\n     * opcode (which leaves remaining gas untouched) while Solidity uses an\\n     * invalid opcode to revert (consuming all remaining gas).\\n     *\\n     * Requirements:\\n     *\\n     * - The divisor cannot be zero.\\n     */\\n    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {\\n        unchecked {\\n            require(b > 0, errorMessage);\\n            return a % b;\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x58b21219689909c4f8339af00813760337f7e2e7f169a97fe49e2896dcfb3b9a\",\"license\":\"MIT\"},\"contracts/SortedTroves.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.19;\\n\\nimport \\\"./interfaces/ISortedTroves.sol\\\";\\nimport \\\"./interfaces/ITroveManager.sol\\\";\\nimport \\\"./interfaces/IBorrowerOperations.sol\\\";\\nimport \\\"@openzeppelin/contracts/utils/math/SafeMath.sol\\\";\\nimport \\\"@openzeppelin/contracts/access/Ownable.sol\\\";\\nimport \\\"./dependencies/CheckContract.sol\\\";\\n\\n/*\\n * A sorted doubly linked list with nodes sorted in descending order.\\n *\\n * Nodes map to active Troves in the system - the ID property is the address of a Trove owner.\\n * Nodes are ordered according to their current nominal individual collateral ratio (NICR),\\n * which is like the ICR but without the price, i.e., just collateral / debt.\\n *\\n * The list optionally accepts insert position hints.\\n *\\n * NICRs are computed dynamically at runtime, and not stored on the Node. This is because NICRs of active Troves\\n * change dynamically as liquidation events occur.\\n *\\n * The list relies on the fact that liquidation events preserve ordering: a liquidation decreases the NICRs of all active Troves,\\n * but maintains their order. A node inserted based on current NICR will maintain the correct position,\\n * relative to it's peers, as rewards accumulate, as long as it's raw collateral and debt have not changed.\\n * Thus, Nodes remain sorted by current NICR.\\n *\\n * Nodes need only be re-inserted upon a Trove operation - when the owner adds or removes collateral or debt\\n * to their position.\\n *\\n * The list is a modification of the following audited SortedDoublyLinkedList:\\n * https://github.com/livepeer/protocol/blob/master/contracts/libraries/SortedDoublyLL.sol\\n *\\n *\\n * Changes made in the Liquity implementation:\\n *\\n * - Keys have been removed from nodes\\n *\\n * - Ordering checks for insertion are performed by comparing an NICR argument to the current NICR, calculated at runtime.\\n *   The list relies on the property that ordering by ICR is maintained as the StETH:USD price varies.\\n *\\n * - Public functions with parameters have been made internal to save gas, and given an external wrapper function for external access\\n */\\ncontract SortedTroves is Ownable, CheckContract {\\n    using SafeMath for uint256;\\n\\n    string public constant NAME = \\\"SortedTroves\\\";\\n\\n    event TroveManagerAddressChanged(address _troveManagerAddress);\\n    event BorrowerOperationsAddressChanged(address _borrowerOperationsAddress);\\n    event NodeAdded(address _id, uint _NICR);\\n    event NodeRemoved(address _id);\\n\\n    address public borrowerOperationsAddress;\\n\\n    ITroveManager public troveManager;\\n\\n    // Information for a node in the list\\n    struct Node {\\n        bool exists;\\n        address nextId; // Id of next node (smaller NICR) in the list\\n        address prevId; // Id of previous node (larger NICR) in the list\\n    }\\n\\n    // Information for the list\\n    struct Data {\\n        address head; // Head of the list. Also the node in the list with the largest NICR\\n        address tail; // Tail of the list. Also the node in the list with the smallest NICR\\n        uint256 maxSize; // Maximum size of the list\\n        uint256 size; // Current size of the list\\n        mapping(address => Node) nodes; // Track the corresponding ids for each node in the list\\n    }\\n\\n    Data public data;\\n\\n    // --- Dependency setters ---\\n\\n    function setParams(\\n        uint256 _size,\\n        address _troveManagerAddress,\\n        address _borrowerOperationsAddress\\n    ) external onlyOwner {\\n        require(_size > 0, \\\"SortedTroves: Size cant be zero\\\");\\n        checkContract(_troveManagerAddress);\\n        checkContract(_borrowerOperationsAddress);\\n\\n        data.maxSize = _size;\\n\\n        troveManager = ITroveManager(_troveManagerAddress);\\n        borrowerOperationsAddress = _borrowerOperationsAddress;\\n\\n        emit TroveManagerAddressChanged(_troveManagerAddress);\\n        emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);\\n\\n        renounceOwnership();\\n    }\\n\\n    /*\\n     * @dev Add a node to the list\\n     * @param _id Node's id\\n     * @param _NICR Node's NICR\\n     * @param _prevId Id of previous node for the insert position\\n     * @param _nextId Id of next node for the insert position\\n     */\\n\\n    function insert(\\n        address _id,\\n        uint256 _NICR,\\n        address _prevId,\\n        address _nextId\\n    ) external {\\n        ITroveManager troveManagerCached = troveManager;\\n\\n        _requireCallerIsBOorTroveM(troveManagerCached);\\n        _insert(troveManagerCached, _id, _NICR, _prevId, _nextId);\\n    }\\n\\n    function _insert(\\n        ITroveManager _troveManager,\\n        address _id,\\n        uint256 _NICR,\\n        address _prevId,\\n        address _nextId\\n    ) internal {\\n        // List must not be full\\n        require(!isFull(), \\\"SortedTroves: List is full\\\");\\n        // List must not already contain node\\n        require(!contains(_id), \\\"SortedTroves: List already contains the node\\\");\\n        // Node id must not be null\\n        require(_id != address(0), \\\"SortedTroves: Id cannot be zero\\\");\\n        // NICR must be non-zero\\n        require(_NICR > 0, \\\"SortedTroves: NICR must be positive\\\");\\n\\n        address prevId = _prevId;\\n        address nextId = _nextId;\\n\\n        if (!_validInsertPosition(_troveManager, _NICR, prevId, nextId)) {\\n            // Sender's hint was not a valid insert position\\n            // Use sender's hint to find a valid insert position\\n            (prevId, nextId) = _findInsertPosition(\\n                _troveManager,\\n                _NICR,\\n                prevId,\\n                nextId\\n            );\\n        }\\n\\n        data.nodes[_id].exists = true;\\n\\n        if (prevId == address(0) && nextId == address(0)) {\\n            // Insert as head and tail\\n            data.head = _id;\\n            data.tail = _id;\\n        } else if (prevId == address(0)) {\\n            // Insert before `prevId` as the head\\n            data.nodes[_id].nextId = data.head;\\n            data.nodes[data.head].prevId = _id;\\n            data.head = _id;\\n        } else if (nextId == address(0)) {\\n            // Insert after `nextId` as the tail\\n            data.nodes[_id].prevId = data.tail;\\n            data.nodes[data.tail].nextId = _id;\\n            data.tail = _id;\\n        } else {\\n            // Insert at insert position between `prevId` and `nextId`\\n            data.nodes[_id].nextId = nextId;\\n            data.nodes[_id].prevId = prevId;\\n            data.nodes[prevId].nextId = _id;\\n            data.nodes[nextId].prevId = _id;\\n        }\\n\\n        data.size = data.size.add(1);\\n        emit NodeAdded(_id, _NICR);\\n    }\\n\\n    function remove(address _id) external {\\n        _requireCallerIsTroveManager();\\n        _remove(_id);\\n    }\\n\\n    /*\\n     * @dev Remove a node from the list\\n     * @param _id Node's id\\n     */\\n    function _remove(address _id) internal {\\n        // List must contain the node\\n        require(contains(_id), \\\"SortedTroves: List does not contain the id\\\");\\n\\n        if (data.size > 1) {\\n            // List contains more than a single node\\n            if (_id == data.head) {\\n                // The removed node is the head\\n                // Set head to next node\\n                data.head = data.nodes[_id].nextId;\\n                // Set prev pointer of new head to null\\n                data.nodes[data.head].prevId = address(0);\\n            } else if (_id == data.tail) {\\n                // The removed node is the tail\\n                // Set tail to previous node\\n                data.tail = data.nodes[_id].prevId;\\n                // Set next pointer of new tail to null\\n                data.nodes[data.tail].nextId = address(0);\\n            } else {\\n                // The removed node is neither the head nor the tail\\n                // Set next pointer of previous node to the next node\\n                data.nodes[data.nodes[_id].prevId].nextId = data\\n                    .nodes[_id]\\n                    .nextId;\\n                // Set prev pointer of next node to the previous node\\n                data.nodes[data.nodes[_id].nextId].prevId = data\\n                    .nodes[_id]\\n                    .prevId;\\n            }\\n        } else {\\n            // List contains a single node\\n            // Set the head and tail to null\\n            data.head = address(0);\\n            data.tail = address(0);\\n        }\\n\\n        delete data.nodes[_id];\\n        data.size = data.size.sub(1);\\n        emit NodeRemoved(_id);\\n    }\\n\\n    /*\\n     * @dev Re-insert the node at a new position, based on its new NICR\\n     * @param _id Node's id\\n     * @param _newNICR Node's new NICR\\n     * @param _prevId Id of previous node for the new insert position\\n     * @param _nextId Id of next node for the new insert position\\n     */\\n    function reInsert(\\n        address _id,\\n        uint256 _newNICR,\\n        address _prevId,\\n        address _nextId\\n    ) external {\\n        ITroveManager troveManagerCached = troveManager;\\n\\n        _requireCallerIsBOorTroveM(troveManagerCached);\\n        // List must contain the node\\n        require(contains(_id), \\\"SortedTroves: List does not contain the id\\\");\\n        // NICR must be non-zero\\n        require(_newNICR > 0, \\\"SortedTroves: NICR must be positive\\\");\\n\\n        // Remove node from the list\\n        _remove(_id);\\n\\n        _insert(troveManagerCached, _id, _newNICR, _prevId, _nextId);\\n    }\\n\\n    /*\\n     * @dev Checks if the list contains a node\\n     */\\n    function contains(address _id) public view returns (bool) {\\n        return data.nodes[_id].exists;\\n    }\\n\\n    /*\\n     * @dev Checks if the list is full\\n     */\\n    function isFull() public view returns (bool) {\\n        return data.size == data.maxSize;\\n    }\\n\\n    /*\\n     * @dev Checks if the list is empty\\n     */\\n    function isEmpty() public view returns (bool) {\\n        return data.size == 0;\\n    }\\n\\n    /*\\n     * @dev Returns the current size of the list\\n     */\\n    function getSize() external view returns (uint256) {\\n        return data.size;\\n    }\\n\\n    /*\\n     * @dev Returns the maximum size of the list\\n     */\\n    function getMaxSize() external view returns (uint256) {\\n        return data.maxSize;\\n    }\\n\\n    /*\\n     * @dev Returns the first node in the list (node with the largest NICR)\\n     */\\n    function getFirst() external view returns (address) {\\n        return data.head;\\n    }\\n\\n    /*\\n     * @dev Returns the last node in the list (node with the smallest NICR)\\n     */\\n    function getLast() external view returns (address) {\\n        return data.tail;\\n    }\\n\\n    /*\\n     * @dev Returns the next node (with a smaller NICR) in the list for a given node\\n     * @param _id Node's id\\n     */\\n    function getNext(address _id) external view returns (address) {\\n        return data.nodes[_id].nextId;\\n    }\\n\\n    /*\\n     * @dev Returns the previous node (with a larger NICR) in the list for a given node\\n     * @param _id Node's id\\n     */\\n    function getPrev(address _id) external view returns (address) {\\n        return data.nodes[_id].prevId;\\n    }\\n\\n    /*\\n     * @dev Check if a pair of nodes is a valid insertion point for a new node with the given NICR\\n     * @param _NICR Node's NICR\\n     * @param _prevId Id of previous node for the insert position\\n     * @param _nextId Id of next node for the insert position\\n     */\\n    function validInsertPosition(\\n        uint256 _NICR,\\n        address _prevId,\\n        address _nextId\\n    ) external view returns (bool) {\\n        return _validInsertPosition(troveManager, _NICR, _prevId, _nextId);\\n    }\\n\\n    function _validInsertPosition(\\n        ITroveManager _troveManager,\\n        uint256 _NICR,\\n        address _prevId,\\n        address _nextId\\n    ) internal view returns (bool) {\\n        if (_prevId == address(0) && _nextId == address(0)) {\\n            // `(null, null)` is a valid insert position if the list is empty\\n            return isEmpty();\\n        } else if (_prevId == address(0)) {\\n            // `(null, _nextId)` is a valid insert position if `_nextId` is the head of the list\\n            return\\n                data.head == _nextId &&\\n                _NICR >= _troveManager.getNominalICR(_nextId);\\n        } else if (_nextId == address(0)) {\\n            // `(_prevId, null)` is a valid insert position if `_prevId` is the tail of the list\\n            return\\n                data.tail == _prevId &&\\n                _NICR <= _troveManager.getNominalICR(_prevId);\\n        } else {\\n            // `(_prevId, _nextId)` is a valid insert position if they are adjacent nodes and `_NICR` falls between the two nodes' NICRs\\n            return\\n                data.nodes[_prevId].nextId == _nextId &&\\n                _troveManager.getNominalICR(_prevId) >= _NICR &&\\n                _NICR >= _troveManager.getNominalICR(_nextId);\\n        }\\n    }\\n\\n    /*\\n     * @dev Descend the list (larger NICRs to smaller NICRs) to find a valid insert position\\n     * @param _troveManager TroveManager contract, passed in as param to save SLOAD\\u2019s\\n     * @param _NICR Node's NICR\\n     * @param _startId Id of node to start descending the list from\\n     */\\n    function _descendList(\\n        ITroveManager _troveManager,\\n        uint256 _NICR,\\n        address _startId\\n    ) internal view returns (address, address) {\\n        // If `_startId` is the head, check if the insert position is before the head\\n        if (\\n            data.head == _startId &&\\n            _NICR >= _troveManager.getNominalICR(_startId)\\n        ) {\\n            return (address(0), _startId);\\n        }\\n\\n        address prevId = _startId;\\n        address nextId = data.nodes[prevId].nextId;\\n\\n        // Descend the list until we reach the end or until we find a valid insert position\\n        while (\\n            prevId != address(0) &&\\n            !_validInsertPosition(_troveManager, _NICR, prevId, nextId)\\n        ) {\\n            prevId = data.nodes[prevId].nextId;\\n            nextId = data.nodes[prevId].nextId;\\n        }\\n\\n        return (prevId, nextId);\\n    }\\n\\n    /*\\n     * @dev Ascend the list (smaller NICRs to larger NICRs) to find a valid insert position\\n     * @param _troveManager TroveManager contract, passed in as param to save SLOAD\\u2019s\\n     * @param _NICR Node's NICR\\n     * @param _startId Id of node to start ascending the list from\\n     */\\n    function _ascendList(\\n        ITroveManager _troveManager,\\n        uint256 _NICR,\\n        address _startId\\n    ) internal view returns (address, address) {\\n        // If `_startId` is the tail, check if the insert position is after the tail\\n        if (\\n            data.tail == _startId &&\\n            _NICR <= _troveManager.getNominalICR(_startId)\\n        ) {\\n            return (_startId, address(0));\\n        }\\n\\n        address nextId = _startId;\\n        address prevId = data.nodes[nextId].prevId;\\n\\n        // Ascend the list until we reach the end or until we find a valid insertion point\\n        while (\\n            nextId != address(0) &&\\n            !_validInsertPosition(_troveManager, _NICR, prevId, nextId)\\n        ) {\\n            nextId = data.nodes[nextId].prevId;\\n            prevId = data.nodes[nextId].prevId;\\n        }\\n\\n        return (prevId, nextId);\\n    }\\n\\n    /*\\n     * @dev Find the insert position for a new node with the given NICR\\n     * @param _NICR Node's NICR\\n     * @param _prevId Id of previous node for the insert position\\n     * @param _nextId Id of next node for the insert position\\n     */\\n    function findInsertPosition(\\n        uint256 _NICR,\\n        address _prevId,\\n        address _nextId\\n    ) external view returns (address, address) {\\n        return _findInsertPosition(troveManager, _NICR, _prevId, _nextId);\\n    }\\n\\n    function _findInsertPosition(\\n        ITroveManager _troveManager,\\n        uint256 _NICR,\\n        address _prevId,\\n        address _nextId\\n    ) internal view returns (address, address) {\\n        address prevId = _prevId;\\n        address nextId = _nextId;\\n\\n        if (prevId != address(0)) {\\n            if (\\n                !contains(prevId) || _NICR > _troveManager.getNominalICR(prevId)\\n            ) {\\n                // `prevId` does not exist anymore or now has a smaller NICR than the given NICR\\n                prevId = address(0);\\n            }\\n        }\\n\\n        if (nextId != address(0)) {\\n            if (\\n                !contains(nextId) || _NICR < _troveManager.getNominalICR(nextId)\\n            ) {\\n                // `nextId` does not exist anymore or now has a larger NICR than the given NICR\\n                nextId = address(0);\\n            }\\n        }\\n\\n        if (prevId == address(0) && nextId == address(0)) {\\n            // No hint - descend list starting from head\\n            return _descendList(_troveManager, _NICR, data.head);\\n        } else if (prevId == address(0)) {\\n            // No `prevId` for hint - ascend list starting from `nextId`\\n            return _ascendList(_troveManager, _NICR, nextId);\\n        } else if (nextId == address(0)) {\\n            // No `nextId` for hint - descend list starting from `prevId`\\n            return _descendList(_troveManager, _NICR, prevId);\\n        } else {\\n            // Descend list starting from `prevId`\\n            return _descendList(_troveManager, _NICR, prevId);\\n        }\\n    }\\n\\n    // --- 'require' functions ---\\n\\n    function _requireCallerIsTroveManager() internal view {\\n        require(\\n            msg.sender == address(troveManager),\\n            \\\"SortedTroves: Caller is not the TroveManager\\\"\\n        );\\n    }\\n\\n    function _requireCallerIsBOorTroveM(\\n        ITroveManager _troveManager\\n    ) internal view {\\n        require(\\n            msg.sender == borrowerOperationsAddress ||\\n                msg.sender == address(_troveManager),\\n            \\\"SortedTroves: Caller is neither BO nor TroveM\\\"\\n        );\\n    }\\n}\\n\",\"keccak256\":\"0x30cb260ac49a90b43b2ad8d60be316ec07bf6f34d4d670d53b1e33ada9e5ccbf\",\"license\":\"MIT\"},\"contracts/dependencies/CheckContract.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.19;\\n\\ncontract CheckContract {\\n    /**\\n     * Check that the account is an already deployed non-destroyed contract.\\n     * See: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Address.sol#L12\\n     */\\n    function checkContract(address _account) internal view {\\n        require(_account != address(0), \\\"Account cannot be zero address\\\");\\n\\n        uint256 size;\\n        // solhint-disable-next-line no-inline-assembly\\n        assembly {\\n            size := extcodesize(_account)\\n        }\\n        require(size > 0, \\\"Account code size cannot be zero\\\");\\n    }\\n}\\n\",\"keccak256\":\"0x4860bce12806bb81c1e91ec617f2f95dd1774148b15645eaca94a67220096f2f\",\"license\":\"MIT\"},\"contracts/dependencies/IERC2612.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.19;\\n\\n/**\\n * @dev Interface of the ERC2612 standard as defined in the EIP.\\n *\\n * Adds the {permit} method, which can be used to change one's\\n * {IERC20-allowance} without having to send a transaction, by signing a\\n * message. This allows users to spend tokens without having to hold StETH.\\n *\\n * See https://eips.stETHeum.org/EIPS/eip-2612.\\n *\\n * Code adapted from https://github.com/OpenZeppelin/openzeppelin-contracts/pull/2237/\\n */\\ninterface IERC2612 {\\n    /**\\n     * @dev Sets `amount` as the allowance of `spender` over `owner`'s tokens,\\n     * given `owner`'s signed approval.\\n     *\\n     * IMPORTANT: The same issues {IERC20-approve} has related to transaction\\n     * ordering also apply here.\\n     *\\n     * Emits an {Approval} event.\\n     *\\n     * Requirements:\\n     *\\n     * - `owner` cannot be the zero address.\\n     * - `spender` cannot be the zero address.\\n     * - `deadline` must be a timestamp in the future.\\n     * - `v`, `r` and `s` must be a valid `secp256k1` signature from `owner`\\n     * over the EIP712-formatted function arguments.\\n     * - the signature must use ``owner``'s current nonce (see {nonces}).\\n     *\\n     * For more information on the signature format, see the\\n     * https://eips.stETHeum.org/EIPS/eip-2612#specification[relevant EIP\\n     * section].\\n     */\\n    function permit(\\n        address owner,\\n        address spender,\\n        uint256 amount,\\n        uint256 deadline,\\n        uint8 v,\\n        bytes32 r,\\n        bytes32 s\\n    ) external;\\n\\n    /**\\n     * @dev Returns the current ERC2612 nonce for `owner`. This value must be\\n     * included whenever a signature is generated for {permit}.\\n     *\\n     * Every successful call to {permit} increases `owner`'s nonce by one. This\\n     * prevents a signature from being used multiple times.\\n     *\\n     * `owner` can limit the time a Permit is valid for by setting `deadline` to\\n     * a value in the near future. The deadline argument can be set to uint(-1) to\\n     * create Permits that effectively never expire.\\n     */\\n    function nonces(address owner) external view returns (uint256);\\n\\n    function version() external view returns (string memory);\\n\\n    function permitTypeHash() external view returns (bytes32);\\n\\n    function domainSeparator() external view returns (bytes32);\\n}\\n\",\"keccak256\":\"0xd862d70e8c9d8f912e73151567a70f47f3a7e52c9ec766ccc4e02f87bd0d32b9\",\"license\":\"MIT\"},\"contracts/interfaces/IBaseFeeLMAToken.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.19;\\n\\nimport \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\nimport \\\"../dependencies/IERC2612.sol\\\";\\n\\ninterface IBaseFeeLMAToken is IERC20, IERC2612 {\\n    // --- Events ---\\n\\n    event TroveManagerAddressChanged(address _troveManagerAddress);\\n    event StabilityPoolAddressChanged(address _newStabilityPoolAddress);\\n    event BorrowerOperationsAddressChanged(\\n        address _newBorrowerOperationsAddress\\n    );\\n\\n    event BaseFeeLMATokenBalanceUpdated(address _user, uint _amount);\\n\\n    // --- Functions ---\\n\\n    function mint(address _account, uint256 _amount) external;\\n\\n    function burn(address _account, uint256 _amount) external;\\n\\n    function sendToPool(\\n        address _sender,\\n        address poolAddress,\\n        uint256 _amount\\n    ) external;\\n\\n    function returnFromPool(\\n        address poolAddress,\\n        address user,\\n        uint256 _amount\\n    ) external;\\n\\n    function totalSupply() external view returns (uint256);\\n}\\n\",\"keccak256\":\"0x4f46da70de4bab049b8e24afec10e5308ab86fbbfb77f2314c1607ff8e77a4d2\",\"license\":\"MIT\"},\"contracts/interfaces/IBorrowerOperations.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.19;\\n\\n// Common interface for the Trove Manager.\\ninterface IBorrowerOperations {\\n    // --- Events ---\\n\\n    event TroveManagerAddressChanged(address _newTroveManagerAddress);\\n    event ActivePoolAddressChanged(address _activePoolAddress);\\n    event DefaultPoolAddressChanged(address _defaultPoolAddress);\\n    event StabilityPoolAddressChanged(address _stabilityPoolAddress);\\n    event GasPoolAddressChanged(address _gasPoolAddress);\\n    event CollSurplusPoolAddressChanged(address _collSurplusPoolAddress);\\n    event PriceFeedAddressChanged(address _newPriceFeedAddress);\\n    event SortedTrovesAddressChanged(address _sortedTrovesAddress);\\n    event BaseFeeLMATokenAddressChanged(address _baseFeeLMATokenAddress);\\n    event HOGStakingAddressChanged(address _hogStakingAddress);\\n\\n    event TroveCreated(address indexed _borrower, uint arrayIndex);\\n    event TroveUpdated(\\n        address indexed _borrower,\\n        uint _debt,\\n        uint _coll,\\n        uint stake,\\n        uint8 operation\\n    );\\n    event BaseFeeLMABorrowingFeePaid(\\n        address indexed _borrower,\\n        uint _BaseFeeLMAFee\\n    );\\n\\n    // --- Functions ---\\n\\n    function setAddresses(\\n        address _troveManagerAddress,\\n        address _activePoolAddress,\\n        address _defaultPoolAddress,\\n        address _stabilityPoolAddress,\\n        address _gasPoolAddress,\\n        address _collSurplusPoolAddress,\\n        address _priceFeedAddress,\\n        address _sortedTrovesAddress,\\n        address _baseFeeLMATokenAddress,\\n        address _hogStakingAddress\\n    ) external;\\n\\n    function openTrove(\\n        uint _maxFee,\\n        uint _BaseFeeLMAAmount,\\n        uint _collAmount,\\n        address _upperHint,\\n        address _lowerHint\\n    ) external;\\n\\n    function addColl(\\n        address _upperHint,\\n        address _lowerHint,\\n        uint _amount\\n    ) external;\\n\\n    function moveStETHGainToTrove(\\n        address _user,\\n        address _upperHint,\\n        address _lowerHint,\\n        uint _amount\\n    ) external;\\n\\n    function withdrawColl(\\n        uint _amount,\\n        address _upperHint,\\n        address _lowerHint\\n    ) external;\\n\\n    function withdrawBaseFeeLMA(\\n        uint _maxFee,\\n        uint _amount,\\n        address _upperHint,\\n        address _lowerHint\\n    ) external;\\n\\n    function repayBaseFeeLMA(\\n        uint _amount,\\n        address _upperHint,\\n        address _lowerHint\\n    ) external;\\n\\n    function closeTrove() external;\\n\\n    function adjustTrove(\\n        uint _maxFee,\\n        uint _collWithdrawal,\\n        uint _collIncrease,\\n        uint _debtChange,\\n        bool isDebtIncrease,\\n        address _upperHint,\\n        address _lowerHint\\n    ) external;\\n\\n    function claimCollateral() external;\\n\\n    function getCompositeDebt(uint _debt) external pure returns (uint);\\n}\\n\",\"keccak256\":\"0xc267f577164887dce6a8f4fef3eb2301d2a401cc723f0d06ee66b9b72f5b0e90\",\"license\":\"MIT\"},\"contracts/interfaces/IHOGStaking.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.19;\\n\\ninterface IHOGStaking {\\n    // --- Events --\\n\\n    event HOGTokenAddressSet(address _hogTokenAddress);\\n    event BaseFeeLMATokenAddressSet(address _baseFeeLMATokenAddress);\\n    event TroveManagerAddressSet(address _troveManager);\\n    event BorrowerOperationsAddressSet(address _borrowerOperationsAddress);\\n    event ActivePoolAddressSet(address _activePoolAddress);\\n\\n    event StakeChanged(address indexed staker, uint newStake);\\n    event StakingGainsWithdrawn(\\n        address indexed staker,\\n        uint BaseFeeLMAGain,\\n        uint StETHGain\\n    );\\n    event F_StETHUpdated(uint _F_StETH);\\n    event F_BaseFeeLMAUpdated(uint _F_BaseFeeLMA);\\n    event TotalHOGStakedUpdated(uint _totalHOGStaked);\\n    event StETHSent(address _account, uint _amount);\\n    event StakerSnapshotsUpdated(\\n        address _staker,\\n        uint _F_StETH,\\n        uint _F_BaseFeeLMA\\n    );\\n\\n    // --- Functions ---\\n\\n    function setAddresses(\\n        address _hogTokenAddress,\\n        address _baseFeeLMATokenAddress,\\n        address _troveManagerAddress,\\n        address _borrowerOperationsAddress,\\n        address _activePoolAddress\\n    ) external;\\n\\n    function stake(uint _HOGamount) external;\\n\\n    function unstake(uint _HOGamount) external;\\n\\n    function increaseF_StETH(uint _StETHFee) external;\\n\\n    function increaseF_BaseFeeLMA(uint _HOGFee) external;\\n\\n    function getPendingStETHGain(address _user) external view returns (uint);\\n\\n    function getPendingBaseFeeLMAGain(\\n        address _user\\n    ) external view returns (uint);\\n}\\n\",\"keccak256\":\"0x13e4a173500e5e3f5645d39df65bad38ba953e7438a9cd3fd170b928d0264926\",\"license\":\"MIT\"},\"contracts/interfaces/IHOGToken.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.19;\\n\\nimport \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\nimport \\\"../dependencies/IERC2612.sol\\\";\\n\\ninterface IHOGToken is IERC20, IERC2612 {\\n    // --- Events ---\\n\\n    event CommunityIssuanceAddressSet(address _communityIssuanceAddress);\\n    event HOGStakingAddressSet(address _hogStakingAddress);\\n    event LockupContractFactoryAddressSet(\\n        address _lockupContractFactoryAddress\\n    );\\n\\n    // --- Functions ---\\n\\n    function sendToHOGStaking(address _sender, uint256 _amount) external;\\n\\n    function getDeploymentStartTime() external view returns (uint256);\\n\\n    function getLpRewardsEntitlement() external view returns (uint256);\\n\\n    function increaseAllowance(\\n        address _spender,\\n        uint256 _addedValues\\n    ) external returns (bool);\\n\\n    function decreaseAllowance(\\n        address _spender,\\n        uint256 _decreasedValue\\n    ) external returns (bool);\\n}\\n\",\"keccak256\":\"0x2c56d03787067551d0947fc59ba84d41d4163856163557d5e59c023552d99f04\",\"license\":\"MIT\"},\"contracts/interfaces/IHedgehogBase.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.19;\\n\\nimport \\\"./IPriceFeed.sol\\\";\\n\\ninterface IHedgehogBase {\\n    function priceFeed() external view returns (IPriceFeed);\\n}\\n\",\"keccak256\":\"0x9832f1daa908607df4b572f561b27463d7fc4eb27847a26b1c399c2ee6ee6110\",\"license\":\"MIT\"},\"contracts/interfaces/IPriceFeed.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.19;\\n\\ninterface IPriceFeed {\\n    // --- Events ---\\n    event LastGoodPriceUpdated(uint _lastGoodPrice);\\n\\n    // --- Function ---\\n    function fetchPrice() external returns (uint);\\n\\n    function lastGoodPrice() external view returns (uint);\\n}\\n\",\"keccak256\":\"0xdee620e51756443b2cdd8ac54df2e6d7b38f700a9d1a3cc4d1a2f31ce09bbd1e\",\"license\":\"MIT\"},\"contracts/interfaces/ISortedTroves.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.19;\\n\\n// Common interface for the SortedTroves Doubly Linked List.\\ninterface ISortedTroves {\\n    // --- Events ---\\n\\n    event SortedTrovesAddressChanged(address _sortedDoublyLLAddress);\\n    event BorrowerOperationsAddressChanged(address _borrowerOperationsAddress);\\n    event NodeAdded(address _id, uint _NICR);\\n    event NodeRemoved(address _id);\\n\\n    // --- Functions ---\\n\\n    function setParams(\\n        uint256 _size,\\n        address _TroveManagerAddress,\\n        address _borrowerOperationsAddress\\n    ) external;\\n\\n    function insert(\\n        address _id,\\n        uint256 _ICR,\\n        address _prevId,\\n        address _nextId\\n    ) external;\\n\\n    function remove(address _id) external;\\n\\n    function reInsert(\\n        address _id,\\n        uint256 _newICR,\\n        address _prevId,\\n        address _nextId\\n    ) external;\\n\\n    function contains(address _id) external view returns (bool);\\n\\n    function isFull() external view returns (bool);\\n\\n    function isEmpty() external view returns (bool);\\n\\n    function getSize() external view returns (uint256);\\n\\n    function getMaxSize() external view returns (uint256);\\n\\n    function getFirst() external view returns (address);\\n\\n    function getLast() external view returns (address);\\n\\n    function getNext(address _id) external view returns (address);\\n\\n    function getPrev(address _id) external view returns (address);\\n\\n    function validInsertPosition(\\n        uint256 _ICR,\\n        address _prevId,\\n        address _nextId\\n    ) external view returns (bool);\\n\\n    function findInsertPosition(\\n        uint256 _ICR,\\n        address _prevId,\\n        address _nextId\\n    ) external view returns (address, address);\\n}\\n\",\"keccak256\":\"0xee69ee66b0db6c873a5a1177e5e9178aa8be6c57aa988d1d7e7526f484862ecd\",\"license\":\"MIT\"},\"contracts/interfaces/IStabilityPool.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.19;\\n\\n/*\\n * The Stability Pool holds BaseFeeLMA tokens deposited by Stability Pool depositors.\\n *\\n * When a trove is liquidated, then depending on system conditions, some of its BaseFeeLMA debt gets offset with\\n * BaseFeeLMA in the Stability Pool:  that is, the offset debt evaporates, and an equal amount of BaseFeeLMA tokens in the Stability Pool is burned.\\n *\\n * Thus, a liquidation causes each depositor to receive a BaseFeeLMA loss, in proportion to their deposit as a share of total deposits.\\n * They also receive an StETH gain, as the StETH collateral of the liquidated trove is distributed among Stability depositors,\\n * in the same proportion.\\n *\\n * When a liquidation occurs, it depletes every deposit by the same fraction: for example, a liquidation that depletes 40%\\n * of the total BaseFeeLMA in the Stability Pool, depletes 40% of each deposit.\\n *\\n * A deposit that has experienced a series of liquidations is termed a \\\"compounded deposit\\\": each liquidation depletes the deposit,\\n * multiplying it by some factor in range ]0,1[\\n *\\n * Please see the implementation spec in the proof document, which closely follows on from the compounded deposit / StETH gain derivations:\\n * https://github.com/liquity/liquity/blob/master/papers/Scalable_Reward_Distribution_with_Compounding_Stakes.pdf\\n *\\n * --- HOG ISSUANCE TO STABILITY POOL DEPOSITORS ---\\n *\\n * A HOG issuance event occurs at every deposit operation, and every liquidation.\\n *\\n * Each deposit is tagged with the address of the front end through which it was made.\\n *\\n * All deposits earn a share of the issued HOG in proportion to the deposit as a share of total deposits. The HOG earned\\n * by a given deposit, is split between the depositor and the front end through which the deposit was made, based on the front end's kickbackRate.\\n *\\n * Please see the system Readme for an overview:\\n * https://github.com/liquity/dev/blob/main/README.md#hog-issuance-to-stability-providers\\n */\\ninterface IStabilityPool {\\n    // --- Events ---\\n\\n    event StabilityPoolStETHBalanceUpdated(uint _newBalance);\\n    event StabilityPoolBaseFeeLMABalanceUpdated(uint _newBalance);\\n\\n    event BorrowerOperationsAddressChanged(\\n        address _newBorrowerOperationsAddress\\n    );\\n    event TroveManagerAddressChanged(address _newTroveManagerAddress);\\n    event ActivePoolAddressChanged(address _newActivePoolAddress);\\n    event DefaultPoolAddressChanged(address _newDefaultPoolAddress);\\n    event BaseFeeLMATokenAddressChanged(address _newBaseFeeLMATokenAddress);\\n    event SortedTrovesAddressChanged(address _newSortedTrovesAddress);\\n    event PriceFeedAddressChanged(address _newPriceFeedAddress);\\n    event CommunityIssuanceAddressChanged(address _newCommunityIssuanceAddress);\\n\\n    event P_Updated(uint _P);\\n    event S_Updated(uint _S, uint128 _epoch, uint128 _scale);\\n    event G_Updated(uint _G, uint128 _epoch, uint128 _scale);\\n    event EpochUpdated(uint128 _currentEpoch);\\n    event ScaleUpdated(uint128 _currentScale);\\n\\n    event DepositSnapshotUpdated(\\n        address indexed _depositor,\\n        uint _P,\\n        uint _S,\\n        uint _G\\n    );\\n\\n    event StETHGainWithdrawn(\\n        address indexed _depositor,\\n        uint _StETH,\\n        uint _BaseFeeLMALoss\\n    );\\n    event HOGPaidToDepositor(address indexed _depositor, uint _HOG);\\n    event StETHSent(address _to, uint _amount);\\n\\n    // --- Functions ---\\n\\n    /*\\n     * Called only once on init, to set addresses of other Hedgehog contracts\\n     * Callable only by owner, renounces ownership at the end\\n     */\\n    function setAddresses(\\n        address _borrowerOperationsAddress,\\n        address _troveManagerAddress,\\n        address _activePoolAddress,\\n        address _baseFeeLMATokenAddress,\\n        address _sortedTrovesAddress,\\n        address _priceFeedAddress,\\n        address _communityIssuanceAddress\\n    ) external;\\n\\n    /*\\n     * Initial checks:\\n     * - _amount is not zero\\n     * ---\\n     * - Triggers a HOG issuance, based on time passed since the last issuance. The HOG issuance is shared between *all* depositors and front ends\\n     * - Tags the deposit with the provided front end tag param, if it's a new deposit\\n     * - Sends depositor's accumulated gains (HOG, StETH) to depositor\\n     * - Sends the tagged front end's accumulated HOG gains to the tagged front end\\n     * - Increases deposit and tagged front end's stake, and takes new snapshots for each.\\n     */\\n    function provideToSP(uint _amount) external;\\n\\n    /*\\n     * Initial checks:\\n     * - _amount is zero or there are no under collateralized troves left in the system\\n     * - User has a non zero deposit\\n     * ---\\n     * - Triggers a HOG issuance, based on time passed since the last issuance. The HOG issuance is shared between *all* depositors and front ends\\n     * - Removes the deposit's front end tag if it is a full withdrawal\\n     * - Sends all depositor's accumulated gains (HOG, StETH) to depositor\\n     * - Sends the tagged front end's accumulated HOG gains to the tagged front end\\n     * - Decreases deposit and tagged front end's stake, and takes new snapshots for each.\\n     *\\n     * If _amount > userDeposit, the user withdraws all of their compounded deposit.\\n     */\\n    function withdrawFromSP(uint _amount) external;\\n\\n    /*\\n     * Initial checks:\\n     * - User has a non zero deposit\\n     * - User has an open trove\\n     * - User has some StETH gain\\n     * ---\\n     * - Triggers a HOG issuance, based on time passed since the last issuance. The HOG issuance is shared between *all* depositors and front ends\\n     * - Sends all depositor's HOG gain to  depositor\\n     * - Sends all tagged front end's HOG gain to the tagged front end\\n     * - Transfers the depositor's entire StETH gain from the Stability Pool to the caller's trove\\n     * - Leaves their compounded deposit in the Stability Pool\\n     * - Updates snapshots for deposit and tagged front end stake\\n     */\\n    function withdrawStETHGainToTrove(\\n        address _upperHint,\\n        address _lowerHint\\n    ) external;\\n\\n    /*\\n     * Initial checks:\\n     * - Caller is TroveManager\\n     * ---\\n     * Cancels out the specified debt against the BaseFeeLMA contained in the Stability Pool (as far as possible)\\n     * and transfers the Trove's StETH collateral from ActivePool to StabilityPool.\\n     * Only called by liquidation functions in the TroveManager.\\n     */\\n    function offset(uint _debt, uint _coll) external;\\n\\n    /*\\n     * Returns the total amount of StETH held by the pool, accounted in an internal variable instead of `balance`,\\n     * to exclude edge cases like StETH received from a self-destruct.\\n     */\\n    function getStETH() external view returns (uint);\\n\\n    /*\\n     * Returns BaseFeeLMA held in the pool. Changes when users deposit/withdraw, and when Trove debt is offset.\\n     */\\n    function getTotalBaseFeeLMADeposits() external view returns (uint);\\n\\n    /*\\n     * Calculates the StETH gain earned by the deposit since its last snapshots were taken.\\n     */\\n    function getDepositorStETHGain(\\n        address _depositor\\n    ) external view returns (uint);\\n\\n    /*\\n     * Calculate the HOG gain earned by a deposit since its last snapshots were taken.\\n     * If not tagged with a front end, the depositor gets a 100% cut of what their deposit earned.\\n     * Otherwise, their cut of the deposit's earnings is equal to the kickbackRate, set by the front end through\\n     * which they made their deposit.\\n     */\\n    function getDepositorHOGGain(\\n        address _depositor\\n    ) external view returns (uint);\\n\\n    /*\\n     * Return the user's compounded deposit.\\n     */\\n    function getCompoundedBaseFeeLMADeposit(\\n        address _depositor\\n    ) external view returns (uint);\\n}\\n\",\"keccak256\":\"0xabf6fb0fd220a7b67010f1ddab008cc9a15b3485b24caf25f9e44220d5c55d6a\",\"license\":\"MIT\"},\"contracts/interfaces/ITroveManager.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.19;\\n\\nimport \\\"./IHedgehogBase.sol\\\";\\nimport \\\"./IStabilityPool.sol\\\";\\nimport \\\"./IBaseFeeLMAToken.sol\\\";\\nimport \\\"./IHOGToken.sol\\\";\\nimport \\\"./IHOGStaking.sol\\\";\\n\\n// Common interface for the Trove Manager.\\ninterface ITroveManager is IHedgehogBase {\\n    // --- Events ---\\n\\n    event BorrowerOperationsAddressChanged(\\n        address _newBorrowerOperationsAddress\\n    );\\n    event PriceFeedAddressChanged(address _newPriceFeedAddress);\\n    event BaseFeeLMATokenAddressChanged(address _newBaseFeeLMATokenAddress);\\n    event ActivePoolAddressChanged(address _activePoolAddress);\\n    event DefaultPoolAddressChanged(address _defaultPoolAddress);\\n    event StabilityPoolAddressChanged(address _stabilityPoolAddress);\\n    event GasPoolAddressChanged(address _gasPoolAddress);\\n    event CollSurplusPoolAddressChanged(address _collSurplusPoolAddress);\\n    event SortedTrovesAddressChanged(address _sortedTrovesAddress);\\n    event HOGTokenAddressChanged(address _hogTokenAddress);\\n    event HOGStakingAddressChanged(address _hogStakingAddress);\\n\\n    event Liquidation(\\n        uint _liquidatedDebt,\\n        uint _liquidatedColl,\\n        uint _collGasCompensation,\\n        uint _BaseFeeLMAGasCompensation\\n    );\\n    event Redemption(\\n        uint _attemptedBaseFeeLMAAmount,\\n        uint _actualBaseFeeLMAAmount,\\n        uint _StETHSent,\\n        uint _StETHFee\\n    );\\n    event TroveUpdated(\\n        address indexed _borrower,\\n        uint _debt,\\n        uint _coll,\\n        uint stake,\\n        uint8 operation\\n    );\\n    event TroveLiquidated(\\n        address indexed _borrower,\\n        uint _debt,\\n        uint _coll,\\n        uint8 operation\\n    );\\n    event BaseRateUpdated(uint _baseRate);\\n    event LastFeeOpTimeUpdated(uint _lastFeeOpTime);\\n    event TotalStakesUpdated(uint _newTotalStakes);\\n    event SystemSnapshotsUpdated(\\n        uint _totalStakesSnapshot,\\n        uint _totalCollateralSnapshot\\n    );\\n    event LTermsUpdated(uint _L_StETH, uint _L_BaseFeeLMADebt);\\n    event TroveSnapshotsUpdated(uint _L_StETH, uint _L_BaseFeeLMADebt);\\n    event TroveIndexUpdated(address _borrower, uint _newIndex);\\n\\n    // --- Functions ---\\n\\n    function setAddresses(\\n        address _borrowerOperationsAddress,\\n        address _activePoolAddress,\\n        address _defaultPoolAddress,\\n        address _stabilityPoolAddress,\\n        address _gasPoolAddress,\\n        address _collSurplusPoolAddress,\\n        address _priceFeedAddress,\\n        address _baseFeeLMATokenAddress,\\n        address _sortedTrovesAddress,\\n        address _hogTokenAddress,\\n        address _hogStakingAddress\\n    ) external;\\n\\n    function stabilityPool() external view returns (IStabilityPool);\\n\\n    function baseFeeLMAToken() external view returns (IBaseFeeLMAToken);\\n\\n    function hogToken() external view returns (IHOGToken);\\n\\n    function hogStaking() external view returns (IHOGStaking);\\n\\n    function getTroveOwnersCount() external view returns (uint);\\n\\n    function getTroveFromTroveOwnersArray(\\n        uint _index\\n    ) external view returns (address);\\n\\n    function getNominalICR(address _borrower) external view returns (uint);\\n\\n    function getCurrentICR(\\n        address _borrower,\\n        uint _price\\n    ) external view returns (uint);\\n\\n    function liquidate(address _borrower) external;\\n\\n    function liquidateTroves(uint _n) external;\\n\\n    function batchLiquidateTroves(address[] calldata _troveArray) external;\\n\\n    function redeemCollateral(\\n        uint _BaseFeeLMAAmount,\\n        address _firstRedemptionHint,\\n        address _upperPartialRedemptionHint,\\n        address _lowerPartialRedemptionHint,\\n        uint _partialRedemptionHintNICR,\\n        uint _maxIterations,\\n        uint _maxFee\\n    ) external;\\n\\n    function updateStakeAndTotalStakes(\\n        address _borrower\\n    ) external returns (uint);\\n\\n    function updateTroveRewardSnapshots(address _borrower) external;\\n\\n    function addTroveOwnerToArray(\\n        address _borrower\\n    ) external returns (uint index);\\n\\n    function applyPendingRewards(address _borrower) external;\\n\\n    function getPendingStETHReward(\\n        address _borrower\\n    ) external view returns (uint);\\n\\n    function getPendingBaseFeeLMADebtReward(\\n        address _borrower\\n    ) external view returns (uint);\\n\\n    function hasPendingRewards(address _borrower) external view returns (bool);\\n\\n    function getEntireDebtAndColl(\\n        address _borrower\\n    )\\n        external\\n        view\\n        returns (\\n            uint debt,\\n            uint coll,\\n            uint pendingBaseFeeLMADebtReward,\\n            uint pendingStETHReward\\n        );\\n\\n    function closeTrove(address _borrower) external;\\n\\n    function removeStake(address _borrower) external;\\n\\n    function getRedemptionRate(\\n        uint _redemptionColl\\n    ) external view returns (uint);\\n\\n    function getRedemptionRateWithDecay(\\n        uint _redemptionColl\\n    ) external view returns (uint);\\n\\n    function getRedemptionFeeWithDecay(\\n        uint _StETHDrawn\\n    ) external view returns (uint);\\n\\n    function getBorrowingRate(\\n        uint _issuedBaseFeeLMA\\n    ) external view returns (uint);\\n\\n    function getBorrowingRateWithDecay(\\n        uint _issuedBaseFeeLMA\\n    ) external view returns (uint);\\n\\n    function getBorrowingFee(\\n        uint BaseFeeLMADebt\\n    ) external view returns (uint, uint);\\n\\n    function getBorrowingFeeWithDecay(\\n        uint _BaseFeeLMADebt\\n    ) external view returns (uint);\\n\\n    function updateBaseRateFromBorrowing(uint _baseRate) external;\\n\\n    function decayBaseRateFromBorrowing() external;\\n\\n    function getTroveStatus(address _borrower) external view returns (uint);\\n\\n    function getTroveStake(address _borrower) external view returns (uint);\\n\\n    function getTroveDebt(address _borrower) external view returns (uint);\\n\\n    function getTroveColl(address _borrower) external view returns (uint);\\n\\n    function setTroveStatus(address _borrower, uint num) external;\\n\\n    function increaseTroveColl(\\n        address _borrower,\\n        uint _collIncrease\\n    ) external returns (uint);\\n\\n    function decreaseTroveColl(\\n        address _borrower,\\n        uint _collDecrease\\n    ) external returns (uint);\\n\\n    function increaseTroveDebt(\\n        address _borrower,\\n        uint _debtIncrease\\n    ) external returns (uint);\\n\\n    function decreaseTroveDebt(\\n        address _borrower,\\n        uint _collDecrease\\n    ) external returns (uint);\\n\\n    function getTCR(uint _price) external view returns (uint);\\n\\n    function checkRecoveryMode(uint _price) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x33b2744d95fae4541cfb11a799aa434885d1b30ac376faf25f487ddc4f7113a5\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b5061001a3361001f565b61006f565b600080546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09190a35050565b6116be8061007e6000396000f3fe608060405234801561001057600080fd5b50600436106101425760003560e01c8063715018a6116100b8578063b72703ac1161007c578063b72703ac1461031c578063b7f8cf9b1461034b578063babd3d9a1461035e578063de8fa4311461036a578063f2fde38b14610372578063f376d7981461038557600080fd5b8063715018a61461024d57806373d4a13a14610255578063765e0159146102a25780638da5cb5b146102d3578063a3f4df7e146102e457600080fd5b8063416980dc1161010a578063416980dc146101c857806346f7cf87146101fb5780634d6228311461020e5780635dbe47e81461021f57806363e1d57c14610232578063681fe70c1461024457600080fd5b80631e2231431461014757806329092d0e1461016a5780632be212601461017f5780633d83908a146101925780633fce12d5146101a5575b600080fd5b6003546001600160a01b03165b6040516101619190611484565b60405180910390f35b61017d6101783660046114b4565b610398565b005b61017d61018d3660046114cf565b6103ac565b600254610154906001600160a01b031681565b6101b86101b336600461151c565b61042c565b6040519015158152602001610161565b6101db6101d636600461151c565b61044f565b604080516001600160a01b03938416815292909116602083015201610161565b61017d6102093660046114cf565b610479565b6004546001600160a01b0316610154565b6101b861022d3660046114b4565b61048e565b6005545b604051908152602001610161565b600654156101b8565b61017d6104ac565b600354600454600554600654610277936001600160a01b039081169316919084565b604080516001600160a01b039586168152949093166020850152918301526060820152608001610161565b6101546102b03660046114b4565b6001600160a01b0390811660009081526007602052604090205461010090041690565b6000546001600160a01b0316610154565b61030f6040518060400160405280600c81526020016b536f7274656454726f76657360a01b81525081565b6040516101619190611558565b61015461032a3660046114b4565b6001600160a01b039081166000908152600760205260409020600101541690565b600154610154906001600160a01b031681565b600554600654146101b8565b600654610236565b61017d6103803660046114b4565b6104c0565b61017d61039336600461151c565b610536565b6103a0610651565b6103a9816106c0565b50565b6002546001600160a01b03166103c1816108c5565b6103ca8561048e565b6103ef5760405162461bcd60e51b81526004016103e6906115a6565b60405180910390fd5b6000841161040f5760405162461bcd60e51b81526004016103e6906115f0565b610418856106c0565b6104258186868686610948565b5050505050565b600254600090610447906001600160a01b0316858585610cbf565b949350505050565b600254600090819061046c906001600160a01b0316868686610efb565b915091505b935093915050565b6002546001600160a01b0316610418816108c5565b6001600160a01b031660009081526007602052604090205460ff1690565b6104b46110be565b6104be6000611118565b565b6104c86110be565b6001600160a01b03811661052d5760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b60648201526084016103e6565b6103a981611118565b61053e6110be565b6000831161058e5760405162461bcd60e51b815260206004820152601f60248201527f536f7274656454726f7665733a2053697a652063616e74206265207a65726f0060448201526064016103e6565b61059782611168565b6105a081611168565b6005839055600280546001600160a01b038085166001600160a01b03199283161790925560018054928416929091169190911790556040517f143219c9e69b09e07e095fcc889b43d8f46ca892bba65f08dc3a0050869a567890610605908490611484565b60405180910390a17f3ca631ffcd2a9b5d9ae18543fc82f58eb4ca33af9e6ab01b7a8e95331e6ed9858160405161063c9190611484565b60405180910390a161064c6104ac565b505050565b6002546001600160a01b031633146104be5760405162461bcd60e51b815260206004820152602c60248201527f536f7274656454726f7665733a2043616c6c6572206973206e6f74207468652060448201526b2a3937bb32a6b0b730b3b2b960a11b60648201526084016103e6565b6106c98161048e565b6106e55760405162461bcd60e51b81526004016103e6906115a6565b60065460011015610825576003546001600160a01b0390811690821603610752576001600160a01b0380821660009081526007602052604080822054600380546001600160a01b031990811661010090930490951691821790558252902060010180549091169055610842565b6004546001600160a01b03908116908216036107b6576001600160a01b0380821660009081526007602052604080822060010154600480546001600160a01b03191691909416908117909355918152208054610100600160a81b0319169055610842565b6001600160a01b038082166000908152600760205260408082208054600180830180548716865284862080546101009485900489168502610100600160a81b03199091161790555492549190910485168452919092200180546001600160a01b03191691909216179055610842565b600380546001600160a01b03199081169091556004805490911690555b6001600160a01b038116600090815260076020526040902080546001600160a81b0319168155600190810180546001600160a01b031916905560065461088791611211565b6006556040517fcfc24166db4bb677e857cacabd1541fb2b30645021b27c5130419589b84db52b906108ba908390611484565b60405180910390a150565b6001546001600160a01b03163314806108e65750336001600160a01b038216145b6103a95760405162461bcd60e51b815260206004820152602d60248201527f536f7274656454726f7665733a2043616c6c6572206973206e6569746865722060448201526c424f206e6f722054726f76654d60981b60648201526084016103e6565b6005546006540361099b5760405162461bcd60e51b815260206004820152601a60248201527f536f7274656454726f7665733a204c6973742069732066756c6c00000000000060448201526064016103e6565b6109a48461048e565b15610a065760405162461bcd60e51b815260206004820152602c60248201527f536f7274656454726f7665733a204c69737420616c726561647920636f6e746160448201526b696e7320746865206e6f646560a01b60648201526084016103e6565b6001600160a01b038416610a5c5760405162461bcd60e51b815260206004820152601f60248201527f536f7274656454726f7665733a2049642063616e6e6f74206265207a65726f0060448201526064016103e6565b60008311610a7c5760405162461bcd60e51b81526004016103e6906115f0565b8181610a8a87868484610cbf565b610aa057610a9a87868484610efb565b90925090505b6001600160a01b038087166000908152600760205260409020805460ff191660011790558216158015610ada57506001600160a01b038116155b15610b0f57600380546001600160a01b0388166001600160a01b03199182168117909255600480549091169091179055610c63565b6001600160a01b038216610b8357600380546001600160a01b03888116600081815260076020526040808220805495851661010002610100600160a81b0319909616959095179094558454909216825291902060010180546001600160a01b03199081168317909155825416179055610c63565b6001600160a01b038116610bf357600480546001600160a01b0388811660008181526007602052604080822060010180549585166001600160a01b031996871617905585549093168152919091208054610100600160a81b03191661010083021790558254909116179055610c63565b6001600160a01b038087166000818152600760205260408082208054858716610100818102610100600160a81b031993841617845560019384018054988b166001600160a01b0319998a168117909155865284862080549188029190931617909155835291200180549092161790555b600654610c71906001611226565b600655604080516001600160a01b0388168152602081018790527fe02b43adbee0c123de070a04554a71877a0007e2fc161466299cae3c094fe82f910160405180910390a150505050505050565b60006001600160a01b038316158015610cdf57506001600160a01b038216155b15610cf057600654155b9050610447565b6001600160a01b038316610d8d576003546001600160a01b038381169116148015610ce9575060405163b0d8e18160e01b81526001600160a01b0386169063b0d8e18190610d42908590600401611484565b602060405180830381865afa158015610d5f573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610d839190611633565b8410159050610447565b6001600160a01b038216610e2a576004546001600160a01b038481169116148015610ce9575060405163b0d8e18160e01b81526001600160a01b0386169063b0d8e18190610ddf908690600401611484565b602060405180830381865afa158015610dfc573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610e209190611633565b8411159050610447565b6001600160a01b0383811660009081526007602052604090205461010090048116908316148015610ec8575060405163b0d8e18160e01b815284906001600160a01b0387169063b0d8e18190610e84908790600401611484565b602060405180830381865afa158015610ea1573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610ec59190611633565b10155b8015610ce9575060405163b0d8e18160e01b81526001600160a01b0386169063b0d8e18190610d42908590600401611484565b60008083836001600160a01b03821615610f9957610f188261048e565b1580610f8f575060405163b0d8e18160e01b81526001600160a01b0389169063b0d8e18190610f4b908590600401611484565b602060405180830381865afa158015610f68573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610f8c9190611633565b87115b15610f9957600091505b6001600160a01b0381161561103157610fb18161048e565b1580611028575060405163b0d8e18160e01b81526001600160a01b0389169063b0d8e18190610fe4908490600401611484565b602060405180830381865afa158015611001573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906110259190611633565b87105b15611031575060005b6001600160a01b03821615801561104f57506001600160a01b038116155b156110785760035461106d90899089906001600160a01b0316611232565b9350935050506110b5565b6001600160a01b0382166110915761106d88888361135e565b6001600160a01b0381166110aa5761106d888884611232565b61106d888884611232565b94509492505050565b6000546001600160a01b031633146104be5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064016103e6565b600080546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09190a35050565b6001600160a01b0381166111be5760405162461bcd60e51b815260206004820152601e60248201527f4163636f756e742063616e6e6f74206265207a65726f2061646472657373000060448201526064016103e6565b803b8061120d5760405162461bcd60e51b815260206004820181905260248201527f4163636f756e7420636f64652073697a652063616e6e6f74206265207a65726f60448201526064016103e6565b5050565b600061121d8284611662565b90505b92915050565b600061121d8284611675565b60035460009081906001600160a01b0384811691161480156112c0575060405163b0d8e18160e01b81526001600160a01b0386169063b0d8e1819061127b908690600401611484565b602060405180830381865afa158015611298573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906112bc9190611633565b8410155b156112d057506000905081610471565b6001600160a01b038084166000908152600760205260409020548491610100909104165b6001600160a01b03821615801590611315575061131387878484610cbf565b155b1561135257506001600160a01b039081166000908152600760205260408082205461010090819004841680845291909220549092919004166112f4565b90969095509350505050565b60045460009081906001600160a01b0384811691161480156113ec575060405163b0d8e18160e01b81526001600160a01b0386169063b0d8e181906113a7908690600401611484565b602060405180830381865afa1580156113c4573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906113e89190611633565b8411155b156113fc57508190506000610471565b6001600160a01b038084166000908152600760205260409020600101548491165b6001600160a01b0382161580159061143e575061143c87878385610cbf565b155b1561147957506001600160a01b039081166000908152600760205260408082206001908101548416808452919092209091015490911661141d565b969095509350505050565b6001600160a01b0391909116815260200190565b80356001600160a01b03811681146114af57600080fd5b919050565b6000602082840312156114c657600080fd5b61121d82611498565b600080600080608085870312156114e557600080fd5b6114ee85611498565b93506020850135925061150360408601611498565b915061151160608601611498565b905092959194509250565b60008060006060848603121561153157600080fd5b8335925061154160208501611498565b915061154f60408501611498565b90509250925092565b600060208083528351808285015260005b8181101561158557858101830151858201604001528201611569565b506000604082860101526040601f19601f8301168501019250505092915050565b6020808252602a908201527f536f7274656454726f7665733a204c69737420646f6573206e6f7420636f6e74604082015269185a5b881d1a19481a5960b21b606082015260800190565b60208082526023908201527f536f7274656454726f7665733a204e494352206d75737420626520706f73697460408201526269766560e81b606082015260800190565b60006020828403121561164557600080fd5b5051919050565b634e487b7160e01b600052601160045260246000fd5b818103818111156112205761122061164c565b808201808211156112205761122061164c56fea2646970667358221220a9a1d6e5cf12ca4df854ab8e11cae4b9633efde4aa551898ad40a8d791a64c7b64736f6c63430008130033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106101425760003560e01c8063715018a6116100b8578063b72703ac1161007c578063b72703ac1461031c578063b7f8cf9b1461034b578063babd3d9a1461035e578063de8fa4311461036a578063f2fde38b14610372578063f376d7981461038557600080fd5b8063715018a61461024d57806373d4a13a14610255578063765e0159146102a25780638da5cb5b146102d3578063a3f4df7e146102e457600080fd5b8063416980dc1161010a578063416980dc146101c857806346f7cf87146101fb5780634d6228311461020e5780635dbe47e81461021f57806363e1d57c14610232578063681fe70c1461024457600080fd5b80631e2231431461014757806329092d0e1461016a5780632be212601461017f5780633d83908a146101925780633fce12d5146101a5575b600080fd5b6003546001600160a01b03165b6040516101619190611484565b60405180910390f35b61017d6101783660046114b4565b610398565b005b61017d61018d3660046114cf565b6103ac565b600254610154906001600160a01b031681565b6101b86101b336600461151c565b61042c565b6040519015158152602001610161565b6101db6101d636600461151c565b61044f565b604080516001600160a01b03938416815292909116602083015201610161565b61017d6102093660046114cf565b610479565b6004546001600160a01b0316610154565b6101b861022d3660046114b4565b61048e565b6005545b604051908152602001610161565b600654156101b8565b61017d6104ac565b600354600454600554600654610277936001600160a01b039081169316919084565b604080516001600160a01b039586168152949093166020850152918301526060820152608001610161565b6101546102b03660046114b4565b6001600160a01b0390811660009081526007602052604090205461010090041690565b6000546001600160a01b0316610154565b61030f6040518060400160405280600c81526020016b536f7274656454726f76657360a01b81525081565b6040516101619190611558565b61015461032a3660046114b4565b6001600160a01b039081166000908152600760205260409020600101541690565b600154610154906001600160a01b031681565b600554600654146101b8565b600654610236565b61017d6103803660046114b4565b6104c0565b61017d61039336600461151c565b610536565b6103a0610651565b6103a9816106c0565b50565b6002546001600160a01b03166103c1816108c5565b6103ca8561048e565b6103ef5760405162461bcd60e51b81526004016103e6906115a6565b60405180910390fd5b6000841161040f5760405162461bcd60e51b81526004016103e6906115f0565b610418856106c0565b6104258186868686610948565b5050505050565b600254600090610447906001600160a01b0316858585610cbf565b949350505050565b600254600090819061046c906001600160a01b0316868686610efb565b915091505b935093915050565b6002546001600160a01b0316610418816108c5565b6001600160a01b031660009081526007602052604090205460ff1690565b6104b46110be565b6104be6000611118565b565b6104c86110be565b6001600160a01b03811661052d5760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b60648201526084016103e6565b6103a981611118565b61053e6110be565b6000831161058e5760405162461bcd60e51b815260206004820152601f60248201527f536f7274656454726f7665733a2053697a652063616e74206265207a65726f0060448201526064016103e6565b61059782611168565b6105a081611168565b6005839055600280546001600160a01b038085166001600160a01b03199283161790925560018054928416929091169190911790556040517f143219c9e69b09e07e095fcc889b43d8f46ca892bba65f08dc3a0050869a567890610605908490611484565b60405180910390a17f3ca631ffcd2a9b5d9ae18543fc82f58eb4ca33af9e6ab01b7a8e95331e6ed9858160405161063c9190611484565b60405180910390a161064c6104ac565b505050565b6002546001600160a01b031633146104be5760405162461bcd60e51b815260206004820152602c60248201527f536f7274656454726f7665733a2043616c6c6572206973206e6f74207468652060448201526b2a3937bb32a6b0b730b3b2b960a11b60648201526084016103e6565b6106c98161048e565b6106e55760405162461bcd60e51b81526004016103e6906115a6565b60065460011015610825576003546001600160a01b0390811690821603610752576001600160a01b0380821660009081526007602052604080822054600380546001600160a01b031990811661010090930490951691821790558252902060010180549091169055610842565b6004546001600160a01b03908116908216036107b6576001600160a01b0380821660009081526007602052604080822060010154600480546001600160a01b03191691909416908117909355918152208054610100600160a81b0319169055610842565b6001600160a01b038082166000908152600760205260408082208054600180830180548716865284862080546101009485900489168502610100600160a81b03199091161790555492549190910485168452919092200180546001600160a01b03191691909216179055610842565b600380546001600160a01b03199081169091556004805490911690555b6001600160a01b038116600090815260076020526040902080546001600160a81b0319168155600190810180546001600160a01b031916905560065461088791611211565b6006556040517fcfc24166db4bb677e857cacabd1541fb2b30645021b27c5130419589b84db52b906108ba908390611484565b60405180910390a150565b6001546001600160a01b03163314806108e65750336001600160a01b038216145b6103a95760405162461bcd60e51b815260206004820152602d60248201527f536f7274656454726f7665733a2043616c6c6572206973206e6569746865722060448201526c424f206e6f722054726f76654d60981b60648201526084016103e6565b6005546006540361099b5760405162461bcd60e51b815260206004820152601a60248201527f536f7274656454726f7665733a204c6973742069732066756c6c00000000000060448201526064016103e6565b6109a48461048e565b15610a065760405162461bcd60e51b815260206004820152602c60248201527f536f7274656454726f7665733a204c69737420616c726561647920636f6e746160448201526b696e7320746865206e6f646560a01b60648201526084016103e6565b6001600160a01b038416610a5c5760405162461bcd60e51b815260206004820152601f60248201527f536f7274656454726f7665733a2049642063616e6e6f74206265207a65726f0060448201526064016103e6565b60008311610a7c5760405162461bcd60e51b81526004016103e6906115f0565b8181610a8a87868484610cbf565b610aa057610a9a87868484610efb565b90925090505b6001600160a01b038087166000908152600760205260409020805460ff191660011790558216158015610ada57506001600160a01b038116155b15610b0f57600380546001600160a01b0388166001600160a01b03199182168117909255600480549091169091179055610c63565b6001600160a01b038216610b8357600380546001600160a01b03888116600081815260076020526040808220805495851661010002610100600160a81b0319909616959095179094558454909216825291902060010180546001600160a01b03199081168317909155825416179055610c63565b6001600160a01b038116610bf357600480546001600160a01b0388811660008181526007602052604080822060010180549585166001600160a01b031996871617905585549093168152919091208054610100600160a81b03191661010083021790558254909116179055610c63565b6001600160a01b038087166000818152600760205260408082208054858716610100818102610100600160a81b031993841617845560019384018054988b166001600160a01b0319998a168117909155865284862080549188029190931617909155835291200180549092161790555b600654610c71906001611226565b600655604080516001600160a01b0388168152602081018790527fe02b43adbee0c123de070a04554a71877a0007e2fc161466299cae3c094fe82f910160405180910390a150505050505050565b60006001600160a01b038316158015610cdf57506001600160a01b038216155b15610cf057600654155b9050610447565b6001600160a01b038316610d8d576003546001600160a01b038381169116148015610ce9575060405163b0d8e18160e01b81526001600160a01b0386169063b0d8e18190610d42908590600401611484565b602060405180830381865afa158015610d5f573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610d839190611633565b8410159050610447565b6001600160a01b038216610e2a576004546001600160a01b038481169116148015610ce9575060405163b0d8e18160e01b81526001600160a01b0386169063b0d8e18190610ddf908690600401611484565b602060405180830381865afa158015610dfc573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610e209190611633565b8411159050610447565b6001600160a01b0383811660009081526007602052604090205461010090048116908316148015610ec8575060405163b0d8e18160e01b815284906001600160a01b0387169063b0d8e18190610e84908790600401611484565b602060405180830381865afa158015610ea1573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610ec59190611633565b10155b8015610ce9575060405163b0d8e18160e01b81526001600160a01b0386169063b0d8e18190610d42908590600401611484565b60008083836001600160a01b03821615610f9957610f188261048e565b1580610f8f575060405163b0d8e18160e01b81526001600160a01b0389169063b0d8e18190610f4b908590600401611484565b602060405180830381865afa158015610f68573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610f8c9190611633565b87115b15610f9957600091505b6001600160a01b0381161561103157610fb18161048e565b1580611028575060405163b0d8e18160e01b81526001600160a01b0389169063b0d8e18190610fe4908490600401611484565b602060405180830381865afa158015611001573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906110259190611633565b87105b15611031575060005b6001600160a01b03821615801561104f57506001600160a01b038116155b156110785760035461106d90899089906001600160a01b0316611232565b9350935050506110b5565b6001600160a01b0382166110915761106d88888361135e565b6001600160a01b0381166110aa5761106d888884611232565b61106d888884611232565b94509492505050565b6000546001600160a01b031633146104be5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064016103e6565b600080546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09190a35050565b6001600160a01b0381166111be5760405162461bcd60e51b815260206004820152601e60248201527f4163636f756e742063616e6e6f74206265207a65726f2061646472657373000060448201526064016103e6565b803b8061120d5760405162461bcd60e51b815260206004820181905260248201527f4163636f756e7420636f64652073697a652063616e6e6f74206265207a65726f60448201526064016103e6565b5050565b600061121d8284611662565b90505b92915050565b600061121d8284611675565b60035460009081906001600160a01b0384811691161480156112c0575060405163b0d8e18160e01b81526001600160a01b0386169063b0d8e1819061127b908690600401611484565b602060405180830381865afa158015611298573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906112bc9190611633565b8410155b156112d057506000905081610471565b6001600160a01b038084166000908152600760205260409020548491610100909104165b6001600160a01b03821615801590611315575061131387878484610cbf565b155b1561135257506001600160a01b039081166000908152600760205260408082205461010090819004841680845291909220549092919004166112f4565b90969095509350505050565b60045460009081906001600160a01b0384811691161480156113ec575060405163b0d8e18160e01b81526001600160a01b0386169063b0d8e181906113a7908690600401611484565b602060405180830381865afa1580156113c4573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906113e89190611633565b8411155b156113fc57508190506000610471565b6001600160a01b038084166000908152600760205260409020600101548491165b6001600160a01b0382161580159061143e575061143c87878385610cbf565b155b1561147957506001600160a01b039081166000908152600760205260408082206001908101548416808452919092209091015490911661141d565b969095509350505050565b6001600160a01b0391909116815260200190565b80356001600160a01b03811681146114af57600080fd5b919050565b6000602082840312156114c657600080fd5b61121d82611498565b600080600080608085870312156114e557600080fd5b6114ee85611498565b93506020850135925061150360408601611498565b915061151160608601611498565b905092959194509250565b60008060006060848603121561153157600080fd5b8335925061154160208501611498565b915061154f60408501611498565b90509250925092565b600060208083528351808285015260005b8181101561158557858101830151858201604001528201611569565b506000604082860101526040601f19601f8301168501019250505092915050565b6020808252602a908201527f536f7274656454726f7665733a204c69737420646f6573206e6f7420636f6e74604082015269185a5b881d1a19481a5960b21b606082015260800190565b60208082526023908201527f536f7274656454726f7665733a204e494352206d75737420626520706f73697460408201526269766560e81b606082015260800190565b60006020828403121561164557600080fd5b5051919050565b634e487b7160e01b600052601160045260246000fd5b818103818111156112205761122061164c565b808201808211156112205761122061164c56fea2646970667358221220a9a1d6e5cf12ca4df854ab8e11cae4b9633efde4aa551898ad40a8d791a64c7b64736f6c63430008130033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "owner()": {
+        "details": "Returns the address of the current owner."
+      },
+      "renounceOwnership()": {
+        "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner."
+      },
+      "transferOwnership(address)": {
+        "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 396,
+        "contract": "contracts/SortedTroves.sol:SortedTroves",
+        "label": "_owner",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_address"
+      },
+      {
+        "astId": 14989,
+        "contract": "contracts/SortedTroves.sol:SortedTroves",
+        "label": "borrowerOperationsAddress",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_address"
+      },
+      {
+        "astId": 14992,
+        "contract": "contracts/SortedTroves.sol:SortedTroves",
+        "label": "troveManager",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_contract(ITroveManager)25476"
+      },
+      {
+        "astId": 15016,
+        "contract": "contracts/SortedTroves.sol:SortedTroves",
+        "label": "data",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_struct(Data)15013_storage"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_contract(ITroveManager)25476": {
+        "encoding": "inplace",
+        "label": "contract ITroveManager",
+        "numberOfBytes": "20"
+      },
+      "t_mapping(t_address,t_struct(Node)14999_storage)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => struct SortedTroves.Node)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Node)14999_storage"
+      },
+      "t_struct(Data)15013_storage": {
+        "encoding": "inplace",
+        "label": "struct SortedTroves.Data",
+        "members": [
+          {
+            "astId": 15001,
+            "contract": "contracts/SortedTroves.sol:SortedTroves",
+            "label": "head",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address"
+          },
+          {
+            "astId": 15003,
+            "contract": "contracts/SortedTroves.sol:SortedTroves",
+            "label": "tail",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address"
+          },
+          {
+            "astId": 15005,
+            "contract": "contracts/SortedTroves.sol:SortedTroves",
+            "label": "maxSize",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 15007,
+            "contract": "contracts/SortedTroves.sol:SortedTroves",
+            "label": "size",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 15012,
+            "contract": "contracts/SortedTroves.sol:SortedTroves",
+            "label": "nodes",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_address,t_struct(Node)14999_storage)"
+          }
+        ],
+        "numberOfBytes": "160"
+      },
+      "t_struct(Node)14999_storage": {
+        "encoding": "inplace",
+        "label": "struct SortedTroves.Node",
+        "members": [
+          {
+            "astId": 14994,
+            "contract": "contracts/SortedTroves.sol:SortedTroves",
+            "label": "exists",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bool"
+          },
+          {
+            "astId": 14996,
+            "contract": "contracts/SortedTroves.sol:SortedTroves",
+            "label": "nextId",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_address"
+          },
+          {
+            "astId": 14998,
+            "contract": "contracts/SortedTroves.sol:SortedTroves",
+            "label": "prevId",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}
