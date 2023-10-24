@@ -232,7 +232,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             // vars.netDebt = vars.netDebt.sub(vars.BaseFeeLMAFee);
         }
         _requireAtLeastMinNetDebt(vars.netDebt);
-
+        console.log("borrowing fee: ", vars.BaseFeeLMAFee);
         // Hedgehog changes: composite debt now is just BaseFeeLMA amount. Without borrowing fee and without gas comp
         vars.compositeDebt = vars.netDebt;
         assert(vars.compositeDebt > 0);
@@ -282,7 +282,15 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         // Move the stETH to the Active Pool, and mint the BaseFeeLMAAmount to the borrower
         _activePoolAddColl(contractsCache.activePool, _collAmount);
-
+        console.log("LMA amount: ", _BaseFeeLMAAmount);
+        console.log(vars.BaseFeeLMAFee);
+        console.log("gas comp: ", BaseFeeLMA_GAS_COMPENSATION);
+        if (
+            _BaseFeeLMAAmount <=
+            vars.BaseFeeLMAFee + BaseFeeLMA_GAS_COMPENSATION
+        ) {
+            revert("Fee exceeds gain");
+        }
         // Hedgehog Updates: Now amount transferred to the user is decrease by Fee and Gas Compensation reserve
         _withdrawBaseFeeLMA(
             contractsCache.activePool,
@@ -533,8 +541,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             );
             // Hedgehog Updates: Not adding fee to the position debt anymore
             vars.netDebtChange = vars.netDebtChange;
+            console.log("net debt change: ", vars.netDebtChange);
         }
-
+        console.log("borrowing fee: ", vars.BaseFeeLMAFee);
         vars.debt = contractsCache.troveManager.getTroveDebt(_borrower);
         vars.coll = contractsCache.troveManager.getTroveColl(_borrower);
 
@@ -611,7 +620,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             msg.sender,
             vars.collChange,
             vars.isCollIncrease,
-            _BaseFeeLMAChange,
+            _BaseFeeLMAChange - vars.BaseFeeLMAFee,
             _isDebtIncrease,
             vars.netDebtChange
         );
@@ -804,7 +813,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint _netDebtIncrease
     ) internal {
         _activePool.increaseBaseFeeLMADebt(_netDebtIncrease);
-
+        console.log("Actual mint to user: ", _BaseFeeLMAAmount);
         _baseFeeLMAToken.mint(_account, _BaseFeeLMAAmount);
     }
 

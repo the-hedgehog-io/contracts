@@ -1105,10 +1105,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
                 vars.remainingBaseFeeLMAInStabPool = vars
                     .remainingBaseFeeLMAInStabPool
                     .sub(singleLiquidation.debtToOffset);
-                console.log(
-                    "remaining bfe in stab pool: ",
-                    vars.remainingBaseFeeLMAInStabPool
-                );
 
                 // Add liquidation values to their respective running totals
                 totals = _addLiquidationValuesToTotals(
@@ -2111,6 +2107,9 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint _issuedBaseFeeLMA
     ) internal view returns (uint) {
         uint256 supply = baseFeeLMAToken.totalSupply();
+        console.log("base rate: ", _borrowBaseRate);
+        console.log("supply: ", supply);
+        console.log("issued bf: ", _issuedBaseFeeLMA);
         // Checking if there are tokens in supply, otherwise return 1 to avoid division by zero
         if (supply == 0) {
             return BORROWING_FEE_FLOOR;
@@ -2173,6 +2172,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     // Updates the borrowBaseRate state variable based on time elapsed since the last redemption or BaseFeeLMA borrowing operation.
     function decayBaseRateFromBorrowing() external {
         _requireCallerIsBorrowerOperations();
+        console.log("base rate before decay: ", borrowBaseRate);
         uint decayedBaseRate = _calcDecayedBorrowBaseRate();
         assert(decayedBaseRate <= DECIMAL_PRECISION); // The baseRate can decay to 0
         // HEDGEHOG LOGIC CHANGES: Updating borrowing base rate instead
@@ -2234,6 +2234,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
      */
     function _calcDecayedBorrowBaseRate() internal view returns (uint) {
         uint minutesPassed = _minutesPassedSinceLastBorrow();
+        console.log("minutes pass: ", minutesPassed);
         uint decayFactor = LiquityMath._decPow(
             MINUTE_DECAY_BORROWING_FACTOR,
             minutesPassed
