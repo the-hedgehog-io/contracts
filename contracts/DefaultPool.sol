@@ -6,7 +6,7 @@ import "./interfaces/IPool.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
-
+import "./interfaces/IActivePool.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -95,6 +95,7 @@ contract DefaultPool is Ownable, CheckContract, IPool {
         emit DefaultPoolStETHBalanceUpdated(StETH);
         emit StETHSent(activePool, _amount);
 
+        IActivePool(activePool).increaseBalance(_amount);
         StETHToken.safeTransfer(activePool, _amount);
     }
 

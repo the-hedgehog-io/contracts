@@ -222,17 +222,16 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         vars.BaseFeeLMAFee;
         vars.netDebt = _BaseFeeLMAAmount;
 
-        if (!isRecoveryMode) {
-            vars.BaseFeeLMAFee = _triggerBorrowingFee(
-                contractsCache.troveManager,
-                _BaseFeeLMAAmount,
-                _maxFeePercentage
-            );
-            // Hedgehog changes: Do no subtract the fee from the debt
-            // vars.netDebt = vars.netDebt.sub(vars.BaseFeeLMAFee);
-        }
+        // HEDGEHOG UPDATES: Triggering borrowing fee in both recovery and normal modes
+        vars.BaseFeeLMAFee = _triggerBorrowingFee(
+            contractsCache.troveManager,
+            _BaseFeeLMAAmount,
+            _maxFeePercentage
+        );
+        // Hedgehog changes: Do no subtract the fee from the debt
+        // vars.netDebt = vars.netDebt.sub(vars.BaseFeeLMAFee);
+
         _requireAtLeastMinNetDebt(vars.netDebt);
-        console.log("borrowing fee: ", vars.BaseFeeLMAFee);
         // Hedgehog changes: composite debt now is just BaseFeeLMA amount. Without borrowing fee and without gas comp
         vars.compositeDebt = vars.netDebt;
         assert(vars.compositeDebt > 0);
@@ -282,9 +281,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         // Move the stETH to the Active Pool, and mint the BaseFeeLMAAmount to the borrower
         _activePoolAddColl(contractsCache.activePool, _collAmount);
-        console.log("LMA amount: ", _BaseFeeLMAAmount);
-        console.log(vars.BaseFeeLMAFee);
-        console.log("gas comp: ", BaseFeeLMA_GAS_COMPENSATION);
         if (
             _BaseFeeLMAAmount <=
             vars.BaseFeeLMAFee + BaseFeeLMA_GAS_COMPENSATION
@@ -502,6 +498,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         vars.price = priceFeed.fetchPrice();
         bool isRecoveryMode = _checkRecoveryMode(vars.price);
 
+        console.log("price: ", vars.price);
+        console.log("is recovery? :", isRecoveryMode);
+
         if (_isDebtIncrease) {
             _requireValidMaxFeePercentage(_maxFeePercentage, isRecoveryMode);
             _requireNonZeroDebtChange(_BaseFeeLMAChange);
@@ -532,18 +531,20 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         vars.netDebtChange = _BaseFeeLMAChange;
 
-        // If the adjustment incorporates a debt increase and system is in Normal Mode, then trigger a borrowing fee
-        if (_isDebtIncrease && !isRecoveryMode) {
+        // If the adjustment incorporates a debt increase then trigger a borrowing fee
+        // HEDGEHOG UPDATES: Trigger borrowing fee in both recovero and normal modes
+        if (_isDebtIncrease) {
             vars.BaseFeeLMAFee = _triggerBorrowingFee(
                 contractsCache.troveManager,
                 _BaseFeeLMAChange,
                 _maxFeePercentage
             );
+            console.log("fee: ", vars.BaseFeeLMAFee);
+            console.log("net debt change: ", vars.netDebtChange);
             // Hedgehog Updates: Not adding fee to the position debt anymore
             vars.netDebtChange = vars.netDebtChange;
-            console.log("net debt change: ", vars.netDebtChange);
         }
-        console.log("borrowing fee: ", vars.BaseFeeLMAFee);
+
         vars.debt = contractsCache.troveManager.getTroveDebt(_borrower);
         vars.coll = contractsCache.troveManager.getTroveColl(_borrower);
 

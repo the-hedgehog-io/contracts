@@ -71,13 +71,13 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
     function getEntireSystemColl() public view returns (uint entireSystemColl) {
         uint activeColl = activePool.getStETH();
         uint liquidatedColl = defaultPool.getStETH();
-
         return activeColl.add(liquidatedColl);
     }
 
     function getEntireSystemDebt() public view returns (uint entireSystemDebt) {
         uint activeDebt = activePool.getBaseFeeLMADebt();
         uint closedDebt = defaultPool.getBaseFeeLMADebt();
+
         return activeDebt.add(closedDebt);
     }
 
