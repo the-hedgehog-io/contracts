@@ -469,9 +469,14 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         vars.collToLiquidate = singleLiquidation.entireTroveColl.sub(
             singleLiquidation.collGasCompensation
         );
-
+        console.log("MCR: ", MCR);
+        console.log("ICR: ", _ICR);
+        console.log("TCR: ", _TCR);
+        console.log("sing liq debt: ", singleLiquidation.entireTroveDebt);
+        console.log("bfe in stab: ", _BaseFeeLMAInStabPool);
         // If ICR <= 100%, purely redistribute the Trove across all active Troves
         if (_ICR <= _100pct) {
+            console.log("entered less then 100");
             _movePendingTroveRewardsToActivePool(
                 _activePool,
                 _defaultPool,
@@ -547,6 +552,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             (_ICR < _TCR) &&
             (singleLiquidation.entireTroveDebt <= _BaseFeeLMAInStabPool)
         ) {
+            console.log("entered third branch");
             _movePendingTroveRewardsToActivePool(
                 _activePool,
                 _defaultPool,
@@ -584,6 +590,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
                 TroveManagerOperation.liquidateInRecoveryMode
             );
         } else {
+            console.log("entered 4th branch");
             // if (_ICR >= MCR && ( _ICR >= _TCR || singleLiquidation.entireTroveDebt > _BaseFeeLMAInStabPool))
             LiquidationValues memory zeroVals;
             return zeroVals;
@@ -642,11 +649,15 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     ) internal pure returns (LiquidationValues memory singleLiquidation) {
         singleLiquidation.entireTroveDebt = _entireTroveDebt;
         singleLiquidation.entireTroveColl = _entireTroveColl;
-        uint cappedCollPortion = _entireTroveDebt.mul(MCR).div(_price);
+        uint cappedCollPortion = _entireTroveDebt.mul(MCR).mul(_price).div(
+            DECIMAL_PRECISION
+        );
+        console.log("price: ", cappedCollPortion);
 
         singleLiquidation.collGasCompensation = _getCollGasCompensation(
             cappedCollPortion
         );
+        // console.log("coll gas comp: ", singleLiquidation.collGasCompensation);
         singleLiquidation
             .BaseFeeLMAGasCompensation = BaseFeeLMA_GAS_COMPENSATION;
 
@@ -972,7 +983,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             totals.totalCollGasCompensation,
             totals.totalBaseFeeLMAGasCompensation
         );
-
+        console.log(
+            "reward: ",
+            totals.totalBaseFeeLMAGasCompensation,
+            totals.totalCollGasCompensation
+        );
         // Send gas compensation to caller
         _sendGasCompensation(
             activePoolCached,
@@ -1586,8 +1601,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             uint pendingBaseFeeLMADebtReward = getPendingBaseFeeLMADebtReward(
                 _borrower
             );
-            console.log("pending reward eth: ", pendingStETHReward);
-            console.log("pending reward bfe: ", pendingBaseFeeLMADebtReward);
 
             // Apply pending rewards to trove's state
             Troves[_borrower].coll = Troves[_borrower].coll.add(
