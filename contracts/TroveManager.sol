@@ -472,8 +472,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         console.log("MCR: ", MCR);
         console.log("ICR: ", _ICR);
         console.log("TCR: ", _TCR);
-        console.log("sing liq debt: ", singleLiquidation.entireTroveDebt);
-        console.log("bfe in stab: ", _BaseFeeLMAInStabPool);
+        // console.log("sing liq debt: ", singleLiquidation.entireTroveDebt);
+        // console.log("bfe in stab: ", _BaseFeeLMAInStabPool);
         // If ICR <= 100%, purely redistribute the Trove across all active Troves
         if (_ICR <= _100pct) {
             console.log("entered less then 100");
@@ -508,6 +508,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
             // If 100% < ICR < MCR, offset as much as possible, and redistribute the remainder
         } else if ((_ICR > _100pct) && (_ICR < MCR)) {
+            console.log("entered 2nd branch");
             _movePendingTroveRewardsToActivePool(
                 _activePool,
                 _defaultPool,
@@ -652,12 +653,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint cappedCollPortion = _entireTroveDebt.mul(MCR).mul(_price).div(
             DECIMAL_PRECISION
         );
-        console.log("price: ", cappedCollPortion);
 
         singleLiquidation.collGasCompensation = _getCollGasCompensation(
             cappedCollPortion
         );
-        // console.log("coll gas comp: ", singleLiquidation.collGasCompensation);
         singleLiquidation
             .BaseFeeLMAGasCompensation = BaseFeeLMA_GAS_COMPENSATION;
 
@@ -956,6 +955,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             totals.totalDebtToRedistribute,
             totals.totalCollToRedistribute
         );
+
         if (totals.totalCollSurplus > 0) {
             collSurplusPool.increaseBalance(totals.totalCollSurplus);
             activePoolCached.sendStETH(
@@ -963,7 +963,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
                 totals.totalCollSurplus
             );
         }
-
+        console.log(
+            "blabla: ",
+            totals.totalDebtInSequence,
+            totals.totalCollGasCompensation
+        );
         // Update system snapshots
         _updateSystemSnapshots_excludeCollRemainder(
             activePoolCached,
