@@ -469,14 +469,9 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         vars.collToLiquidate = singleLiquidation.entireTroveColl.sub(
             singleLiquidation.collGasCompensation
         );
-        console.log("MCR: ", MCR);
-        console.log("ICR: ", _ICR);
-        console.log("TCR: ", _TCR);
-        // console.log("sing liq debt: ", singleLiquidation.entireTroveDebt);
-        // console.log("bfe in stab: ", _BaseFeeLMAInStabPool);
+
         // If ICR <= 100%, purely redistribute the Trove across all active Troves
         if (_ICR <= _100pct) {
-            console.log("entered less then 100");
             _movePendingTroveRewardsToActivePool(
                 _activePool,
                 _defaultPool,
@@ -508,7 +503,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
             // If 100% < ICR < MCR, offset as much as possible, and redistribute the remainder
         } else if ((_ICR > _100pct) && (_ICR < MCR)) {
-            console.log("entered 2nd branch");
             _movePendingTroveRewardsToActivePool(
                 _activePool,
                 _defaultPool,
@@ -553,7 +547,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             (_ICR < _TCR) &&
             (singleLiquidation.entireTroveDebt <= _BaseFeeLMAInStabPool)
         ) {
-            console.log("entered third branch");
             _movePendingTroveRewardsToActivePool(
                 _activePool,
                 _defaultPool,
@@ -591,7 +584,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
                 TroveManagerOperation.liquidateInRecoveryMode
             );
         } else {
-            console.log("entered 4th branch");
             // if (_ICR >= MCR && ( _ICR >= _TCR || singleLiquidation.entireTroveDebt > _BaseFeeLMAInStabPool))
             LiquidationValues memory zeroVals;
             return zeroVals;
@@ -963,11 +955,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
                 totals.totalCollSurplus
             );
         }
-        console.log(
-            "blabla: ",
-            totals.totalDebtInSequence,
-            totals.totalCollGasCompensation
-        );
         // Update system snapshots
         _updateSystemSnapshots_excludeCollRemainder(
             activePoolCached,
@@ -986,11 +973,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             vars.liquidatedColl,
             totals.totalCollGasCompensation,
             totals.totalBaseFeeLMAGasCompensation
-        );
-        console.log(
-            "reward: ",
-            totals.totalBaseFeeLMAGasCompensation,
-            totals.totalCollGasCompensation
         );
         // Send gas compensation to caller
         _sendGasCompensation(
@@ -1111,8 +1093,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         for (vars.i = 0; vars.i < _troveArray.length; vars.i++) {
             vars.user = _troveArray[vars.i];
             vars.ICR = getCurrentICR(vars.user, _price);
-
-            console.log("icr: ", vars.ICR);
 
             if (vars.ICR < MCR) {
                 singleLiquidation = _liquidateNormalMode(
@@ -2156,6 +2136,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint _borrowingRate,
         uint _BaseFeeLMADebt
     ) internal pure returns (uint) {
+        console.log("final borrowing rate: ", _borrowingRate);
         return _borrowingRate.mul(_BaseFeeLMADebt).div(DECIMAL_PRECISION);
     }
 
@@ -2244,12 +2225,16 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
      * New function simmilar to _calcDecayedBaseRate. However used particularly for borrowBaseRate calculation
      */
     function _calcDecayedBorrowBaseRate() internal view returns (uint) {
+        console.log("BorrowRate before Decay: ", borrowBaseRate);
         uint minutesPassed = _minutesPassedSinceLastBorrow();
         uint decayFactor = LiquityMath._decPow(
             MINUTE_DECAY_BORROWING_FACTOR,
             minutesPassed
         );
-
+        console.log(
+            "BorrowRate after Decay: ",
+            borrowBaseRate.mul(decayFactor).div(DECIMAL_PRECISION)
+        );
         return borrowBaseRate.mul(decayFactor).div(DECIMAL_PRECISION);
     }
 
