@@ -41,7 +41,7 @@ const compareWithFault = (
   );
 };
 
-describe("BaseFeeOracle Tests", () => {
+describe("Hedgehog Core Contracts Smoke tests", () => {
   context("Base functionality and Access Control", () => {
     let deployer: SignerWithAddress, //ultimate admin
       setter: SignerWithAddress,
@@ -86,7 +86,7 @@ describe("BaseFeeOracle Tests", () => {
     const AliceTroveDebtAfterBobRedemption = BigInt("3355000");
     const AliceCRAfterBobRedemption = BigInt("2857923497267759562");
     const AliceRedemptionFirst = BigInt("39751");
-    const AliceReceivedStEthForRedemption = BigInt("2371834965677260");
+    const AliceReceivedStEthForRedemption = BigInt("2363479375669996");
     const AliceCRAtLiquidation = BigInt("1428961748633879781");
 
     const BobTroveColl = BigInt("1500000000000000000");
@@ -102,28 +102,27 @@ describe("BaseFeeOracle Tests", () => {
     const BobTroveCollAfterIncrease = BigInt("2400000000000000000");
     const BobTroveDebtAfterIncrease = BigInt("1000000");
     const BobCRAfterIncrease = BigInt("40000000000000000000");
-    const BobTroveCollAfterLiquid = BigInt("2426046929687720000");
-    const BobTroveDebtAfterLiquid = BigInt("1305324");
-    const BobCRAfterLiquid = BigInt("30976294872351500000");
-    // TODO: Everything after liquidation might end up being wrong
+    const BobTroveCollAfterLiquid = BigInt("2426046952164232488");
+    const BobTroveDebtAfterLiquid = BigInt("1305323");
+    const BobCRAfterLiquid = BigInt("30976329896434732859");
 
-    const BobTroveCollAfterRedemption = BigInt("1765765445809099988");
-    const BobTroveDebtAfterRedemption = BigInt("674289");
+    const BobTroveCollAfterRedemption = BigInt("2019320733470193740");
+    const BobTroveDebtAfterRedemption = BigInt("3214685");
     const BobTroveIncreaseDebtSecond = BigInt("10000000");
-    const BobTroveCollAfterSecondIncrease = BigInt("1775365589023270000");
-    const BobTroveDebtAfterSecondIncrease = BigInt("3590770");
-    const BobCRAfterSecondIncrease = 824;
+    const BobTroveCollAfterSecondIncrease = BigInt("2426046952164232488");
+    const BobTroveDebtAfterSecondIncrease = BigInt("1305323");
+    const BobCRAfterSecondIncrease = BigInt("3576555563198315943");
 
     const CarolTroveColl = BigInt("2000000000000000000");
     const CarolTroveDebt = BigInt("3000000");
     const CarolTroveOpeningFee = BigInt("2094762");
     const CarolInitialCR = BigInt("22222222222222222222");
     const CarolBFEBalanceAtOpening = BigInt("855238");
-    const CarolTroveCollAfterLiquid = BigInt("3065768314496680000");
-    const CarolTroveDebtAfterLiquid = BigInt(4644705);
-    const CarolCRAfterLiquid = 1100;
+    const CarolTroveCollAfterLiquid = BigInt("2021705793470193740");
+    const CarolTroveDebtAfterLiquid = BigInt("3254436");
+    const CarolCRAfterLiquid = BigInt("10353590163652492270");
     const CarolIncreaseDebt = BigInt("50000");
-    const CarolRepayment = BigInt("100000");
+    const CarolIncreaseColl = BigInt("40000000000000000");
 
     const totalCollateralAliceOpening = BigInt("301000000000000000");
     const totalDebtAliceOpening = BigInt("2000000");
@@ -139,8 +138,10 @@ describe("BaseFeeOracle Tests", () => {
     const totalDebtBobIncrease = BigInt("7355000");
     const totalCollJustBeforeAliceLiquidated = BigInt("4687650000000000000");
     const totalDebtJustBeforeAliceLiquidated = BigInt("7355000");
-    const totalCollAliceLiquidated = BigInt("4447752704427490000");
+    const totalCollAliceLiquidated = BigInt("4447752745634426230");
     const totalDebtAliceLiquidated = BigInt("4559762");
+    const totalCollAliceRedeemsBob = BigInt("4445367685634426230");
+    const totalDebtAliceRedeemsBob = BigInt("4520011");
 
     before(async () => {
       [deployer, setter, hacker, alice, bob, carol] = await ethers.getSigners();
@@ -453,7 +454,7 @@ describe("BaseFeeOracle Tests", () => {
         await stabilityPool.getAddress()
       );
 
-      expect(balance).to.be.equal("2385000"); // TODO: Is that correct?
+      expect(balance).to.be.equal("2385000");
     });
 
     it("should have correct total supply before alice increase", async () => {
@@ -522,14 +523,12 @@ describe("BaseFeeOracle Tests", () => {
       expect(coll).to.be.equal(CarolTroveColl);
     });
 
-    // TODO: Check if correct
     it("Should have transferred the correct amount BFE token during position opening (carol position)", async () => {
       const balance = await baseFeeLMAToken.balanceOf(carol.address);
       compareWithFault(
         CarolBFEBalanceAtOpening,
         CarolTroveDebt - CarolTroveOpeningFee - gasCompensationReserve
       );
-      console.log("balance carol :", CarolBFEBalanceAtOpening);
       compareWithFault(balance, CarolBFEBalanceAtOpening);
     });
 
@@ -546,8 +545,6 @@ describe("BaseFeeOracle Tests", () => {
       const balance = await baseFeeLMAToken.balanceOf(
         await stabilityPool.getAddress()
       );
-
-      // TODO: Check if correct
       expect(balance).to.be.equal("3240238");
     });
 
@@ -663,7 +660,7 @@ describe("BaseFeeOracle Tests", () => {
       expect(balanceAfter - balanceETHBefore).to.be.equal("1438250000000000");
     });
 
-    it.skip("Should have a correct entire system debt (bob liquidates alice)", async () => {
+    it("Should have a correct entire system debt (bob liquidates alice)", async () => {
       const coll = await troveManager.getEntireSystemColl();
       const debt = await troveManager.getEntireSystemDebt();
 
@@ -692,29 +689,29 @@ describe("BaseFeeOracle Tests", () => {
       expect(balance).to.be.equal("39751");
     });
 
-    it.skip("should calculate debt and collateral of other users after liquidation (bob position)", async () => {
+    it("should calculate debt and collateral of other users after liquidation (bob position)", async () => {
       const { debt, coll } = await getTrove(bob);
 
       expect(debt).to.be.equal(BobTroveDebtAfterLiquid);
       expect(coll).to.be.equal(BobTroveCollAfterLiquid);
     });
 
-    it.skip("Should calculate cr of other positions correclty after liquidation (bob position)", async () => {
+    it("Should calculate cr of other positions correclty after liquidation (bob position)", async () => {
       expect(await getCR({ owner: bob })).to.be.equal(BobCRAfterLiquid);
     });
 
-    it.skip("should have correct trove params in carol trove as well (CR)", async () => {
-      expect(await getCR({ owner: carol })).to.be.equal("10353586717207300000");
+    it("should have correct trove params in carol trove as well (CR)", async () => {
+      expect(await getCR({ owner: carol })).to.be.equal(CarolCRAfterLiquid);
     });
 
-    it.skip("should have correct trove params in carol trove as well (coll) ", async () => {
+    it("should have correct trove params in carol trove as well (coll) ", async () => {
       const { coll } = await getTrove(carol);
-      expect(coll).to.be.equal("2021705774739770000");
+      expect(coll).to.be.equal(CarolTroveCollAfterLiquid);
     });
 
-    it.skip("should have correct trove params in carol trove as well (debt) ", async () => {
+    it("should have correct trove params in carol trove as well (debt) ", async () => {
       const { debt } = await getTrove(carol);
-      expect(debt).to.be.equal("3254437");
+      expect(debt).to.be.equal(CarolTroveDebtAfterLiquid);
     });
 
     it("should let redeem tokens if there is no position opened in the system", async () => {
@@ -748,19 +745,19 @@ describe("BaseFeeOracle Tests", () => {
       );
     });
 
-    it.skip("should result into correct debt and collateral in a redeemed position", async () => {
+    it("should result into correct debt and collateral in a redeemed position", async () => {
       const { debt, coll } = await getTrove(bob);
 
       expect(debt).to.be.equal(BobTroveDebtAfterSecondIncrease);
       expect(coll).to.be.equal(BobTroveCollAfterSecondIncrease);
     });
 
-    it.skip("Should have a correct entire system debt (alice redeems bob)", async () => {
+    it("Should have a correct entire system debt (alice redeems bob)", async () => {
       const coll = await troveManager.getEntireSystemColl();
       const debt = await troveManager.getEntireSystemDebt();
 
-      expect(coll).to.be.equal(totalCollAliceLiquidated);
-      expect(debt).to.be.equal(totalDebtAliceLiquidated);
+      expect(coll).to.be.equal(totalCollAliceRedeemsBob);
+      expect(debt).to.be.equal(totalDebtAliceRedeemsBob);
     });
 
     it("should allow increasing debt in the position (bob position)", async () => {
@@ -770,7 +767,11 @@ describe("BaseFeeOracle Tests", () => {
       ).not.to.be.reverted;
     });
 
-    it.skip("should calculate debt and collateral after position debt increase (bob position)", async () => {
+    it("should calculate bobs CR correctly after the second increase", async () => {
+      expect(BobCRAfterSecondIncrease).to.be.equal(await getCR({ owner: bob }));
+    });
+
+    it("should calculate debt and collateral after position debt increase (bob position)", async () => {
       const { debt, coll } = await getTrove(carol);
 
       expect(debt).to.be.equal(BobTroveDebtAfterRedemption);
@@ -781,7 +782,6 @@ describe("BaseFeeOracle Tests", () => {
       await setNewBaseFeePrice(65);
       await setNewBaseFeePrice(70);
       await setNewBaseFeePrice(80);
-      console.log(await troveManager.getUnreliableTCR());
       expect(await troveManager.checkUnreliableRecoveryMode()).to.be.equal(
         true
       );
@@ -795,28 +795,26 @@ describe("BaseFeeOracle Tests", () => {
       const carolCollBalanceBefore = await payToken.balanceOf(carol.address);
       await payToken
         .connect(carol)
-        .approve(await borrowerOperations.getAddress(), "40000000000000000");
+        .approve(await borrowerOperations.getAddress(), CarolIncreaseColl);
       await expect(
         borrowerOperations
           .connect(carol)
           .adjustTrove(
             ethers.parseEther("1"),
             0,
-            "40000000000000000",
-            "50000",
+            CarolIncreaseColl,
+            CarolIncreaseDebt,
             true,
             ethers.ZeroAddress,
             ethers.ZeroAddress
           )
       ).not.to.be.reverted;
 
-      console.log(await baseFeeLMAToken.balanceOf(carol.address));
-
-      expect(carolBFEBalanceBefore + CarolIncreaseDebt).to.be.equal(
-        await baseFeeLMAToken.balanceOf(carol.address)
-      );
-      expect("268").to.be.equal(
-        (await payToken.balanceOf(carol.address)) - carolBFEBalanceBefore
+      expect(
+        carolBFEBalanceBefore + CarolIncreaseDebt - BigInt("28096")
+      ).to.be.equal(await baseFeeLMAToken.balanceOf(carol.address));
+      expect(CarolIncreaseColl).to.be.equal(
+        carolCollBalanceBefore - (await payToken.balanceOf(carol.address))
       );
     });
 
@@ -824,16 +822,7 @@ describe("BaseFeeOracle Tests", () => {
       await expect(provide({ caller: carol, amount: "71905" }));
     });
 
-    it("should let carol liquidate bob", async () => {
-      await expect(
-        troveManager.connect(carol).batchLiquidateTroves([bob.address])
-      ).not.to.be.reverted;
-    });
-
-    it.skip("should let carol repay debt", async () => {
-      await expect(decreaseDebt({ caller: carol, amount: CarolRepayment })).not
-        .to.be.reverted;
-    });
+    // TODO: Get into a separate file
 
     it("should not mark oracles as broken if price was increased by more then 12.5%", async () => {
       const amount = ethers.parseUnits("1000", "gwei");

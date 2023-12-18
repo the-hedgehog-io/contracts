@@ -498,9 +498,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         vars.price = priceFeed.fetchPrice();
         bool isRecoveryMode = _checkRecoveryMode(vars.price);
 
-        console.log("price: ", vars.price);
-        console.log("is recovery? :", isRecoveryMode);
-
         if (_isDebtIncrease) {
             _requireValidMaxFeePercentage(_maxFeePercentage, isRecoveryMode);
             _requireNonZeroDebtChange(_BaseFeeLMAChange);
@@ -539,8 +536,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
                 _BaseFeeLMAChange,
                 _maxFeePercentage
             );
-            console.log("fee: ", vars.BaseFeeLMAFee);
-            console.log("net debt change: ", vars.netDebtChange);
+
             // Hedgehog Updates: Not adding fee to the position debt anymore
             vars.netDebtChange = vars.netDebtChange;
         }
@@ -814,7 +810,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint _netDebtIncrease
     ) internal {
         _activePool.increaseBaseFeeLMADebt(_netDebtIncrease);
-        console.log("Actual mint to user: ", _BaseFeeLMAAmount);
         _baseFeeLMAToken.mint(_account, _BaseFeeLMAAmount);
     }
 

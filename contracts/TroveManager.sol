@@ -2136,7 +2136,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint _borrowingRate,
         uint _BaseFeeLMADebt
     ) internal pure returns (uint) {
-        console.log("final borrowing rate: ", _borrowingRate);
         return _borrowingRate.mul(_BaseFeeLMADebt).div(DECIMAL_PRECISION);
     }
 
@@ -2225,16 +2224,12 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
      * New function simmilar to _calcDecayedBaseRate. However used particularly for borrowBaseRate calculation
      */
     function _calcDecayedBorrowBaseRate() internal view returns (uint) {
-        console.log("BorrowRate before Decay: ", borrowBaseRate);
         uint minutesPassed = _minutesPassedSinceLastBorrow();
         uint decayFactor = LiquityMath._decPow(
             MINUTE_DECAY_BORROWING_FACTOR,
             minutesPassed
         );
-        console.log(
-            "BorrowRate after Decay: ",
-            borrowBaseRate.mul(decayFactor).div(DECIMAL_PRECISION)
-        );
+
         return borrowBaseRate.mul(decayFactor).div(DECIMAL_PRECISION);
     }
 

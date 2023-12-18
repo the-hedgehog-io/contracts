@@ -223,7 +223,6 @@ contract FeesRouter is AccessControl {
         IBaseFeeLMAToken _baseFeeLMAToken = baseFeeLMAToken;
         IHOGStaking _hogStaking = hogStaking;
         if (amountA > 0 && config.addressA != address(0)) {
-            console.log("minting fee: ", amountA);
             _baseFeeLMAToken.mint(config.addressA, amountA);
 
             _possiblyIncreaseHogStakingDebtBalance(
@@ -233,7 +232,6 @@ contract FeesRouter is AccessControl {
             );
         }
         if (amountB > 0 && config.addressB != address(0)) {
-            console.log("minting secondFee: ", amountB);
             _baseFeeLMAToken.mint(config.addressB, amountB);
 
             _possiblyIncreaseHogStakingDebtBalance(
