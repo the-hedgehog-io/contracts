@@ -95,8 +95,8 @@ describe("BaseFeeOracle Tests", () => {
     const BobTroveDebtAfterIncrease = BigInt("1000000");
     const BobCRAfterIncrease = BigInt("18333333333333333333");
 
-    const BobTroveCollAfterRedemption = BigInt("1765765445809099988");
-    const BobTroveDebtAfterRedemption = BigInt("674289");
+    const BobTroveCollAfterRedemption = BigInt("2000000000000000000");
+    const BobTroveDebtAfterRedemption = BigInt("1500000");
     const BobTroveIncreaseDebtSecond = BigInt("1400000");
 
     const BobTroveCollAfterSecondIncrease = BigInt("1775365589023270000");
@@ -528,7 +528,6 @@ describe("BaseFeeOracle Tests", () => {
         CarolBFEBalanceAtOpening,
         CarolTroveDebt - CarolTroveOpeningFee - gasCompensationReserve
       );
-      console.log("balance carol :", CarolBFEBalanceAtOpening);
       compareWithFault(balance, CarolBFEBalanceAtOpening);
     });
 
@@ -592,7 +591,7 @@ describe("BaseFeeOracle Tests", () => {
       ).to.be.equal("910191");
     });
 
-    it.skip("should calculate debt and collateral after position debt increase (bob position)", async () => {
+    it("should calculate debt and collateral after position debt increase (bob position)", async () => {
       const { debt, coll } = await getTrove(carol);
 
       expect(debt).to.be.equal(BobTroveDebtAfterRedemption);
@@ -603,7 +602,6 @@ describe("BaseFeeOracle Tests", () => {
       await setNewBaseFeePrice(140);
       await setNewBaseFeePrice(150);
       await setNewBaseFeePrice(160);
-      console.log(await troveManager.getUnreliableTCR());
       expect(await troveManager.checkUnreliableRecoveryMode()).to.be.equal(
         true
       );
@@ -632,8 +630,6 @@ describe("BaseFeeOracle Tests", () => {
           )
       ).not.to.be.reverted;
 
-      console.log(await baseFeeLMAToken.balanceOf(carol.address));
-
       expect("39749").to.be.equal(
         (await baseFeeLMAToken.balanceOf(carol.address)) - carolBFEBalanceBefore
       );
@@ -653,57 +649,20 @@ describe("BaseFeeOracle Tests", () => {
       ).not.to.be.reverted;
 
       const balanceAfter = await payToken.balanceOf(carol.address);
-      // expect(
-      //   await baseFeeLMAToken.balanceOf(await stabilityPool.getAddress())
-      // ).to.equal(0);
-      expect(balanceAfter - balanceBefore).to.be.equal("7005000000000000");
+      expect(
+        await baseFeeLMAToken.balanceOf(await stabilityPool.getAddress())
+      ).to.equal(BigInt("828948"));
+      expect(balanceAfter - balanceBefore).to.be.equal("4385000000000000");
     });
 
     it("should have both positions closed", async () => {
       const { coll, debt } = await getTrove(bob);
+      const { coll: collAlice, debt: debtAlice } = await getTrove(alice);
 
-      console.log("CAROL DEBT: ", debt);
-      console.log("CAROL COLL : ", coll);
-
-      //expect(coll).to.be.equal(0);
+      expect(coll).to.be.equal(0);
+      expect(debt).to.be.equal(0);
+      expect(collAlice).to.be.equal(0);
+      expect(debtAlice).to.be.equal(0);
     });
-
-    // it.skip("should let carol repay debt", async () => {
-    //   await expect(decreaseDebt({ caller: carol, amount: CarolRepayment })).not
-    //     .to.be.reverted;
-    // });
-
-    // it("should not mark oracles as broken if price was increased by more then 12.5%", async () => {
-    //   const amount = ethers.parseUnits("1000", "gwei");
-    //   const block = await latestBlock();
-    //   await mainOracle.feedBaseFeeValue(amount, block);
-    //   await priceFeed.fetchPrice();
-    //   expect(await priceFeed.status()).to.be.equal(1);
-    //   await secondaryOracle.feedBaseFeeValue(
-    //     ethers.parseUnits("1000", "gwei"),
-    //     block
-    //   );
-    //   await priceFeed.fetchPrice();
-    //   expect(await priceFeed.status()).to.be.equal(2);
-    // });
-
-    // it("should mark both oracles as working if price consists", async () => {
-    //   await setNewBaseFeePrice(1001);
-
-    //   await setNewBaseFeePrice(1004);
-    //   expect(await priceFeed.status()).to.be.equal(0);
-    // });
-
-    // it("should mark oracle as frozen if no updates happens for more then 69 blocks", async () => {
-    //   await mine(70);
-    //   const block = await latestBlock();
-
-    //   await secondaryOracle.feedBaseFeeValue(
-    //     ethers.parseUnits("1000", "gwei"),
-    //     block
-    //   );
-    //   await priceFeed.fetchPrice();
-    //   expect(await priceFeed.status()).to.be.equal(3);
-    // });
   });
 });
