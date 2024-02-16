@@ -9,17 +9,26 @@ import "../dependencies/LiquityMath.sol";
 import "../dependencies/CheckContract.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract CommunityIssuance is Ownable, CheckContract, BaseMath {
+contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
     using SafeMath for uint;
 
     // --- Data ---
+
+    bytes32 internal constant DISTRIBUTION_SETTER =
+        keccak256("DISTRIBUTION_SETTER");
+    bytes32 internal constant DISTRIBUTION_SETTER_ADMIN =
+        keccak256("DISTRIBUTION_SETTER_ADMIN");
 
     string public constant NAME = "CommunityIssuance";
 
     uint public constant SECONDS_IN_ONE_MINUTE = 60;
 
-    /* The issuance factor F determines the curvature of the issuance curve.
+    /*
+     * HEDGEHOG UPDATES: Not a constant variable anymore.
+     * May now be updated by a DISTRIBUTION_SETTER
+     * The issuance factor F determines the curvature of the issuance curve.
      *
      * Minutes in one year: 60*24*365 = 525600
      *
@@ -33,7 +42,7 @@ contract CommunityIssuance is Ownable, CheckContract, BaseMath {
      * F = 0.5 ** (1/525600)
      * F = 0.999998681227695000
      */
-    uint public constant ISSUANCE_FACTOR = 999998681227695000;
+    uint public ISSUANCE_FACTOR = 999998681227695000;
 
     /*
      * The community HOG supply cap is the starting balance of the Community Issuance contract.
@@ -41,7 +50,17 @@ contract CommunityIssuance is Ownable, CheckContract, BaseMath {
      *
      * Set to 32M (slightly less than 1/3) of total HOG supply.
      */
-    uint public constant HOGSupplyCap = 32e24; // 32 million
+    uint public HOGSupplyCap = 32e24; // 32 million
+
+    // TODO: Make AccessControl
+    function setHOGSupplyCap(uint _newCap) external onlyOwner {
+        HOGSupplyCap = _newCap;
+    }
+
+    // TODO: Make AccessControl
+    function setISSUANCE_FACTOR(uint _newIssFactor) external onlyOwner {
+        ISSUANCE_FACTOR = _newIssFactor;
+    }
 
     IHOGToken public hogToken;
 
