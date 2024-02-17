@@ -42,24 +42,41 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
      * F = 0.5 ** (1/525600)
      * F = 0.999998681227695000
      */
-    uint public ISSUANCE_FACTOR = 999998681227695000;
+    uint256 public ISSUANCE_FACTOR = 999998681227695000;
 
     /*
+     * HEDGEHOG UPDATES: Not a constant variable anymore.
+     * May now be updated by a DISTRIBUTION_SETTER
      * The community HOG supply cap is the starting balance of the Community Issuance contract.
      * It should be minted to this contract by HOGToken, when the token is deployed.
      *
      * Set to 32M (slightly less than 1/3) of total HOG supply.
      */
-    uint public HOGSupplyCap = 32e24; // 32 million
+    uint256 public HOGSupplyCap; // 32 million
 
-    // TODO: Make AccessControl
-    function setHOGSupplyCap(uint _newCap) external onlyOwner {
+    event HOGSupplyCapUpdated(uint256 _newCap);
+    event ISSUANCE_FACTORUpdated(uint256 _newFactor);
+
+    /*
+     * HEDGEHOG UPDATES: HOGSupplyCap is not a constant variable anymore.
+     * May now be updated by a DISTRIBUTION_SETTER
+     * */
+    function setHOGSupplyCap(
+        uint _newCap
+    ) external onlyRole(DISTRIBUTION_SETTER) {
         HOGSupplyCap = _newCap;
+        emit HOGSupplyCapUpdated(_newCap);
     }
 
-    // TODO: Make AccessControl
-    function setISSUANCE_FACTOR(uint _newIssFactor) external onlyOwner {
+    /*
+     * HEDGEHOG UPDATES: ISSUANCE_FACTOR is not a constant variable anymore.
+     * May now be updated by a DISTRIBUTION_SETTER
+     * */
+    function setISSUANCE_FACTOR(
+        uint _newIssFactor
+    ) external onlyRole(DISTRIBUTION_SETTER) {
         ISSUANCE_FACTOR = _newIssFactor;
+        emit ISSUANCE_FACTORUpdated(_newIssFactor);
     }
 
     IHOGToken public hogToken;
@@ -88,8 +105,19 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
         checkContract(_hogTokenAddress);
         checkContract(_stabilityPoolAddress);
 
+        /* HEDGEHOG UPDATES: Setting two variables that used to be constant in constructor now.
+         * May now be updated by a DISTRIBUTION_SETTER and DISTRIBUTION_SETTER address is admined by DISTRIBUTION_SETTER_ADMIN
+         * At deployment both admin roles set to the deployer. May be updated later
+         */
+        _grantRole(DISTRIBUTION_SETTER, msg.sender);
+        _setRoleAdmin(DISTRIBUTION_SETTER, DISTRIBUTION_SETTER_ADMIN);
+        _grantRole(DISTRIBUTION_SETTER_ADMIN, msg.sender);
+
         hogToken = IHOGToken(_hogTokenAddress);
         stabilityPoolAddress = _stabilityPoolAddress;
+
+        ISSUANCE_FACTOR = 999998681227695000; // default issuance factor value;
+        HOGSupplyCap = 500 * 10e16; // default supply cap value
 
         // When HOGToken deployed, it should have transferred CommunityIssuance's HOG entitlement
         uint HOGBalance = hogToken.balanceOf(address(this));
