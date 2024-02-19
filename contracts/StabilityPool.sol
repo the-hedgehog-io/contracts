@@ -278,7 +278,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
     // --- Contract setters ---
 
     /**
-     * HEDGEHOG LOGIC UPDATES:
+     * HEDGEHOG UPDATES:
      * ERC20 is used as a collateral instead of native token.
      * Setting erc20 address in the initialisation
      */
@@ -357,6 +357,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         );
         uint BaseFeeLMALoss = initialDeposit.sub(compoundedBaseFeeLMADeposit); // Needed only for event log
 
+        // HEDGEHOG UPDATES: No longer perfor any kind of "frontend" payments
         // First pay out any HOG gains
         _payOutHOGGains(communityIssuanceCached, msg.sender);
 
@@ -403,6 +404,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         );
         uint BaseFeeLMALoss = initialDeposit.sub(compoundedBaseFeeLMADeposit); // Needed only for event log
 
+        // HEDGEHOG UPDATES: No longer perfor any kind of "frontend" payments
         // First pay out any HOG gains
         _payOutHOGGains(communityIssuanceCached, msg.sender);
 
@@ -449,6 +451,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         );
         uint BaseFeeLMALoss = initialDeposit.sub(compoundedBaseFeeLMADeposit); // Needed only for event log
 
+        // HEDGEHOG UPDATES: No longer perfor any kind of "frontend" payments
         // First pay out any HOG gains
         _payOutHOGGains(communityIssuanceCached, msg.sender);
 

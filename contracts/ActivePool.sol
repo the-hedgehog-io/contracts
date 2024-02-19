@@ -54,7 +54,7 @@ contract ActivePool is Ownable, CheckContract, IPool {
     // --- Contract setters ---
 
     /**
-     * HEDGEHOG LOGIC UPDATES:
+     * HEDGEHOG UPDATES:
      * ERC20 is used as a collateral instead of native token.
      * Setting erc20 address in the initialisation
      */
@@ -97,7 +97,7 @@ contract ActivePool is Ownable, CheckContract, IPool {
      * In case StETH is 0 return 1 to avoid division by zero in base rate calculations
      * Returns the stStETH state variable.
      *
-     *Not necessarily equal to the the contract's raw StETH balance - stETH can be forcibly sent to contracts.
+     * Not necessarily equal to the the contract's raw StETH balance - stETH can be forcibly sent to contracts.
      */
     function getStETH() external view override returns (uint) {
         return StETH > 0 ? StETH : 1;

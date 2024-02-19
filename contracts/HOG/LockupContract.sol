@@ -17,6 +17,10 @@ import "../interfaces/IHOGToken.sol";
 * The above two restrictions ensure that until one year after system deployment, HOG tokens originating from Hedgehog AG cannot 
 * enter circulating supply and cannot be staked to earn system revenue.
 */
+
+/**
+    @notice Not used in Hedgehog Protocol
+*/
 contract LockupContract {
     using SafeMath for uint;
 

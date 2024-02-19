@@ -14,13 +14,13 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
     using SafeMath for uint;
 
-    // --- Data ---
-
+    // HEDGEHOG UPDATES: Add Access control to the contract for the setting of dynamic variables
     bytes32 internal constant DISTRIBUTION_SETTER =
         keccak256("DISTRIBUTION_SETTER");
     bytes32 internal constant DISTRIBUTION_SETTER_ADMIN =
         keccak256("DISTRIBUTION_SETTER_ADMIN");
 
+    // --- Data ---
     string public constant NAME = "CommunityIssuance";
 
     uint public constant SECONDS_IN_ONE_MINUTE = 60;

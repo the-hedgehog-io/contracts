@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
- * @notice Fork of Liquity's Default Pool. Logic remains unchanged.
+ * @notice Based on Liquity's Default Pool. Overall logic remains unchanged, but ERC20 token is used instsead of a native token
  * Changes to the contract:
  * - Raised pragma version
  * - Removed an import of Default Interface and updated with IPool
@@ -44,7 +44,7 @@ contract DefaultPool is Ownable, CheckContract, IPool {
     // --- Dependency setters ---
 
     /**
-     * HEDGEHOG LOGIC UPDATES:
+     * HEDGEHOG UPDATES:
      * ERC20 is used as a collateral instead of native token.
      * Setting erc20 address in the initialisation
      */

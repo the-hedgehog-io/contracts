@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IBaseFeeLMAToken.sol";
 import "./interfaces/IActivePool.sol";
 import "./interfaces/IHOGStaking.sol";
-import "hardhat/console.sol";
 
 error InvalidIndex();
 error InvalidAddress();
@@ -14,6 +13,12 @@ error InvalidLength();
 error InvalidInput();
 error TooManyConfigValues();
 
+/**
+ * @notice Completely new contract in Hedgehog Protocol, that was never a part of Liquity Protocol
+ *
+ * Accepts fees and routes it to different places(or a single one) assigned by the account with "SETTER" rights
+ * Contract overall is a config of addresses assigned for each 5% range from 0 to 100.
+ */
 contract FeesRouter is AccessControl {
     bytes32 internal constant SETTER = keccak256("SETTER");
     bytes32 internal constant ULTIMATE_ADMIN = keccak256("ULTIMATE_ADMIN");
@@ -84,6 +89,17 @@ contract FeesRouter is AccessControl {
         _revokeRole(DEPLOYER, msg.sender);
     }
 
+    /**
+     * Sets both debt and coll fees configs. Should be used if routing logic is the same for both procesesses.
+     *
+     * @param _percentage range at which new config is valid
+     * @param _amountA amount of tokens that _addressA is going to receive in the event of tx fee appears in _percentage range. Must be > 0
+     * @param _amountB amount of tokens that _addressB is going to receive in the event of tx fee appears in _percentage range. Set to 0 to skip
+     * @param _amountC amount of tokens that _addressC is going to receive in the event of tx fee appears in _percentage range Set to 0 to skip
+     * @param _addressA _addressA that receives tokens in the event of tx fee appears in _percentage range. Can't be an address(0)
+     * @param _addressB _addressB that receives tokens in the event of tx fee appears in _percentage range. Set to address(0) to skip
+     * @param _addressC _addressC that receives tokens in the event of tx fee appears in _percentage range. Set to address(0) to skip
+     */
     function setFeeConfigs(
         uint256 _percentage,
         uint256 _amountA,
@@ -138,6 +154,17 @@ contract FeesRouter is AccessControl {
         );
     }
 
+    /**
+     * Sets debt fees configs. Should be used if routing logic is unique for BFE token fees.
+     *
+     * @param _percentage range at which new config is valid
+     * @param _amountA amount of tokens that _addressA is going to receive in the event of tx fee appears in _percentage range. Must be > 0
+     * @param _amountB amount of tokens that _addressB is going to receive in the event of tx fee appears in _percentage range. Set to 0 to skip
+     * @param _amountC amount of tokens that _addressC is going to receive in the event of tx fee appears in _percentage range Set to 0 to skip
+     * @param _addressA _addressA that receives tokens in the event of tx fee appears in _percentage range. Can't be an address(0)
+     * @param _addressB _addressB that receives tokens in the event of tx fee appears in _percentage range. Set to address(0) to skip
+     * @param _addressC _addressC that receives tokens in the event of tx fee appears in _percentage range. Set to address(0) to skip
+     */
     function setDebtFeeConfig(
         uint256 _percentage,
         uint256 _amountA,
@@ -172,6 +199,17 @@ contract FeesRouter is AccessControl {
         );
     }
 
+    /**
+     * Sets coll fees configs. Should be used if routing logic is unique for WStETH token fees.
+     *
+     * @param _percentage range at which new config is valid
+     * @param _amountA amount of tokens that _addressA is going to receive in the event of tx fee appears in _percentage range. Must be > 0
+     * @param _amountB amount of tokens that _addressB is going to receive in the event of tx fee appears in _percentage range. Set to 0 to skip
+     * @param _amountC amount of tokens that _addressC is going to receive in the event of tx fee appears in _percentage range Set to 0 to skip
+     * @param _addressA _addressA that receives tokens in the event of tx fee appears in _percentage range. Can't be an address(0)
+     * @param _addressB _addressB that receives tokens in the event of tx fee appears in _percentage range. Set to address(0) to skip
+     * @param _addressC _addressC that receives tokens in the event of tx fee appears in _percentage range. Set to address(0) to skip
+     */
     function setCollFeeConfig(
         uint256 _percentage,
         uint256 _amountA,
@@ -206,6 +244,11 @@ contract FeesRouter is AccessControl {
         );
     }
 
+    // TODO: Only protocol's contract should be able to call
+    /**
+     * @param _debt amount of BFE tokens that user receives in the event of succesful borrowing op
+     * @param _fee amount of fee that user is getting cut with in the event of succseful borrowing op
+     */
     function distributeDebtFee(uint256 _debt, uint256 _fee) external {
         FeeConfig memory config = debtFeeConfigs[
             (((_fee * 100) / _debt) % 5) * 5
@@ -251,6 +294,11 @@ contract FeesRouter is AccessControl {
         }
     }
 
+    // TODO: Only protocol's contract should be able to call
+    /**
+     * @param _debt amount of BFE tokens that user receives in the event of succesful borrowing op
+     * @param _fee amount of fee that user is getting cut with in the event of succseful borrowing op
+     */
     function distributeCollFee(uint256 _debt, uint256 _fee) external {
         FeeConfig memory config = collFeeConfigs[
             (((_fee * 100) / _debt) % 5) * 5

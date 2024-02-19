@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../dependencies/IERC2612.sol";
 
 /**
+* Based On Liquity Protocol Token 
 * @notice Token's functionality based on HOG token. 
 * Functions logic remains unchanged.
  * Changes to the contract:
@@ -101,10 +102,6 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
     address public immutable communityIssuanceAddress;
     address public immutable hogStakingAddress;
 
-    uint internal immutable lpRewardsEntitlement;
-
-    ILockupContractFactory public immutable lockupContractFactory;
-
     // --- Events ---
 
     event CommunityIssuanceAddressSet(address _communityIssuanceAddress);
@@ -132,7 +129,6 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
 
         communityIssuanceAddress = _communityIssuanceAddress;
         hogStakingAddress = _hogStakingAddress;
-        lockupContractFactory = ILockupContractFactory(_lockupFactoryAddress);
 
         bytes32 hashedName = keccak256(bytes(_NAME));
         bytes32 hashedVersion = keccak256(bytes(_VERSION));
@@ -148,22 +144,20 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
 
         // --- Initial HOG allocations ---
 
-        uint bountyEntitlement = _1_MILLION.mul(2); // Allocate 2 million for bounties/hackathons
-        _mint(_bountyAddress, bountyEntitlement);
+        /*
+        * Hedgehog Updates:
+        Not allocating anymore tokens for differrent purposes to different accounts.
+        Instead only initial HogSupplyCap goes to Community Issuance contract.
+        The rest is going to Multisig address including:
+        Bounty Entitlement, LP Rewards Entitlement, Multisig Entitlement and potential additional rewards for depositors in community issuance address
+        */
 
-        uint depositorsAndFrontEndsEntitlement = _1_MILLION.mul(32); // Allocate 32 million to the algorithmic issuance schedule
+        // HEDGEHOG UPDATES: Allocate 1 million instead of 32 initially for the stabiltiy pool entitlement
+        uint depositorsAndFrontEndsEntitlement = _1_MILLION; // Allocate 1 million to the algorithmic issuance schedule
         _mint(_communityIssuanceAddress, depositorsAndFrontEndsEntitlement);
 
-        uint _lpRewardsEntitlement = _1_MILLION.mul(4).div(3); // Allocate 1.33 million for LP rewards
-        lpRewardsEntitlement = _lpRewardsEntitlement;
-        _mint(_lpRewardsAddress, _lpRewardsEntitlement);
-
-        // Allocate the remainder to the HOG Multisig: (100 - 2 - 32 - 1.33) million = 64.66 million
-        uint multisigEntitlement = _1_MILLION
-            .mul(100)
-            .sub(bountyEntitlement)
-            .sub(depositorsAndFrontEndsEntitlement)
-            .sub(_lpRewardsEntitlement);
+        // Allocate the remainder to the HOG Multisig: (100 - 1) million = 99 million
+        uint multisigEntitlement = _1_MILLION.mul(99);
 
         _mint(_multisigAddress, multisigEntitlement);
     }
@@ -184,18 +178,15 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         return deploymentStartTime;
     }
 
-    function getLpRewardsEntitlement() external view returns (uint256) {
-        return lpRewardsEntitlement;
-    }
-
     function transfer(
         address recipient,
         uint256 amount
     ) external override returns (bool) {
-        // Restrict the multisig's transfers in first year
-        if (_callerIsMultisig() && _isFirstYear()) {
-            _requireRecipientIsRegisteredLC(recipient);
-        }
+        /**
+         * Hedgehog Updates:
+         * No Longer restricting transfers for a multisig wallet
+         * Neither restricting transfers during the first year
+         */
 
         _requireValidRecipient(recipient);
 
@@ -372,7 +363,6 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
     ) internal {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
-        // TODO: Restrict access to all core contracts, unless msg.sender is another core contract
         _balances[sender] = _balances[sender].sub(
             amount,
             "ERC20: transfer amount exceeds balance"
@@ -409,22 +399,14 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
 
     // --- 'require' functions ---
 
+    /**
+     * Hedgehog Updates:
+     * No Longer revert transfer on transfers to communityIssuance and hogStakingAddresses
+     */
     function _requireValidRecipient(address _recipient) internal view {
         require(
             _recipient != address(0) && _recipient != address(this),
             "HOG: Cannot transfer tokens directly to the HOG token contract or the zero address"
-        );
-        require(
-            _recipient != communityIssuanceAddress &&
-                _recipient != hogStakingAddress,
-            "HOG: Cannot transfer tokens directly to the community issuance or staking contract"
-        );
-    }
-
-    function _requireRecipientIsRegisteredLC(address _recipient) internal view {
-        require(
-            lockupContractFactory.isRegisteredLockup(_recipient),
-            "HOGToken: recipient must be a LockupContract registered in the Factory"
         );
     }
 

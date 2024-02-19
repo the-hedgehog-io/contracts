@@ -26,12 +26,13 @@ contract PriceFeed is Ownable, BaseMath {
     IBaseFeeOracle public mainOracle; // Main Oracle aggregator
     IBaseFeeOracle public backupOracle; // Backup Oracle
 
-    // Use to convert a price answer to an 18-digit precision uint
+    // HEDGEHOG UPDATES: decrease to 1
     uint public constant TARGET_DIGITS = 1;
 
     // Maximum time period allowed since Main Oracle's latest round data blockNumber, beyond which Main Oracle is considered frozen.
     uint public constant TIMEOUT = 69;
 
+    // HEDGEHOG UPDATES: decrease to 176
     // Maximum deviation allowed between two consecutive Main oracle prices. Hedgehog oracles are getting updated in case there is a 5% diviation price
     // Meaning that there might be max 17.5% price diviation between rounds
     uint public constant MAX_PRICE_DEVIATION_PERCENTAGE_FROM_PREVIOUS_ROUND =
@@ -564,9 +565,9 @@ contract PriceFeed is Ownable, BaseMath {
          * Convert the price returned by an oracle to an 18-digit decimal for use by Hedgehog.
          * At date of Hedgehog launch, MaainOracle uses an 8-digit price, but we also handle the possibility of
          * future changes.
-         *
          */
         uint price;
+        // TODO: Double check that
         if (_answerDigits >= TARGET_DIGITS) {
             // Scale the returned price value down to Hedgehog's target precision
             price = _price / (10 ** (_answerDigits - TARGET_DIGITS));

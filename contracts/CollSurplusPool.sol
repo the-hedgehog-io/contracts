@@ -40,9 +40,10 @@ contract CollSurplusPool is Ownable, CheckContract {
     // --- Contract setters ---
 
     /**
-     * HEDGEHOG LOGIC UPDATES:
+     * HEDGEHOG UPDATES:
      * ERC20 is used as a collateral instead of native token.
      * Setting erc20 address in the initialisation
+     * Native Token Fallback function is removed
      */
     function setAddresses(
         address _borrowerOperationsAddress,

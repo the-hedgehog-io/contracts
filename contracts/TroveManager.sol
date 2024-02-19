@@ -57,9 +57,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
      * Half-life of 12h. 12h = 720 min
      * (1/2) = d^720 => d = (1/2)^(1/720)
      */
+    // HEDGEHOG UPDATES: Redemption and Borrowing Decay factors are now different variables
     uint public constant MINUTE_DECAY_REDEMPTION_FACTOR = 999037758833783000;
     uint public constant MINUTE_DECAY_BORROWING_FACTOR = 991152865945140000;
     uint public constant REDEMPTION_FEE_FLOOR = (DECIMAL_PRECISION / 1000) * 5; // 0.5%
+    // HEDGEHOG UPDATES: Can reach 100% now
     uint public constant MAX_BORROWING_FEE = DECIMAL_PRECISION; // 100%
 
     // During bootsrap period redemptions are not allowed
@@ -71,14 +73,14 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
      */
     uint public constant BETA = 2;
 
-    // HEDGEHOG LOGIC UPDATES: BaseRate is different for redemption and minting tokens
+    // HEDGEHOG UPDATES: BaseRate is different for redemption and minting tokens
     // 1) Remove baseRate variable
     // 2) Create redemptionBaseRate public state variable
     // 3) Create borrowBaseRate public state variable
     uint public redemptionBaseRate;
     uint public borrowBaseRate;
 
-    // HEDGEHOG LOGIC UPDATES: lastFeeOperationTime is different for redemption and minting tokens
+    // HEDGEHOG UPDATES: lastFeeOperationTime is different for redemption and minting tokens
     // 1) Remove lastFeeOperationTime variable
     // 2) Create lastRedemptionTime public state variable
     // 3) Create lastBorrowTime public state variable
@@ -211,7 +213,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint totalStETHDrawn;
         uint StETHFee;
         uint StETHToSendToRedeemer;
-        // HEDGEHOG LOGIC UPDATES: BaseRate is different for redemption and minting tokens
+        // HEDGEHOG UPDATES: BaseRate is different for redemption and minting tokens
         // Rename decayedBaseRate into decayedRedemptionBaseRate
         uint decayedRedemptionBaseRate;
         uint price;
@@ -267,14 +269,14 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         TroveManagerOperation _operation
     );
 
-    // HEDGEHOG LOGIC UPDATES: BaseRate is different for redemption and minting tokens
+    // HEDGEHOG UPDATES: BaseRate is different for redemption and minting tokens
     // 1) Remove BaseRateUpdated event
     // 2) Create RedemptionBaseRateUpdated event that accepts _redemptionBaseRate
     // 3) Create BorrowBaseRateUpdated event that accepts _borrowBaseRate
     event RedemptionBaseRateUpdated(uint _redemptionBaseRate);
     event BorrowBaseRateUpdated(uint _borrowBaseRate);
 
-    // HEDGEHOG LOGIC UPDATES: BaseRate is different for redemption and minting tokens
+    // HEDGEHOG UPDATES: BaseRate is different for redemption and minting tokens
     // 1) Remove LastFeeOpTimeUpdated event
     // 2) Create LastRedemptionTimeUpdated event that accepts _lastRedemptionTime
     // 3) Create LastBorrowTimeUpdated event that accepts _lastBorrowTime
@@ -642,6 +644,9 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     ) internal pure returns (LiquidationValues memory singleLiquidation) {
         singleLiquidation.entireTroveDebt = _entireTroveDebt;
         singleLiquidation.entireTroveColl = _entireTroveColl;
+
+        // HEDGEHOG UPDATES:
+        // Changed the cappedCollPortion formula from [entireTroveDebt] * [MCR] / [price]  to => [entireTroveDebt] * [MCR] * [price] / [DECIMAL_PRECISION]/ [DECIMAL_PRECISION]
         uint cappedCollPortion = _entireTroveDebt.mul(MCR).mul(_price).div(
             DECIMAL_PRECISION
         );
@@ -1205,7 +1210,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         );
 
         // Get the StETHLot of equivalent value in USD
-        // HEDGEHOG UPDATES: Change StETHLOT calculations formula from [debtToBeRedeemed * price * 10e9] to [debtToBeRedeemed / price * 1e18]
+        // HEDGEHOG UPDATES: Change StETHLOT calculations formula from [debtToBeRedeemed * price * 10e9] to [debtToBeRedeemed / price]
         singleRedemption.StETHLot = singleRedemption.BaseFeeLMALot.mul(_price);
 
         // Decrease the debt and collateral of the current Trove according to the BaseFeeLMA lot and corresponding StETH to send
@@ -1532,6 +1537,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         return ICR;
     }
 
+    /**
+     * HEDGEHOG UPDATES:
+     * New view method to help with getting the data on frontends
+     */
     function getUnreliableTroveICR(
         address _borrower
     ) public view returns (uint) {
@@ -1927,6 +1936,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         return _getTCR(_price);
     }
 
+    /**
+     * HEDGEHOG UPDATES:
+     * New view method to help with getting the data on frontends
+     */
     function getUnreliableTCR() external view returns (uint) {
         return _getTCR(priceFeed.lastGoodPrice());
     }
@@ -1935,6 +1948,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         return _checkRecoveryMode(_price);
     }
 
+    /**
+     * HEDGEHOG UPDATES:
+     * New view method to help with getting the data on frontends
+     */
     function checkUnreliableRecoveryMode() external view returns (bool) {
         return _checkRecoveryMode(priceFeed.lastGoodPrice());
     }
@@ -1957,7 +1974,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     // --- Redemption fee functions ---
 
     /*
-     * HEDGEHOG LOGIC UPDATES:
+     * HEDGEHOG UPDATES:
      * 1) Rename variable in docs (baseRate => redemptionBaseRate)
      * 2) decayedRemeptionBaseRate (decayedBaseRate) is now calculated by _calcDecayedRedemptionBaseRate();
      * 3) Updating RedemptionBaseRate state variable instead of baseRate
@@ -1975,6 +1992,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint decayedRedemptionBaseRate = _calcDecayedRedemptionBaseRate();
         // Hedgehog updates: Now calculating what part of total collateral is getting withdrawn from the
         // system
+
+        // HEDGEHOG UPDATES: not dividing, but multyplying by decimal precision
         /* Convert the drawn StETH back to BaseFeeLMA at face value rate (1 BaseFeeLMA:1 USD), in order to get
          * the fraction of total supply that was redeemed at face value. */
         uint redeemedBaseFeeLMAFraction = _StETHDrawn
@@ -1990,6 +2009,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         //assert(newBaseRate <= DECIMAL_PRECISION); // This is already enforced in the line above
         assert(newBaseRate > 0); // Base rate is always non-zero after redemption
 
+        // HEDGEHOG UPDATES: succesful redemption now updates only the redemption base rate. Redemption base rate update also received a new event.
         // Update the baseRate state variable
         redemptionBaseRate = newBaseRate;
         emit RedemptionBaseRateUpdated(newBaseRate);
@@ -1999,8 +2019,9 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     }
 
     /*
-     * HEDGEHOG LOGIC UPDATES:
+     * HEDGEHOG UPDATES:
      * 1) Now passing redemptionBaseRate instead of combined baseRate
+     * 2) Now accepts a new param: redemptionColl as we can't get that amount from value anymore since of ERC20 transition
      */
     function getRedemptionRate(
         uint _redemptionColl
@@ -2008,6 +2029,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         return _calcRedemptionRate(redemptionBaseRate, _redemptionColl);
     }
 
+    /*
+     * HEDGEHOG UPDATES:
+     * Now accepts a new param: redemptionColl as we can't get that amount from value anymore since of ERC20 transition
+     */
     function getRedemptionRateWithDecay(
         uint _redemptionColl
     ) public view returns (uint) {
@@ -2061,13 +2086,15 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             DECIMAL_PRECISION
         );
 
+        // Hedgehog Updates: check if fee is too big is now performed at the BO contract
+
         return redemptionFee;
     }
 
     // --- Borrowing fee functions ---
 
     /*
-     * HEDGEHOG LOGIC UPDATES:
+     * HEDGEHOG UPDATES:
      * 1) Now passing borrowBaseRate instead of combined baseRate
      */
     function getBorrowingRate(
@@ -2077,7 +2104,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     }
 
     /*
-     * HEDGEHOG LOGIC UPDATES:
+     * HEDGEHOG UPDATES:
      * 1) Now passing _calcDecayedBorrowBaseRate instead of _calcDecayedBaseRate function to calculate the decayed borrowBaseRate
      */
     function getBorrowingRateWithDecay(
@@ -2094,7 +2121,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
      * HEDGEHOG UPDATES:
      * Now full dynamic fees formula is as follows: RedRate = RedFloor + RedBaseRate*MinuteDecayFactorMinutes + RedemptionETH / Total Collateral in the system
      * 1) Rename param name (_baseRate => _borrowBaseRate)
-     * 2) Now adding issued asset divided by total supply of the asset to the sum of borrow flor and borrow decayed baseRate
+     * 2) If BFE total supply is 0, returning fee floor
+     * 3) Now adding issued bfe amount divided by total supply of the asset to the sum of borrow floor and decayed borrowedBaseRate
      */
     function _calcBorrowingRate(
         uint _borrowBaseRate,
@@ -2115,6 +2143,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             );
     }
 
+    // HEDGEHOG UPDATES: Now retuns also a calculated base rate along with a borrowing fee
     function getBorrowingFee(
         uint _BaseFeeLMADebt
     ) external view returns (uint, uint) {
@@ -2139,6 +2168,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         return _borrowingRate.mul(_BaseFeeLMADebt).div(DECIMAL_PRECISION);
     }
 
+    // HEDGEHOG UPDATES: New function to updtae borrowBaseRate during borrowing op on BorrowersOperations contract
     function updateBaseRateFromBorrowing(uint _newBaseRate) external {
         require(
             msg.sender == borrowerOperationsAddress,
@@ -2154,7 +2184,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     }
 
     /*
-     * HEDGEHOG LOGIC UPDATES:
+     * HEDGEHOG UPDATES:
      * 1) Now updates borrowBaseRate instead of baseRate used by both redemption and minting functions
      * 2) Emit BorrowBaseRateUpdated instead of BaseRateUpdated
      * 3) Now updates time only of borrow operation instead of both redemption and borrow
@@ -2165,7 +2195,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         _requireCallerIsBorrowerOperations();
         uint decayedBaseRate = _calcDecayedBorrowBaseRate();
         assert(decayedBaseRate <= DECIMAL_PRECISION); // The baseRate can decay to 0
-        // HEDGEHOG LOGIC CHANGES: Updating borrowing base rate instead
+        // HEDGEHOG LOGIC CHANGES: Updating a unique borrowing base rate instead of just "baseRate"
         borrowBaseRate = decayedBaseRate;
 
         emit BorrowBaseRateUpdated(decayedBaseRate);
@@ -2176,7 +2206,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     // --- Internal fee functions ---
 
     /*
-     * HEDGEHOG LOGIC UPDATES:
+     * HEDGEHOG UPDATES:
      * removed _updateLastFeeOpTime
      * New function _updateLastRedemptionTime simmilar to _updateLastFeeOpTime, that sets lastRedemptionTime and emits respective event.
      */
@@ -2191,7 +2221,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     }
 
     /*
-     * HEDGEHOG LOGIC UPDATES:
+     * HEDGEHOG UPDATES:
      * removed _updateLastFeeOpTime
      * New function _updateLastBorrowTime simmilar to _updateLastFeeOpTime, that sets lastBorrowTime and emits respective event.
      */
@@ -2206,7 +2236,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     }
 
     /*
-     * HEDGEHOG LOGIC UPDATES:
+     * HEDGEHOG UPDATES:
      * New function simmilar to _calcDecayedBaseRate. However used particularly for redemptionBaseRate calculation
      */
     function _calcDecayedRedemptionBaseRate() internal view returns (uint) {
@@ -2220,7 +2250,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     }
 
     /*
-     * HEDGEHOG LOGIC UPDATES:
+     * HEDGEHOG UPDATES:
      * New function simmilar to _calcDecayedBaseRate. However used particularly for borrowBaseRate calculation
      */
     function _calcDecayedBorrowBaseRate() internal view returns (uint) {
@@ -2234,7 +2264,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     }
 
     /*
-     * HEDGEHOG LOGIC UPDATES:
+     * HEDGEHOG UPDATES:
      * removed _minutesPassedSinceLastFeeOp
      * New function _minutesPassedSinceLastRedemption simmilar to _minutesPassedSinceLastFeeOp, that returns amount of minutes since last registered redemption
      */
@@ -2246,7 +2276,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     }
 
     /*
-     * HEDGEHOG LOGIC UPDATES:
+     * HEDGEHOG UPDATES:
      * removed _minutesPassedSinceLastFeeOp
      * New function _minutesPassedSinceLastBorrow simmilar to _minutesPassedSinceLastFeeOp, that returns amount of minutes since last registered borrow
      */
@@ -2384,6 +2414,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         return newDebt;
     }
 
+    /*
+     * HEDGEHOG UPDATES:
+     * removed _minutesPassedSinceLastFeeOp
+     * New function _minutesPassedSinceLastRedemption simmilar to _minutesPassedSinceLastFeeOp, that returns amount of minutes since last registered redemption
+     */
     function getNormalLiquidationPrice(
         uint256 _coll,
         uint256 _debt
@@ -2397,6 +2432,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         return price;
     }
 
+    /*
+     * HEDGEHOG UPDATES:
+     * removed _minutesPassedSinceLastFeeOp
+     * New function _minutesPassedSinceLastRedemption simmilar to _minutesPassedSinceLastFeeOp, that returns amount of minutes since last registered redemption
+     */
     function getRecoveryLiquidationPrice(
         uint256 _coll,
         uint256 _debt

@@ -22,6 +22,9 @@ import "./LockupContract.sol";
  * LockupContract.
  */
 
+/**
+    @notice Not used in Hedgehog Protocol
+*/
 contract LockupContractFactory is Ownable, CheckContract {
     using SafeMath for uint;
 

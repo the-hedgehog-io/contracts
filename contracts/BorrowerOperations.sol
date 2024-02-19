@@ -126,7 +126,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     // --- Dependency setters ---
 
     /**
-     * HEDGEHOG LOGIC UPDATES:
+     * HEDGEHOG UPDATES:
      * ERC20 is used as a collateral instead of native token.
      * Setting erc20 address in the initialisation
      */
@@ -228,11 +228,11 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             _BaseFeeLMAAmount,
             _maxFeePercentage
         );
-        // Hedgehog changes: Do no subtract the fee from the debt
+        // HEDGEHOG UPDATES: Do no subtract the fee from the debt
         // vars.netDebt = vars.netDebt.sub(vars.BaseFeeLMAFee);
 
         _requireAtLeastMinNetDebt(vars.netDebt);
-        // Hedgehog changes: composite debt now is just BaseFeeLMA amount. Without borrowing fee and without gas comp
+        // HEDGEHOG UPDATES: composite debt now is just BaseFeeLMA amount. Without borrowing fee and without gas comp
         vars.compositeDebt = vars.netDebt;
         assert(vars.compositeDebt > 0);
 
@@ -281,11 +281,12 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         // Move the stETH to the Active Pool, and mint the BaseFeeLMAAmount to the borrower
         _activePoolAddColl(contractsCache.activePool, _collAmount);
+        // HEDGEHOG UPDATES: Revert if bfe loan is less then fee + gas comp
         if (
             _BaseFeeLMAAmount <=
             vars.BaseFeeLMAFee + BaseFeeLMA_GAS_COMPENSATION
         ) {
-            revert("Fee exceeds gain");
+            revert("BO: Fee exceeds gain");
         }
         // Hedgehog Updates: Now amount transferred to the user is decrease by Fee and Gas Compensation reserve
         _withdrawBaseFeeLMA(
@@ -658,7 +659,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         emit TroveUpdated(msg.sender, 0, 0, 0, BorrowerOperation.closeTrove);
 
-        // Hedgehog Updates: No longer deduction
+        // Hedgehog Updates: No longer deducts gas comp from the repayment as it's not included into the debt during the initial mint
         // Burn the repaid BaseFeeLMA from the user's balance and the gas compensation from the Gas Pool
         _repayBaseFeeLMA(
             activePoolCached,
@@ -790,7 +791,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     /**
      * HEDGEHOG UPDATES: use SafeERC20 safe transfer instead of native token transfer
-     * Send funds from User's accound instead of relaying native token through address(this)
+     * Send funds from User's account instead of relaying native token through address(this)
+     * Manualy increase balance in Active Pool, since it used to be done in the native token fallback
      */
     // Send StETH to Active Pool and increase its recorded StETH balance
     function _activePoolAddColl(
@@ -1116,6 +1118,10 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         return _getCompositeDebt(_debt);
     }
 
+    /**
+     * HEDGEHOG UPDATES:
+     * New view method to help with getting the data on frontends
+     */
     function computeUnreliableCR(
         uint _coll,
         uint _debt
