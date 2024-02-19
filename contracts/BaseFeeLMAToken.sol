@@ -8,6 +8,10 @@ import "./dependencies/IERC2612.sol";
 import "./dependencies/CheckContract.sol";
 
 /*
+ * Hedgehog Updates:
+ *  - Decrease Decimals from 18 to 6 for better visibility
+ *  - Remove transfer protection described later in the contract
+ *
  *
  * Based upon OpenZeppelin's ERC20 contract:
  * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol
