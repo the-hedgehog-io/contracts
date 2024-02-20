@@ -6,12 +6,10 @@ import "./interfaces/ITroveManager.sol";
 import "./interfaces/IBaseFeeLMAToken.sol";
 import "./interfaces/ICollSurplusPool.sol";
 import "./interfaces/ISortedTroves.sol";
-import "./interfaces/IHOGStaking.sol";
 import "./interfaces/IFeesRouter.sol";
 import "./dependencies/HedgehogBase.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
-import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -23,6 +21,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * - Collateral is now an ERC20 token instead of a native one
  * - Updated variable names and docs to refer to BaseFeeLMA token and stEth as a collateral
  * - Logic updates with borrowing fees calculation and their distribution
+ * - Removed Native Liquity Protocol Token Staking
  * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  */
 
@@ -44,8 +43,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     ICollSurplusPool collSurplusPool;
 
-    IHOGStaking public hogStaking;
-    address public hogStakingAddress;
     IFeesRouter public feesRouter;
 
     IBaseFeeLMAToken baseFeeLMAToken;
@@ -106,7 +103,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     event PriceFeedAddressChanged(address _newPriceFeedAddress);
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
     event BaseFeeLMATokenAddressChanged(address _BaseFeeLMATokenAddress);
-    event HOGStakingAddressChanged(address _hogStakingAddress);
     event StETHTokenAddressUpdated(IERC20 _StEthAddress);
     event FeesRouterAddressUpdated(IFeesRouter _feesRouter);
 
@@ -122,6 +118,11 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address indexed _borrower,
         uint _BaseFeeLMAFee
     );
+
+    constructor(
+        uint _gasComp,
+        uint _minNetDebt
+    ) HedgehogBase(_gasComp, _minNetDebt) {}
 
     // --- Dependency setters ---
 
@@ -140,7 +141,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _priceFeedAddress,
         address _sortedTrovesAddress,
         address _baseFeeLMATokenAddress,
-        address _hogStakingAddress,
         IERC20 _stETHTokenAddress,
         IFeesRouter _feesRouter
     ) external onlyOwner {
@@ -156,7 +156,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         checkContract(_priceFeedAddress);
         checkContract(_sortedTrovesAddress);
         checkContract(_baseFeeLMATokenAddress);
-        checkContract(_hogStakingAddress);
         checkContract(address(_stETHTokenAddress));
         checkContract(address(_feesRouter));
 
@@ -169,8 +168,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         priceFeed = IPriceFeed(_priceFeedAddress);
         sortedTroves = ISortedTroves(_sortedTrovesAddress);
         baseFeeLMAToken = IBaseFeeLMAToken(_baseFeeLMATokenAddress);
-        hogStakingAddress = _hogStakingAddress;
-        hogStaking = IHOGStaking(_hogStakingAddress);
         StETHToken = _stETHTokenAddress;
         feesRouter = _feesRouter;
 
@@ -183,7 +180,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         emit PriceFeedAddressChanged(_priceFeedAddress);
         emit SortedTrovesAddressChanged(_sortedTrovesAddress);
         emit BaseFeeLMATokenAddressChanged(_baseFeeLMATokenAddress);
-        emit HOGStakingAddressChanged(_hogStakingAddress);
         emit StETHTokenAddressUpdated(_stETHTokenAddress);
         emit FeesRouterAddressUpdated(_feesRouter);
 
@@ -971,7 +967,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
     }
 
-    function _requireAtLeastMinNetDebt(uint _netDebt) internal pure {
+    function _requireAtLeastMinNetDebt(uint _netDebt) internal view {
         require(
             _netDebt >= MIN_NET_DEBT,
             "BorrowerOps: Trove's net debt must be greater than minimum"

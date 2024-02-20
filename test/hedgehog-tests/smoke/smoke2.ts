@@ -146,7 +146,6 @@ describe("BaseFeeOracle Tests", () => {
         hintHelpers,
         baseFeeLMAToken,
         communityIssuance,
-        hogStaking,
         lockupContractFactory,
         hogToken,
         payToken,

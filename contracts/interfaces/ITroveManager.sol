@@ -6,7 +6,6 @@ import "./IHedgehogBase.sol";
 import "./IStabilityPool.sol";
 import "./IBaseFeeLMAToken.sol";
 import "./IHOGToken.sol";
-import "./IHOGStaking.sol";
 
 // Common interface for the Trove Manager.
 interface ITroveManager is IHedgehogBase {
@@ -24,7 +23,6 @@ interface ITroveManager is IHedgehogBase {
     event CollSurplusPoolAddressChanged(address _collSurplusPoolAddress);
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
     event HOGTokenAddressChanged(address _hogTokenAddress);
-    event HOGStakingAddressChanged(address _hogStakingAddress);
 
     event Liquidation(
         uint _liquidatedDebt,
@@ -74,8 +72,7 @@ interface ITroveManager is IHedgehogBase {
         address _priceFeedAddress,
         address _baseFeeLMATokenAddress,
         address _sortedTrovesAddress,
-        address _hogTokenAddress,
-        address _hogStakingAddress
+        address _hogTokenAddress
     ) external;
 
     function stabilityPool() external view returns (IStabilityPool);
@@ -83,8 +80,6 @@ interface ITroveManager is IHedgehogBase {
     function baseFeeLMAToken() external view returns (IBaseFeeLMAToken);
 
     function hogToken() external view returns (IHOGToken);
-
-    function hogStaking() external view returns (IHOGStaking);
 
     function getTroveOwnersCount() external view returns (uint);
 

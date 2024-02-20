@@ -20,6 +20,11 @@ contract HintHelpers is HedgehogBase, Ownable, CheckContract {
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
     event TroveManagerAddressChanged(address _troveManagerAddress);
 
+    constructor(
+        uint _gasComp,
+        uint _minNetDebt
+    ) HedgehogBase(_gasComp, _minNetDebt) {}
+
     // --- Dependency setters ---
 
     function setAddresses(

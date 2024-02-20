@@ -8,7 +8,6 @@ import "./interfaces/ICollSurplusPool.sol";
 import "./interfaces/IBaseFeeLMAToken.sol";
 import "./interfaces/ISortedTroves.sol";
 import "./interfaces/IHOGToken.sol";
-import "./interfaces/IHOGStaking.sol";
 import "./interfaces/IFeesRouter.sol";
 import "./dependencies/HedgehogBase.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -42,8 +41,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     IBaseFeeLMAToken public baseFeeLMAToken;
 
     IHOGToken public hogToken;
-
-    IHOGStaking public hogStaking;
 
     IFeesRouter public feesRouter;
 
@@ -200,7 +197,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         IActivePool activePool;
         IDefaultPool defaultPool;
         IBaseFeeLMAToken baseFeeLMAToken;
-        IHOGStaking hogStaking;
         ISortedTroves sortedTroves;
         ICollSurplusPool collSurplusPool;
         address gasPoolAddress;
@@ -240,7 +236,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     event CollSurplusPoolAddressChanged(address _collSurplusPoolAddress);
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
     event HOGTokenAddressChanged(address _hogTokenAddress);
-    event HOGStakingAddressChanged(address _hogStakingAddress);
     event FeesRouterAddressUpdated(IFeesRouter _feesRouter);
 
     event Liquidation(
@@ -298,6 +293,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         redeemCollateral
     }
 
+    constructor(
+        uint _gasComp,
+        uint _minNetDebt
+    ) HedgehogBase(_gasComp, _minNetDebt) {}
+
     // --- Dependency setter ---
 
     function setAddresses(
@@ -311,7 +311,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         address _baseFeeLMATokenAddress,
         address _sortedTrovesAddress,
         address _hogTokenAddress,
-        address _hogStakingAddress,
         IFeesRouter _feesRouterAddress
     ) external onlyOwner {
         checkContract(_borrowerOperationsAddress);
@@ -324,7 +323,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         checkContract(_baseFeeLMATokenAddress);
         checkContract(_sortedTrovesAddress);
         checkContract(_hogTokenAddress);
-        checkContract(_hogStakingAddress);
         checkContract(address(_feesRouterAddress));
 
         borrowerOperationsAddress = _borrowerOperationsAddress;
@@ -337,7 +335,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         baseFeeLMAToken = IBaseFeeLMAToken(_baseFeeLMATokenAddress);
         sortedTroves = ISortedTroves(_sortedTrovesAddress);
         hogToken = IHOGToken(_hogTokenAddress);
-        hogStaking = IHOGStaking(_hogStakingAddress);
         feesRouter = IFeesRouter(_feesRouterAddress);
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
@@ -350,7 +347,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         emit BaseFeeLMATokenAddressChanged(_baseFeeLMATokenAddress);
         emit SortedTrovesAddressChanged(_sortedTrovesAddress);
         emit HOGTokenAddressChanged(_hogTokenAddress);
-        emit HOGStakingAddressChanged(_hogStakingAddress);
         emit FeesRouterAddressUpdated(_feesRouterAddress);
 
         renounceOwnership();
@@ -641,7 +637,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint _entireTroveDebt,
         uint _entireTroveColl,
         uint _price
-    ) internal pure returns (LiquidationValues memory singleLiquidation) {
+    ) internal view returns (LiquidationValues memory singleLiquidation) {
         singleLiquidation.entireTroveDebt = _entireTroveDebt;
         singleLiquidation.entireTroveColl = _entireTroveColl;
 
@@ -675,7 +671,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             activePool,
             defaultPool,
             IBaseFeeLMAToken(address(0)),
-            IHOGStaking(address(0)),
             sortedTroves,
             ICollSurplusPool(address(0)),
             address(0)
@@ -1354,7 +1349,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             activePool,
             defaultPool,
             baseFeeLMAToken,
-            hogStaking,
             sortedTroves,
             collSurplusPool,
             gasPoolAddress

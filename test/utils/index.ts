@@ -1,12 +1,11 @@
+import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { ethers } from "hardhat";
-import { time, mine } from "@nomicfoundation/hardhat-toolbox/network-helpers";
-import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import { BorrowerOperations, TroveManager } from "../../typechain-types";
 
 const { latestBlock } = time;
 
 export const setupContracts = async () => {
-  const [deployer, , hacker, alice, bob, carol] = await ethers.getSigners();
+  const [deployer, , hacker, alice, bob, carol, feeCollector] =
+    await ethers.getSigners();
 
   const payToken = await (
     await (
@@ -52,7 +51,9 @@ export const setupContracts = async () => {
   ).waitForDeployment();
 
   const troveManager = await (
-    await (await ethers.getContractFactory("TroveManager")).deploy()
+    await (
+      await ethers.getContractFactory("TroveManager")
+    ).deploy("50000", "50000")
   ).waitForDeployment();
 
   const activePool = await (
@@ -60,7 +61,9 @@ export const setupContracts = async () => {
   ).waitForDeployment();
 
   const stabilityPool = await (
-    await (await ethers.getContractFactory("StabilityPool")).deploy()
+    await (
+      await ethers.getContractFactory("StabilityPool")
+    ).deploy("50000", "50000")
   ).waitForDeployment();
 
   const defaultPool = await (
@@ -76,11 +79,15 @@ export const setupContracts = async () => {
   ).waitForDeployment();
 
   const borrowerOperations = await (
-    await (await ethers.getContractFactory("BorrowerOperations")).deploy()
+    await (
+      await ethers.getContractFactory("BorrowerOperations")
+    ).deploy("50000", "50000")
   ).waitForDeployment();
 
   const hintHelpers = await (
-    await (await ethers.getContractFactory("HintHelpers")).deploy()
+    await (
+      await ethers.getContractFactory("HintHelpers")
+    ).deploy("50000", "50000")
   ).waitForDeployment();
 
   const feesRouter = await (
@@ -104,10 +111,6 @@ export const setupContracts = async () => {
     await (await ethers.getContractFactory("CommunityIssuance")).deploy()
   ).waitForDeployment();
 
-  const hogStaking = await (
-    await (await ethers.getContractFactory("HOGStaking")).deploy()
-  ).waitForDeployment();
-
   const lockupContractFactory = await (
     await (await ethers.getContractFactory("LockupContractFactory")).deploy()
   ).waitForDeployment();
@@ -115,14 +118,7 @@ export const setupContracts = async () => {
   const hogToken = await (
     await (
       await ethers.getContractFactory("HOGToken")
-    ).deploy(
-      await communityIssuance.getAddress(),
-      await hogStaking.getAddress(),
-      await lockupContractFactory.getAddress(),
-      deployer.address,
-      deployer.address, // TODO: Probably have to edit these addresses
-      deployer.address
-    )
+    ).deploy(await communityIssuance.getAddress(), deployer.address)
   ).waitForDeployment();
 
   for (let i = 0; i < 100; i = i + 5) {
@@ -131,7 +127,7 @@ export const setupContracts = async () => {
       100,
       0,
       0,
-      await hogStaking.getAddress(),
+      feeCollector.address,
       ethers.ZeroAddress,
       ethers.ZeroAddress
     );
@@ -161,7 +157,6 @@ export const setupContracts = async () => {
     await baseFeeLMAToken.getAddress(),
     await sortedTroves.getAddress(),
     await hogToken.getAddress(),
-    await hogStaking.getAddress(),
     await feesRouter.getAddress()
   );
 
@@ -175,7 +170,6 @@ export const setupContracts = async () => {
     await priceFeed.getAddress(),
     await sortedTroves.getAddress(),
     await baseFeeLMAToken.getAddress(),
-    await hogStaking.getAddress(),
     await payToken.getAddress(),
     await feesRouter.getAddress()
   );
@@ -213,16 +207,6 @@ export const setupContracts = async () => {
     await payToken.getAddress()
   );
 
-  await hogStaking.setAddresses(
-    await hogToken.getAddress(),
-    await baseFeeLMAToken.getAddress(),
-    await troveManager.getAddress(),
-    await borrowerOperations.getAddress(),
-    await activePool.getAddress(),
-    await payToken.getAddress(),
-    await feesRouter.getAddress()
-  );
-
   await hintHelpers.setAddresses(
     await sortedTroves.getAddress(),
     await troveManager.getAddress()
@@ -236,8 +220,7 @@ export const setupContracts = async () => {
   );
   await feesRouter.setAddresses(
     await activePool.getAddress(),
-    await baseFeeLMAToken.getAddress(),
-    await hogStaking.getAddress()
+    await baseFeeLMAToken.getAddress()
   );
 
   return [
@@ -253,7 +236,6 @@ export const setupContracts = async () => {
     hintHelpers,
     baseFeeLMAToken,
     communityIssuance,
-    hogStaking,
     lockupContractFactory,
     hogToken,
     payToken,

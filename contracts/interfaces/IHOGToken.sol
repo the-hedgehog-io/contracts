@@ -9,14 +9,11 @@ interface IHOGToken is IERC20, IERC2612 {
     // --- Events ---
 
     event CommunityIssuanceAddressSet(address _communityIssuanceAddress);
-    event HOGStakingAddressSet(address _hogStakingAddress);
     event LockupContractFactoryAddressSet(
         address _lockupContractFactoryAddress
     );
 
     // --- Functions ---
-
-    function sendToHOGStaking(address _sender, uint256 _amount) external;
 
     function getDeploymentStartTime() external view returns (uint256);
 

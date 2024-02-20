@@ -10,51 +10,41 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../dependencies/IERC2612.sol";
 
 /**
-* Based On Liquity Protocol Token 
-* @notice Token's functionality based on HOG token. 
-* Functions logic remains unchanged.
+ * Based On Liquity Protocol Token
+ * @notice Token's functionality based on HOG token.
+ * Functions logic remains unchanged.
  * Changes to the contract:
  * - Raised pragma version
  * - Removed an import of Token Interface
+ * - Remove native Liquidity Staking contract functionality
  * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
-*
-* Based upon OpenZeppelin's ERC20 contract:
-* https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol
-*  
-* and their EIP2612 (ERC20Permit / ERC712) functionality:
-* https://github.com/OpenZeppelin/openzeppelin-contracts/blob/53516bc555a454862470e7860a9b5254db4d00f5/contracts/token/ERC20/ERC20Permit.sol
-* 
-*
-*  --- Functionality added specific to the HOG ---
-* 
-* 1) Transfer protection: blacklist of addresses that are invalid recipients (i.e. core Liquity contracts) in external 
-* transfer() and transferFrom() calls. The purpose is to protect users from losing tokens by mistakenly sending HOG directly to a Liquity
-* core contract, when they should rather call the right function.
-*
-* 2) sendToHOGStaking(): callable only by Hedgehog core contracts, which move HOG tokens from user -> HOGStaking contract.
-*
-* 3) Supply hard-capped at 100 million
-*
-* 4) CommunityIssuance and LockupContractFactory addresses are set at deployment
-*
-* 5) The bug bounties / hackathons allocation of 2 million tokens is minted at deployment to an EOA
-
-* 6) 32 million tokens are minted at deployment to the CommunityIssuance contract
-*
-* 7) The LP rewards allocation of (1 + 1/3) million tokens is minted at deployent to a Staking contract
-*
-* 8) (64 + 2/3) million tokens are minted at deployment to the Hedgehog multisig
-*
-* 9) Until one year from deployment:
-* -Hedgehog multisig may only transfer() tokens to LockupContracts that have been deployed via & registered in the 
-*  LockupContractFactory 
-* -approve(), increaseAllowance(), decreaseAllowance() revert when called by the multisig
-* -transferFrom() reverts when the multisig is the sender
-* -sendToHOGStaking() reverts when the multisig is the sender, blocking the multisig from staking its HOG.
-* 
-* After one year has passed since deployment of the HOGToken, the restrictions on multisig operations are lifted
-* and the multisig has the same rights as any other address.
-*/
+ *
+ * Based upon OpenZeppelin's ERC20 contract:
+ * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol
+ *
+ * and their EIP2612 (ERC20Permit / ERC712) functionality:
+ * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/53516bc555a454862470e7860a9b5254db4d00f5/contracts/token/ERC20/ERC20Permit.sol
+ *
+ *
+ *  --- Functionality added specific to the HOG ---
+ *
+ * 1) Transfer protection: blacklist of addresses that are invalid recipients (i.e. core Liquity contracts) in external
+ * transfer() and transferFrom() calls. The purpose is to protect users from losing tokens by mistakenly sending HOG directly to a Liquity
+ * core contract, when they should rather call the right function.
+ *
+ * 2) [ DEPRECATED ] sendToHOGStaking(): callable only by Hedgehog core contracts, which move HOG tokens from user -> HOGStaking contract. [ DEPRECATED ]
+ *
+ * 3) Supply hard-capped at 100 million
+ *
+ * 4) CommunityIssuance and LockupContractFactory addresses are set at deployment
+ *
+ * 5) Initial CommunityIssuance HOG token alloc is set at 1 million tokens
+ *
+ * 8) 99 million tokens are minted at deployment to the Hedgehog multisig
+ *
+ * After one year has passed since deployment of the HOGToken, the restrictions on multisig operations are lifted
+ * and the multisig has the same rights as any other address.
+ */
 
 contract HOGToken is CheckContract, IERC20, IERC2612 {
     using SafeMath for uint256;
@@ -100,35 +90,23 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
     address public immutable multisigAddress;
 
     address public immutable communityIssuanceAddress;
-    address public immutable hogStakingAddress;
 
     // --- Events ---
 
     event CommunityIssuanceAddressSet(address _communityIssuanceAddress);
-    event HOGStakingAddressSet(address _hogStakingAddress);
     event LockupContractFactoryAddressSet(
         address _lockupContractFactoryAddress
     );
 
     // --- Functions ---
 
-    constructor(
-        address _communityIssuanceAddress,
-        address _hogStakingAddress,
-        address _lockupFactoryAddress,
-        address _bountyAddress,
-        address _lpRewardsAddress,
-        address _multisigAddress
-    ) {
+    constructor(address _communityIssuanceAddress, address _multisigAddress) {
         checkContract(_communityIssuanceAddress);
-        checkContract(_hogStakingAddress);
-        checkContract(_lockupFactoryAddress);
         // TODO: Pass addresses of all core contract to be able to restrict transfers to them
         multisigAddress = _multisigAddress;
         deploymentStartTime = block.timestamp;
 
         communityIssuanceAddress = _communityIssuanceAddress;
-        hogStakingAddress = _hogStakingAddress;
 
         bytes32 hashedName = keccak256(bytes(_NAME));
         bytes32 hashedVersion = keccak256(bytes(_VERSION));
@@ -272,14 +250,6 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         return true;
     }
 
-    function sendToHOGStaking(address _sender, uint256 _amount) external {
-        _requireCallerIsHOGStaking();
-        if (_isFirstYear()) {
-            _requireSenderIsNotMultisig(_sender);
-        } // Prevent the multisig from staking HOG
-        _transfer(_sender, hogStakingAddress, _amount);
-    }
-
     // --- EIP 2612 functionality ---
 
     function domainSeparator() public view override returns (bytes32) {
@@ -401,7 +371,7 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
 
     /**
      * Hedgehog Updates:
-     * No Longer revert transfer on transfers to communityIssuance and hogStakingAddresses
+     * No Longer revert transfer on transfers to communityIssuance
      */
     function _requireValidRecipient(address _recipient) internal view {
         require(
@@ -421,13 +391,6 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         require(
             !_callerIsMultisig(),
             "HOGToken: caller must not be the multisig"
-        );
-    }
-
-    function _requireCallerIsHOGStaking() internal view {
-        require(
-            msg.sender == hogStakingAddress,
-            "HOGToken: caller must be the HOGStaking contract"
         );
     }
 

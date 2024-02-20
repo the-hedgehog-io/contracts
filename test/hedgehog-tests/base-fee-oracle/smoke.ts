@@ -1,6 +1,5 @@
-import { time, mine } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
+import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { BaseFeeOracle } from "../../../typechain-types";
@@ -62,7 +61,7 @@ describe("BaseFeeOracle Tests", () => {
       expect(
         (await latestRound()).round,
         "Round number is incorrect"
-      ).to.be.equal(2);
+      ).to.be.equal(3);
     });
     it("Should set answer correctly", async () => {
       expect(

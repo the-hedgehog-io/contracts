@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IBaseFeeLMAToken.sol";
 import "./interfaces/IActivePool.sol";
-import "./interfaces/IHOGStaking.sol";
 
 error InvalidIndex();
 error InvalidAddress();
@@ -39,7 +38,6 @@ contract FeesRouter is AccessControl {
     uint256 public feeCount;
     IBaseFeeLMAToken baseFeeLMAToken;
     IActivePool activePool;
-    IHOGStaking hogStaking;
 
     event DebtFeeConfigUpdated(
         address indexed setter,
@@ -75,16 +73,13 @@ contract FeesRouter is AccessControl {
 
     function setAddresses(
         IActivePool _activePool,
-        IBaseFeeLMAToken _baseFeeLMAToken,
-        IHOGStaking _hogStaking
+        IBaseFeeLMAToken _baseFeeLMAToken
     ) external onlyRole(DEPLOYER) {
         if (address(_activePool) == address(0)) revert InvalidAddress();
         if (address(_baseFeeLMAToken) == address(0)) revert InvalidAddress();
-        if (address(_hogStaking) == address(0)) revert InvalidAddress();
 
         activePool = _activePool;
         baseFeeLMAToken = _baseFeeLMAToken;
-        hogStaking = _hogStaking;
 
         _revokeRole(DEPLOYER, msg.sender);
     }
@@ -264,33 +259,14 @@ contract FeesRouter is AccessControl {
         }
 
         IBaseFeeLMAToken _baseFeeLMAToken = baseFeeLMAToken;
-        IHOGStaking _hogStaking = hogStaking;
         if (amountA > 0 && config.addressA != address(0)) {
             _baseFeeLMAToken.mint(config.addressA, amountA);
-
-            _possiblyIncreaseHogStakingDebtBalance(
-                config.addressA,
-                amountA,
-                _hogStaking
-            );
         }
         if (amountB > 0 && config.addressB != address(0)) {
             _baseFeeLMAToken.mint(config.addressB, amountB);
-
-            _possiblyIncreaseHogStakingDebtBalance(
-                config.addressB,
-                amountB,
-                _hogStaking
-            );
         }
         if (amountC > 0 && config.addressC != address(0)) {
             _baseFeeLMAToken.mint(config.addressB, amountC);
-
-            _possiblyIncreaseHogStakingDebtBalance(
-                config.addressC,
-                amountC,
-                _hogStaking
-            );
         }
     }
 
@@ -314,34 +290,15 @@ contract FeesRouter is AccessControl {
         }
 
         IActivePool _activePool = activePool;
-        IHOGStaking _hogStaking = hogStaking;
 
         if (amountA > 0 && config.addressA != address(0)) {
             _activePool.sendStETH(config.addressA, amountA);
-
-            _possiblyIncreaseHogStakingCollBalance(
-                config.addressA,
-                amountA,
-                _hogStaking
-            );
         }
         if (amountB > 0 && config.addressB != address(0)) {
             _activePool.sendStETH(config.addressB, amountB);
-
-            _possiblyIncreaseHogStakingCollBalance(
-                config.addressA,
-                amountA,
-                _hogStaking
-            );
         }
         if (amountC > 0 && config.addressC != address(0)) {
             _activePool.sendStETH(config.addressC, amountC);
-
-            _possiblyIncreaseHogStakingCollBalance(
-                config.addressA,
-                amountA,
-                _hogStaking
-            );
         }
     }
 
@@ -350,25 +307,5 @@ contract FeesRouter is AccessControl {
         uint256 _percentage
     ) internal pure returns (uint256) {
         return ((_fee * _percentage) / 100);
-    }
-
-    function _possiblyIncreaseHogStakingCollBalance(
-        address _receiver,
-        uint256 _amount,
-        IHOGStaking _hogStaking
-    ) internal {
-        if (_receiver == address(_hogStaking)) {
-            _hogStaking.increaseF_StETH(_amount);
-        }
-    }
-
-    function _possiblyIncreaseHogStakingDebtBalance(
-        address _receiver,
-        uint256 _amount,
-        IHOGStaking _hogStaking
-    ) internal {
-        if (_receiver == address(_hogStaking)) {
-            hogStaking.increaseF_BaseFeeLMA(_amount);
-        }
     }
 }

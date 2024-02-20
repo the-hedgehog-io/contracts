@@ -159,7 +159,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         hintHelpers,
         baseFeeLMAToken,
         communityIssuance,
-        hogStaking,
         lockupContractFactory,
         hogToken,
         payToken,

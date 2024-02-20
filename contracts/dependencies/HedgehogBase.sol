@@ -32,11 +32,11 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
 
     // HEDGEHOG: Decreased to 0.1 BFE
     // Amount of BaseFeeLMA to be locked in gas pool on opening troves
-    uint public constant BaseFeeLMA_GAS_COMPENSATION = 1e5;
+    uint public immutable BaseFeeLMA_GAS_COMPENSATION;
 
     // HEDGEHOG UPDATES: Decreased min net debt to 0.1 BFE
     // Minimum amount of net BaseFeeLMA debt a trove must have
-    uint public constant MIN_NET_DEBT = 1e5;
+    uint public immutable MIN_NET_DEBT;
 
     uint public constant PERCENT_DIVISOR = 200; // dividing by 200 yields 0.5%
 
@@ -47,6 +47,11 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
     IDefaultPool public defaultPool;
 
     IPriceFeed public override priceFeed;
+
+    constructor(uint _gasComp, uint _minNetDebt) {
+        BaseFeeLMA_GAS_COMPENSATION = _gasComp;
+        MIN_NET_DEBT = _minNetDebt;
+    }
 
     // --- Gas compensation functions ---
 
