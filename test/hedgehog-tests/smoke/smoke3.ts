@@ -1,12 +1,11 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import { mine, time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
+import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { BigNumberish } from "ethers";
 import { ethers } from "hardhat";
 import {
   CommunityIssuance,
   ERC20Mock,
-  HOGStaking,
   HOGToken,
   LockupContractFactory,
   TestPriceFeed,
@@ -62,7 +61,6 @@ describe("BaseFeeOracle Tests", () => {
     let hintHelpers: HintHelpers;
     let baseFeeLMAToken: BaseFeeLMAToken;
     let communityIssuance: CommunityIssuance;
-    let hogStaking: HOGStaking;
     let lockupContractFactory: LockupContractFactory;
     let hogToken: HOGToken;
     let payToken: ERC20Mock;

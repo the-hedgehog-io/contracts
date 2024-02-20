@@ -6,7 +6,6 @@ import { ethers } from "hardhat";
 import {
   CommunityIssuance,
   ERC20Mock,
-  HOGStaking,
   HOGToken,
   LockupContractFactory,
   TestPriceFeed,
@@ -62,7 +61,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     let hintHelpers: HintHelpers;
     let baseFeeLMAToken: BaseFeeLMAToken;
     let communityIssuance: CommunityIssuance;
-    let hogStaking: HOGStaking;
     let lockupContractFactory: LockupContractFactory;
     let hogToken: HOGToken;
     let payToken: ERC20Mock;
