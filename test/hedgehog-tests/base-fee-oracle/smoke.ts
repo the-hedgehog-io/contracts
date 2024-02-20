@@ -61,7 +61,7 @@ describe("BaseFeeOracle Tests", () => {
       expect(
         (await latestRound()).round,
         "Round number is incorrect"
-      ).to.be.equal(3);
+      ).to.be.equal(116416460); // 3 for local network
     });
     it("Should set answer correctly", async () => {
       expect(

@@ -78,9 +78,16 @@ const config: HardhatUserConfig = {
     ],
   },
   networks: {
-    mumbai: {
-      accounts: [process.env.PK_DEPLOYER || ""],
-      url: "https://polygon-mumbai-bor.publicnode.com",
+    // mumbai: {
+    //   accounts: [process.env.PK_DEPLOYER || ""],
+    //   url: "https://polygon-mumbai-bor.publicnode.com",
+    // },
+    hardhat: {
+      forking: {
+        url: "https://rpc.ankr.com/optimism",
+        blockNumber: 116416457,
+      },
+      chainId: 10,
     },
   },
 

@@ -22,7 +22,7 @@ import {
   StabilityPool,
   TroveManager,
 } from "../../../typechain-types/contracts";
-import { setupContracts } from "../../utils";
+import { getSigners, setupContracts } from "../../utils";
 
 const { latestBlock, increase, advanceBlock } = time;
 
@@ -127,7 +127,9 @@ describe("BaseFeeOracle Tests", () => {
     const SPBalanceAtBobFirstDeposit = BigInt("1998265");
 
     before(async () => {
-      [deployer, setter, hacker, alice, bob, carol] = await ethers.getSigners();
+      [deployer, setter, hacker, alice, bob, carol] = await getSigners({
+        fork: true,
+      });
 
       [
         priceFeed,

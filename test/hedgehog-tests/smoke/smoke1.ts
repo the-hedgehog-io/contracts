@@ -22,7 +22,7 @@ import {
   StabilityPool,
   TroveManager,
 } from "../../../typechain-types/contracts";
-import { setupContracts } from "../../utils";
+import { getSigners, setupContracts } from "../../utils";
 
 const { latestBlock, increase, advanceBlock } = time;
 
@@ -142,7 +142,9 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const totalDebtAliceRedeemsBob = BigInt("4520011");
 
     before(async () => {
-      [deployer, setter, hacker, alice, bob, carol] = await ethers.getSigners();
+      [deployer, setter, hacker, alice, bob, carol] = await getSigners({
+        fork: true,
+      });
 
       [
         priceFeed,
@@ -387,6 +389,11 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     it("Should let another user(bob) open a position", async () => {
       await increase(15);
+      console.log(
+        "balance at deply: ",
+        await payToken.balanceOf(bob.address),
+        bob.address
+      );
       await openTrove({
         caller: bob,
         baseFeeLMAAmount: BobTroveDebt,
@@ -575,7 +582,10 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
             ethers.parseEther("1")
           )
       ).not.to.be.reverted;
+
       const balanceCollAfter = await payToken.balanceOf(bob.address);
+      console.log("A: ", balanceCollAfter - balanceCollBefore);
+      console.log("B: ", BobCollBalanceAfterRedemption);
       compareWithFault(
         balanceCollAfter - balanceCollBefore,
         BobCollBalanceAfterRedemption
