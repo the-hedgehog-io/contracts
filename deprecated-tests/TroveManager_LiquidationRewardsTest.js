@@ -138,20 +138,20 @@ contract(
 
       // Get entire coll of A and C
       const alice_Coll = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingStETHReward(alice))
+        .add(await troveManager.getPendingWStETHReward(alice))
         .toString();
       const carol_Coll = (await troveManager.Troves(carol))[1]
-        .add(await troveManager.getPendingStETHReward(carol))
+        .add(await troveManager.getPendingWStETHReward(carol))
         .toString();
 
       /* Expected collateral:
-    A: Alice receives 0.995 StETH from L1, and ~3/5*0.995 StETH from L2.
-    expect aliceColl = 2 + 0.995 + 2.995/4.995 * 0.995 = 3.5916 StETH
+    A: Alice receives 0.995 WStETH from L1, and ~3/5*0.995 WStETH from L2.
+    expect aliceColl = 2 + 0.995 + 2.995/4.995 * 0.995 = 3.5916 WStETH
 
-    C: Carol receives ~2/5 StETH from L2
-    expect carolColl = 2 + 2/4.995 * 0.995 = 2.398 StETH
+    C: Carol receives ~2/5 WStETH from L2
+    expect carolColl = 2 + 2/4.995 * 0.995 = 2.398 WStETH
 
-    Total coll = 4 + 2 * 0.995 StETH
+    Total coll = 4 + 2 * 0.995 WStETH
     */
       const A_collAfterL1 = A_coll.add(th.applyLiquidationFee(B_coll));
       assert.isAtMost(
@@ -177,8 +177,8 @@ contract(
         1000
       );
 
-      const entireSystemColl = (await activePool.getStETH())
-        .add(await defaultPool.getStETH())
+      const entireSystemColl = (await activePool.getWStETH())
+        .add(await defaultPool.getWStETH())
         .toString();
       assert.equal(
         entireSystemColl,
@@ -248,28 +248,28 @@ contract(
 
       // Get entire coll of A, B, D and E
       const alice_Coll = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingStETHReward(alice))
+        .add(await troveManager.getPendingWStETHReward(alice))
         .toString();
       const bob_Coll = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingStETHReward(bob))
+        .add(await troveManager.getPendingWStETHReward(bob))
         .toString();
       const dennis_Coll = (await troveManager.Troves(dennis))[1]
-        .add(await troveManager.getPendingStETHReward(dennis))
+        .add(await troveManager.getPendingWStETHReward(dennis))
         .toString();
       const erin_Coll = (await troveManager.Troves(erin))[1]
-        .add(await troveManager.getPendingStETHReward(erin))
+        .add(await troveManager.getPendingWStETHReward(erin))
         .toString();
 
       /* Expected collateral:
-    A and B receives 1/2 StETH * 0.995 from L1.
+    A and B receives 1/2 WStETH * 0.995 from L1.
     total Coll: 3
 
-    A, B, receive (2.4975)/8.995 * 0.995 StETH from L2.
+    A, B, receive (2.4975)/8.995 * 0.995 WStETH from L2.
     
-    D, E receive 2/8.995 * 0.995 StETH from L2.
+    D, E receive 2/8.995 * 0.995 WStETH from L2.
 
-    expect A, B coll  = 2 +  0.4975 + 0.2763  =  StETH
-    expect D, E coll  = 2 + 0.2212  =  StETH
+    expect A, B coll  = 2 +  0.4975 + 0.2763  =  WStETH
+    expect D, E coll  = 2 + 0.2212  =  WStETH
 
     Total coll = 8 (non-liquidated) + 2 * 0.995 (liquidated and redistributed)
     */
@@ -299,8 +299,8 @@ contract(
       assert.isAtMost(th.getDifference(dennis_Coll, expected_D), 1000);
       assert.isAtMost(th.getDifference(erin_Coll, expected_E), 1000);
 
-      const entireSystemColl = (await activePool.getStETH())
-        .add(await defaultPool.getStETH())
+      const entireSystemColl = (await activePool.getWStETH())
+        .add(await defaultPool.getWStETH())
         .toString();
       assert.equal(
         entireSystemColl,
@@ -318,7 +318,7 @@ contract(
     });
     ////
 
-    it("redistribution: Sequence of alternate opening/liquidation: final surviving trove has StETH from all previously liquidated troves", async () => {
+    it("redistribution: Sequence of alternate opening/liquidation: final surviving trove has WStETH from all previously liquidated troves", async () => {
       // A, B  open troves
       const { collateral: A_coll } = await openTrove({
         ICR: toBN(dec(400, 16)),
@@ -403,29 +403,29 @@ contract(
 
       // Get entire coll of A, B, D, E and F
       const alice_Coll = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingStETHReward(alice))
+        .add(await troveManager.getPendingWStETHReward(alice))
         .toString();
       const bob_Coll = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingStETHReward(bob))
+        .add(await troveManager.getPendingWStETHReward(bob))
         .toString();
       const carol_Coll = (await troveManager.Troves(carol))[1]
-        .add(await troveManager.getPendingStETHReward(carol))
+        .add(await troveManager.getPendingWStETHReward(carol))
         .toString();
       const dennis_Coll = (await troveManager.Troves(dennis))[1]
-        .add(await troveManager.getPendingStETHReward(dennis))
+        .add(await troveManager.getPendingWStETHReward(dennis))
         .toString();
       const erin_Coll = (await troveManager.Troves(erin))[1]
-        .add(await troveManager.getPendingStETHReward(erin))
+        .add(await troveManager.getPendingWStETHReward(erin))
         .toString();
 
       const freddy_rawColl = (await troveManager.Troves(freddy))[1].toString();
       const freddy_ETHReward = (
-        await troveManager.getPendingStETHReward(freddy)
+        await troveManager.getPendingWStETHReward(freddy)
       ).toString();
 
       /* Expected collateral:
      A-E should have been liquidated
-     trove F should have acquired all StETH in the system: 1 StETH initial coll, and 0.995^5+0.995^4+0.995^3+0.995^2+0.995 from rewards = 5.925 StETH
+     trove F should have acquired all WStETH in the system: 1 WStETH initial coll, and 0.995^5+0.995^4+0.995^3+0.995^2+0.995 from rewards = 5.925 WStETH
     */
       assert.isAtMost(th.getDifference(alice_Coll, "0"), 1000);
       assert.isAtMost(th.getDifference(bob_Coll, "0"), 1000);
@@ -451,8 +451,8 @@ contract(
       );
       assert.isAtMost(th.getDifference(freddy_ETHReward, gainedETH), 1000);
 
-      const entireSystemColl = (await activePool.getStETH())
-        .add(await defaultPool.getStETH())
+      const entireSystemColl = (await activePool.getWStETH())
+        .add(await defaultPool.getWStETH())
         .toString();
       assert.isAtMost(
         th.getDifference(entireSystemColl, F_coll.add(gainedETH)),
@@ -534,7 +534,7 @@ contract(
       assert.isAtMost(getDifference(D_entireColl_1, D_collAfterL1), 1e8);
       assert.isAtMost(getDifference(E_entireColl_1, E_collAfterL1), 1e8);
 
-      // Bob adds 1 StETH to his trove
+      // Bob adds 1 WStETH to his trove
       const addedColl1 = toBN(dec(1, "ether"));
       await borrowerOperations.addColl(B, B, { from: B, value: addedColl1 });
 
@@ -577,7 +577,7 @@ contract(
       assert.isAtMost(getDifference(D_entireColl_2, D_collAfterL2), 1e8);
       assert.isAtMost(getDifference(E_entireColl_2, E_collAfterL2), 1e8);
 
-      // Bob adds 1 StETH to his trove
+      // Bob adds 1 WStETH to his trove
       const addedColl2 = toBN(dec(1, "ether"));
       await borrowerOperations.addColl(B, B, { from: B, value: addedColl2 });
 
@@ -672,11 +672,11 @@ contract(
       ); // remove the gas comp
 
       // console.log(`A_collRedistribution: ${A_collRedistribution}`)
-      // Check accumulated StETH gain for each trove
-      const B_ETHGain_1 = await troveManager.getPendingStETHReward(B);
-      const C_ETHGain_1 = await troveManager.getPendingStETHReward(C);
-      const D_ETHGain_1 = await troveManager.getPendingStETHReward(D);
-      const E_ETHGain_1 = await troveManager.getPendingStETHReward(E);
+      // Check accumulated WStETH gain for each trove
+      const B_ETHGain_1 = await troveManager.getPendingWStETHReward(B);
+      const C_ETHGain_1 = await troveManager.getPendingWStETHReward(C);
+      const D_ETHGain_1 = await troveManager.getPendingWStETHReward(D);
+      const E_ETHGain_1 = await troveManager.getPendingWStETHReward(E);
 
       // Check gains are what we'd expect from a distribution proportional to each trove's entire coll
       const B_expectedPendingETH_1 =
@@ -693,7 +693,7 @@ contract(
       assert.isAtMost(getDifference(D_expectedPendingETH_1, D_ETHGain_1), 1e8);
       assert.isAtMost(getDifference(E_expectedPendingETH_1, E_ETHGain_1), 1e8);
 
-      // // Bob adds 1 StETH to his trove
+      // // Bob adds 1 WStETH to his trove
       await borrowerOperations.addColl(B, B, {
         from: B,
         value: dec(1, "ether"),
@@ -724,15 +724,15 @@ contract(
       ); // remove the gas comp
       // console.log(`C_collRedistribution: ${C_collRedistribution}`)
 
-      const B_ETHGain_2 = await troveManager.getPendingStETHReward(B);
-      const D_ETHGain_2 = await troveManager.getPendingStETHReward(D);
-      const E_ETHGain_2 = await troveManager.getPendingStETHReward(E);
+      const B_ETHGain_2 = await troveManager.getPendingWStETHReward(B);
+      const D_ETHGain_2 = await troveManager.getPendingWStETHReward(D);
+      const E_ETHGain_2 = await troveManager.getPendingWStETHReward(E);
 
-      // Since B topped up, he has no previous pending StETH gain
+      // Since B topped up, he has no previous pending WStETH gain
       const B_expectedPendingETH_2 =
         C_collRedistribution.mul(B_entireColl_1).div(denominatorColl_2);
 
-      // D & E's accumulated pending StETH gain includes their previous gain
+      // D & E's accumulated pending WStETH gain includes their previous gain
       const D_expectedPendingETH_2 = C_collRedistribution.mul(D_entireColl_1)
         .div(denominatorColl_2)
         .add(D_expectedPendingETH_1);
@@ -745,7 +745,7 @@ contract(
       assert.isAtMost(getDifference(D_expectedPendingETH_2, D_ETHGain_2), 1e8);
       assert.isAtMost(getDifference(E_expectedPendingETH_2, E_ETHGain_2), 1e8);
 
-      // // Bob adds 1 StETH to his trove
+      // // Bob adds 1 WStETH to his trove
       await borrowerOperations.addColl(B, B, {
         from: B,
         value: dec(1, "ether"),
@@ -774,14 +774,14 @@ contract(
       ); // remove the gas comp
       // console.log(`E_collRedistribution: ${E_collRedistribution}`)
 
-      const B_ETHGain_3 = await troveManager.getPendingStETHReward(B);
-      const D_ETHGain_3 = await troveManager.getPendingStETHReward(D);
+      const B_ETHGain_3 = await troveManager.getPendingWStETHReward(B);
+      const D_ETHGain_3 = await troveManager.getPendingWStETHReward(D);
 
-      // Since B topped up, he has no previous pending StETH gain
+      // Since B topped up, he has no previous pending WStETH gain
       const B_expectedPendingETH_3 =
         E_collRedistribution.mul(B_entireColl_2).div(denominatorColl_3);
 
-      // D'S accumulated pending StETH gain includes their previous gain
+      // D'S accumulated pending WStETH gain includes their previous gain
       const D_expectedPendingETH_3 = E_collRedistribution.mul(D_entireColl_2)
         .div(denominatorColl_3)
         .add(D_expectedPendingETH_2);
@@ -818,7 +818,7 @@ contract(
       // Price bounces back to 200 $/E
       await priceFeed.setPrice(dec(200, 18));
 
-      //Bob adds StETH to his trove
+      //Bob adds WStETH to his trove
       const addedColl = toBN(dec(1, "ether"));
       await borrowerOperations.addColl(bob, bob, {
         from: bob,
@@ -844,7 +844,7 @@ contract(
 
       // Expect Bob now holds all Ether and BaseFeeLMADebt in the system: 2 + 0.4975+0.4975*0.995+0.995 Ether and 110*3 BaseFeeLMA (10 each for gas compensation)
       const bob_Coll = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingStETHReward(bob))
+        .add(await troveManager.getPendingWStETHReward(bob))
         .toString();
 
       const bob_BaseFeeLMADebt = (await troveManager.Troves(bob))[0]
@@ -897,7 +897,7 @@ contract(
       // Price bounces back to 200 $/E
       await priceFeed.setPrice(dec(200, 18));
 
-      //Bob adds StETH to his trove
+      //Bob adds WStETH to his trove
       const addedColl = toBN(dec(1, "ether"));
       await borrowerOperations.addColl(bob, bob, {
         from: bob,
@@ -920,24 +920,24 @@ contract(
       assert.isFalse(await sortedTroves.contains(dennis));
 
       /* Bob rewards:
-     L1: 1/2*0.995 StETH, 55 BaseFeeLMA
-     L2: (2.4975/3.995)*0.995 = 0.622 StETH , 110*(2.4975/3.995)= 68.77 BaseFeeLMADebt
+     L1: 1/2*0.995 WStETH, 55 BaseFeeLMA
+     L2: (2.4975/3.995)*0.995 = 0.622 WStETH , 110*(2.4975/3.995)= 68.77 BaseFeeLMADebt
 
-    coll: 3.1195 StETH
+    coll: 3.1195 WStETH
     debt: 233.77 BaseFeeLMADebt
 
      Alice rewards:
-    L1 1/2*0.995 StETH, 55 BaseFeeLMA
-    L2 (1.4975/3.995)*0.995 = 0.3730 StETH, 110*(1.4975/3.995) = 41.23 BaseFeeLMADebt
+    L1 1/2*0.995 WStETH, 55 BaseFeeLMA
+    L2 (1.4975/3.995)*0.995 = 0.3730 WStETH, 110*(1.4975/3.995) = 41.23 BaseFeeLMADebt
 
-    coll: 1.8705 StETH
+    coll: 1.8705 WStETH
     debt: 146.23 BaseFeeLMADebt
 
-    totalColl: 4.99 StETH
+    totalColl: 4.99 WStETH
     totalDebt 380 BaseFeeLMA (includes 50 each for gas compensation)
     */
       const bob_Coll = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingStETHReward(bob))
+        .add(await troveManager.getPendingWStETHReward(bob))
         .toString();
 
       const bob_BaseFeeLMADebt = (await troveManager.Troves(bob))[0]
@@ -945,7 +945,7 @@ contract(
         .toString();
 
       const alice_Coll = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingStETHReward(alice))
+        .add(await troveManager.getPendingWStETHReward(alice))
         .toString();
 
       const alice_BaseFeeLMADebt = (await troveManager.Troves(alice))[0]
@@ -1025,14 +1025,18 @@ contract(
       // Price bounces back to 200 $/E
       await priceFeed.setPrice(dec(200, 18));
 
-      // Expected rewards:  alice: 1 StETH, bob: 1 StETH, carol: 998 StETH
-      const alice_ETHReward_1 = await troveManager.getPendingStETHReward(alice);
-      const bob_ETHReward_1 = await troveManager.getPendingStETHReward(bob);
-      const carol_ETHReward_1 = await troveManager.getPendingStETHReward(carol);
+      // Expected rewards:  alice: 1 WStETH, bob: 1 WStETH, carol: 998 WStETH
+      const alice_ETHReward_1 = await troveManager.getPendingWStETHReward(
+        alice
+      );
+      const bob_ETHReward_1 = await troveManager.getPendingWStETHReward(bob);
+      const carol_ETHReward_1 = await troveManager.getPendingWStETHReward(
+        carol
+      );
 
-      //Expect 1000 + 1000*0.995 StETH in system now
-      const entireSystemColl_1 = (await activePool.getStETH())
-        .add(await defaultPool.getStETH())
+      //Expect 1000 + 1000*0.995 WStETH in system now
+      const entireSystemColl_1 = (await activePool.getWStETH())
+        .add(await defaultPool.getWStETH())
         .toString();
       assert.equal(
         entireSystemColl_1,
@@ -1053,23 +1057,23 @@ contract(
         th.applyLiquidationFee(D_coll).mul(C_coll).div(totalColl)
       );
 
-      //Carol adds 1 StETH to her trove, brings it to 1992.01 total coll
+      //Carol adds 1 WStETH to her trove, brings it to 1992.01 total coll
       const C_addedColl = toBN(dec(1, "ether"));
       await borrowerOperations.addColl(carol, carol, {
         from: carol,
         value: dec(1, "ether"),
       });
 
-      //Expect 1996 StETH in system now
-      const entireSystemColl_2 = (await activePool.getStETH()).add(
-        await defaultPool.getStETH()
+      //Expect 1996 WStETH in system now
+      const entireSystemColl_2 = (await activePool.getWStETH()).add(
+        await defaultPool.getWStETH()
       );
       th.assertIsApproximatelyEqual(
         entireSystemColl_2,
         totalColl.add(th.applyLiquidationFee(D_coll)).add(C_addedColl)
       );
 
-      // E opens with another 1996 StETH
+      // E opens with another 1996 WStETH
       const { collateral: E_coll } = await openTrove({
         ICR: toBN(dec(200, 16)),
         extraParams: { from: erin, value: entireSystemColl_2 },
@@ -1083,30 +1087,30 @@ contract(
       assert.isTrue(txE.receipt.status);
       assert.isFalse(await sortedTroves.contains(erin));
 
-      /* Expected StETH rewards: 
-     Carol = 1992.01/1996 * 1996*0.995 = 1982.05 StETH
-     Alice = 1.995/1996 * 1996*0.995 = 1.985025 StETH
-     Bob = 1.995/1996 * 1996*0.995 = 1.985025 StETH
+      /* Expected WStETH rewards: 
+     Carol = 1992.01/1996 * 1996*0.995 = 1982.05 WStETH
+     Alice = 1.995/1996 * 1996*0.995 = 1.985025 WStETH
+     Bob = 1.995/1996 * 1996*0.995 = 1.985025 WStETH
 
     therefore, expected total collateral:
 
     Carol = 1991.01 + 1991.01 = 3974.06
-    Alice = 1.995 + 1.985025 = 3.980025 StETH
-    Bob = 1.995 + 1.985025 = 3.980025 StETH
+    Alice = 1.995 + 1.985025 = 3.980025 WStETH
+    Bob = 1.995 + 1.985025 = 3.980025 WStETH
 
-    total = 3982.02 StETH
+    total = 3982.02 WStETH
     */
 
       const alice_Coll = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingStETHReward(alice))
+        .add(await troveManager.getPendingWStETHReward(alice))
         .toString();
 
       const bob_Coll = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingStETHReward(bob))
+        .add(await troveManager.getPendingWStETHReward(bob))
         .toString();
 
       const carol_Coll = (await troveManager.Troves(carol))[1]
-        .add(await troveManager.getPendingStETHReward(carol))
+        .add(await troveManager.getPendingWStETHReward(carol))
         .toString();
 
       const totalCollAfterL1 = A_coll.add(B_coll)
@@ -1142,9 +1146,9 @@ contract(
       assert.isAtMost(th.getDifference(bob_Coll, expected_B_coll), 1000);
       assert.isAtMost(th.getDifference(carol_Coll, expected_C_coll), 1000);
 
-      //Expect 3982.02 StETH in system now
-      const entireSystemColl_3 = (await activePool.getStETH())
-        .add(await defaultPool.getStETH())
+      //Expect 3982.02 WStETH in system now
+      const entireSystemColl_3 = (await activePool.getWStETH())
+        .add(await defaultPool.getWStETH())
         .toString();
       th.assertIsApproximatelyEqual(
         entireSystemColl_3,
@@ -1191,14 +1195,18 @@ contract(
       // Price bounces back to 200 $/E
       await priceFeed.setPrice(dec(200, 18));
 
-      // Expected rewards:  alice: 1 StETH, bob: 1 StETH, carol: 998 StETH (*0.995)
-      const alice_ETHReward_1 = await troveManager.getPendingStETHReward(alice);
-      const bob_ETHReward_1 = await troveManager.getPendingStETHReward(bob);
-      const carol_ETHReward_1 = await troveManager.getPendingStETHReward(carol);
+      // Expected rewards:  alice: 1 WStETH, bob: 1 WStETH, carol: 998 WStETH (*0.995)
+      const alice_ETHReward_1 = await troveManager.getPendingWStETHReward(
+        alice
+      );
+      const bob_ETHReward_1 = await troveManager.getPendingWStETHReward(bob);
+      const carol_ETHReward_1 = await troveManager.getPendingWStETHReward(
+        carol
+      );
 
-      //Expect 1995 StETH in system now
-      const entireSystemColl_1 = (await activePool.getStETH())
-        .add(await defaultPool.getStETH())
+      //Expect 1995 WStETH in system now
+      const entireSystemColl_1 = (await activePool.getWStETH())
+        .add(await defaultPool.getWStETH())
         .toString();
       assert.equal(
         entireSystemColl_1,
@@ -1219,7 +1227,7 @@ contract(
         th.applyLiquidationFee(D_coll).mul(C_coll).div(totalColl)
       );
 
-      /* Alice, Bob, Carol each adds 1 StETH to their troves, 
+      /* Alice, Bob, Carol each adds 1 WStETH to their troves, 
     bringing them to 2.995, 2.995, 1992.01 total coll each. */
 
       const addedColl = toBN(dec(1, "ether"));
@@ -1236,9 +1244,9 @@ contract(
         value: addedColl,
       });
 
-      //Expect 1998 StETH in system now
-      const entireSystemColl_2 = (await activePool.getStETH())
-        .add(await defaultPool.getStETH())
+      //Expect 1998 WStETH in system now
+      const entireSystemColl_2 = (await activePool.getWStETH())
+        .add(await defaultPool.getWStETH())
         .toString();
       th.assertIsApproximatelyEqual(
         entireSystemColl_2,
@@ -1247,7 +1255,7 @@ contract(
           .add(addedColl.mul(toBN(3)))
       );
 
-      // E opens with another 1998 StETH
+      // E opens with another 1998 WStETH
       const { collateral: E_coll } = await openTrove({
         ICR: toBN(dec(200, 16)),
         extraParams: { from: erin, value: entireSystemColl_2 },
@@ -1261,30 +1269,30 @@ contract(
       assert.isTrue(txE.receipt.status);
       assert.isFalse(await sortedTroves.contains(erin));
 
-      /* Expected StETH rewards: 
-     Carol = 1992.01/1998 * 1998*0.995 = 1982.04995 StETH
-     Alice = 2.995/1998 * 1998*0.995 = 2.980025 StETH
-     Bob = 2.995/1998 * 1998*0.995 = 2.980025 StETH
+      /* Expected WStETH rewards: 
+     Carol = 1992.01/1998 * 1998*0.995 = 1982.04995 WStETH
+     Alice = 2.995/1998 * 1998*0.995 = 2.980025 WStETH
+     Bob = 2.995/1998 * 1998*0.995 = 2.980025 WStETH
 
     therefore, expected total collateral:
 
     Carol = 1992.01 + 1982.04995 = 3974.05995
-    Alice = 2.995 + 2.980025 = 5.975025 StETH
-    Bob = 2.995 + 2.980025 = 5.975025 StETH
+    Alice = 2.995 + 2.980025 = 5.975025 WStETH
+    Bob = 2.995 + 2.980025 = 5.975025 WStETH
 
-    total = 3986.01 StETH
+    total = 3986.01 WStETH
     */
 
       const alice_Coll = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingStETHReward(alice))
+        .add(await troveManager.getPendingWStETHReward(alice))
         .toString();
 
       const bob_Coll = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingStETHReward(bob))
+        .add(await troveManager.getPendingWStETHReward(bob))
         .toString();
 
       const carol_Coll = (await troveManager.Troves(carol))[1]
-        .add(await troveManager.getPendingStETHReward(carol))
+        .add(await troveManager.getPendingWStETHReward(carol))
         .toString();
 
       const totalCollAfterL1 = A_coll.add(B_coll)
@@ -1320,9 +1328,9 @@ contract(
       assert.isAtMost(th.getDifference(bob_Coll, expected_B_coll), 1000);
       assert.isAtMost(th.getDifference(carol_Coll, expected_C_coll), 1000);
 
-      //Expect 3986.01 StETH in system now
-      const entireSystemColl_3 = (await activePool.getStETH()).add(
-        await defaultPool.getStETH()
+      //Expect 3986.01 WStETH in system now
+      const entireSystemColl_3 = (await activePool.getWStETH()).add(
+        await defaultPool.getWStETH()
       );
       th.assertIsApproximatelyEqual(
         entireSystemColl_3,
@@ -1366,7 +1374,7 @@ contract(
       // Price bounces back to 200 $/E
       await priceFeed.setPrice(dec(200, 18));
 
-      //Bob withdraws 0.5 StETH from his trove
+      //Bob withdraws 0.5 WStETH from his trove
       const withdrawnColl = toBN(dec(500, "finney"));
       await borrowerOperations.withdrawColl(withdrawnColl, bob, bob, {
         from: bob,
@@ -1392,7 +1400,7 @@ contract(
       // Expect Bob now holds all Ether and BaseFeeLMADebt in the system: 2.5 Ether and 300 BaseFeeLMA
       // 1 + 0.995/2 - 0.5 + 1.4975*0.995
       const bob_Coll = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingStETHReward(bob))
+        .add(await troveManager.getPendingWStETHReward(bob))
         .toString();
 
       const bob_BaseFeeLMADebt = (await troveManager.Troves(bob))[0]
@@ -1451,7 +1459,7 @@ contract(
       // Price bounces back to 200 $/E
       await priceFeed.setPrice(dec(200, 18));
 
-      //Bob  withdraws 0.5 StETH from his trove
+      //Bob  withdraws 0.5 WStETH from his trove
       const withdrawnColl = toBN(dec(500, "finney"));
       await borrowerOperations.withdrawColl(withdrawnColl, bob, bob, {
         from: bob,
@@ -1473,24 +1481,24 @@ contract(
       assert.isFalse(await sortedTroves.contains(dennis));
 
       /* Bob rewards:
-     L1: 0.4975 StETH, 55 BaseFeeLMA
-     L2: (0.9975/2.495)*0.995 = 0.3978 StETH , 110*(0.9975/2.495)= 43.98 BaseFeeLMADebt
+     L1: 0.4975 WStETH, 55 BaseFeeLMA
+     L2: (0.9975/2.495)*0.995 = 0.3978 WStETH , 110*(0.9975/2.495)= 43.98 BaseFeeLMADebt
 
-    coll: (1 + 0.4975 - 0.5 + 0.3968) = 1.3953 StETH
+    coll: (1 + 0.4975 - 0.5 + 0.3968) = 1.3953 WStETH
     debt: (110 + 55 + 43.98 = 208.98 BaseFeeLMADebt 
 
      Alice rewards:
     L1 0.4975, 55 BaseFeeLMA
-    L2 (1.4975/2.495)*0.995 = 0.5972 StETH, 110*(1.4975/2.495) = 66.022 BaseFeeLMADebt
+    L2 (1.4975/2.495)*0.995 = 0.5972 WStETH, 110*(1.4975/2.495) = 66.022 BaseFeeLMADebt
 
-    coll: (1 + 0.4975 + 0.5972) = 2.0947 StETH
+    coll: (1 + 0.4975 + 0.5972) = 2.0947 WStETH
     debt: (50 + 55 + 66.022) = 171.022 BaseFeeLMA Debt
 
-    totalColl: 3.49 StETH
+    totalColl: 3.49 WStETH
     totalDebt 380 BaseFeeLMA (Includes 50 in each trove for gas compensation)
     */
       const bob_Coll = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingStETHReward(bob))
+        .add(await troveManager.getPendingWStETHReward(bob))
         .toString();
 
       const bob_BaseFeeLMADebt = (await troveManager.Troves(bob))[0]
@@ -1498,7 +1506,7 @@ contract(
         .toString();
 
       const alice_Coll = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingStETHReward(alice))
+        .add(await troveManager.getPendingWStETHReward(alice))
         .toString();
 
       const alice_BaseFeeLMADebt = (await troveManager.Troves(alice))[0]
@@ -1538,8 +1546,8 @@ contract(
         10000
       );
 
-      const entireSystemColl = (await activePool.getStETH()).add(
-        await defaultPool.getStETH()
+      const entireSystemColl = (await activePool.getWStETH()).add(
+        await defaultPool.getWStETH()
       );
       th.assertIsApproximatelyEqual(
         entireSystemColl,
@@ -1596,14 +1604,18 @@ contract(
       // Price bounces back to 200 $/E
       await priceFeed.setPrice(dec(200, 18));
 
-      // Expected rewards:  alice: 1 StETH, bob: 1 StETH, carol: 998 StETH (*0.995)
-      const alice_ETHReward_1 = await troveManager.getPendingStETHReward(alice);
-      const bob_ETHReward_1 = await troveManager.getPendingStETHReward(bob);
-      const carol_ETHReward_1 = await troveManager.getPendingStETHReward(carol);
+      // Expected rewards:  alice: 1 WStETH, bob: 1 WStETH, carol: 998 WStETH (*0.995)
+      const alice_ETHReward_1 = await troveManager.getPendingWStETHReward(
+        alice
+      );
+      const bob_ETHReward_1 = await troveManager.getPendingWStETHReward(bob);
+      const carol_ETHReward_1 = await troveManager.getPendingWStETHReward(
+        carol
+      );
 
-      //Expect 1995 StETH in system now
-      const entireSystemColl_1 = (await activePool.getStETH()).add(
-        await defaultPool.getStETH()
+      //Expect 1995 WStETH in system now
+      const entireSystemColl_1 = (await activePool.getWStETH()).add(
+        await defaultPool.getWStETH()
       );
       th.assertIsApproximatelyEqual(
         entireSystemColl_1,
@@ -1624,22 +1636,22 @@ contract(
         th.applyLiquidationFee(D_coll).mul(C_coll).div(totalColl)
       );
 
-      //Carol wthdraws 1 StETH from her trove, brings it to 1990.01 total coll
+      //Carol wthdraws 1 WStETH from her trove, brings it to 1990.01 total coll
       const C_withdrawnColl = toBN(dec(1, "ether"));
       await borrowerOperations.withdrawColl(C_withdrawnColl, carol, carol, {
         from: carol,
       });
 
-      //Expect 1994 StETH in system now
-      const entireSystemColl_2 = (await activePool.getStETH()).add(
-        await defaultPool.getStETH()
+      //Expect 1994 WStETH in system now
+      const entireSystemColl_2 = (await activePool.getWStETH()).add(
+        await defaultPool.getWStETH()
       );
       th.assertIsApproximatelyEqual(
         entireSystemColl_2,
         totalColl.add(th.applyLiquidationFee(D_coll)).sub(C_withdrawnColl)
       );
 
-      // E opens with another 1994 StETH
+      // E opens with another 1994 WStETH
       const { collateral: E_coll } = await openTrove({
         ICR: toBN(dec(200, 16)),
         extraParams: { from: erin, value: entireSystemColl_2 },
@@ -1653,30 +1665,30 @@ contract(
       assert.isTrue(txE.receipt.status);
       assert.isFalse(await sortedTroves.contains(erin));
 
-      /* Expected StETH rewards: 
-     Carol = 1990.01/1994 * 1994*0.995 = 1980.05995 StETH
-     Alice = 1.995/1994 * 1994*0.995 = 1.985025 StETH
-     Bob = 1.995/1994 * 1994*0.995 = 1.985025 StETH
+      /* Expected WStETH rewards: 
+     Carol = 1990.01/1994 * 1994*0.995 = 1980.05995 WStETH
+     Alice = 1.995/1994 * 1994*0.995 = 1.985025 WStETH
+     Bob = 1.995/1994 * 1994*0.995 = 1.985025 WStETH
 
     therefore, expected total collateral:
 
     Carol = 1990.01 + 1980.05995 = 3970.06995
-    Alice = 1.995 + 1.985025 = 3.980025 StETH
-    Bob = 1.995 + 1.985025 = 3.980025 StETH
+    Alice = 1.995 + 1.985025 = 3.980025 WStETH
+    Bob = 1.995 + 1.985025 = 3.980025 WStETH
 
-    total = 3978.03 StETH
+    total = 3978.03 WStETH
     */
 
       const alice_Coll = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingStETHReward(alice))
+        .add(await troveManager.getPendingWStETHReward(alice))
         .toString();
 
       const bob_Coll = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingStETHReward(bob))
+        .add(await troveManager.getPendingWStETHReward(bob))
         .toString();
 
       const carol_Coll = (await troveManager.Troves(carol))[1]
-        .add(await troveManager.getPendingStETHReward(carol))
+        .add(await troveManager.getPendingWStETHReward(carol))
         .toString();
 
       const totalCollAfterL1 = A_coll.add(B_coll)
@@ -1712,9 +1724,9 @@ contract(
       assert.isAtMost(th.getDifference(bob_Coll, expected_B_coll), 1000);
       assert.isAtMost(th.getDifference(carol_Coll, expected_C_coll), 1000);
 
-      //Expect 3978.03 StETH in system now
-      const entireSystemColl_3 = (await activePool.getStETH()).add(
-        await defaultPool.getStETH()
+      //Expect 3978.03 WStETH in system now
+      const entireSystemColl_3 = (await activePool.getWStETH()).add(
+        await defaultPool.getWStETH()
       );
       th.assertIsApproximatelyEqual(
         entireSystemColl_3,
@@ -1761,14 +1773,18 @@ contract(
       // Price bounces back to 200 $/E
       await priceFeed.setPrice(dec(200, 18));
 
-      // Expected rewards:  alice: 1 StETH, bob: 1 StETH, carol: 998 StETH (*0.995)
-      const alice_ETHReward_1 = await troveManager.getPendingStETHReward(alice);
-      const bob_ETHReward_1 = await troveManager.getPendingStETHReward(bob);
-      const carol_ETHReward_1 = await troveManager.getPendingStETHReward(carol);
+      // Expected rewards:  alice: 1 WStETH, bob: 1 WStETH, carol: 998 WStETH (*0.995)
+      const alice_ETHReward_1 = await troveManager.getPendingWStETHReward(
+        alice
+      );
+      const bob_ETHReward_1 = await troveManager.getPendingWStETHReward(bob);
+      const carol_ETHReward_1 = await troveManager.getPendingWStETHReward(
+        carol
+      );
 
-      //Expect 1995 StETH in system now
-      const entireSystemColl_1 = (await activePool.getStETH()).add(
-        await defaultPool.getStETH()
+      //Expect 1995 WStETH in system now
+      const entireSystemColl_1 = (await activePool.getWStETH()).add(
+        await defaultPool.getWStETH()
       );
       th.assertIsApproximatelyEqual(
         entireSystemColl_1,
@@ -1789,7 +1805,7 @@ contract(
         th.applyLiquidationFee(D_coll).mul(C_coll).div(totalColl)
       );
 
-      /* Alice, Bob, Carol each withdraw 0.5 StETH to their troves, 
+      /* Alice, Bob, Carol each withdraw 0.5 WStETH to their troves, 
     bringing them to 1.495, 1.495, 1990.51 total coll each. */
       const withdrawnColl = toBN(dec(500, "finney"));
       await borrowerOperations.withdrawColl(withdrawnColl, alice, alice, {
@@ -1803,15 +1819,15 @@ contract(
       });
 
       const alice_Coll_1 = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingStETHReward(alice))
+        .add(await troveManager.getPendingWStETHReward(alice))
         .toString();
 
       const bob_Coll_1 = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingStETHReward(bob))
+        .add(await troveManager.getPendingWStETHReward(bob))
         .toString();
 
       const carol_Coll_1 = (await troveManager.Troves(carol))[1]
-        .add(await troveManager.getPendingStETHReward(carol))
+        .add(await troveManager.getPendingWStETHReward(carol))
         .toString();
 
       const totalColl_1 = A_coll.add(B_coll).add(C_coll);
@@ -1843,9 +1859,9 @@ contract(
         1000
       );
 
-      //Expect 1993.5 StETH in system now
-      const entireSystemColl_2 = (await activePool.getStETH()).add(
-        await defaultPool.getStETH()
+      //Expect 1993.5 WStETH in system now
+      const entireSystemColl_2 = (await activePool.getWStETH()).add(
+        await defaultPool.getWStETH()
       );
       th.assertIsApproximatelyEqual(
         entireSystemColl_2,
@@ -1854,7 +1870,7 @@ contract(
           .sub(withdrawnColl.mul(toBN(3)))
       );
 
-      // E opens with another 1993.5 StETH
+      // E opens with another 1993.5 WStETH
       const { collateral: E_coll } = await openTrove({
         ICR: toBN(dec(200, 16)),
         extraParams: { from: erin, value: entireSystemColl_2 },
@@ -1868,30 +1884,30 @@ contract(
       assert.isTrue(txE.receipt.status);
       assert.isFalse(await sortedTroves.contains(erin));
 
-      /* Expected StETH rewards: 
-     Carol = 1990.51/1993.5 * 1993.5*0.995 = 1980.55745 StETH
-     Alice = 1.495/1993.5 * 1993.5*0.995 = 1.487525 StETH
-     Bob = 1.495/1993.5 * 1993.5*0.995 = 1.487525 StETH
+      /* Expected WStETH rewards: 
+     Carol = 1990.51/1993.5 * 1993.5*0.995 = 1980.55745 WStETH
+     Alice = 1.495/1993.5 * 1993.5*0.995 = 1.487525 WStETH
+     Bob = 1.495/1993.5 * 1993.5*0.995 = 1.487525 WStETH
 
     therefore, expected total collateral:
 
     Carol = 1990.51 + 1980.55745 = 3971.06745
-    Alice = 1.495 + 1.487525 = 2.982525 StETH
-    Bob = 1.495 + 1.487525 = 2.982525 StETH
+    Alice = 1.495 + 1.487525 = 2.982525 WStETH
+    Bob = 1.495 + 1.487525 = 2.982525 WStETH
 
-    total = 3977.0325 StETH
+    total = 3977.0325 WStETH
     */
 
       const alice_Coll_2 = (await troveManager.Troves(alice))[1]
-        .add(await troveManager.getPendingStETHReward(alice))
+        .add(await troveManager.getPendingWStETHReward(alice))
         .toString();
 
       const bob_Coll_2 = (await troveManager.Troves(bob))[1]
-        .add(await troveManager.getPendingStETHReward(bob))
+        .add(await troveManager.getPendingWStETHReward(bob))
         .toString();
 
       const carol_Coll_2 = (await troveManager.Troves(carol))[1]
-        .add(await troveManager.getPendingStETHReward(carol))
+        .add(await troveManager.getPendingWStETHReward(carol))
         .toString();
 
       const totalCollAfterL1 = A_coll.add(B_coll)
@@ -1927,9 +1943,9 @@ contract(
       assert.isAtMost(th.getDifference(bob_Coll_2, expected_B_coll), 1000);
       assert.isAtMost(th.getDifference(carol_Coll_2, expected_C_coll), 1000);
 
-      //Expect 3977.0325 StETH in system now
-      const entireSystemColl_3 = (await activePool.getStETH()).add(
-        await defaultPool.getStETH()
+      //Expect 3977.0325 WStETH in system now
+      const entireSystemColl_3 = (await activePool.getWStETH()).add(
+        await defaultPool.getWStETH()
       );
       th.assertIsApproximatelyEqual(
         entireSystemColl_3,
@@ -1982,14 +1998,14 @@ contract(
         .div(B_coll.add(C_coll));
       assert.isAtMost(
         th.getDifference(
-          await troveManager.getPendingStETHReward(bob),
+          await troveManager.getPendingWStETHReward(bob),
           B_pendingRewardsAfterL1
         ),
         1000000
       );
       assert.isAtMost(
         th.getDifference(
-          await troveManager.getPendingStETHReward(carol),
+          await troveManager.getPendingWStETHReward(carol),
           C_pendingRewardsAfterL1
         ),
         1000000
@@ -2018,14 +2034,14 @@ contract(
         extraParams: { from: dennis },
       });
 
-      //Bob adds 1 StETH to his trove
+      //Bob adds 1 WStETH to his trove
       const B_addedColl = toBN(dec(1, "ether"));
       await borrowerOperations.addColl(bob, bob, {
         from: bob,
         value: B_addedColl,
       });
 
-      //Carol  withdraws 1 StETH from her trove
+      //Carol  withdraws 1 WStETH from her trove
       const C_withdrawnColl = toBN(dec(1, "ether"));
       await borrowerOperations.withdrawColl(C_withdrawnColl, carol, carol, {
         from: carol,
@@ -2055,14 +2071,14 @@ contract(
       ).div(C_collAfterL1.add(D_coll));
       assert.isAtMost(
         th.getDifference(
-          await troveManager.getPendingStETHReward(carol),
+          await troveManager.getPendingWStETHReward(carol),
           C_pendingRewardsAfterL2
         ),
         1000000
       );
       assert.isAtMost(
         th.getDifference(
-          await troveManager.getPendingStETHReward(dennis),
+          await troveManager.getPendingWStETHReward(dennis),
           D_pendingRewardsAfterL2
         ),
         1000000
@@ -2130,17 +2146,17 @@ contract(
       // Grab remaining troves' collateral
       const carol_rawColl = (await troveManager.Troves(carol))[1].toString();
       const carol_pendingETHReward = (
-        await troveManager.getPendingStETHReward(carol)
+        await troveManager.getPendingWStETHReward(carol)
       ).toString();
 
       const dennis_rawColl = (await troveManager.Troves(dennis))[1].toString();
       const dennis_pendingETHReward = (
-        await troveManager.getPendingStETHReward(dennis)
+        await troveManager.getPendingWStETHReward(dennis)
       ).toString();
 
       const erin_rawColl = (await troveManager.Troves(erin))[1].toString();
       const erin_pendingETHReward = (
-        await troveManager.getPendingStETHReward(erin)
+        await troveManager.getPendingWStETHReward(erin)
       ).toString();
 
       // Check raw collateral of C, D, E
@@ -2162,7 +2178,7 @@ contract(
       assert.isAtMost(th.getDifference(dennis_rawColl, D_collAfterL2), 1000000);
       assert.isAtMost(th.getDifference(erin_rawColl, E_coll), 1000);
 
-      // Check pending StETH rewards of C, D, E
+      // Check pending WStETH rewards of C, D, E
       assert.isAtMost(
         th.getDifference(
           carol_pendingETHReward,
@@ -2183,8 +2199,8 @@ contract(
       );
 
       // Check systemic collateral
-      const activeColl = (await activePool.getStETH()).toString();
-      const defaultColl = (await defaultPool.getStETH()).toString();
+      const activeColl = (await activePool.getWStETH()).toString();
+      const defaultColl = (await defaultPool.getWStETH()).toString();
 
       assert.isAtMost(
         th.getDifference(
@@ -2241,9 +2257,9 @@ contract(
     // https://docs.google.com/spreadsheets/d/1F5p3nZy749K5jwO-bwJeTsRoY7ewMfWIQ3QHtokxqzo/edit?usp=sharing
     it("redistribution, all operations: A,B,C open. Liq(A). D opens. B adds, C withdraws. Liq(B). E & F open. D adds. Liq(F). Varying coll. Distributes correct rewards", async () => {
       /* A, B, C open troves.
-    A: 450 StETH
-    B: 8901 StETH
-    C: 23.902 StETH
+    A: 450 WStETH
+    B: 8901 WStETH
+    C: 23.902 WStETH
     */
       const { collateral: A_coll } = await openTrove({
         ICR: toBN(dec(90000, 16)),
@@ -2277,14 +2293,14 @@ contract(
         .div(B_coll.add(C_coll));
       assert.isAtMost(
         th.getDifference(
-          await troveManager.getPendingStETHReward(bob),
+          await troveManager.getPendingWStETHReward(bob),
           B_pendingRewardsAfterL1
         ),
         1000000
       );
       assert.isAtMost(
         th.getDifference(
-          await troveManager.getPendingStETHReward(carol),
+          await troveManager.getPendingWStETHReward(carol),
           C_pendingRewardsAfterL1
         ),
         1000000
@@ -2306,20 +2322,20 @@ contract(
       // Price rises
       await priceFeed.setPrice(dec(1, 27));
 
-      // D opens trove: 0.035 StETH
+      // D opens trove: 0.035 WStETH
       const { collateral: D_coll, totalDebt: D_totalDebt } = await openTrove({
         extraBaseFeeLMAAmount: dec(100, 18),
         extraParams: { from: dennis, value: toBN(dec(35, 15)) },
       });
 
-      // Bob adds 11.33909 StETH to his trove
+      // Bob adds 11.33909 WStETH to his trove
       const B_addedColl = toBN("11339090000000000000");
       await borrowerOperations.addColl(bob, bob, {
         from: bob,
         value: B_addedColl,
       });
 
-      // Carol withdraws 15 StETH from her trove
+      // Carol withdraws 15 WStETH from her trove
       const C_withdrawnColl = toBN(dec(15, "ether"));
       await borrowerOperations.withdrawColl(C_withdrawnColl, carol, carol, {
         from: carol,
@@ -2350,14 +2366,14 @@ contract(
       const C_collAfterL2 = C_collAfterL1.add(C_pendingRewardsAfterL2);
       assert.isAtMost(
         th.getDifference(
-          await troveManager.getPendingStETHReward(carol),
+          await troveManager.getPendingWStETHReward(carol),
           C_pendingRewardsAfterL2
         ),
         10000000
       );
       assert.isAtMost(
         th.getDifference(
-          await troveManager.getPendingStETHReward(dennis),
+          await troveManager.getPendingWStETHReward(dennis),
           D_pendingRewardsAfterL2
         ),
         10000000
@@ -2396,8 +2412,8 @@ contract(
       await priceFeed.setPrice(dec(1, 27));
 
       /* E and F open troves.
-    E: 10000 StETH
-    F: 0.0007 StETH
+    E: 10000 WStETH
+    F: 0.0007 WStETH
     */
       const { collateral: E_coll, totalDebt: E_totalDebt } = await openTrove({
         extraBaseFeeLMAAmount: dec(100, 18),
@@ -2430,19 +2446,19 @@ contract(
       // Grab remaining troves' collateral
       const carol_rawColl = (await troveManager.Troves(carol))[1].toString();
       const carol_pendingETHReward = (
-        await troveManager.getPendingStETHReward(carol)
+        await troveManager.getPendingWStETHReward(carol)
       ).toString();
       const carol_Stake = (await troveManager.Troves(carol))[2].toString();
 
       const dennis_rawColl = (await troveManager.Troves(dennis))[1].toString();
       const dennis_pendingETHReward = (
-        await troveManager.getPendingStETHReward(dennis)
+        await troveManager.getPendingWStETHReward(dennis)
       ).toString();
       const dennis_Stake = (await troveManager.Troves(dennis))[2].toString();
 
       const erin_rawColl = (await troveManager.Troves(erin))[1].toString();
       const erin_pendingETHReward = (
-        await troveManager.getPendingStETHReward(erin)
+        await troveManager.getPendingWStETHReward(erin)
       ).toString();
       const erin_Stake = (await troveManager.Troves(erin))[2].toString();
 
@@ -2461,7 +2477,7 @@ contract(
       assert.isAtMost(th.getDifference(dennis_rawColl, D_collAfterL2), 1000000);
       assert.isAtMost(th.getDifference(erin_rawColl, E_coll), 1000);
 
-      // Check pending StETH rewards of C, D, E
+      // Check pending WStETH rewards of C, D, E
       assert.isAtMost(
         th.getDifference(
           carol_pendingETHReward,
@@ -2482,8 +2498,8 @@ contract(
       );
 
       // Check systemic collateral
-      const activeColl = (await activePool.getStETH()).toString();
-      const defaultColl = (await defaultPool.getStETH()).toString();
+      const activeColl = (await activePool.getWStETH()).toString();
+      const defaultColl = (await defaultPool.getWStETH()).toString();
 
       assert.isAtMost(
         th.getDifference(

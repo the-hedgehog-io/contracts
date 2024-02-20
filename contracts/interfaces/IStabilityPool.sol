@@ -9,7 +9,7 @@ pragma solidity 0.8.19;
  * BaseFeeLMA in the Stability Pool:  that is, the offset debt evaporates, and an equal amount of BaseFeeLMA tokens in the Stability Pool is burned.
  *
  * Thus, a liquidation causes each depositor to receive a BaseFeeLMA loss, in proportion to their deposit as a share of total deposits.
- * They also receive an StETH gain, as the StETH collateral of the liquidated trove is distributed among Stability depositors,
+ * They also receive an WStETH gain, as the WStETH collateral of the liquidated trove is distributed among Stability depositors,
  * in the same proportion.
  *
  * When a liquidation occurs, it depletes every deposit by the same fraction: for example, a liquidation that depletes 40%
@@ -18,7 +18,7 @@ pragma solidity 0.8.19;
  * A deposit that has experienced a series of liquidations is termed a "compounded deposit": each liquidation depletes the deposit,
  * multiplying it by some factor in range ]0,1[
  *
- * Please see the implementation spec in the proof document, which closely follows on from the compounded deposit / StETH gain derivations:
+ * Please see the implementation spec in the proof document, which closely follows on from the compounded deposit / WStETH gain derivations:
  * https://github.com/liquity/liquity/blob/master/papers/Scalable_Reward_Distribution_with_Compounding_Stakes.pdf
  *
  * --- HOG ISSUANCE TO STABILITY POOL DEPOSITORS ---
@@ -36,7 +36,7 @@ pragma solidity 0.8.19;
 interface IStabilityPool {
     // --- Events ---
 
-    event StabilityPoolStETHBalanceUpdated(uint _newBalance);
+    event StabilityPoolWStETHBalanceUpdated(uint _newBalance);
     event StabilityPoolBaseFeeLMABalanceUpdated(uint _newBalance);
 
     event BorrowerOperationsAddressChanged(
@@ -63,13 +63,13 @@ interface IStabilityPool {
         uint _G
     );
 
-    event StETHGainWithdrawn(
+    event WStETHGainWithdrawn(
         address indexed _depositor,
-        uint _StETH,
+        uint _WStETH,
         uint _BaseFeeLMALoss
     );
     event HOGPaidToDepositor(address indexed _depositor, uint _HOG);
-    event StETHSent(address _to, uint _amount);
+    event WStETHSent(address _to, uint _amount);
 
     // --- Functions ---
 
@@ -93,7 +93,7 @@ interface IStabilityPool {
      * ---
      * - Triggers a HOG issuance, based on time passed since the last issuance. The HOG issuance is shared between *all* depositors and front ends
      * - Tags the deposit with the provided front end tag param, if it's a new deposit
-     * - Sends depositor's accumulated gains (HOG, StETH) to depositor
+     * - Sends depositor's accumulated gains (HOG, WStETH) to depositor
      * - Sends the tagged front end's accumulated HOG gains to the tagged front end
      * - Increases deposit and tagged front end's stake, and takes new snapshots for each.
      */
@@ -106,7 +106,7 @@ interface IStabilityPool {
      * ---
      * - Triggers a HOG issuance, based on time passed since the last issuance. The HOG issuance is shared between *all* depositors and front ends
      * - Removes the deposit's front end tag if it is a full withdrawal
-     * - Sends all depositor's accumulated gains (HOG, StETH) to depositor
+     * - Sends all depositor's accumulated gains (HOG, WStETH) to depositor
      * - Sends the tagged front end's accumulated HOG gains to the tagged front end
      * - Decreases deposit and tagged front end's stake, and takes new snapshots for each.
      *
@@ -118,16 +118,16 @@ interface IStabilityPool {
      * Initial checks:
      * - User has a non zero deposit
      * - User has an open trove
-     * - User has some StETH gain
+     * - User has some WStETH gain
      * ---
      * - Triggers a HOG issuance, based on time passed since the last issuance. The HOG issuance is shared between *all* depositors and front ends
      * - Sends all depositor's HOG gain to  depositor
      * - Sends all tagged front end's HOG gain to the tagged front end
-     * - Transfers the depositor's entire StETH gain from the Stability Pool to the caller's trove
+     * - Transfers the depositor's entire WStETH gain from the Stability Pool to the caller's trove
      * - Leaves their compounded deposit in the Stability Pool
      * - Updates snapshots for deposit and tagged front end stake
      */
-    function withdrawStETHGainToTrove(
+    function withdrawWStETHGainToTrove(
         address _upperHint,
         address _lowerHint
     ) external;
@@ -137,16 +137,16 @@ interface IStabilityPool {
      * - Caller is TroveManager
      * ---
      * Cancels out the specified debt against the BaseFeeLMA contained in the Stability Pool (as far as possible)
-     * and transfers the Trove's StETH collateral from ActivePool to StabilityPool.
+     * and transfers the Trove's WStETH collateral from ActivePool to StabilityPool.
      * Only called by liquidation functions in the TroveManager.
      */
     function offset(uint _debt, uint _coll) external;
 
     /*
-     * Returns the total amount of StETH held by the pool, accounted in an internal variable instead of `balance`,
-     * to exclude edge cases like StETH received from a self-destruct.
+     * Returns the total amount of WStETH held by the pool, accounted in an internal variable instead of `balance`,
+     * to exclude edge cases like WStETH received from a self-destruct.
      */
-    function getStETH() external view returns (uint);
+    function getWStETH() external view returns (uint);
 
     /*
      * Returns BaseFeeLMA held in the pool. Changes when users deposit/withdraw, and when Trove debt is offset.
@@ -154,9 +154,9 @@ interface IStabilityPool {
     function getTotalBaseFeeLMADeposits() external view returns (uint);
 
     /*
-     * Calculates the StETH gain earned by the deposit since its last snapshots were taken.
+     * Calculates the WStETH gain earned by the deposit since its last snapshots were taken.
      */
-    function getDepositorStETHGain(
+    function getDepositorWStETHGain(
         address _depositor
     ) external view returns (uint);
 

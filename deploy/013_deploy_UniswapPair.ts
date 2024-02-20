@@ -15,40 +15,40 @@ const deploy: DeployFunction = async ({
   );
 
   // Check Uniswap Pair LUSD-ETH pair before pair creation
-  let BaseFeeLMAStEthPairAddr = await uniswapV2Factory.getPair(
+  let BaseFeeLMAWStEthPairAddr = await uniswapV2Factory.getPair(
     BaseFeeLMAToken.address,
-    deployConfig.stEth
+    deployConfig.wwstETH
   );
-  let StEthBaseFeeLMAPairAddr = await uniswapV2Factory.getPair(
-    deployConfig.stEth,
+  let WStEthBaseFeeLMAPairAddr = await uniswapV2Factory.getPair(
+    deployConfig.wwstETH,
     BaseFeeLMAToken.address
   );
-  if (BaseFeeLMAStEthPairAddr != StEthBaseFeeLMAPairAddr) {
+  if (BaseFeeLMAWStEthPairAddr != WStEthBaseFeeLMAPairAddr) {
     throw console.error("Uniswap pair addresses are not equal");
   }
 
-  if (BaseFeeLMAStEthPairAddr == ethers.ZeroAddress) {
+  if (BaseFeeLMAWStEthPairAddr == ethers.ZeroAddress) {
     console.log("deploying a uniswap pair");
-    // Deploy Uniswap paid for StEth - BaseFeeLMA
+    // Deploy Uniswap paid for WStEth - BaseFeeLMA
     await uniswapV2Factory.createPair(
-      deployConfig.stEth,
+      deployConfig.wwstETH,
       BaseFeeLMAToken.address
     );
   }
 
-  BaseFeeLMAStEthPairAddr = await uniswapV2Factory.getPair(
+  BaseFeeLMAWStEthPairAddr = await uniswapV2Factory.getPair(
     BaseFeeLMAToken.address,
-    deployConfig.stEth
+    deployConfig.wwstETH
   );
 
-  StEthBaseFeeLMAPairAddr = await uniswapV2Factory.getPair(
-    deployConfig.stEth,
+  WStEthBaseFeeLMAPairAddr = await uniswapV2Factory.getPair(
+    deployConfig.wwstETH,
     BaseFeeLMAToken.address
   );
-  if (BaseFeeLMAStEthPairAddr === ethers.ZeroAddress) {
+  if (BaseFeeLMAWStEthPairAddr === ethers.ZeroAddress) {
     throw console.error("Uniswap pair is missing");
   }
-  if (BaseFeeLMAStEthPairAddr != StEthBaseFeeLMAPairAddr) {
+  if (BaseFeeLMAWStEthPairAddr != WStEthBaseFeeLMAPairAddr) {
     throw console.error("Uniswap pair addresses are not equal");
   }
 };

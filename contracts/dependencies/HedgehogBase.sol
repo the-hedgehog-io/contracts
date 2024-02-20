@@ -68,7 +68,7 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
         return _debt;
     }
 
-    // Return the amount of StETH to be drawn from a trove's collateral and sent as gas compensation.
+    // Return the amount of WStETH to be drawn from a trove's collateral and sent as gas compensation.
     function _getCollGasCompensation(
         uint _entireColl
     ) internal pure returns (uint) {
@@ -76,8 +76,8 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
     }
 
     function getEntireSystemColl() public view returns (uint entireSystemColl) {
-        uint activeColl = activePool.getStETH();
-        uint liquidatedColl = defaultPool.getStETH();
+        uint activeColl = activePool.getWStETH();
+        uint liquidatedColl = defaultPool.getWStETH();
         return activeColl.add(liquidatedColl);
     }
 

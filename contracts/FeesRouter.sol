@@ -195,7 +195,7 @@ contract FeesRouter is AccessControl {
     }
 
     /**
-     * Sets coll fees configs. Should be used if routing logic is unique for WStETH token fees.
+     * Sets coll fees configs. Should be used if routing logic is unique for WWStETH token fees.
      *
      * @param _percentage range at which new config is valid
      * @param _amountA amount of tokens that _addressA is going to receive in the event of tx fee appears in _percentage range. Must be > 0
@@ -292,13 +292,13 @@ contract FeesRouter is AccessControl {
         IActivePool _activePool = activePool;
 
         if (amountA > 0 && config.addressA != address(0)) {
-            _activePool.sendStETH(config.addressA, amountA);
+            _activePool.sendWStETH(config.addressA, amountA);
         }
         if (amountB > 0 && config.addressB != address(0)) {
-            _activePool.sendStETH(config.addressB, amountB);
+            _activePool.sendWStETH(config.addressB, amountB);
         }
         if (amountC > 0 && config.addressC != address(0)) {
-            _activePool.sendStETH(config.addressC, amountC);
+            _activePool.sendWStETH(config.addressC, amountC);
         }
     }
 

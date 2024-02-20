@@ -180,7 +180,7 @@ contract("StabilityPool", async (accounts) => {
     it("provideToSP(): increases totalBaseFeeLMADeposits by correct amount", async () => {
       // --- SETUP ---
 
-      // Whale opens Trove with 50 StETH, adds 2000 BaseFeeLMA to StabilityPool
+      // Whale opens Trove with 50 WStETH, adds 2000 BaseFeeLMA to StabilityPool
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(2000, 18)),
         ICR: toBN(dec(2, 18)),
@@ -467,7 +467,7 @@ contract("StabilityPool", async (accounts) => {
       }
     });
 
-    it("provideToSP(): reverts if cannot receive StETH Gain", async () => {
+    it("provideToSP(): reverts if cannot receive WStETH Gain", async () => {
       // --- SETUP ---
       // Whale deposits 1850 BaseFeeLMA in StabilityPool
       await openTrove({
@@ -505,7 +505,7 @@ contract("StabilityPool", async (accounts) => {
       ]);
       const tx1 = await nonPayable.forward(stabilityPool.address, txData1);
 
-      const gain_0 = await stabilityPool.getDepositorStETHGain(
+      const gain_0 = await stabilityPool.getDepositorWStETHGain(
         nonPayable.address
       );
       assert.isTrue(
@@ -520,7 +520,7 @@ contract("StabilityPool", async (accounts) => {
       await troveManager.liquidate(defaulter_1, { from: owner });
       await troveManager.liquidate(defaulter_2, { from: owner });
 
-      const gain_1 = await stabilityPool.getDepositorStETHGain(
+      const gain_1 = await stabilityPool.getDepositorWStETHGain(
         nonPayable.address
       );
       assert.isTrue(
@@ -528,18 +528,18 @@ contract("StabilityPool", async (accounts) => {
         "NonPayable should have some accumulated gains"
       );
 
-      // NonPayable tries to make deposit #2: 100BaseFeeLMA (which also attempts to withdraw StETH gain)
+      // NonPayable tries to make deposit #2: 100BaseFeeLMA (which also attempts to withdraw WStETH gain)
       const txData2 = th.getTransactionData("provideToSP(uint256,address)", [
         web3.utils.toHex(dec(100, 18)),
         frontEnd_1,
       ]);
       await th.assertRevert(
         nonPayable.forward(stabilityPool.address, txData2),
-        "StabilityPool: sending StETH failed"
+        "StabilityPool: sending WStETH failed"
       );
     });
 
-    it("provideToSP(): doesn't impact other users' deposits or StETH gains", async () => {
+    it("provideToSP(): doesn't impact other users' deposits or WStETH gains", async () => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(2, 18)),
@@ -610,18 +610,18 @@ contract("StabilityPool", async (accounts) => {
       ).toString();
 
       const alice_ETHGain_Before = (
-        await stabilityPool.getDepositorStETHGain(alice)
+        await stabilityPool.getDepositorWStETHGain(alice)
       ).toString();
       const bob_ETHGain_Before = (
-        await stabilityPool.getDepositorStETHGain(bob)
+        await stabilityPool.getDepositorWStETHGain(bob)
       ).toString();
       const carol_ETHGain_Before = (
-        await stabilityPool.getDepositorStETHGain(carol)
+        await stabilityPool.getDepositorWStETHGain(carol)
       ).toString();
 
       //check non-zero BaseFeeLMA and ETHGain in the Stability Pool
       const BaseFeeLMAinSP = await stabilityPool.getTotalBaseFeeLMADeposits();
-      const ETHinSP = await stabilityPool.getStETH();
+      const ETHinSP = await stabilityPool.getWStETH();
       assert.isTrue(BaseFeeLMAinSP.gt(mv._zeroBN));
       assert.isTrue(ETHinSP.gt(mv._zeroBN));
 
@@ -645,16 +645,16 @@ contract("StabilityPool", async (accounts) => {
       ).toString();
 
       const alice_ETHGain_After = (
-        await stabilityPool.getDepositorStETHGain(alice)
+        await stabilityPool.getDepositorWStETHGain(alice)
       ).toString();
       const bob_ETHGain_After = (
-        await stabilityPool.getDepositorStETHGain(bob)
+        await stabilityPool.getDepositorWStETHGain(bob)
       ).toString();
       const carol_ETHGain_After = (
-        await stabilityPool.getDepositorStETHGain(carol)
+        await stabilityPool.getDepositorWStETHGain(carol)
       ).toString();
 
-      // Check compounded deposits and StETH gains for A, B and C have not changed
+      // Check compounded deposits and WStETH gains for A, B and C have not changed
       assert.equal(
         alice_BaseFeeLMADeposit_Before,
         alice_BaseFeeLMADeposit_After
@@ -736,8 +736,8 @@ contract("StabilityPool", async (accounts) => {
       const defaultedDebt_Before = (
         await defaultPool.getBaseFeeLMADebt()
       ).toString();
-      const activeColl_Before = (await activePool.getStETH()).toString();
-      const defaultedColl_Before = (await defaultPool.getStETH()).toString();
+      const activeColl_Before = (await activePool.getWStETH()).toString();
+      const defaultedColl_Before = (await defaultPool.getWStETH()).toString();
       const TCR_Before = (await th.getTCR(contracts)).toString();
 
       // D makes an SP deposit
@@ -755,8 +755,8 @@ contract("StabilityPool", async (accounts) => {
       const defaultedDebt_After = (
         await defaultPool.getBaseFeeLMADebt()
       ).toString();
-      const activeColl_After = (await activePool.getStETH()).toString();
-      const defaultedColl_After = (await defaultPool.getStETH()).toString();
+      const activeColl_After = (await activePool.getWStETH()).toString();
+      const defaultedColl_After = (await defaultPool.getWStETH()).toString();
       const TCR_After = (await th.getTCR(contracts)).toString();
 
       // Check total system debt, collateral and TCR have not changed after a Stability deposit is made
@@ -1291,7 +1291,7 @@ contract("StabilityPool", async (accounts) => {
       // C deposits. A, and B earn HOG
       await stabilityPool.provideToSP(dec(5, 18), ZERO_ADDRESS, { from: C });
 
-      // Price drops, defaulter is liquidated, A, B and C earn StETH
+      // Price drops, defaulter is liquidated, A, B and C earn WStETH
       await priceFeed.setPrice(dec(105, 18));
       assert.isFalse(await th.checkRecoveryMode(contracts));
 
@@ -1545,7 +1545,7 @@ contract("StabilityPool", async (accounts) => {
       for (frontEnd of [frontEnd_1, frontEnd_2, frontEnd_3]) {
         const snapshot = await stabilityPool.frontEndSnapshots(frontEnd);
 
-        assert.equal(snapshot[0], "0"); // S (should always be 0 for front ends, since S corresponds to StETH gain)
+        assert.equal(snapshot[0], "0"); // S (should always be 0 for front ends, since S corresponds to WStETH gain)
         assert.equal(snapshot[1], "0"); // P
         assert.equal(snapshot[2], "0"); // G
         assert.equal(snapshot[3], "0"); // scale
@@ -1596,7 +1596,7 @@ contract("StabilityPool", async (accounts) => {
       }
     });
 
-    it("provideToSP(), new deposit: depositor does not receive StETH gains", async () => {
+    it("provideToSP(), new deposit: depositor does not receive WStETH gains", async () => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(10, 18)),
@@ -1621,7 +1621,7 @@ contract("StabilityPool", async (accounts) => {
 
       // --- TEST ---
 
-      // get current StETH balances
+      // get current WStETH balances
       const A_ETHBalance_Before = await web3.eth.getBalance(A);
       const B_ETHBalance_Before = await web3.eth.getBalance(B);
       const C_ETHBalance_Before = await web3.eth.getBalance(C);
@@ -1653,26 +1653,26 @@ contract("StabilityPool", async (accounts) => {
         })
       );
 
-      // StETH balances before minus gas used
+      // WStETH balances before minus gas used
       const A_expectedBalance = A_ETHBalance_Before - A_GAS_Used;
       const B_expectedBalance = B_ETHBalance_Before - B_GAS_Used;
       const C_expectedBalance = C_ETHBalance_Before - C_GAS_Used;
       const D_expectedBalance = D_ETHBalance_Before - D_GAS_Used;
 
-      // Get  StETH balances after
+      // Get  WStETH balances after
       const A_ETHBalance_After = await web3.eth.getBalance(A);
       const B_ETHBalance_After = await web3.eth.getBalance(B);
       const C_ETHBalance_After = await web3.eth.getBalance(C);
       const D_ETHBalance_After = await web3.eth.getBalance(D);
 
-      // Check StETH balances have not changed
+      // Check WStETH balances have not changed
       assert.equal(A_ETHBalance_After, A_expectedBalance);
       assert.equal(B_ETHBalance_After, B_expectedBalance);
       assert.equal(C_ETHBalance_After, C_expectedBalance);
       assert.equal(D_ETHBalance_After, D_expectedBalance);
     });
 
-    it("provideToSP(), new deposit after past full withdrawal: depositor does not receive StETH gains", async () => {
+    it("provideToSP(), new deposit after past full withdrawal: depositor does not receive WStETH gains", async () => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(10, 18)),
@@ -1716,7 +1716,7 @@ contract("StabilityPool", async (accounts) => {
       // B deposits. A,B,C,D earn HOG
       await stabilityPool.provideToSP(dec(5, 18), ZERO_ADDRESS, { from: B });
 
-      // Price drops, defaulter is liquidated, A, B, C, D earn StETH
+      // Price drops, defaulter is liquidated, A, B, C, D earn WStETH
       await priceFeed.setPrice(dec(105, 18));
       assert.isFalse(await th.checkRecoveryMode(contracts));
 
@@ -1733,7 +1733,7 @@ contract("StabilityPool", async (accounts) => {
 
       // --- TEST ---
 
-      // get current StETH balances
+      // get current WStETH balances
       const A_ETHBalance_Before = await web3.eth.getBalance(A);
       const B_ETHBalance_Before = await web3.eth.getBalance(B);
       const C_ETHBalance_Before = await web3.eth.getBalance(C);
@@ -1769,19 +1769,19 @@ contract("StabilityPool", async (accounts) => {
         })
       );
 
-      // StETH balances before minus gas used
+      // WStETH balances before minus gas used
       const A_expectedBalance = A_ETHBalance_Before - A_GAS_Used;
       const B_expectedBalance = B_ETHBalance_Before - B_GAS_Used;
       const C_expectedBalance = C_ETHBalance_Before - C_GAS_Used;
       const D_expectedBalance = D_ETHBalance_Before - D_GAS_Used;
 
-      // Get  StETH balances after
+      // Get  WStETH balances after
       const A_ETHBalance_After = await web3.eth.getBalance(A);
       const B_ETHBalance_After = await web3.eth.getBalance(B);
       const C_ETHBalance_After = await web3.eth.getBalance(C);
       const D_ETHBalance_After = await web3.eth.getBalance(D);
 
-      // Check StETH balances have not changed
+      // Check WStETH balances have not changed
       assert.equal(A_ETHBalance_After, A_expectedBalance);
       assert.equal(B_ETHBalance_After, B_expectedBalance);
       assert.equal(C_ETHBalance_After, C_expectedBalance);
@@ -2170,7 +2170,7 @@ contract("StabilityPool", async (accounts) => {
       for (frontEnd of [frontEnd_1, frontEnd_2, frontEnd_3]) {
         const snapshot = await stabilityPool.frontEndSnapshots(frontEnd);
 
-        assert.equal(snapshot[0], "0"); // S (should always be 0 for front ends, since S corresponds to StETH gain)
+        assert.equal(snapshot[0], "0"); // S (should always be 0 for front ends, since S corresponds to WStETH gain)
         assert.equal(snapshot[1], dec(1, 18)); // P
         assert.equal(snapshot[2], "0"); // G
         assert.equal(snapshot[3], "0"); // scale
@@ -2438,7 +2438,7 @@ contract("StabilityPool", async (accounts) => {
         extraParams: { from: defaulter_1 },
       });
 
-      // StETH drops, defaulter is in liquidation range (but not liquidated yet)
+      // WStETH drops, defaulter is in liquidation range (but not liquidated yet)
       await priceFeed.setPrice(dec(100, 18));
 
       await th.assertRevert(
@@ -2446,7 +2446,7 @@ contract("StabilityPool", async (accounts) => {
       );
     });
 
-    it("withdrawFromSP(): partial retrieval - retrieves correct BaseFeeLMA amount and the entire StETH Gain, and updates deposit", async () => {
+    it("withdrawFromSP(): partial retrieval - retrieves correct BaseFeeLMA amount and the entire WStETH Gain, and updates deposit", async () => {
       // --- SETUP ---
       // Whale deposits 185000 BaseFeeLMA in StabilityPool
       await openTrove({
@@ -2534,8 +2534,8 @@ contract("StabilityPool", async (accounts) => {
         100000
       );
 
-      // Expect Alice has withdrawn all StETH gain
-      const alice_pendingETHGain = await stabilityPool.getDepositorStETHGain(
+      // Expect Alice has withdrawn all WStETH gain
+      const alice_pendingETHGain = await stabilityPool.getDepositorWStETHGain(
         alice
       );
       assert.equal(alice_pendingETHGain, 0);
@@ -2709,7 +2709,7 @@ contract("StabilityPool", async (accounts) => {
       );
     });
 
-    it("withdrawFromSP(): Subsequent deposit and withdrawal attempt from same account, with no intermediate liquidations, withdraws zero StETH", async () => {
+    it("withdrawFromSP(): Subsequent deposit and withdrawal attempt from same account, with no intermediate liquidations, withdraws zero WStETH", async () => {
       // --- SETUP ---
       // Whale deposits 1850 BaseFeeLMA in StabilityPool
       await openTrove({
@@ -2752,38 +2752,42 @@ contract("StabilityPool", async (accounts) => {
 
       // Alice retrieves all of her entitled BaseFeeLMA:
       await stabilityPool.withdrawFromSP(dec(15000, 18), { from: alice });
-      assert.equal(await stabilityPool.getDepositorStETHGain(alice), 0);
+      assert.equal(await stabilityPool.getDepositorWStETHGain(alice), 0);
 
       // Alice makes second deposit
       await stabilityPool.provideToSP(dec(10000, 18), frontEnd_1, {
         from: alice,
       });
-      assert.equal(await stabilityPool.getDepositorStETHGain(alice), 0);
+      assert.equal(await stabilityPool.getDepositorWStETHGain(alice), 0);
 
-      const ETHinSP_Before = (await stabilityPool.getStETH()).toString();
+      const ETHinSP_Before = (await stabilityPool.getWStETH()).toString();
 
       // Alice attempts second withdrawal
       await stabilityPool.withdrawFromSP(dec(10000, 18), { from: alice });
-      assert.equal(await stabilityPool.getDepositorStETHGain(alice), 0);
+      assert.equal(await stabilityPool.getDepositorWStETHGain(alice), 0);
 
-      // Check StETH in pool does not change
-      const ETHinSP_1 = (await stabilityPool.getStETH()).toString();
+      // Check WStETH in pool does not change
+      const ETHinSP_1 = (await stabilityPool.getWStETH()).toString();
       assert.equal(ETHinSP_Before, ETHinSP_1);
 
       // Third deposit
       await stabilityPool.provideToSP(dec(10000, 18), frontEnd_1, {
         from: alice,
       });
-      assert.equal(await stabilityPool.getDepositorStETHGain(alice), 0);
+      assert.equal(await stabilityPool.getDepositorWStETHGain(alice), 0);
 
       // Alice attempts third withdrawal (this time, frm SP to Trove)
-      const txPromise_A = stabilityPool.withdrawStETHGainToTrove(alice, alice, {
-        from: alice,
-      });
+      const txPromise_A = stabilityPool.withdrawWStETHGainToTrove(
+        alice,
+        alice,
+        {
+          from: alice,
+        }
+      );
       await th.assertRevert(txPromise_A);
     });
 
-    it("withdrawFromSP(): it correctly updates the user's BaseFeeLMA and StETH snapshots of entitled reward per unit staked", async () => {
+    it("withdrawFromSP(): it correctly updates the user's BaseFeeLMA and WStETH snapshots of entitled reward per unit staked", async () => {
       // --- SETUP ---
       // Whale deposits 185000 BaseFeeLMA in StabilityPool
       await openTrove({
@@ -2844,7 +2848,7 @@ contract("StabilityPool", async (accounts) => {
       assert.equal(alice_snapshot_P_After, P);
     });
 
-    it("withdrawFromSP(): decreases StabilityPool StETH", async () => {
+    it("withdrawFromSP(): decreases StabilityPool WStETH", async () => {
       // --- SETUP ---
       // Whale deposits 185000 BaseFeeLMA in StabilityPool
       await openTrove({
@@ -2885,21 +2889,21 @@ contract("StabilityPool", async (accounts) => {
         th.getEmittedLiquidationValues(liquidationTx_1);
 
       //Get ActivePool and StabilityPool Ether before retrieval:
-      const active_ETH_Before = await activePool.getStETH();
-      const stability_ETH_Before = await stabilityPool.getStETH();
+      const active_ETH_Before = await activePool.getWStETH();
+      const stability_ETH_Before = await stabilityPool.getWStETH();
 
       // Expect alice to be entitled to 15000/200000 of the liquidated coll
       const aliceExpectedETHGain = liquidatedColl
         .mul(toBN(dec(15000, 18)))
         .div(toBN(dec(200000, 18)));
-      const aliceETHGain = await stabilityPool.getDepositorStETHGain(alice);
+      const aliceETHGain = await stabilityPool.getDepositorWStETHGain(alice);
       assert.isTrue(aliceExpectedETHGain.eq(aliceETHGain));
 
       // Alice retrieves all of her deposit
       await stabilityPool.withdrawFromSP(dec(15000, 18), { from: alice });
 
-      const active_ETH_After = await activePool.getStETH();
-      const stability_ETH_After = await stabilityPool.getStETH();
+      const active_ETH_After = await activePool.getWStETH();
+      const stability_ETH_After = await stabilityPool.getWStETH();
 
       const active_ETH_Difference = active_ETH_Before.sub(active_ETH_After);
       const stability_ETH_Difference =
@@ -3009,7 +3013,7 @@ contract("StabilityPool", async (accounts) => {
       and thus with a deposit of 10000 BaseFeeLMA, each should withdraw 8333.3333333333333333 BaseFeeLMA (in practice, slightly less due to rounding error)
       */
 
-      // Price bounces back to $200 per StETH
+      // Price bounces back to $200 per WStETH
       await priceFeed.setPrice(dec(200, 18));
 
       // Bob issues a further 5000 BaseFeeLMA from his trove
@@ -3045,7 +3049,7 @@ contract("StabilityPool", async (accounts) => {
       );
     });
 
-    it("withdrawFromSP(): doesn't impact other users Stability deposits or StETH gains", async () => {
+    it("withdrawFromSP(): doesn't impact other users Stability deposits or WStETH gains", async () => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(100000, 18)),
         ICR: toBN(dec(10, 18)),
@@ -3106,15 +3110,15 @@ contract("StabilityPool", async (accounts) => {
       ).toString();
 
       const alice_ETHGain_Before = (
-        await stabilityPool.getDepositorStETHGain(alice)
+        await stabilityPool.getDepositorWStETHGain(alice)
       ).toString();
       const bob_ETHGain_Before = (
-        await stabilityPool.getDepositorStETHGain(bob)
+        await stabilityPool.getDepositorWStETHGain(bob)
       ).toString();
 
       //check non-zero BaseFeeLMA and ETHGain in the Stability Pool
       const BaseFeeLMAinSP = await stabilityPool.getTotalBaseFeeLMADeposits();
-      const ETHinSP = await stabilityPool.getStETH();
+      const ETHinSP = await stabilityPool.getWStETH();
       assert.isTrue(BaseFeeLMAinSP.gt(mv._zeroBN));
       assert.isTrue(ETHinSP.gt(mv._zeroBN));
 
@@ -3137,13 +3141,13 @@ contract("StabilityPool", async (accounts) => {
       ).toString();
 
       const alice_ETHGain_After = (
-        await stabilityPool.getDepositorStETHGain(alice)
+        await stabilityPool.getDepositorWStETHGain(alice)
       ).toString();
       const bob_ETHGain_After = (
-        await stabilityPool.getDepositorStETHGain(bob)
+        await stabilityPool.getDepositorWStETHGain(bob)
       ).toString();
 
-      // Check compounded deposits and StETH gains for A and B have not changed
+      // Check compounded deposits and WStETH gains for A and B have not changed
       assert.equal(
         alice_BaseFeeLMADeposit_Before,
         alice_BaseFeeLMADeposit_After
@@ -3216,8 +3220,8 @@ contract("StabilityPool", async (accounts) => {
       const defaultedDebt_Before = (
         await defaultPool.getBaseFeeLMADebt()
       ).toString();
-      const activeColl_Before = (await activePool.getStETH()).toString();
-      const defaultedColl_Before = (await defaultPool.getStETH()).toString();
+      const activeColl_Before = (await activePool.getWStETH()).toString();
+      const defaultedColl_Before = (await defaultPool.getWStETH()).toString();
       const TCR_Before = (await th.getTCR(contracts)).toString();
 
       // Carol withdraws her Stability deposit
@@ -3234,8 +3238,8 @@ contract("StabilityPool", async (accounts) => {
       const defaultedDebt_After = (
         await defaultPool.getBaseFeeLMADebt()
       ).toString();
-      const activeColl_After = (await activePool.getStETH()).toString();
-      const defaultedColl_After = (await defaultPool.getStETH()).toString();
+      const activeColl_After = (await activePool.getWStETH()).toString();
+      const defaultedColl_After = (await defaultPool.getWStETH()).toString();
       const TCR_After = (await th.getTCR(contracts)).toString();
 
       // Check total system debt, collateral and TCR have not changed after a Stability deposit is made
@@ -3394,7 +3398,7 @@ contract("StabilityPool", async (accounts) => {
         extraParams: { from: defaulter_2 },
       });
 
-      // StETH drops, defaulters are in liquidation range
+      // WStETH drops, defaulters are in liquidation range
       await priceFeed.setPrice(dec(105, 18));
       const price = await priceFeed.getPrice();
       assert.isTrue(
@@ -3420,7 +3424,7 @@ contract("StabilityPool", async (accounts) => {
       const A_HOGBalBefore = await hogToken.balanceOf(A);
 
       // Check Alice has gains to withdraw
-      const A_pendingETHGain = await stabilityPool.getDepositorStETHGain(A);
+      const A_pendingETHGain = await stabilityPool.getDepositorWStETHGain(A);
       const A_pendingHOGGain = await stabilityPool.getDepositorHOGGain(A);
       assert.isTrue(A_pendingETHGain.gt(toBN("0")));
       assert.isTrue(A_pendingHOGGain.gt(toBN("0")));
@@ -3441,7 +3445,7 @@ contract("StabilityPool", async (accounts) => {
       const A_HOGBalAfter = await hogToken.balanceOf(A);
       const A_HOGBalDiff = A_HOGBalAfter.sub(A_HOGBalBefore);
 
-      // Check A's StETH and HOG balances have increased correctly
+      // Check A's WStETH and HOG balances have increased correctly
       assert.isTrue(A_ETHBalAfter.sub(A_expectedBalance).eq(A_pendingETHGain));
       assert.isAtMost(th.getDifference(A_HOGBalDiff, A_pendingHOGGain), 1000);
     });
@@ -3502,7 +3506,7 @@ contract("StabilityPool", async (accounts) => {
       assert.equal(BaseFeeLMAinSP_Before, BaseFeeLMAinSP_After);
     });
 
-    it("withdrawFromSP(): withdrawing 0 StETH Gain does not alter the caller's StETH balance, their trove collateral, or the StETH  in the Stability Pool", async () => {
+    it("withdrawFromSP(): withdrawing 0 WStETH Gain does not alter the caller's WStETH balance, their trove collateral, or the WStETH  in the Stability Pool", async () => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(10, 18)),
@@ -3553,7 +3557,7 @@ contract("StabilityPool", async (accounts) => {
 
       // Check Dennis has 0 ETHGain
       const dennis_ETHGain = (
-        await stabilityPool.getDepositorStETHGain(dennis)
+        await stabilityPool.getDepositorWStETHGain(dennis)
       ).toString();
       assert.equal(dennis_ETHGain, "0");
 
@@ -3561,7 +3565,7 @@ contract("StabilityPool", async (accounts) => {
       const dennis_Collateral_Before = (
         await troveManager.Troves(dennis)
       )[1].toString();
-      const ETHinSP_Before = (await stabilityPool.getStETH()).toString();
+      const ETHinSP_Before = (await stabilityPool.getWStETH()).toString();
 
       await priceFeed.setPrice(dec(200, 18));
 
@@ -3571,17 +3575,17 @@ contract("StabilityPool", async (accounts) => {
         gasPrice: GAS_PRICE,
       });
 
-      // Check withdrawal does not alter Dennis' StETH balance or his trove's collateral
+      // Check withdrawal does not alter Dennis' WStETH balance or his trove's collateral
       const dennis_ETHBalance_After = web3.eth.getBalance(dennis).toString();
       const dennis_Collateral_After = (
         await troveManager.Troves(dennis)
       )[1].toString();
-      const ETHinSP_After = (await stabilityPool.getStETH()).toString();
+      const ETHinSP_After = (await stabilityPool.getWStETH()).toString();
 
       assert.equal(dennis_ETHBalance_Before, dennis_ETHBalance_After);
       assert.equal(dennis_Collateral_Before, dennis_Collateral_After);
 
-      // Check withdrawal has not altered the StETH in the Stability Pool
+      // Check withdrawal has not altered the WStETH in the Stability Pool
       assert.equal(ETHinSP_Before, ETHinSP_After);
     });
 
@@ -3780,7 +3784,7 @@ contract("StabilityPool", async (accounts) => {
       assert.equal(BaseFeeLMAinSP_After, expectedBaseFeeLMAinSP);
     });
 
-    it("withdrawFromSP(): caller can withdraw full deposit and StETH gain during Recovery Mode", async () => {
+    it("withdrawFromSP(): caller can withdraw full deposit and WStETH gain during Recovery Mode", async () => {
       // --- SETUP ---
 
       // Price doubles
@@ -3875,11 +3879,13 @@ contract("StabilityPool", async (accounts) => {
       const carol_Deposit_Before =
         await stabilityPool.getCompoundedBaseFeeLMADeposit(carol);
 
-      const alice_ETHGain_Before = await stabilityPool.getDepositorStETHGain(
+      const alice_ETHGain_Before = await stabilityPool.getDepositorWStETHGain(
         alice
       );
-      const bob_ETHGain_Before = await stabilityPool.getDepositorStETHGain(bob);
-      const carol_ETHGain_Before = await stabilityPool.getDepositorStETHGain(
+      const bob_ETHGain_Before = await stabilityPool.getDepositorWStETHGain(
+        bob
+      );
+      const carol_ETHGain_Before = await stabilityPool.getDepositorWStETHGain(
         carol
       );
 
@@ -3944,7 +3950,7 @@ contract("StabilityPool", async (accounts) => {
         carol_expectedBaseFeeLMABalance
       );
 
-      // Check StETH balances of A, B, C have increased by the value of their StETH gain from liquidations, respectively
+      // Check WStETH balances of A, B, C have increased by the value of their WStETH gain from liquidations, respectively
       const alice_expectedETHBalance = alice_ETH_Balance_Before
         .add(alice_ETHGain_Before)
         .toString();
@@ -3963,7 +3969,7 @@ contract("StabilityPool", async (accounts) => {
         await web3.eth.getBalance(carol)
       ).toString();
 
-      // StETH balances before minus gas used
+      // WStETH balances before minus gas used
       const alice_ETHBalance_After_Gas = alice_ETHBalance_After - A_GAS_Used;
       const bob_ETHBalance_After_Gas = bob_ETHBalance_After - B_GAS_Used;
       const carol_ETHBalance_After_Gas = carol_ETHBalance_After - C_GAS_Used;
@@ -3984,12 +3990,12 @@ contract("StabilityPool", async (accounts) => {
       ).toString();
       assert.equal(BaseFeeLMAinSP_After, expectedBaseFeeLMAinSP);
 
-      // Check StETH in SP has reduced to zero
-      const ETHinSP_After = (await stabilityPool.getStETH()).toString();
+      // Check WStETH in SP has reduced to zero
+      const ETHinSP_After = (await stabilityPool.getWStETH()).toString();
       assert.isAtMost(th.getDifference(ETHinSP_After, "0"), 100000);
     });
 
-    it("getDepositorStETHGain(): depositor does not earn further StETH gains from liquidations while their compounded deposit == 0: ", async () => {
+    it("getDepositorWStETHGain(): depositor does not earn further WStETH gains from liquidations while their compounded deposit == 0: ", async () => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(1, 24)),
         ICR: toBN(dec(10, 18)),
@@ -4057,12 +4063,12 @@ contract("StabilityPool", async (accounts) => {
       assert.equal(alice_Deposit, "0");
       assert.equal(bob_Deposit, "0");
 
-      // Get StETH gain for A and B
+      // Get WStETH gain for A and B
       const alice_ETHGain_1 = (
-        await stabilityPool.getDepositorStETHGain(alice)
+        await stabilityPool.getDepositorWStETHGain(alice)
       ).toString();
       const bob_ETHGain_1 = (
-        await stabilityPool.getDepositorStETHGain(bob)
+        await stabilityPool.getDepositorWStETHGain(bob)
       ).toString();
 
       // Whale deposits 10000 BaseFeeLMA to Stability Pool
@@ -4072,12 +4078,12 @@ contract("StabilityPool", async (accounts) => {
       await troveManager.liquidate(defaulter_2);
       assert.isFalse(await sortedTroves.contains(defaulter_2));
 
-      // Check Alice and Bob have not received StETH gain from liquidation 2 while their deposit was 0
+      // Check Alice and Bob have not received WStETH gain from liquidation 2 while their deposit was 0
       const alice_ETHGain_2 = (
-        await stabilityPool.getDepositorStETHGain(alice)
+        await stabilityPool.getDepositorWStETHGain(alice)
       ).toString();
       const bob_ETHGain_2 = (
-        await stabilityPool.getDepositorStETHGain(bob)
+        await stabilityPool.getDepositorWStETHGain(bob)
       ).toString();
 
       assert.equal(alice_ETHGain_1, alice_ETHGain_2);
@@ -4087,12 +4093,12 @@ contract("StabilityPool", async (accounts) => {
       await troveManager.liquidate(defaulter_3);
       assert.isFalse(await sortedTroves.contains(defaulter_3));
 
-      // Check Alice and Bob have not received StETH gain from liquidation 3 while their deposit was 0
+      // Check Alice and Bob have not received WStETH gain from liquidation 3 while their deposit was 0
       const alice_ETHGain_3 = (
-        await stabilityPool.getDepositorStETHGain(alice)
+        await stabilityPool.getDepositorWStETHGain(alice)
       ).toString();
       const bob_ETHGain_3 = (
-        await stabilityPool.getDepositorStETHGain(bob)
+        await stabilityPool.getDepositorWStETHGain(bob)
       ).toString();
 
       assert.equal(alice_ETHGain_1, alice_ETHGain_3);
@@ -4487,7 +4493,7 @@ contract("StabilityPool", async (accounts) => {
       for (frontEnd of [frontEnd_1, frontEnd_2, frontEnd_3]) {
         const snapshot = await stabilityPool.frontEndSnapshots(frontEnd);
 
-        assert.equal(snapshot[0], "0"); // S (should always be 0 for front ends, since S corresponds to StETH gain)
+        assert.equal(snapshot[0], "0"); // S (should always be 0 for front ends, since S corresponds to WStETH gain)
         assert.equal(snapshot[1], dec(1, 18)); // P
         assert.equal(snapshot[2], "0"); // G
         assert.equal(snapshot[3], "0"); // scale
@@ -4840,7 +4846,7 @@ contract("StabilityPool", async (accounts) => {
         extraParams: { from: defaulter_1 },
       });
 
-      //  SETUP: Execute a series of operations to trigger HOG and StETH rewards for depositor A
+      //  SETUP: Execute a series of operations to trigger HOG and WStETH rewards for depositor A
 
       // Fast-forward time and make a second deposit, to trigger HOG reward and make G > 0
       await th.fastForwardTime(
@@ -4882,9 +4888,9 @@ contract("StabilityPool", async (accounts) => {
       await th.assertRevert(withdrawalPromise_C, expectedRevertMessage);
     });
 
-    // --- withdrawStETHGainToTrove ---
+    // --- withdrawWStETHGainToTrove ---
 
-    it("withdrawStETHGainToTrove(): reverts when user has no active deposit", async () => {
+    it("withdrawWStETHGainToTrove(): reverts when user has no active deposit", async () => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(100000, 18)),
         ICR: toBN(dec(10, 18)),
@@ -4926,7 +4932,7 @@ contract("StabilityPool", async (accounts) => {
       await troveManager.liquidate(defaulter_1);
       assert.isFalse(await sortedTroves.contains(defaulter_1));
 
-      const txAlice = await stabilityPool.withdrawStETHGainToTrove(
+      const txAlice = await stabilityPool.withdrawWStETHGainToTrove(
         alice,
         alice,
         {
@@ -4935,13 +4941,13 @@ contract("StabilityPool", async (accounts) => {
       );
       assert.isTrue(txAlice.receipt.status);
 
-      const txPromise_B = stabilityPool.withdrawStETHGainToTrove(bob, bob, {
+      const txPromise_B = stabilityPool.withdrawWStETHGainToTrove(bob, bob, {
         from: bob,
       });
       await th.assertRevert(txPromise_B);
     });
 
-    it("withdrawStETHGainToTrove(): Applies BaseFeeLMALoss to user's deposit, and redirects StETH reward to user's Trove", async () => {
+    it("withdrawWStETHGainToTrove(): Applies BaseFeeLMALoss to user's deposit, and redirects WStETH reward to user's Trove", async () => {
       // --- SETUP ---
       // Whale deposits 185000 BaseFeeLMA in StabilityPool
       await openTrove({
@@ -4971,7 +4977,7 @@ contract("StabilityPool", async (accounts) => {
         from: alice,
       });
 
-      // check Alice's Trove recorded StETH Before:
+      // check Alice's Trove recorded WStETH Before:
       const aliceTrove_Before = await troveManager.Troves(alice);
       const aliceTrove_ETH_Before = aliceTrove_Before[1];
       assert.isTrue(aliceTrove_ETH_Before.gt(toBN("0")));
@@ -4986,7 +4992,7 @@ contract("StabilityPool", async (accounts) => {
       const [liquidatedDebt, liquidatedColl, ,] =
         th.getEmittedLiquidationValues(liquidationTx_1);
 
-      const ETHGain_A = await stabilityPool.getDepositorStETHGain(alice);
+      const ETHGain_A = await stabilityPool.getDepositorWStETHGain(alice);
       const compoundedDeposit_A =
         await stabilityPool.getCompoundedBaseFeeLMADeposit(alice);
 
@@ -5006,8 +5012,8 @@ contract("StabilityPool", async (accounts) => {
         100000
       );
 
-      // Alice sends her StETH Gains to her Trove
-      await stabilityPool.withdrawStETHGainToTrove(alice, alice, {
+      // Alice sends her WStETH Gains to her Trove
+      await stabilityPool.withdrawWStETHGainToTrove(alice, alice, {
         from: alice,
       });
 
@@ -5021,7 +5027,7 @@ contract("StabilityPool", async (accounts) => {
         100000
       );
 
-      // check alice's Trove recorded StETH has increased by the expected reward amount
+      // check alice's Trove recorded WStETH has increased by the expected reward amount
       const aliceTrove_After = await troveManager.Troves(alice);
       const aliceTrove_ETH_After = aliceTrove_After[1];
 
@@ -5032,7 +5038,7 @@ contract("StabilityPool", async (accounts) => {
       assert.equal(Trove_ETH_Increase, ETHGain_A);
     });
 
-    it("withdrawStETHGainToTrove(): reverts if it would leave trove with ICR < MCR", async () => {
+    it("withdrawWStETHGainToTrove(): reverts if it would leave trove with ICR < MCR", async () => {
       // --- SETUP ---
       // Whale deposits 1850 BaseFeeLMA in StabilityPool
       await openTrove({
@@ -5062,7 +5068,7 @@ contract("StabilityPool", async (accounts) => {
         from: alice,
       });
 
-      // check alice's Trove recorded StETH Before:
+      // check alice's Trove recorded WStETH Before:
       const aliceTrove_Before = await troveManager.Troves(alice);
       const aliceTrove_ETH_Before = aliceTrove_Before[1];
       assert.isTrue(aliceTrove_ETH_Before.gt(toBN("0")));
@@ -5073,14 +5079,14 @@ contract("StabilityPool", async (accounts) => {
       // defaulter's Trove is closed.
       await troveManager.liquidate(defaulter_1, { from: owner });
 
-      // Alice attempts to  her StETH Gains to her Trove
+      // Alice attempts to  her WStETH Gains to her Trove
       await assertRevert(
-        stabilityPool.withdrawStETHGainToTrove(alice, alice, { from: alice }),
+        stabilityPool.withdrawWStETHGainToTrove(alice, alice, { from: alice }),
         "BorrowerOps: An operation that would result in ICR < MCR is not permitted"
       );
     });
 
-    it("withdrawStETHGainToTrove(): Subsequent deposit and withdrawal attempt from same account, with no intermediate liquidations, withdraws zero StETH", async () => {
+    it("withdrawWStETHGainToTrove(): Subsequent deposit and withdrawal attempt from same account, with no intermediate liquidations, withdraws zero WStETH", async () => {
       // --- SETUP ---
       // Whale deposits 1850 BaseFeeLMA in StabilityPool
       await openTrove({
@@ -5110,7 +5116,7 @@ contract("StabilityPool", async (accounts) => {
         from: alice,
       });
 
-      // check alice's Trove recorded StETH Before:
+      // check alice's Trove recorded WStETH Before:
       const aliceTrove_Before = await troveManager.Troves(alice);
       const aliceTrove_ETH_Before = aliceTrove_Before[1];
       assert.isTrue(aliceTrove_ETH_Before.gt(toBN("0")));
@@ -5124,23 +5130,27 @@ contract("StabilityPool", async (accounts) => {
       // price bounces back
       await priceFeed.setPrice(dec(200, 18));
 
-      // Alice sends her StETH Gains to her Trove
-      await stabilityPool.withdrawStETHGainToTrove(alice, alice, {
+      // Alice sends her WStETH Gains to her Trove
+      await stabilityPool.withdrawWStETHGainToTrove(alice, alice, {
         from: alice,
       });
 
-      assert.equal(await stabilityPool.getDepositorStETHGain(alice), 0);
+      assert.equal(await stabilityPool.getDepositorWStETHGain(alice), 0);
 
-      const ETHinSP_Before = (await stabilityPool.getStETH()).toString();
+      const ETHinSP_Before = (await stabilityPool.getWStETH()).toString();
 
-      // Alice attempts second withdrawal from SP to Trove - reverts, due to 0 StETH Gain
-      const txPromise_A = stabilityPool.withdrawStETHGainToTrove(alice, alice, {
-        from: alice,
-      });
+      // Alice attempts second withdrawal from SP to Trove - reverts, due to 0 WStETH Gain
+      const txPromise_A = stabilityPool.withdrawWStETHGainToTrove(
+        alice,
+        alice,
+        {
+          from: alice,
+        }
+      );
       await th.assertRevert(txPromise_A);
 
-      // Check StETH in pool does not change
-      const ETHinSP_1 = (await stabilityPool.getStETH()).toString();
+      // Check WStETH in pool does not change
+      const ETHinSP_1 = (await stabilityPool.getWStETH()).toString();
       assert.equal(ETHinSP_Before, ETHinSP_1);
 
       await priceFeed.setPrice(dec(200, 18));
@@ -5148,12 +5158,12 @@ contract("StabilityPool", async (accounts) => {
       // Alice attempts third withdrawal (this time, from SP to her own account)
       await stabilityPool.withdrawFromSP(dec(15000, 18), { from: alice });
 
-      // Check StETH in pool does not change
-      const ETHinSP_2 = (await stabilityPool.getStETH()).toString();
+      // Check WStETH in pool does not change
+      const ETHinSP_2 = (await stabilityPool.getWStETH()).toString();
       assert.equal(ETHinSP_Before, ETHinSP_2);
     });
 
-    it("withdrawStETHGainToTrove(): decreases StabilityPool StETH and increases activePool StETH", async () => {
+    it("withdrawWStETHGainToTrove(): decreases StabilityPool WStETH and increases activePool WStETH", async () => {
       // --- SETUP ---
       // Whale deposits 185000 BaseFeeLMA in StabilityPool
       await openTrove({
@@ -5195,29 +5205,29 @@ contract("StabilityPool", async (accounts) => {
       const aliceExpectedETHGain = liquidatedColl
         .mul(toBN(dec(15000, 18)))
         .div(toBN(dec(200000, 18)));
-      const aliceETHGain = await stabilityPool.getDepositorStETHGain(alice);
+      const aliceETHGain = await stabilityPool.getDepositorWStETHGain(alice);
       assert.isTrue(aliceExpectedETHGain.eq(aliceETHGain));
 
       // price bounces back
       await priceFeed.setPrice(dec(200, 18));
 
       //check activePool and StabilityPool Ether before retrieval:
-      const active_ETH_Before = await activePool.getStETH();
-      const stability_ETH_Before = await stabilityPool.getStETH();
+      const active_ETH_Before = await activePool.getWStETH();
+      const stability_ETH_Before = await stabilityPool.getWStETH();
 
-      // Alice retrieves redirects StETH gain to her Trove
-      await stabilityPool.withdrawStETHGainToTrove(alice, alice, {
+      // Alice retrieves redirects WStETH gain to her Trove
+      await stabilityPool.withdrawWStETHGainToTrove(alice, alice, {
         from: alice,
       });
 
-      const active_ETH_After = await activePool.getStETH();
-      const stability_ETH_After = await stabilityPool.getStETH();
+      const active_ETH_After = await activePool.getWStETH();
+      const stability_ETH_After = await stabilityPool.getWStETH();
 
-      const active_ETH_Difference = active_ETH_After.sub(active_ETH_Before); // AP StETH should increase
+      const active_ETH_Difference = active_ETH_After.sub(active_ETH_Before); // AP WStETH should increase
       const stability_ETH_Difference =
-        stability_ETH_Before.sub(stability_ETH_After); // SP StETH should decrease
+        stability_ETH_Before.sub(stability_ETH_After); // SP WStETH should decrease
 
-      // check Pool StETH values change by Alice's ETHGain, i.e 0.075 StETH
+      // check Pool WStETH values change by Alice's ETHGain, i.e 0.075 WStETH
       assert.isAtMost(
         th.getDifference(active_ETH_Difference, aliceETHGain),
         10000
@@ -5228,7 +5238,7 @@ contract("StabilityPool", async (accounts) => {
       );
     });
 
-    it("withdrawStETHGainToTrove(): All depositors are able to withdraw their StETH gain from the SP to their Trove", async () => {
+    it("withdrawWStETHGainToTrove(): All depositors are able to withdraw their WStETH gain from the SP to their Trove", async () => {
       // Whale opens trove
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(100000, 18)),
@@ -5262,33 +5272,37 @@ contract("StabilityPool", async (accounts) => {
       await priceFeed.setPrice(dec(200, 18));
 
       // All depositors attempt to withdraw
-      const tx1 = await stabilityPool.withdrawStETHGainToTrove(alice, alice, {
+      const tx1 = await stabilityPool.withdrawWStETHGainToTrove(alice, alice, {
         from: alice,
       });
       assert.isTrue(tx1.receipt.status);
-      const tx2 = await stabilityPool.withdrawStETHGainToTrove(bob, bob, {
+      const tx2 = await stabilityPool.withdrawWStETHGainToTrove(bob, bob, {
         from: bob,
       });
       assert.isTrue(tx1.receipt.status);
-      const tx3 = await stabilityPool.withdrawStETHGainToTrove(carol, carol, {
+      const tx3 = await stabilityPool.withdrawWStETHGainToTrove(carol, carol, {
         from: carol,
       });
       assert.isTrue(tx1.receipt.status);
-      const tx4 = await stabilityPool.withdrawStETHGainToTrove(dennis, dennis, {
-        from: dennis,
-      });
+      const tx4 = await stabilityPool.withdrawWStETHGainToTrove(
+        dennis,
+        dennis,
+        {
+          from: dennis,
+        }
+      );
       assert.isTrue(tx1.receipt.status);
-      const tx5 = await stabilityPool.withdrawStETHGainToTrove(erin, erin, {
+      const tx5 = await stabilityPool.withdrawWStETHGainToTrove(erin, erin, {
         from: erin,
       });
       assert.isTrue(tx1.receipt.status);
-      const tx6 = await stabilityPool.withdrawStETHGainToTrove(flyn, flyn, {
+      const tx6 = await stabilityPool.withdrawWStETHGainToTrove(flyn, flyn, {
         from: flyn,
       });
       assert.isTrue(tx1.receipt.status);
     });
 
-    it("withdrawStETHGainToTrove(): All depositors withdraw, each withdraw their correct StETH gain", async () => {
+    it("withdrawWStETHGainToTrove(): All depositors withdraw, each withdraw their correct WStETH gain", async () => {
       // Whale opens trove
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(100000, 18)),
@@ -5321,7 +5335,7 @@ contract("StabilityPool", async (accounts) => {
       const [, liquidatedColl, ,] =
         th.getEmittedLiquidationValues(liquidationTx);
 
-      /* All depositors attempt to withdraw their StETH gain to their Trove. Each depositor 
+      /* All depositors attempt to withdraw their WStETH gain to their Trove. Each depositor 
       receives (liquidatedColl/ 6).
 
       Thus, expected new collateral for each depositor with 1 Ether in their trove originally, is 
@@ -5332,7 +5346,7 @@ contract("StabilityPool", async (accounts) => {
 
       await priceFeed.setPrice(dec(200, 18));
 
-      await stabilityPool.withdrawStETHGainToTrove(alice, alice, {
+      await stabilityPool.withdrawWStETHGainToTrove(alice, alice, {
         from: alice,
       });
       const aliceCollAfter = (await troveManager.Troves(alice))[1];
@@ -5341,14 +5355,14 @@ contract("StabilityPool", async (accounts) => {
         10000
       );
 
-      await stabilityPool.withdrawStETHGainToTrove(bob, bob, { from: bob });
+      await stabilityPool.withdrawWStETHGainToTrove(bob, bob, { from: bob });
       const bobCollAfter = (await troveManager.Troves(bob))[1];
       assert.isAtMost(
         th.getDifference(bobCollAfter.sub(collBefore), expectedCollGain),
         10000
       );
 
-      await stabilityPool.withdrawStETHGainToTrove(carol, carol, {
+      await stabilityPool.withdrawWStETHGainToTrove(carol, carol, {
         from: carol,
       });
       const carolCollAfter = (await troveManager.Troves(carol))[1];
@@ -5357,7 +5371,7 @@ contract("StabilityPool", async (accounts) => {
         10000
       );
 
-      await stabilityPool.withdrawStETHGainToTrove(dennis, dennis, {
+      await stabilityPool.withdrawWStETHGainToTrove(dennis, dennis, {
         from: dennis,
       });
       const dennisCollAfter = (await troveManager.Troves(dennis))[1];
@@ -5366,14 +5380,14 @@ contract("StabilityPool", async (accounts) => {
         10000
       );
 
-      await stabilityPool.withdrawStETHGainToTrove(erin, erin, { from: erin });
+      await stabilityPool.withdrawWStETHGainToTrove(erin, erin, { from: erin });
       const erinCollAfter = (await troveManager.Troves(erin))[1];
       assert.isAtMost(
         th.getDifference(erinCollAfter.sub(collBefore), expectedCollGain),
         10000
       );
 
-      await stabilityPool.withdrawStETHGainToTrove(flyn, flyn, { from: flyn });
+      await stabilityPool.withdrawWStETHGainToTrove(flyn, flyn, { from: flyn });
       const flynCollAfter = (await troveManager.Troves(flyn))[1];
       assert.isAtMost(
         th.getDifference(flynCollAfter.sub(collBefore), expectedCollGain),
@@ -5381,7 +5395,7 @@ contract("StabilityPool", async (accounts) => {
       );
     });
 
-    it("withdrawStETHGainToTrove(): caller can withdraw full deposit and StETH gain to their trove during Recovery Mode", async () => {
+    it("withdrawWStETHGainToTrove(): caller can withdraw full deposit and WStETH gain to their trove during Recovery Mode", async () => {
       // --- SETUP ---
 
       // Defaulter opens
@@ -5438,24 +5452,26 @@ contract("StabilityPool", async (accounts) => {
       await troveManager.liquidate(defaulter_1);
       assert.isFalse(await sortedTroves.contains(defaulter_1));
 
-      const alice_ETHGain_Before = await stabilityPool.getDepositorStETHGain(
+      const alice_ETHGain_Before = await stabilityPool.getDepositorWStETHGain(
         alice
       );
-      const bob_ETHGain_Before = await stabilityPool.getDepositorStETHGain(bob);
-      const carol_ETHGain_Before = await stabilityPool.getDepositorStETHGain(
+      const bob_ETHGain_Before = await stabilityPool.getDepositorWStETHGain(
+        bob
+      );
+      const carol_ETHGain_Before = await stabilityPool.getDepositorWStETHGain(
         carol
       );
 
-      // A, B, C withdraw their full StETH gain from the Stability Pool to their trove
-      await stabilityPool.withdrawStETHGainToTrove(alice, alice, {
+      // A, B, C withdraw their full WStETH gain from the Stability Pool to their trove
+      await stabilityPool.withdrawWStETHGainToTrove(alice, alice, {
         from: alice,
       });
-      await stabilityPool.withdrawStETHGainToTrove(bob, bob, { from: bob });
-      await stabilityPool.withdrawStETHGainToTrove(carol, carol, {
+      await stabilityPool.withdrawWStETHGainToTrove(bob, bob, { from: bob });
+      await stabilityPool.withdrawWStETHGainToTrove(carol, carol, {
         from: carol,
       });
 
-      // Check collateral of troves A, B, C has increased by the value of their StETH gain from liquidations, respectively
+      // Check collateral of troves A, B, C has increased by the value of their WStETH gain from liquidations, respectively
       const alice_expectedCollateral = alice_Collateral_Before
         .add(alice_ETHGain_Before)
         .toString();
@@ -5474,12 +5490,12 @@ contract("StabilityPool", async (accounts) => {
       assert.equal(bob_expectedColalteral, bob_Collateral_After);
       assert.equal(carol_expectedCollateral, carol_Collateral_After);
 
-      // Check StETH in SP has reduced to zero
-      const ETHinSP_After = (await stabilityPool.getStETH()).toString();
+      // Check WStETH in SP has reduced to zero
+      const ETHinSP_After = (await stabilityPool.getWStETH()).toString();
       assert.isAtMost(th.getDifference(ETHinSP_After, "0"), 100000);
     });
 
-    it("withdrawStETHGainToTrove(): reverts if user has no trove", async () => {
+    it("withdrawWStETHGainToTrove(): reverts if user has no trove", async () => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(10, 18)),
@@ -5526,16 +5542,16 @@ contract("StabilityPool", async (accounts) => {
 
       await priceFeed.setPrice(dec(200, 18));
 
-      // D attempts to withdraw his StETH gain to Trove
+      // D attempts to withdraw his WStETH gain to Trove
       await th.assertRevert(
-        stabilityPool.withdrawStETHGainToTrove(dennis, dennis, {
+        stabilityPool.withdrawWStETHGainToTrove(dennis, dennis, {
           from: dennis,
         }),
         "caller must have an active trove to withdraw ETHGain to"
       );
     });
 
-    it("withdrawStETHGainToTrove(): triggers HOG reward event - increases the sum G", async () => {
+    it("withdrawWStETHGainToTrove(): triggers HOG reward event - increases the sum G", async () => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(10, 18)),
@@ -5597,11 +5613,11 @@ contract("StabilityPool", async (accounts) => {
         web3.currentProvider
       );
 
-      // Check B has non-zero StETH gain
-      assert.isTrue((await stabilityPool.getDepositorStETHGain(B)).gt(ZERO));
+      // Check B has non-zero WStETH gain
+      assert.isTrue((await stabilityPool.getDepositorWStETHGain(B)).gt(ZERO));
 
       // B withdraws to trove
-      await stabilityPool.withdrawStETHGainToTrove(B, B, { from: B });
+      await stabilityPool.withdrawWStETHGainToTrove(B, B, { from: B });
 
       const G_2 = await stabilityPool.epochToScaleToG(0, 0);
 
@@ -5609,7 +5625,7 @@ contract("StabilityPool", async (accounts) => {
       assert.isTrue(G_2.gt(G_1));
     });
 
-    it("withdrawStETHGainToTrove(), partial withdrawal: doesn't change the front end tag", async () => {
+    it("withdrawWStETHGainToTrove(), partial withdrawal: doesn't change the front end tag", async () => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(10, 18)),
@@ -5655,17 +5671,17 @@ contract("StabilityPool", async (accounts) => {
         web3.currentProvider
       );
 
-      // Check A, B, C have non-zero StETH gain
-      assert.isTrue((await stabilityPool.getDepositorStETHGain(A)).gt(ZERO));
-      assert.isTrue((await stabilityPool.getDepositorStETHGain(B)).gt(ZERO));
-      assert.isTrue((await stabilityPool.getDepositorStETHGain(C)).gt(ZERO));
+      // Check A, B, C have non-zero WStETH gain
+      assert.isTrue((await stabilityPool.getDepositorWStETHGain(A)).gt(ZERO));
+      assert.isTrue((await stabilityPool.getDepositorWStETHGain(B)).gt(ZERO));
+      assert.isTrue((await stabilityPool.getDepositorWStETHGain(C)).gt(ZERO));
 
       await priceFeed.setPrice(dec(200, 18));
 
       // A, B, C withdraw to trove
-      await stabilityPool.withdrawStETHGainToTrove(A, A, { from: A });
-      await stabilityPool.withdrawStETHGainToTrove(B, B, { from: B });
-      await stabilityPool.withdrawStETHGainToTrove(C, C, { from: C });
+      await stabilityPool.withdrawWStETHGainToTrove(A, A, { from: A });
+      await stabilityPool.withdrawWStETHGainToTrove(B, B, { from: B });
+      await stabilityPool.withdrawWStETHGainToTrove(C, C, { from: C });
 
       const frontEndTag_A = (await stabilityPool.deposits(A))[1];
       const frontEndTag_B = (await stabilityPool.deposits(B))[1];
@@ -5677,7 +5693,7 @@ contract("StabilityPool", async (accounts) => {
       assert.equal(frontEndTag_C, ZERO_ADDRESS);
     });
 
-    it("withdrawStETHGainToTrove(), eligible deposit: depositor receives HOG rewards", async () => {
+    it("withdrawWStETHGainToTrove(), eligible deposit: depositor receives HOG rewards", async () => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(10, 18)),
@@ -5726,17 +5742,17 @@ contract("StabilityPool", async (accounts) => {
       const B_HOGBalance_Before = await hogToken.balanceOf(B);
       const C_HOGBalance_Before = await hogToken.balanceOf(C);
 
-      // Check A, B, C have non-zero StETH gain
-      assert.isTrue((await stabilityPool.getDepositorStETHGain(A)).gt(ZERO));
-      assert.isTrue((await stabilityPool.getDepositorStETHGain(B)).gt(ZERO));
-      assert.isTrue((await stabilityPool.getDepositorStETHGain(C)).gt(ZERO));
+      // Check A, B, C have non-zero WStETH gain
+      assert.isTrue((await stabilityPool.getDepositorWStETHGain(A)).gt(ZERO));
+      assert.isTrue((await stabilityPool.getDepositorWStETHGain(B)).gt(ZERO));
+      assert.isTrue((await stabilityPool.getDepositorWStETHGain(C)).gt(ZERO));
 
       await priceFeed.setPrice(dec(200, 18));
 
       // A, B, C withdraw to trove
-      await stabilityPool.withdrawStETHGainToTrove(A, A, { from: A });
-      await stabilityPool.withdrawStETHGainToTrove(B, B, { from: B });
-      await stabilityPool.withdrawStETHGainToTrove(C, C, { from: C });
+      await stabilityPool.withdrawWStETHGainToTrove(A, A, { from: A });
+      await stabilityPool.withdrawWStETHGainToTrove(B, B, { from: B });
+      await stabilityPool.withdrawWStETHGainToTrove(C, C, { from: C });
 
       // Get HOG balance after
       const A_HOGBalance_After = await hogToken.balanceOf(A);
@@ -5749,7 +5765,7 @@ contract("StabilityPool", async (accounts) => {
       assert.isTrue(C_HOGBalance_After.gt(C_HOGBalance_Before));
     });
 
-    it("withdrawStETHGainToTrove(), eligible deposit: tagged front end receives HOG rewards", async () => {
+    it("withdrawWStETHGainToTrove(), eligible deposit: tagged front end receives HOG rewards", async () => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
         ICR: toBN(dec(10, 18)),
@@ -5800,15 +5816,15 @@ contract("StabilityPool", async (accounts) => {
 
       await priceFeed.setPrice(dec(200, 18));
 
-      // Check A, B, C have non-zero StETH gain
-      assert.isTrue((await stabilityPool.getDepositorStETHGain(A)).gt(ZERO));
-      assert.isTrue((await stabilityPool.getDepositorStETHGain(B)).gt(ZERO));
-      assert.isTrue((await stabilityPool.getDepositorStETHGain(C)).gt(ZERO));
+      // Check A, B, C have non-zero WStETH gain
+      assert.isTrue((await stabilityPool.getDepositorWStETHGain(A)).gt(ZERO));
+      assert.isTrue((await stabilityPool.getDepositorWStETHGain(B)).gt(ZERO));
+      assert.isTrue((await stabilityPool.getDepositorWStETHGain(C)).gt(ZERO));
 
       // A, B, C withdraw
-      await stabilityPool.withdrawStETHGainToTrove(A, A, { from: A });
-      await stabilityPool.withdrawStETHGainToTrove(B, B, { from: B });
-      await stabilityPool.withdrawStETHGainToTrove(C, C, { from: C });
+      await stabilityPool.withdrawWStETHGainToTrove(A, A, { from: A });
+      await stabilityPool.withdrawWStETHGainToTrove(B, B, { from: B });
+      await stabilityPool.withdrawWStETHGainToTrove(C, C, { from: C });
 
       // Get front ends' HOG balance after
       const F1_HOGBalance_After = await hogToken.balanceOf(frontEnd_1);
@@ -5821,7 +5837,7 @@ contract("StabilityPool", async (accounts) => {
       assert.isTrue(F3_HOGBalance_After.gt(F3_HOGBalance_Before));
     });
 
-    it("withdrawStETHGainToTrove(), eligible deposit: tagged front end's stake decreases", async () => {
+    it("withdrawWStETHGainToTrove(), eligible deposit: tagged front end's stake decreases", async () => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(100000, 18)),
         ICR: toBN(dec(10, 18)),
@@ -5890,15 +5906,15 @@ contract("StabilityPool", async (accounts) => {
 
       await priceFeed.setPrice(dec(200, 18));
 
-      // Check A, B, C have non-zero StETH gain
-      assert.isTrue((await stabilityPool.getDepositorStETHGain(A)).gt(ZERO));
-      assert.isTrue((await stabilityPool.getDepositorStETHGain(B)).gt(ZERO));
-      assert.isTrue((await stabilityPool.getDepositorStETHGain(C)).gt(ZERO));
+      // Check A, B, C have non-zero WStETH gain
+      assert.isTrue((await stabilityPool.getDepositorWStETHGain(A)).gt(ZERO));
+      assert.isTrue((await stabilityPool.getDepositorWStETHGain(B)).gt(ZERO));
+      assert.isTrue((await stabilityPool.getDepositorWStETHGain(C)).gt(ZERO));
 
       // A, B, C withdraw to trove
-      await stabilityPool.withdrawStETHGainToTrove(A, A, { from: A });
-      await stabilityPool.withdrawStETHGainToTrove(B, B, { from: B });
-      await stabilityPool.withdrawStETHGainToTrove(C, C, { from: C });
+      await stabilityPool.withdrawWStETHGainToTrove(A, A, { from: A });
+      await stabilityPool.withdrawWStETHGainToTrove(B, B, { from: B });
+      await stabilityPool.withdrawWStETHGainToTrove(C, C, { from: C });
 
       // Get front ends' stakes after
       const F1_Stake_After = await stabilityPool.frontEndStakes(frontEnd_1);
@@ -5911,7 +5927,7 @@ contract("StabilityPool", async (accounts) => {
       assert.isTrue(F3_Stake_After.lt(F3_Stake_Before));
     });
 
-    it("withdrawStETHGainToTrove(), eligible deposit: tagged front end's snapshots update", async () => {
+    it("withdrawWStETHGainToTrove(), eligible deposit: tagged front end's snapshots update", async () => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(100000, 18)),
         ICR: toBN(dec(10, 18)),
@@ -5997,7 +6013,7 @@ contract("StabilityPool", async (accounts) => {
       for (frontEnd of [frontEnd_1, frontEnd_2, frontEnd_3]) {
         const snapshot = await stabilityPool.frontEndSnapshots(frontEnd);
 
-        assert.equal(snapshot[0], "0"); // S (should always be 0 for front ends, since S corresponds to StETH gain)
+        assert.equal(snapshot[0], "0"); // S (should always be 0 for front ends, since S corresponds to WStETH gain)
         assert.equal(snapshot[1], dec(1, 18)); // P
         assert.equal(snapshot[2], "0"); // G
         assert.equal(snapshot[3], "0"); // scale
@@ -6006,32 +6022,32 @@ contract("StabilityPool", async (accounts) => {
 
       // --- TEST ---
 
-      // Check A, B, C have non-zero StETH gain
-      assert.isTrue((await stabilityPool.getDepositorStETHGain(A)).gt(ZERO));
-      assert.isTrue((await stabilityPool.getDepositorStETHGain(B)).gt(ZERO));
-      assert.isTrue((await stabilityPool.getDepositorStETHGain(C)).gt(ZERO));
+      // Check A, B, C have non-zero WStETH gain
+      assert.isTrue((await stabilityPool.getDepositorWStETHGain(A)).gt(ZERO));
+      assert.isTrue((await stabilityPool.getDepositorWStETHGain(B)).gt(ZERO));
+      assert.isTrue((await stabilityPool.getDepositorWStETHGain(C)).gt(ZERO));
 
       await priceFeed.setPrice(dec(200, 18));
 
-      // A, B, C withdraw StETH gain to troves. Grab G at each stage, as it can increase a bit
+      // A, B, C withdraw WStETH gain to troves. Grab G at each stage, as it can increase a bit
       // between topups, because some block.timestamp time passes (and HOG is issued) between ops
       const G1 = await stabilityPool.epochToScaleToG(
         currentScale,
         currentEpoch
       );
-      await stabilityPool.withdrawStETHGainToTrove(A, A, { from: A });
+      await stabilityPool.withdrawWStETHGainToTrove(A, A, { from: A });
 
       const G2 = await stabilityPool.epochToScaleToG(
         currentScale,
         currentEpoch
       );
-      await stabilityPool.withdrawStETHGainToTrove(B, B, { from: B });
+      await stabilityPool.withdrawWStETHGainToTrove(B, B, { from: B });
 
       const G3 = await stabilityPool.epochToScaleToG(
         currentScale,
         currentEpoch
       );
-      await stabilityPool.withdrawStETHGainToTrove(C, C, { from: C });
+      await stabilityPool.withdrawWStETHGainToTrove(C, C, { from: C });
 
       const frontEnds = [frontEnd_1, frontEnd_2, frontEnd_3];
       const G_Values = [G1, G2, G3];
@@ -6052,7 +6068,7 @@ contract("StabilityPool", async (accounts) => {
       }
     });
 
-    it("withdrawStETHGainToTrove(): reverts when depositor has no StETH gain", async () => {
+    it("withdrawWStETHGainToTrove(): reverts when depositor has no WStETH gain", async () => {
       await openTrove({
         extraBaseFeeLMAAmount: toBN(dec(100000, 18)),
         ICR: toBN(dec(10, 18)),
@@ -6093,22 +6109,22 @@ contract("StabilityPool", async (accounts) => {
       });
       await stabilityPool.provideToSP(dec(3000, 18), ZERO_ADDRESS, { from: E });
 
-      // Confirm A, B, C have zero StETH gain
-      assert.equal(await stabilityPool.getDepositorStETHGain(A), "0");
-      assert.equal(await stabilityPool.getDepositorStETHGain(B), "0");
-      assert.equal(await stabilityPool.getDepositorStETHGain(C), "0");
+      // Confirm A, B, C have zero WStETH gain
+      assert.equal(await stabilityPool.getDepositorWStETHGain(A), "0");
+      assert.equal(await stabilityPool.getDepositorWStETHGain(B), "0");
+      assert.equal(await stabilityPool.getDepositorWStETHGain(C), "0");
 
-      // Check withdrawStETHGainToTrove reverts for A, B, C
-      const txPromise_A = stabilityPool.withdrawStETHGainToTrove(A, A, {
+      // Check withdrawWStETHGainToTrove reverts for A, B, C
+      const txPromise_A = stabilityPool.withdrawWStETHGainToTrove(A, A, {
         from: A,
       });
-      const txPromise_B = stabilityPool.withdrawStETHGainToTrove(B, B, {
+      const txPromise_B = stabilityPool.withdrawWStETHGainToTrove(B, B, {
         from: B,
       });
-      const txPromise_C = stabilityPool.withdrawStETHGainToTrove(C, C, {
+      const txPromise_C = stabilityPool.withdrawWStETHGainToTrove(C, C, {
         from: C,
       });
-      const txPromise_D = stabilityPool.withdrawStETHGainToTrove(D, D, {
+      const txPromise_D = stabilityPool.withdrawWStETHGainToTrove(D, D, {
         from: D,
       });
 

@@ -93,10 +93,10 @@ contract(
     });
 
     describe("BorrowerOperations", async (accounts) => {
-      it("moveStETHGainToTrove(): reverts when called by an account that is not StabilityPool", async () => {
+      it("moveWStETHGainToTrove(): reverts when called by an account that is not StabilityPool", async () => {
         // Attempt call from alice
         try {
-          const tx1 = await borrowerOperations.moveStETHGainToTrove(
+          const tx1 = await borrowerOperations.moveWStETHGainToTrove(
             bob,
             bob,
             bob,
@@ -251,11 +251,11 @@ contract(
     });
 
     describe("ActivePool", async (accounts) => {
-      // sendStETH
-      it("sendStETH(): reverts when called by an account that is not BO nor TroveM nor SP", async () => {
+      // sendWStETH
+      it("sendWStETH(): reverts when called by an account that is not BO nor TroveM nor SP", async () => {
         // Attempt call from alice
         try {
-          const txAlice = await activePool.sendStETH(alice, 100, {
+          const txAlice = await activePool.sendWStETH(alice, 100, {
             from: alice,
           });
         } catch (err) {
@@ -319,11 +319,11 @@ contract(
     });
 
     describe("DefaultPool", async (accounts) => {
-      // sendStETHToActivePool
-      it("sendStETHToActivePool(): reverts when called by an account that is not TroveManager", async () => {
+      // sendWStETHToActivePool
+      it("sendWStETHToActivePool(): reverts when called by an account that is not TroveManager", async () => {
         // Attempt call from alice
         try {
-          const txAlice = await defaultPool.sendStETHToActivePool(100, {
+          const txAlice = await defaultPool.sendWStETHToActivePool(100, {
             from: alice,
           });
         } catch (err) {

@@ -129,11 +129,11 @@ contract("BorrowerWrappers", async (accounts) => {
       await borrowerOperations.BaseFeeLMA_GAS_COMPENSATION();
   });
 
-  it("proxy owner can recover StETH", async () => {
+  it("proxy owner can recover WStETH", async () => {
     const amount = toBN(dec(1, 18));
     const proxyAddress = borrowerWrappers.getProxyAddressFromUser(alice);
 
-    // send some StETH to proxy
+    // send some WStETH to proxy
     await web3.eth.sendTransaction({
       from: owner,
       to: proxyAddress,
@@ -144,7 +144,7 @@ contract("BorrowerWrappers", async (accounts) => {
 
     const balanceBefore = toBN(await web3.eth.getBalance(alice));
 
-    // recover StETH
+    // recover WStETH
     const gas_Used = th.gasUsed(
       await borrowerWrappers.transferETH(alice, amount, {
         from: alice,
@@ -157,11 +157,11 @@ contract("BorrowerWrappers", async (accounts) => {
     assert.equal(balanceAfter.sub(expectedBalance), amount.toString());
   });
 
-  it("non proxy owner cannot recover StETH", async () => {
+  it("non proxy owner cannot recover WStETH", async () => {
     const amount = toBN(dec(1, 18));
     const proxyAddress = borrowerWrappers.getProxyAddressFromUser(alice);
 
-    // send some StETH to proxy
+    // send some WStETH to proxy
     await web3.eth.sendTransaction({
       from: owner,
       to: proxyAddress,
@@ -171,7 +171,7 @@ contract("BorrowerWrappers", async (accounts) => {
 
     const balanceBefore = toBN(await web3.eth.getBalance(alice));
 
-    // try to recover StETH
+    // try to recover WStETH
     const proxy = borrowerWrappers.getProxyFromUser(alice);
     const signature = "transferETH(address,uint256)";
     const calldata = th.getTransactionData(signature, [alice, amount]);
@@ -549,12 +549,12 @@ contract("BorrowerWrappers", async (accounts) => {
       baseFeeLMABalanceBefore.toString()
     );
     assert.equal(hogBalanceAfter.toString(), hogBalanceBefore.toString());
-    // check trove has increased debt by the ICR proportional amount to StETH gain
+    // check trove has increased debt by the ICR proportional amount to WStETH gain
     th.assertIsApproximatelyEqual(
       troveDebtAfter,
       troveDebtBefore.add(proportionalBaseFeeLMA)
     );
-    // check trove has increased collateral by the StETH gain
+    // check trove has increased collateral by the WStETH gain
     th.assertIsApproximatelyEqual(
       troveCollAfter,
       troveCollBefore.add(expectedETHGain_A)
@@ -575,8 +575,8 @@ contract("BorrowerWrappers", async (accounts) => {
       stakeBefore.add(expectedHOGGain_A)
     );
 
-    // Expect Alice has withdrawn all StETH gain
-    const alice_pendingETHGain = await stabilityPool.getDepositorStETHGain(
+    // Expect Alice has withdrawn all WStETH gain
+    const alice_pendingETHGain = await stabilityPool.getDepositorWStETHGain(
       alice
     );
     assert.equal(alice_pendingETHGain, 0);
@@ -747,14 +747,14 @@ contract("BorrowerWrappers", async (accounts) => {
     // HOG staking
     th.assertIsApproximatelyEqual(stakeAfter, stakeBefore);
 
-    // Expect Alice has withdrawn all StETH gain
-    const alice_pendingETHGain = await stabilityPool.getDepositorStETHGain(
+    // Expect Alice has withdrawn all WStETH gain
+    const alice_pendingETHGain = await stabilityPool.getDepositorWStETHGain(
       alice
     );
     assert.equal(alice_pendingETHGain, 0);
   });
 
-  it("claimStakingGainsAndRecycle(): with only StETH gain", async () => {
+  it("claimStakingGainsAndRecycle(): with only WStETH gain", async () => {
     const price = toBN(dec(200, 18));
 
     // Whale opens Trove
@@ -804,7 +804,7 @@ contract("BorrowerWrappers", async (accounts) => {
     const redeemedAmount = toBN(dec(100, 18));
     await th.redeemCollateral(whale, contracts, redeemedAmount, GAS_PRICE);
 
-    // Alice StETH gain is ((150/2000) * (redemption fee over redeemedAmount) / price)
+    // Alice WStETH gain is ((150/2000) * (redemption fee over redeemedAmount) / price)
     const redemptionFee = await troveManager.getRedemptionFeeWithDecay(
       redeemedAmount
     );
@@ -870,13 +870,13 @@ contract("BorrowerWrappers", async (accounts) => {
       baseFeeLMABalanceAfter,
       baseFeeLMABalanceBefore.add(expectedNewBaseFeeLMAGain_A)
     );
-    // check trove has increased debt by the ICR proportional amount to StETH gain
+    // check trove has increased debt by the ICR proportional amount to WStETH gain
     th.assertIsApproximatelyEqual(
       troveDebtAfter,
       troveDebtBefore.add(proportionalBaseFeeLMA),
       10000
     );
-    // check trove has increased collateral by the StETH gain
+    // check trove has increased collateral by the WStETH gain
     th.assertIsApproximatelyEqual(
       troveCollAfter,
       troveCollBefore.add(expectedETHGain_A)
@@ -898,8 +898,8 @@ contract("BorrowerWrappers", async (accounts) => {
       stakeBefore.add(expectedHOGGain_A)
     );
 
-    // Expect Alice has withdrawn all StETH gain
-    const alice_pendingETHGain = await stabilityPool.getDepositorStETHGain(
+    // Expect Alice has withdrawn all WStETH gain
+    const alice_pendingETHGain = await stabilityPool.getDepositorWStETHGain(
       alice
     );
     assert.equal(alice_pendingETHGain, 0);
@@ -991,9 +991,9 @@ contract("BorrowerWrappers", async (accounts) => {
       baseFeeLMABalanceAfter,
       baseFeeLMABalanceBefore
     );
-    // check trove has increased debt by the ICR proportional amount to StETH gain
+    // check trove has increased debt by the ICR proportional amount to WStETH gain
     th.assertIsApproximatelyEqual(troveDebtAfter, troveDebtBefore, 10000);
-    // check trove has increased collateral by the StETH gain
+    // check trove has increased collateral by the WStETH gain
     th.assertIsApproximatelyEqual(troveCollAfter, troveCollBefore);
     // check that ICR remains constant
     th.assertIsApproximatelyEqual(ICRAfter, ICRBefore);
@@ -1006,14 +1006,14 @@ contract("BorrowerWrappers", async (accounts) => {
     // check hog balance remains the same
     th.assertIsApproximatelyEqual(hogBalanceBefore, hogBalanceAfter);
 
-    // Expect Alice has withdrawn all StETH gain
-    const alice_pendingETHGain = await stabilityPool.getDepositorStETHGain(
+    // Expect Alice has withdrawn all WStETH gain
+    const alice_pendingETHGain = await stabilityPool.getDepositorWStETHGain(
       alice
     );
     assert.equal(alice_pendingETHGain, 0);
   });
 
-  it("claimStakingGainsAndRecycle(): with both StETH and BaseFeeLMA gains", async () => {
+  it("claimStakingGainsAndRecycle(): with both WStETH and BaseFeeLMA gains", async () => {
     const price = toBN(dec(200, 18));
 
     // Whale opens Trove
@@ -1068,7 +1068,7 @@ contract("BorrowerWrappers", async (accounts) => {
     const redeemedAmount = toBN(dec(100, 18));
     await th.redeemCollateral(whale, contracts, redeemedAmount, GAS_PRICE);
 
-    // Alice StETH gain is ((150/2000) * (redemption fee over redeemedAmount) / price)
+    // Alice WStETH gain is ((150/2000) * (redemption fee over redeemedAmount) / price)
     const redemptionFee = await troveManager.getRedemptionFeeWithDecay(
       redeemedAmount
     );
@@ -1134,13 +1134,13 @@ contract("BorrowerWrappers", async (accounts) => {
       baseFeeLMABalanceAfter,
       baseFeeLMABalanceBefore.add(expectedNewBaseFeeLMAGain_A)
     );
-    // check trove has increased debt by the ICR proportional amount to StETH gain
+    // check trove has increased debt by the ICR proportional amount to WStETH gain
     th.assertIsApproximatelyEqual(
       troveDebtAfter,
       troveDebtBefore.add(proportionalBaseFeeLMA),
       10000
     );
-    // check trove has increased collateral by the StETH gain
+    // check trove has increased collateral by the WStETH gain
     th.assertIsApproximatelyEqual(
       troveCollAfter,
       troveCollBefore.add(expectedETHGain_A)
@@ -1162,8 +1162,8 @@ contract("BorrowerWrappers", async (accounts) => {
       stakeBefore.add(expectedHOGGain_A)
     );
 
-    // Expect Alice has withdrawn all StETH gain
-    const alice_pendingETHGain = await stabilityPool.getDepositorStETHGain(
+    // Expect Alice has withdrawn all WStETH gain
+    const alice_pendingETHGain = await stabilityPool.getDepositorWStETHGain(
       alice
     );
     assert.equal(alice_pendingETHGain, 0);

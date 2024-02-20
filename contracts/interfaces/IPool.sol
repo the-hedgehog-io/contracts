@@ -6,16 +6,16 @@ pragma solidity 0.8.19;
 interface IPool {
     // --- Events ---
 
-    event StETHBalanceUpdated(uint _newBalance);
+    event WStETHBalanceUpdated(uint _newBalance);
     event BaseFeeLMABalanceUpdated(uint _newBalance);
     event ActivePoolAddressChanged(address _newActivePoolAddress);
     event DefaultPoolAddressChanged(address _newDefaultPoolAddress);
     event StabilityPoolAddressChanged(address _newStabilityPoolAddress);
-    event StETHSent(address _to, uint _amount);
+    event WStETHSent(address _to, uint _amount);
 
     // --- Functions ---
 
-    function getStETH() external view returns (uint);
+    function getWStETH() external view returns (uint);
 
     function getBaseFeeLMADebt() external view returns (uint);
 

@@ -12,7 +12,7 @@ interface ICollSurplusPool {
     event ActivePoolAddressChanged(address _newActivePoolAddress);
 
     event CollBalanceUpdated(address indexed _account, uint _newBalance);
-    event StETHSent(address _to, uint _amount);
+    event WStETHSent(address _to, uint _amount);
 
     // --- Contract setters ---
 
@@ -22,7 +22,7 @@ interface ICollSurplusPool {
         address _activePoolAddress
     ) external;
 
-    function getStETH() external view returns (uint);
+    function getWStETH() external view returns (uint);
 
     function getCollateral(address _account) external view returns (uint);
 

@@ -523,9 +523,8 @@ class TestHelper {
     // console.log(`account: ${account}`)
     const rawColl = (await contracts.troveManager.Troves(account))[1];
     const rawDebt = (await contracts.troveManager.Troves(account))[0];
-    const pendingETHReward = await contracts.troveManager.getPendingStETHReward(
-      account
-    );
+    const pendingETHReward =
+      await contracts.troveManager.getPendingWStETHReward(account);
     const pendingBaseFeeLMADebtReward =
       await contracts.troveManager.getPendingBaseFeeLMADebtReward(account);
     const entireColl = rawColl.add(pendingETHReward);
@@ -1003,7 +1002,7 @@ class TestHelper {
       let isDebtIncrease = BaseFeeLMAChangeBN.gt(zero);
       BaseFeeLMAChangeBN = BaseFeeLMAChangeBN.abs();
 
-      // Add StETH to trove
+      // Add WStETH to trove
       if (ETHChangeBN.gt(zero)) {
         tx = await contracts.borrowerOperations.adjustTrove(
           this._100pct,
@@ -1014,7 +1013,7 @@ class TestHelper {
           lowerHint,
           { from: account, value: ETHChangeBN }
         );
-        // Withdraw StETH from trove
+        // Withdraw WStETH from trove
       } else if (ETHChangeBN.lt(zero)) {
         ETHChangeBN = ETHChangeBN.neg();
         tx = await contracts.borrowerOperations.adjustTrove(
@@ -1069,7 +1068,7 @@ class TestHelper {
       let isDebtIncrease = BaseFeeLMAChangeBN.gt(zero);
       BaseFeeLMAChangeBN = BaseFeeLMAChangeBN.abs();
 
-      // Add StETH to trove
+      // Add WStETH to trove
       if (ETHChangeBN.gt(zero)) {
         tx = await contracts.borrowerOperations.adjustTrove(
           this._100pct,
@@ -1080,7 +1079,7 @@ class TestHelper {
           lowerHint,
           { from: account, value: ETHChangeBN }
         );
-        // Withdraw StETH from trove
+        // Withdraw WStETH from trove
       } else if (ETHChangeBN.lt(zero)) {
         ETHChangeBN = ETHChangeBN.neg();
         tx = await contracts.borrowerOperations.adjustTrove(
@@ -1095,7 +1094,7 @@ class TestHelper {
       }
 
       const gas = this.gasUsed(tx);
-      // console.log(`StETH change: ${ETHChangeBN},  BaseFeeLMAChange: ${BaseFeeLMAChangeBN}, gas: ${gas} `)
+      // console.log(`WStETH change: ${ETHChangeBN},  BaseFeeLMAChange: ${BaseFeeLMAChangeBN}, gas: ${gas} `)
 
       gasCostList.push(gas);
     }
@@ -1565,7 +1564,7 @@ class TestHelper {
       );
       console.log(`entireColl: ${entireColl}`);
       console.log(`entireDebt: ${entireDebt}`);
-      const ETHGain = await contracts.stabilityPool.getDepositorStETHGain(
+      const ETHGain = await contracts.stabilityPool.getDepositorWStETHGain(
         account
       );
       const newColl = entireColl.add(ETHGain);
@@ -1575,7 +1574,7 @@ class TestHelper {
         entireDebt
       );
 
-      const tx = await contracts.stabilityPool.withdrawStETHGainToTrove(
+      const tx = await contracts.stabilityPool.withdrawWStETHGainToTrove(
         upperHint,
         lowerHint,
         { from: account }

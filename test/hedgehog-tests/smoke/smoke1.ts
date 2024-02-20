@@ -86,7 +86,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const AliceTroveDebtAfterBobRedemption = BigInt("3355000");
     const AliceCRAfterBobRedemption = BigInt("2857923497267759562");
     const AliceRedemptionFirst = BigInt("39751");
-    const AliceReceivedStEthForRedemption = BigInt("2363479375669996");
+    const AliceReceivedWStEthForRedemption = BigInt("2363479375669996");
     const AliceCRAtLiquidation = BigInt("1428961748633879781");
 
     const BobTroveColl = BigInt("1500000000000000000");
@@ -205,10 +205,10 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     };
 
     const getTrove = async (caller = bob) => {
-      const { debt, coll, pendingBaseFeeLMADebtReward, pendingStETHReward } =
+      const { debt, coll, pendingBaseFeeLMADebtReward, pendingWStETHReward } =
         await troveManager.getEntireDebtAndColl(caller.address);
 
-      return { debt, coll, pendingBaseFeeLMADebtReward, pendingStETHReward };
+      return { debt, coll, pendingBaseFeeLMADebtReward, pendingWStETHReward };
     };
 
     const logAllDebtColl = async () => {
@@ -740,7 +740,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       const balanceAfter = await payToken.balanceOf(alice.address);
 
       expect(balanceAfter - balanceBefore).to.be.equal(
-        AliceReceivedStEthForRedemption
+        AliceReceivedWStEthForRedemption
       );
     });
 

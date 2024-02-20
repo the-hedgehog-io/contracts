@@ -11,8 +11,8 @@ export const setupContracts = async () => {
     await (
       await ethers.getContractFactory("ERC20Mock")
     ).deploy(
-      "Test StETH",
-      "TSTETH",
+      "Test WStETH",
+      "TWSTETH",
       deployer.address,
       ethers.parseEther("1000000")
     )

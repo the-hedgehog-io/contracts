@@ -138,7 +138,7 @@ const ABDKOperations = async () => {
   // returns 10979513.468051490981687838
   // accurate to 17 digits
 
-  /* TODO: will L_StETH, L_BaseFeeLMA overflow if stored as 64.64? Possibly need to store as uint, divide by 1e18, then use
+  /* TODO: will L_WStETH, L_BaseFeeLMA overflow if stored as 64.64? Possibly need to store as uint, divide by 1e18, then use
     the resulting 64.64  */
 
   // // --- Ratio Multiplication ---

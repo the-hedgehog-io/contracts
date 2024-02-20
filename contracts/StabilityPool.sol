@@ -31,7 +31,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * BaseFeeLMA in the Stability Pool:  that is, the offset debt evaporates, and an equal amount of BaseFeeLMA tokens in the Stability Pool is burned.
  *
  * Thus, a liquidation causes each depositor to receive a BaseFeeLMA loss, in proportion to their deposit as a share of total deposits.
- * They also receive an StETH gain, as the StETH collateral of the liquidated trove is distributed among Stability depositors,
+ * They also receive an WStETH gain, as the WStETH collateral of the liquidated trove is distributed among Stability depositors,
  * in the same proportion.
  *
  * When a liquidation occurs, it depletes every deposit by the same fraction: for example, a liquidation that depletes 40%
@@ -43,25 +43,25 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  *
  * --- IMPLEMENTATION ---
  *
- * We use a highly scalable method of tracking deposits and StETH gains that has O(1) complexity.
+ * We use a highly scalable method of tracking deposits and WStETH gains that has O(1) complexity.
  *
- * When a liquidation occurs, rather than updating each depositor's deposit and StETH gain, we simply update two state variables:
+ * When a liquidation occurs, rather than updating each depositor's deposit and WStETH gain, we simply update two state variables:
  * a product P, and a sum S.
  *
  * A mathematical manipulation allows us to factor out the initial deposit, and accurately track all depositors' compounded deposits
- * and accumulated StETH gains over time, as liquidations occur, using just these two variables P and S. When depositors join the
+ * and accumulated WStETH gains over time, as liquidations occur, using just these two variables P and S. When depositors join the
  * Stability Pool, they get a snapshot of the latest P and S: P_t and S_t, respectively.
  *
- * The formula for a depositor's accumulated StETH gain is derived here:
+ * The formula for a depositor's accumulated WStETH gain is derived here:
  * https://github.com/liquity/dev/blob/main/papers/Scalable_Reward_Distribution_with_Compounding_Stakes.pdf
  *
  * For a given deposit d_t, the ratio P/P_t tells us the factor by which a deposit has decreased since it joined the Stability Pool,
- * and the term d_t * (S - S_t)/P_t gives us the deposit's total accumulated StETH gain.
+ * and the term d_t * (S - S_t)/P_t gives us the deposit's total accumulated WStETH gain.
  *
- * Each liquidation updates the product P and sum S. After a series of liquidations, a compounded deposit and corresponding StETH gain
+ * Each liquidation updates the product P and sum S. After a series of liquidations, a compounded deposit and corresponding WStETH gain
  * can be calculated using the initial deposit, the depositor’s snapshots of P and S, and the latest values of P and S.
  *
- * Any time a depositor updates their deposit (withdrawal, top-up) their accumulated StETH gain is paid out, their new deposit is recorded
+ * Any time a depositor updates their deposit (withdrawal, top-up) their accumulated WStETH gain is paid out, their new deposit is recorded
  * (based on their latest compounded deposit and modified by the withdrawal/top-up), and they receive new snapshots of the latest P and S.
  * Essentially, they make a fresh deposit that overwrites the old one.
  *
@@ -100,13 +100,13 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * as 0, since it is now less than 1e-9'th of its initial value (e.g. a deposit of 1 billion BaseFeeLMA has depleted to < 1 BaseFeeLMA).
  *
  *
- *  --- TRACKING DEPOSITOR'S StETH GAIN OVER SCALE CHANGES AND EPOCHS ---
+ *  --- TRACKING DEPOSITOR'S WStETH GAIN OVER SCALE CHANGES AND EPOCHS ---
  *
  * In the current epoch, the latest value of S is stored upon each scale change, and the mapping (scale -> S) is stored for each epoch.
  *
- * This allows us to calculate a deposit's accumulated StETH gain, during the epoch in which the deposit was non-zero and earned StETH.
+ * This allows us to calculate a deposit's accumulated WStETH gain, during the epoch in which the deposit was non-zero and earned WStETH.
  *
- * We calculate the depositor's accumulated StETH gain for the scale at which they made the deposit, using the StETH gain formula:
+ * We calculate the depositor's accumulated WStETH gain for the scale at which they made the deposit, using the WStETH gain formula:
  * e_1 = d_t * (S - S_t) / P_t
  *
  * and also for scale after, taking care to divide the latter by a factor of 1e9:
@@ -126,14 +126,14 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  *  |---+---------|-------------|-----...
  *         i            i+1
  *
- * The sum of (e_1 + e_2) captures the depositor's total accumulated StETH gain, handling the case where their
+ * The sum of (e_1 + e_2) captures the depositor's total accumulated WStETH gain, handling the case where their
  * deposit spanned one scale change. We only care about gains across one scale change, since the compounded
  * deposit is defined as being 0 once it has spanned more than one scale change.
  *
  *
  * --- UPDATING P WHEN A LIQUIDATION OCCURS ---
  *
- * Please see the implementation spec in the proof document, which closely follows on from the compounded deposit / StETH gain derivations:
+ * Please see the implementation spec in the proof document, which closely follows on from the compounded deposit / WStETH gain derivations:
  * https://github.com/liquity/liquity/blob/master/papers/Scalable_Reward_Distribution_with_Compounding_Stakes.pdf
  *
  *
@@ -171,8 +171,8 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
 
     ICommunityIssuance public communityIssuance;
 
-    uint256 internal StETH; // deposited stETH tracker
-    IERC20 public StETHToken;
+    uint256 internal WStETH; // deposited wStETH tracker
+    IERC20 public WStETHToken;
 
     // Tracker for BaseFeeLMA held in the pool. Changes when users deposit/withdraw, and when Trove debt is offset.
     uint256 internal totalBaseFeeLMADeposits;
@@ -210,7 +210,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
     // With each offset that fully empties the Pool, the epoch is incremented by 1
     uint128 public currentEpoch;
 
-    /* StETH Gain sum 'S': During its lifetime, each deposit d_t earns an StETH gain of ( d_t * [S - S_t] )/P_t, where S_t
+    /* WStETH Gain sum 'S': During its lifetime, each deposit d_t earns an WStETH gain of ( d_t * [S - S_t] )/P_t, where S_t
      * is the depositor's snapshot of S taken at the time t when the deposit was made.
      *
      * The 'S' sums are stored in a nested mapping (epoch => scale => sum):
@@ -232,12 +232,12 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
     // Error tracker for the error correction in the HOG issuance calculation
     uint public lastHOGError;
     // Error trackers for the error correction in the offset calculation
-    uint public lastStETHError_Offset;
+    uint public lastWStETHError_Offset;
     uint public lastBaseFeeLMALossError_Offset;
 
     // --- Events ---
 
-    event StabilityPoolStETHBalanceUpdated(uint _newBalance);
+    event StabilityPoolWStETHBalanceUpdated(uint _newBalance);
     event StabilityPoolBaseFeeLMABalanceUpdated(uint _newBalance);
 
     event BorrowerOperationsAddressChanged(
@@ -250,7 +250,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
     event SortedTrovesAddressChanged(address _newSortedTrovesAddress);
     event PriceFeedAddressChanged(address _newPriceFeedAddress);
     event CommunityIssuanceAddressChanged(address _newCommunityIssuanceAddress);
-    event StETHTokenAddressUpdated(IERC20 _StEthAddress);
+    event WStETHTokenAddressUpdated(IERC20 _WStEthAddress);
 
     event P_Updated(uint _P);
     event S_Updated(uint _S, uint128 _epoch, uint128 _scale);
@@ -267,13 +267,13 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
 
     event UserDepositChanged(address indexed _depositor, uint _newDeposit);
 
-    event StETHGainWithdrawn(
+    event WStETHGainWithdrawn(
         address indexed _depositor,
-        uint _StETH,
+        uint _WStETH,
         uint _BaseFeeLMALoss
     );
     event HOGPaidToDepositor(address indexed _depositor, uint _HOG);
-    event StETHSent(address _to, uint _amount);
+    event WStETHSent(address _to, uint _amount);
 
     constructor(
         uint _gasComp,
@@ -295,7 +295,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         address _sortedTrovesAddress,
         address _priceFeedAddress,
         address _communityIssuanceAddress,
-        IERC20 _StETHTokenAddress
+        IERC20 _WStETHTokenAddress
     ) external onlyOwner {
         checkContract(_borrowerOperationsAddress);
         checkContract(_troveManagerAddress);
@@ -304,7 +304,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         checkContract(_sortedTrovesAddress);
         checkContract(_priceFeedAddress);
         checkContract(_communityIssuanceAddress);
-        checkContract(address(_StETHTokenAddress));
+        checkContract(address(_WStETHTokenAddress));
 
         borrowerOperations = IBorrowerOperations(_borrowerOperationsAddress);
         troveManager = ITroveManager(_troveManagerAddress);
@@ -313,7 +313,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         sortedTroves = ISortedTroves(_sortedTrovesAddress);
         priceFeed = IPriceFeed(_priceFeedAddress);
         communityIssuance = ICommunityIssuance(_communityIssuanceAddress);
-        StETHToken = _StETHTokenAddress;
+        WStETHToken = _WStETHTokenAddress;
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);
@@ -322,15 +322,15 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         emit SortedTrovesAddressChanged(_sortedTrovesAddress);
         emit PriceFeedAddressChanged(_priceFeedAddress);
         emit CommunityIssuanceAddressChanged(_communityIssuanceAddress);
-        emit StETHTokenAddressUpdated(_StETHTokenAddress);
+        emit WStETHTokenAddressUpdated(_WStETHTokenAddress);
 
         renounceOwnership();
     }
 
     // --- Getters for public variables. Required by IPool interface ---
 
-    function getStETH() external view returns (uint) {
-        return StETH;
+    function getWStETH() external view returns (uint) {
+        return WStETH;
     }
 
     function getTotalBaseFeeLMADeposits() external view returns (uint) {
@@ -343,7 +343,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
      *
      * - Triggers a HOG issuance, based on time passed since the last issuance. The HOG issuance is shared between *all* depositors and front ends
      * - Tags the deposit with the provided front end tag param, if it's a new deposit
-     * - Sends depositor's accumulated gains (HOG, StETH) to depositor
+     * - Sends depositor's accumulated gains (HOG, WStETH) to depositor
      * - Sends the tagged front end's accumulated HOG gains to the tagged front end
      * - Increases deposit and tagged front end's stake, and takes new snapshots for each.
      */
@@ -356,7 +356,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
 
         _triggerHOGIssuance(communityIssuanceCached);
 
-        uint depositorStETHGain = getDepositorStETHGain(msg.sender);
+        uint depositorWStETHGain = getDepositorWStETHGain(msg.sender);
         uint compoundedBaseFeeLMADeposit = getCompoundedBaseFeeLMADeposit(
             msg.sender
         );
@@ -372,16 +372,20 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         _updateDepositAndSnapshots(msg.sender, newDeposit);
         emit UserDepositChanged(msg.sender, newDeposit);
 
-        emit StETHGainWithdrawn(msg.sender, depositorStETHGain, BaseFeeLMALoss); // BaseFeeLMA Loss required for event log
+        emit WStETHGainWithdrawn(
+            msg.sender,
+            depositorWStETHGain,
+            BaseFeeLMALoss
+        ); // BaseFeeLMA Loss required for event log
 
-        _sendStETHGainToDepositor(depositorStETHGain);
+        _sendWStETHGainToDepositor(depositorWStETHGain);
     }
 
     /*  withdrawFromSP():
      *
      * - Triggers a HOG issuance, based on time passed since the last issuance. The HOG issuance is shared between *all* depositors and front ends
      * - Removes the deposit's front end tag if it is a full withdrawal
-     * - Sends all depositor's accumulated gains (HOG, StETH) to depositor
+     * - Sends all depositor's accumulated gains (HOG, WStETH) to depositor
      * - Sends the tagged front end's accumulated HOG gains to the tagged front end
      * - Decreases deposit and tagged front end's stake, and takes new snapshots for each.
      *
@@ -398,7 +402,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
 
         _triggerHOGIssuance(communityIssuanceCached);
 
-        uint depositorStETHGain = getDepositorStETHGain(msg.sender);
+        uint depositorWStETHGain = getDepositorWStETHGain(msg.sender);
 
         uint compoundedBaseFeeLMADeposit = getCompoundedBaseFeeLMADeposit(
             msg.sender
@@ -420,12 +424,16 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         _updateDepositAndSnapshots(msg.sender, newDeposit);
         emit UserDepositChanged(msg.sender, newDeposit);
 
-        emit StETHGainWithdrawn(msg.sender, depositorStETHGain, BaseFeeLMALoss); // BaseFeeLMA Loss required for event log
+        emit WStETHGainWithdrawn(
+            msg.sender,
+            depositorWStETHGain,
+            BaseFeeLMALoss
+        ); // BaseFeeLMA Loss required for event log
 
-        _sendStETHGainToDepositor(depositorStETHGain);
+        _sendWStETHGainToDepositor(depositorWStETHGain);
     }
 
-    /* withdrawStETHGainToTrove:
+    /* withdrawWStETHGainToTrove:
 
      * HEDGEHOG UPDATES: use SafeERC20 safe transfer instead of native token transfer. Therefore 
      * transfer value isn't paste anymore as a {value: }, but as a separate input param
@@ -433,23 +441,23 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
      * - Triggers a HOG issuance, based on time passed since the last issuance. The HOG issuance is shared between *all* depositors and front ends
      * - Sends all depositor's HOG gain to  depositor
      * - Sends all tagged front end's HOG gain to the tagged front end
-     * - Transfers the depositor's entire StETH gain from the Stability Pool to the caller's trove
+     * - Transfers the depositor's entire WStETH gain from the Stability Pool to the caller's trove
      * - Leaves their compounded deposit in the Stability Pool
      * - Updates snapshots for deposit and tagged front end stake */
-    function withdrawStETHGainToTrove(
+    function withdrawWStETHGainToTrove(
         address _upperHint,
         address _lowerHint
     ) external {
         uint initialDeposit = deposits[msg.sender].initialValue;
         _requireUserHasDeposit(initialDeposit);
         _requireUserHasTrove(msg.sender);
-        _requireUserHasStETHGain(msg.sender);
+        _requireUserHasWStETHGain(msg.sender);
 
         ICommunityIssuance communityIssuanceCached = communityIssuance;
 
         _triggerHOGIssuance(communityIssuanceCached);
 
-        uint depositorStETHGain = getDepositorStETHGain(msg.sender);
+        uint depositorWStETHGain = getDepositorWStETHGain(msg.sender);
 
         uint compoundedBaseFeeLMADeposit = getCompoundedBaseFeeLMADeposit(
             msg.sender
@@ -462,21 +470,25 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
 
         _updateDepositAndSnapshots(msg.sender, compoundedBaseFeeLMADeposit);
 
-        /* Emit events before transferring StETH gain to Trove.
-         This lets the event log make more sense (i.e. so it appears that first the StETH gain is withdrawn
+        /* Emit events before transferring WStETH gain to Trove.
+         This lets the event log make more sense (i.e. so it appears that first the WStETH gain is withdrawn
         and then it is deposited into the Trove, not the other way around). */
-        emit StETHGainWithdrawn(msg.sender, depositorStETHGain, BaseFeeLMALoss);
+        emit WStETHGainWithdrawn(
+            msg.sender,
+            depositorWStETHGain,
+            BaseFeeLMALoss
+        );
         emit UserDepositChanged(msg.sender, compoundedBaseFeeLMADeposit);
 
-        StETH = StETH.sub(depositorStETHGain);
-        emit StabilityPoolStETHBalanceUpdated(StETH);
-        emit StETHSent(msg.sender, depositorStETHGain);
+        WStETH = WStETH.sub(depositorWStETHGain);
+        emit StabilityPoolWStETHBalanceUpdated(WStETH);
+        emit WStETHSent(msg.sender, depositorWStETHGain);
 
-        borrowerOperations.moveStETHGainToTrove(
+        borrowerOperations.moveWStETHGainToTrove(
             msg.sender,
             _upperHint,
             _lowerHint,
-            depositorStETHGain
+            depositorWStETHGain
         );
     }
 
@@ -549,7 +561,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
 
     /*
      * Cancels out the specified debt against the BaseFeeLMA contained in the Stability Pool (as far as possible)
-     * and transfers the Trove's StETH collateral from ActivePool to StabilityPool.
+     * and transfers the Trove's WStETH collateral from ActivePool to StabilityPool.
      * Only called by liquidation functions in the TroveManager.
      */
     function offset(uint _debtToOffset, uint _collToAdd) external {
@@ -562,7 +574,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         _triggerHOGIssuance(communityIssuance);
 
         (
-            uint StETHGainPerUnitStaked,
+            uint WStETHGainPerUnitStaked,
             uint BaseFeeLMALossPerUnitStaked
         ) = _computeRewardsPerUnitStaked(
                 _collToAdd,
@@ -571,7 +583,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
             );
 
         _updateRewardSumAndProduct(
-            StETHGainPerUnitStaked,
+            WStETHGainPerUnitStaked,
             BaseFeeLMALossPerUnitStaked
         ); // updates S and P
 
@@ -586,10 +598,10 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         uint _totalBaseFeeLMADeposits
     )
         internal
-        returns (uint StETHGainPerUnitStaked, uint BaseFeeLMALossPerUnitStaked)
+        returns (uint WStETHGainPerUnitStaked, uint BaseFeeLMALossPerUnitStaked)
     {
         /*
-         * Compute the BaseFeeLMA and StETH rewards. Uses a "feedback" error correction, to keep
+         * Compute the BaseFeeLMA and WStETH rewards. Uses a "feedback" error correction, to keep
          * the cumulative error in the P and S state variables low:
          *
          * 1) Form numerators which compensate for the floor division errors that occurred the last time this
@@ -599,8 +611,8 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
          * 4) Store these errors for use in the next correction when this function is called.
          * 5) Note: static analysis tools complain about this "division before multiplication", however, it is intended.
          */
-        uint StETHNumerator = _collToAdd.mul(DECIMAL_PRECISION).add(
-            lastStETHError_Offset
+        uint WStETHNumerator = _collToAdd.mul(DECIMAL_PRECISION).add(
+            lastWStETHError_Offset
         );
 
         assert(_debtToOffset <= _totalBaseFeeLMADeposits);
@@ -623,17 +635,17 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
             ).sub(BaseFeeLMALossNumerator);
         }
 
-        StETHGainPerUnitStaked = StETHNumerator.div(_totalBaseFeeLMADeposits);
-        lastStETHError_Offset = StETHNumerator.sub(
-            StETHGainPerUnitStaked.mul(_totalBaseFeeLMADeposits)
+        WStETHGainPerUnitStaked = WStETHNumerator.div(_totalBaseFeeLMADeposits);
+        lastWStETHError_Offset = WStETHNumerator.sub(
+            WStETHGainPerUnitStaked.mul(_totalBaseFeeLMADeposits)
         );
 
-        return (StETHGainPerUnitStaked, BaseFeeLMALossPerUnitStaked);
+        return (WStETHGainPerUnitStaked, BaseFeeLMALossPerUnitStaked);
     }
 
     // Update the Stability Pool reward sum S and product P
     function _updateRewardSumAndProduct(
-        uint _StETHGainPerUnitStaked,
+        uint _WStETHGainPerUnitStaked,
         uint _BaseFeeLMALossPerUnitStaked
     ) internal {
         uint currentP = P;
@@ -656,13 +668,13 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
 
         /*
          * Calculate the new S first, before we update P.
-         * The StETH gain for any given depositor from a liquidation depends on the value of their deposit
+         * The WStETH gain for any given depositor from a liquidation depends on the value of their deposit
          * (and the value of totalDeposits) prior to the Stability being depleted by the debt in the liquidation.
          *
-         * Since S corresponds to StETH gain, and P to deposit loss, we update S first.
+         * Since S corresponds to WStETH gain, and P to deposit loss, we update S first.
          */
-        uint marginalStETHGain = _StETHGainPerUnitStaked.mul(currentP);
-        uint newS = currentS.add(marginalStETHGain);
+        uint marginalWStETHGain = _WStETHGainPerUnitStaked.mul(currentP);
+        uint newS = currentS.add(marginalWStETHGain);
         epochToScaleToSum[currentEpochCached][currentScaleCached] = newS;
         emit S_Updated(newS, currentEpochCached, currentScaleCached);
 
@@ -707,7 +719,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         baseFeeLMAToken.burn(address(this), _debtToOffset);
 
         _increaseBalance(_collToAdd);
-        activePoolCached.sendStETH(address(this), _collToAdd);
+        activePoolCached.sendWStETH(address(this), _collToAdd);
     }
 
     function _decreaseBaseFeeLMA(uint _amount) internal {
@@ -718,12 +730,12 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
 
     // --- Reward calculator functions for depositor and front end ---
 
-    /* Calculates the StETH gain earned by the deposit since its last snapshots were taken.
+    /* Calculates the WStETH gain earned by the deposit since its last snapshots were taken.
      * Given by the formula:  E = d0 * (S - S(0))/P(0)
      * where S(0) and P(0) are the depositor's snapshots of the sum S and product P, respectively.
      * d0 is the last recorded deposit value.
      */
-    function getDepositorStETHGain(
+    function getDepositorWStETHGain(
         address _depositor
     ) public view returns (uint) {
         uint initialDeposit = deposits[_depositor].initialValue;
@@ -734,17 +746,20 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
 
         Snapshots memory snapshots = depositSnapshots[_depositor];
 
-        uint StETHGain = _getStETHGainFromSnapshots(initialDeposit, snapshots);
-        return StETHGain;
+        uint WStETHGain = _getWStETHGainFromSnapshots(
+            initialDeposit,
+            snapshots
+        );
+        return WStETHGain;
     }
 
-    function _getStETHGainFromSnapshots(
+    function _getWStETHGainFromSnapshots(
         uint initialDeposit,
         Snapshots memory snapshots
     ) internal view returns (uint) {
         /*
-         * Grab the sum 'S' from the epoch at which the stake was made. The StETH gain may span up to one scale change.
-         * If it does, the second portion of the StETH gain is scaled by 1e9.
+         * Grab the sum 'S' from the epoch at which the stake was made. The WStETH gain may span up to one scale change.
+         * If it does, the second portion of the WStETH gain is scaled by 1e9.
          * If the gain spans no scale change, the second portion will be 0.
          */
         uint128 epochSnapshot = snapshots.epoch;
@@ -759,12 +774,12 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
             scaleSnapshot.add(1)
         ].div(SCALE_FACTOR);
 
-        uint StETHGain = initialDeposit
+        uint WStETHGain = initialDeposit
             .mul(firstPortion.add(secondPortion))
             .div(P_Snapshot)
             .div(DECIMAL_PRECISION);
 
-        return StETHGain;
+        return WStETHGain;
     }
 
     /*
@@ -888,7 +903,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         return compoundedStake;
     }
 
-    // --- Sender functions for BaseFeeLMA deposit, StETH gains and HOG gains ---
+    // --- Sender functions for BaseFeeLMA deposit, WStETH gains and HOG gains ---
 
     // Transfer the BaseFeeLMA tokens from the user to the Stability Pool's address, and update its recorded BaseFeeLMA
     function _sendBaseFeeLMAtoStabilityPool(
@@ -904,16 +919,16 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
     /**
      * HEDGEHOG UPDATES: use SafeERC20 safe transfer instead of native token transfer
      */
-    function _sendStETHGainToDepositor(uint _amount) internal {
+    function _sendWStETHGainToDepositor(uint _amount) internal {
         if (_amount == 0) {
             return;
         }
-        uint newStETH = StETH.sub(_amount);
-        StETH = newStETH;
-        emit StabilityPoolStETHBalanceUpdated(newStETH);
-        emit StETHSent(msg.sender, _amount);
+        uint newWStETH = WStETH.sub(_amount);
+        WStETH = newWStETH;
+        emit StabilityPoolWStETHBalanceUpdated(newWStETH);
+        emit WStETHSent(msg.sender, _amount);
 
-        StETHToken.safeTransfer(msg.sender, _amount);
+        WStETHToken.safeTransfer(msg.sender, _amount);
     }
 
     // Send BaseFeeLMA to user and decrease BaseFeeLMA in Pool
@@ -1023,15 +1038,15 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
     function _requireUserHasTrove(address _depositor) internal view {
         require(
             troveManager.getTroveStatus(_depositor) == 1,
-            "StabilityPool: caller must have an active trove to withdraw StETHGain to"
+            "StabilityPool: caller must have an active trove to withdraw WStETHGain to"
         );
     }
 
-    function _requireUserHasStETHGain(address _depositor) internal view {
-        uint StETHGain = getDepositorStETHGain(_depositor);
+    function _requireUserHasWStETHGain(address _depositor) internal view {
+        uint WStETHGain = getDepositorWStETHGain(_depositor);
         require(
-            StETHGain > 0,
-            "StabilityPool: caller must have non-zero StETH Gain"
+            WStETHGain > 0,
+            "StabilityPool: caller must have non-zero WStETH Gain"
         );
     }
 
@@ -1048,7 +1063,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
      *
      */
     function _increaseBalance(uint256 _amount) internal {
-        StETH = StETH.add(_amount);
+        WStETH = WStETH.add(_amount);
     }
 
     // --- Fallback function ---

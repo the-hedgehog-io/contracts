@@ -49,8 +49,8 @@ contract("CollSurplusPool", async (accounts) => {
     await deploymentHelper.connectHOGContractsToCore(HOGContracts, contracts);
   });
 
-  it("CollSurplusPool::getStETH(): Returns the StETH balance of the CollSurplusPool after redemption", async () => {
-    const ETH_1 = await collSurplusPool.getStETH();
+  it("CollSurplusPool::getWStETH(): Returns the WStETH balance of the CollSurplusPool after redemption", async () => {
+    const ETH_1 = await collSurplusPool.getWStETH();
     assert.equal(ETH_1, "0");
 
     const price = toBN(dec(100, 18));
@@ -71,10 +71,10 @@ contract("CollSurplusPool", async (accounts) => {
       web3.currentProvider
     );
 
-    // At StETH:USD = 100, this redemption should leave 1 eth of coll surplus
+    // At WStETH:USD = 100, this redemption should leave 1 eth of coll surplus
     await th.redeemCollateralAndGetTxObject(A, contracts, B_netDebt);
 
-    const ETH_2 = await collSurplusPool.getStETH();
+    const ETH_2 = await collSurplusPool.getWStETH();
     th.assertIsApproximatelyEqual(
       ETH_2,
       B_coll.sub(B_netDebt.mul(mv._1e18BN).div(price))
@@ -95,7 +95,7 @@ contract("CollSurplusPool", async (accounts) => {
     );
   });
 
-  it("CollSurplusPool: claimColl(): Reverts if owner cannot receive StETH surplus", async () => {
+  it("CollSurplusPool: claimColl(): Reverts if owner cannot receive WStETH surplus", async () => {
     const nonPayable = await NonPayable.new();
 
     const price = toBN(dec(100, 18));
@@ -126,10 +126,10 @@ contract("CollSurplusPool", async (accounts) => {
       web3.currentProvider
     );
 
-    // At StETH:USD = 100, this redemption should leave 1 eth of coll surplus for B
+    // At WStETH:USD = 100, this redemption should leave 1 eth of coll surplus for B
     await th.redeemCollateralAndGetTxObject(A, contracts, B_netDebt);
 
-    const ETH_2 = await collSurplusPool.getStETH();
+    const ETH_2 = await collSurplusPool.getWStETH();
     th.assertIsApproximatelyEqual(
       ETH_2,
       B_coll.sub(B_netDebt.mul(mv._1e18BN).div(price))
@@ -138,11 +138,11 @@ contract("CollSurplusPool", async (accounts) => {
     const claimCollateralData = th.getTransactionData("claimCollateral()", []);
     await th.assertRevert(
       nonPayable.forward(borrowerOperations.address, claimCollateralData),
-      "CollSurplusPool: sending StETH failed"
+      "CollSurplusPool: sending WStETH failed"
     );
   });
 
-  it("CollSurplusPool: reverts trying to send StETH to it", async () => {
+  it("CollSurplusPool: reverts trying to send WStETH to it", async () => {
     await th.assertRevert(
       web3.eth.sendTransaction({
         from: A,

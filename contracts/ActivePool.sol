@@ -15,13 +15,13 @@ import "./interfaces/IPool.sol";
  * Changes to the contract:
  * - Raised pragma version
  * - Removed an import of ActivePool Interface
- * - Updated variable names and docs to refer to BaseFeeLMA token and stEth as a collateral
+ * - Updated variable names and docs to refer to BaseFeeLMA token and wwstETH as a collateral
  * - Collateral is now an ERC20 token instead of a native one
  * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  *
- * The Active Pool holds the stStETH collateral and BaseFeeLMA debt (but not BaseFeeLMA tokens) for all active troves.
+ * The Active Pool holds the stWStETH collateral and BaseFeeLMA debt (but not BaseFeeLMA tokens) for all active troves.
  *
- * When a trove is liquidated, it's stStETH and BaseFeeLMA debt are transferred from the Active Pool, to either the
+ * When a trove is liquidated, it's stWStETH and BaseFeeLMA debt are transferred from the Active Pool, to either the
  * Stability Pool, the Default Pool, or both, depending on the liquidation conditions.
  *
  */
@@ -36,8 +36,8 @@ contract ActivePool is Ownable, CheckContract, IPool {
     address public stabilityPoolAddress;
     address public defaultPoolAddress;
     address public feesRouter;
-    IERC20 public StETHToken;
-    uint256 internal StETH; // deposited stEth tracker
+    IERC20 public WStETHToken;
+    uint256 internal WStETH; // deposited wwstETH tracker
     uint256 internal BaseFeeLMADebt;
 
     // --- Events ---
@@ -47,8 +47,8 @@ contract ActivePool is Ownable, CheckContract, IPool {
     );
     event TroveManagerAddressChanged(address _newTroveManagerAddress);
     event ActivePoolBaseFeeLMADebtUpdated(uint _BaseFeeLMADebt);
-    event ActivePoolStETHBalanceUpdated(uint _stStETH);
-    event StETHTokenAddressUpdated(IERC20 _StEthAddress);
+    event ActivePoolWStETHBalanceUpdated(uint _stWStETH);
+    event WStETHTokenAddressUpdated(IERC20 _WStEthAddress);
     event FeesRouterAddressUpdated(address _feesRouter);
 
     // --- Contract setters ---
@@ -63,28 +63,28 @@ contract ActivePool is Ownable, CheckContract, IPool {
         address _troveManagerAddress,
         address _stabilityPoolAddress,
         address _defaultPoolAddress,
-        IERC20 _stETHTokenAddress,
+        IERC20 _wStETHTokenAddress,
         address _feesRouter
     ) external onlyOwner {
         checkContract(_borrowerOperationsAddress);
         checkContract(_troveManagerAddress);
         checkContract(_stabilityPoolAddress);
         checkContract(_defaultPoolAddress);
-        checkContract(address(_stETHTokenAddress));
+        checkContract(address(_wStETHTokenAddress));
         checkContract(_feesRouter);
 
         borrowerOperationsAddress = _borrowerOperationsAddress;
         troveManagerAddress = _troveManagerAddress;
         stabilityPoolAddress = _stabilityPoolAddress;
         defaultPoolAddress = _defaultPoolAddress;
-        StETHToken = _stETHTokenAddress;
+        WStETHToken = _wStETHTokenAddress;
         feesRouter = _feesRouter;
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit StabilityPoolAddressChanged(_stabilityPoolAddress);
         emit DefaultPoolAddressChanged(_defaultPoolAddress);
-        emit StETHTokenAddressUpdated(_stETHTokenAddress);
+        emit WStETHTokenAddressUpdated(_wStETHTokenAddress);
         emit FeesRouterAddressUpdated(_feesRouter);
 
         renounceOwnership();
@@ -94,13 +94,13 @@ contract ActivePool is Ownable, CheckContract, IPool {
 
     /*
      * Hedgehog Updates:
-     * In case StETH is 0 return 1 to avoid division by zero in base rate calculations
-     * Returns the stStETH state variable.
+     * In case WStETH is 0 return 1 to avoid division by zero in base rate calculations
+     * Returns the stWStETH state variable.
      *
-     * Not necessarily equal to the the contract's raw StETH balance - stETH can be forcibly sent to contracts.
+     * Not necessarily equal to the the contract's raw WStETH balance - wStETH can be forcibly sent to contracts.
      */
-    function getStETH() external view override returns (uint) {
-        return StETH > 0 ? StETH : 1;
+    function getWStETH() external view override returns (uint) {
+        return WStETH > 0 ? WStETH : 1;
     }
 
     function getBaseFeeLMADebt() external view override returns (uint) {
@@ -111,14 +111,14 @@ contract ActivePool is Ownable, CheckContract, IPool {
 
     /**
      * HEDGEHOG UPDATES: use SafeERC20 safe transfer instead of native token transfer
-     *      Now also fees router may call sendStETH function
+     *      Now also fees router may call sendWStETH function
      */
-    function sendStETH(address _account, uint _amount) external {
+    function sendWStETH(address _account, uint _amount) external {
         _requireCallerIsBOorTroveMorSPorFRoute();
-        StETH = StETH.sub(_amount);
-        emit ActivePoolStETHBalanceUpdated(StETH);
-        emit StETHSent(_account, _amount);
-        StETHToken.safeTransfer(_account, _amount);
+        WStETH = WStETH.sub(_amount);
+        emit ActivePoolWStETHBalanceUpdated(WStETH);
+        emit WStETHSent(_account, _amount);
+        WStETHToken.safeTransfer(_account, _amount);
     }
 
     function increaseBaseFeeLMADebt(uint _amount) external override {
@@ -176,8 +176,8 @@ contract ActivePool is Ownable, CheckContract, IPool {
      */
     function increaseBalance(uint256 _amount) external {
         _requireCallerIsBorrowerOperationsOrDefaultPool();
-        StETH = StETH.add(_amount);
-        emit ActivePoolStETHBalanceUpdated(StETH);
+        WStETH = WStETH.add(_amount);
+        emit ActivePoolWStETHBalanceUpdated(WStETH);
     }
 
     // --- Fallback function ---

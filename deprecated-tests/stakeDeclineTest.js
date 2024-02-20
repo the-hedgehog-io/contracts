@@ -10,10 +10,10 @@ const assertRevert = th.assertRevert;
 const mv = testHelpers.MoneyValues;
 const timeValues = testHelpers.TimeValues;
 
-/* NOTE: Some tests involving StETH redemption fees do not test for specific fee values.
+/* NOTE: Some tests involving WStETH redemption fees do not test for specific fee values.
  * Some only test that the fees are non-zero when they should occur.
  *
- * Specific StETH gain values will depend on the final fee schedule used, and the final choices for
+ * Specific WStETH gain values will depend on the final fee schedule used, and the final choices for
  * the parameter BETA in the TroveManager, which is still TBD based on economic modelling.
  *
  */
@@ -158,7 +158,7 @@ contract("TroveManager", async (accounts) => {
     );
     console.log(`Snapshots ratio after L1: ${await getSnapshotsRatio()}`);
     console.log(
-      `B pending StETH reward after L1: ${await troveManager.getPendingStETHReward(
+      `B pending WStETH reward after L1: ${await troveManager.getPendingWStETHReward(
         B
       )}`
     );

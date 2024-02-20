@@ -9,7 +9,7 @@ contract StabilityPoolTester is StabilityPool {
     using SafeMath for uint256;
 
     function unprotectedPayable() external payable {
-        StETH = StETH.add(msg.value);
+        WStETH = WStETH.add(msg.value);
     }
 
     function setCurrentScale(uint128 _currentScale) external {

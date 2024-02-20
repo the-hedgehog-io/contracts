@@ -11,12 +11,12 @@ interface IActivePool is IPool {
     );
     event TroveManagerAddressChanged(address _newTroveManagerAddress);
     event ActivePoolBaseFeeLMADebtUpdated(uint _BaseFeeLMADebt);
-    event ActivePoolStETHBalanceUpdated(uint _StETH);
+    event ActivePoolWStETHBalanceUpdated(uint _WStETH);
 
     // --- Functions ---
-    function sendStETH(address _account, uint _amount) external;
+    function sendWStETH(address _account, uint _amount) external;
 
-    function getStETH() external view returns (uint256);
+    function getWStETH() external view returns (uint256);
 
     function increaseBalance(uint256 _amount) external;
 }

@@ -16,7 +16,7 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const BorrowerOperations = await deployments.get("BorrowerOperations");
   const ActivePool = await deployments.get("ActivePool");
   const FeesRouter = await deployments.get("FeesRouter");
-  const { stEth: StETHAddress } = deployConfig;
+  const { wwstETH: WStETHAddress } = deployConfig;
 
   if (!(await isOwnershipRenounced(LockupContractFactory.address))) {
     console.log("Setting up LockupContractFactory...");
@@ -42,7 +42,7 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       TroveManager.address,
       BorrowerOperations.address,
       ActivePool.address,
-      StETHAddress,
+      WStETHAddress,
       FeesRouter.address
     );
   }

@@ -112,22 +112,22 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     uint public totalCollateralSnapshot;
 
     /*
-     * L_StETH and L_BaseFeeLMADebt track the sums of accumulated liquidation rewards per unit staked. During its lifetime, each stake earns:
+     * L_WStETH and L_BaseFeeLMADebt track the sums of accumulated liquidation rewards per unit staked. During its lifetime, each stake earns:
      *
-     * An StETH gain of ( stake * [L_StETH - L_StETH(0)] )
+     * An WStETH gain of ( stake * [L_WStETH - L_WStETH(0)] )
      * A BaseFeeLMADebt increase  of ( stake * [L_BaseFeeLMADebt - L_BaseFeeLMADebt(0)] )
      *
-     * Where L_StETH(0) and L_BaseFeeLMADebt(0) are snapshots of L_StETH and L_BaseFeeLMADebt for the active Trove taken at the instant the stake was made
+     * Where L_WStETH(0) and L_BaseFeeLMADebt(0) are snapshots of L_WStETH and L_BaseFeeLMADebt for the active Trove taken at the instant the stake was made
      */
-    uint public L_StETH;
+    uint public L_WStETH;
     uint public L_BaseFeeLMADebt;
 
     // Map addresses with active troves to their RewardSnapshot
     mapping(address => RewardSnapshot) public rewardSnapshots;
 
-    // Object containing the StETH and BaseFeeLMA snapshots for a given active trove
+    // Object containing the WStETH and BaseFeeLMA snapshots for a given active trove
     struct RewardSnapshot {
-        uint StETH;
+        uint WStETH;
         uint BaseFeeLMADebt;
     }
 
@@ -135,7 +135,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     address[] public TroveOwners;
 
     // Error trackers for the trove redistribution calculation
-    uint public lastStETHError_Redistribution;
+    uint public lastWStETHError_Redistribution;
     uint public lastBaseFeeLMADebtError_Redistribution;
 
     /*
@@ -206,9 +206,9 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     struct RedemptionTotals {
         uint remainingBaseFeeLMA;
         uint totalBaseFeeLMAToRedeem;
-        uint totalStETHDrawn;
-        uint StETHFee;
-        uint StETHToSendToRedeemer;
+        uint totalWStETHDrawn;
+        uint WStETHFee;
+        uint WStETHToSendToRedeemer;
         // HEDGEHOG UPDATES: BaseRate is different for redemption and minting tokens
         // Rename decayedBaseRate into decayedRedemptionBaseRate
         uint decayedRedemptionBaseRate;
@@ -218,7 +218,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
     struct SingleRedemptionValues {
         uint BaseFeeLMALot;
-        uint StETHLot;
+        uint WStETHLot;
         bool cancelledPartial;
     }
 
@@ -247,8 +247,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     event Redemption(
         uint _attemptedBaseFeeLMAAmount,
         uint _actualBaseFeeLMAAmount,
-        uint _StETHSent,
-        uint _StETHFee
+        uint _WStETHSent,
+        uint _WStETHFee
     );
     event TroveUpdated(
         address indexed _borrower,
@@ -282,8 +282,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint _totalStakesSnapshot,
         uint _totalCollateralSnapshot
     );
-    event LTermsUpdated(uint _L_StETH, uint _L_BaseFeeLMADebt);
-    event TroveSnapshotsUpdated(uint _L_StETH, uint _L_BaseFeeLMADebt);
+    event LTermsUpdated(uint _L_WStETH, uint _L_BaseFeeLMADebt);
+    event TroveSnapshotsUpdated(uint _L_WStETH, uint _L_BaseFeeLMADebt);
     event TroveIndexUpdated(address _borrower, uint _newIndex);
 
     enum TroveManagerOperation {
@@ -631,7 +631,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     }
 
     /*
-     *  Get its offset coll/debt and StETH gas comp, and close the trove.
+     *  Get its offset coll/debt and WStETH gas comp, and close the trove.
      */
     function _getCappedOffsetVals(
         uint _entireTroveDebt,
@@ -710,7 +710,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             "TroveManager: nothing to liquidate"
         );
 
-        // Move liquidated StETH and BaseFeeLMA to the appropriate pools
+        // Move liquidated WStETH and BaseFeeLMA to the appropriate pools
         stabilityPoolCached.offset(
             totals.totalDebtToOffset,
             totals.totalCollToSendToSP
@@ -722,7 +722,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             totals.totalCollToRedistribute
         );
         if (totals.totalCollSurplus > 0) {
-            contractsCache.activePool.sendStETH(
+            contractsCache.activePool.sendWStETH(
                 address(collSurplusPool),
                 totals.totalCollSurplus
             );
@@ -936,7 +936,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             "TroveManager: nothing to liquidate"
         );
 
-        // Move liquidated StETH and BaseFeeLMA to the appropriate pools
+        // Move liquidated WStETH and BaseFeeLMA to the appropriate pools
         stabilityPoolCached.offset(
             totals.totalDebtToOffset,
             totals.totalCollToSendToSP
@@ -950,7 +950,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
         if (totals.totalCollSurplus > 0) {
             collSurplusPool.increaseBalance(totals.totalCollSurplus);
-            activePoolCached.sendStETH(
+            activePoolCached.sendWStETH(
                 address(collSurplusPool),
                 totals.totalCollSurplus
             );
@@ -1157,7 +1157,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         IActivePool _activePool,
         address _liquidator,
         uint _BaseFeeLMA,
-        uint _StETH
+        uint _WStETH
     ) internal {
         if (_BaseFeeLMA > 0) {
             baseFeeLMAToken.returnFromPool(
@@ -1167,8 +1167,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             );
         }
 
-        if (_StETH > 0) {
-            _activePool.sendStETH(_liquidator, _StETH);
+        if (_WStETH > 0) {
+            _activePool.sendWStETH(_liquidator, _WStETH);
         }
     }
 
@@ -1177,12 +1177,12 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         IActivePool _activePool,
         IDefaultPool _defaultPool,
         uint _BaseFeeLMA,
-        uint _StETH
+        uint _WStETH
     ) internal {
         _defaultPool.decreaseBaseFeeLMADebt(_BaseFeeLMA);
         _activePool.increaseBaseFeeLMADebt(_BaseFeeLMA);
 
-        _defaultPool.sendStETHToActivePool(_StETH);
+        _defaultPool.sendWStETHToActivePool(_WStETH);
     }
 
     // --- Redemption functions ---
@@ -1204,15 +1204,15 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             Troves[_borrower].debt
         );
 
-        // Get the StETHLot of equivalent value in USD
-        // HEDGEHOG UPDATES: Change StETHLOT calculations formula from [debtToBeRedeemed * price * 10e9] to [debtToBeRedeemed / price]
-        singleRedemption.StETHLot = singleRedemption.BaseFeeLMALot.mul(_price);
+        // Get the WStETHLot of equivalent value in USD
+        // HEDGEHOG UPDATES: Change WStETHLOT calculations formula from [debtToBeRedeemed * price * 10e9] to [debtToBeRedeemed / price]
+        singleRedemption.WStETHLot = singleRedemption.BaseFeeLMALot.mul(_price);
 
-        // Decrease the debt and collateral of the current Trove according to the BaseFeeLMA lot and corresponding StETH to send
+        // Decrease the debt and collateral of the current Trove according to the BaseFeeLMA lot and corresponding WStETH to send
         uint newDebt = (Troves[_borrower].debt).sub(
             singleRedemption.BaseFeeLMALot
         );
-        uint newColl = (Troves[_borrower].coll).sub(singleRedemption.StETHLot);
+        uint newColl = (Troves[_borrower].coll).sub(singleRedemption.WStETHLot);
 
         if (newDebt == BaseFeeLMA_GAS_COMPENSATION) {
             // No debt left in the Trove (except for the liquidation reserve), therefore the trove gets closed
@@ -1274,26 +1274,26 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
     /*
      * Called when a full redemption occurs, and closes the trove.
-     * The redeemer swaps (debt - liquidation reserve) BaseFeeLMA for (debt - liquidation reserve) worth of StETH, so the BaseFeeLMA liquidation reserve left corresponds to the remaining debt.
+     * The redeemer swaps (debt - liquidation reserve) BaseFeeLMA for (debt - liquidation reserve) worth of WStETH, so the BaseFeeLMA liquidation reserve left corresponds to the remaining debt.
      * In order to close the trove, the BaseFeeLMA liquidation reserve is burned, and the corresponding debt is removed from the active pool.
      * The debt recorded on the trove's struct is zero'd elswhere, in _closeTrove.
-     * Any surplus StETH left in the trove, is sent to the Coll surplus pool, and can be later claimed by the borrower.
+     * Any surplus WStETH left in the trove, is sent to the Coll surplus pool, and can be later claimed by the borrower.
      */
     function _redeemCloseTrove(
         ContractsCache memory _contractsCache,
         address _borrower,
         uint _BaseFeeLMA,
-        uint _StETH
+        uint _WStETH
     ) internal {
         _contractsCache.baseFeeLMAToken.burn(gasPoolAddress, _BaseFeeLMA);
-        // Update Active Pool BaseFeeLMA, and send StETH to account
+        // Update Active Pool BaseFeeLMA, and send WStETH to account
         _contractsCache.activePool.decreaseBaseFeeLMADebt(_BaseFeeLMA);
 
-        // send StETH from Active Pool to CollSurplus Pool
-        _contractsCache.collSurplusPool.accountSurplus(_borrower, _StETH);
-        _contractsCache.activePool.sendStETH(
+        // send WStETH from Active Pool to CollSurplus Pool
+        _contractsCache.collSurplusPool.accountSurplus(_borrower, _WStETH);
+        _contractsCache.activePool.sendWStETH(
             address(_contractsCache.collSurplusPool),
-            _StETH
+            _WStETH
         );
     }
 
@@ -1434,8 +1434,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             totals.totalBaseFeeLMAToRedeem = totals.totalBaseFeeLMAToRedeem.add(
                 singleRedemption.BaseFeeLMALot
             );
-            totals.totalStETHDrawn = totals.totalStETHDrawn.add(
-                singleRedemption.StETHLot
+            totals.totalWStETHDrawn = totals.totalWStETHDrawn.add(
+                singleRedemption.WStETHLot
             );
 
             totals.remainingBaseFeeLMA = totals.remainingBaseFeeLMA.sub(
@@ -1445,7 +1445,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         }
 
         require(
-            totals.totalStETHDrawn > 0,
+            totals.totalWStETHDrawn > 0,
             "TroveManager: Unable to redeem any amount"
         );
         // HEDGEHOG LOGIC UPDATE:
@@ -1453,43 +1453,43 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         // 2) update commented explanation (baseRate => redemptionBaseRate)
         // Decay the redemptionBaseRate due to time passed, and then increase it according to the size of this redemption.
         // Use the saved total BaseFeeLMA supply value, from before it was reduced by the redemption.
-        _updateRedemptionBaseRateFromRedemption(totals.totalStETHDrawn);
-        // Calculate the StETH fee
-        totals.StETHFee = _getRedemptionFee(totals.totalStETHDrawn);
+        _updateRedemptionBaseRateFromRedemption(totals.totalWStETHDrawn);
+        // Calculate the WStETH fee
+        totals.WStETHFee = _getRedemptionFee(totals.totalWStETHDrawn);
 
         _requireUserAcceptsFee(
-            totals.StETHFee,
-            totals.totalStETHDrawn,
+            totals.WStETHFee,
+            totals.totalWStETHDrawn,
             _maxFeePercentage
         );
 
         // HEDGHEHOG UPDATES:
         // Fees are now distributed among different addresses based on how big they are
-        feesRouter.distributeCollFee(totals.totalStETHDrawn, totals.StETHFee);
+        feesRouter.distributeCollFee(totals.totalWStETHDrawn, totals.WStETHFee);
 
-        totals.StETHToSendToRedeemer = totals.totalStETHDrawn.sub(
-            totals.StETHFee
+        totals.WStETHToSendToRedeemer = totals.totalWStETHDrawn.sub(
+            totals.WStETHFee
         );
 
         emit Redemption(
             _BaseFeeLMAamount,
             totals.totalBaseFeeLMAToRedeem,
-            totals.totalStETHDrawn,
-            totals.StETHFee
+            totals.totalWStETHDrawn,
+            totals.WStETHFee
         );
-        // Burn the total BaseFeeLMA that is cancelled with debt, and send the redeemed StETH to msg.sender
+        // Burn the total BaseFeeLMA that is cancelled with debt, and send the redeemed WStETH to msg.sender
         contractsCache.baseFeeLMAToken.burn(
             msg.sender,
             totals.totalBaseFeeLMAToRedeem
         );
-        // Update Active Pool BaseFeeLMA, and send StETH to account
+        // Update Active Pool BaseFeeLMA, and send WStETH to account
         contractsCache.activePool.decreaseBaseFeeLMADebt(
             totals.totalBaseFeeLMAToRedeem
         );
 
-        contractsCache.activePool.sendStETH(
+        contractsCache.activePool.sendWStETH(
             msg.sender,
-            totals.StETHToSendToRedeemer
+            totals.WStETHToSendToRedeemer
         );
     }
 
@@ -1498,12 +1498,12 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     // Return the nominal collateral ratio (ICR) of a given Trove, without the price. Takes a trove's pending coll and debt rewards from redistributions into account.
     function getNominalICR(address _borrower) public view returns (uint) {
         (
-            uint currentStETH,
+            uint currentWStETH,
             uint currentBaseFeeLMADebt
         ) = _getCurrentTroveAmounts(_borrower);
 
         uint NICR = LiquityMath._computeNominalCR(
-            currentStETH,
+            currentWStETH,
             currentBaseFeeLMADebt
         );
         return NICR;
@@ -1519,12 +1519,12 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint _price
     ) public view returns (uint) {
         (
-            uint currentStETH,
+            uint currentWStETH,
             uint currentBaseFeeLMADebt
         ) = _getCurrentTroveAmounts(_borrower);
 
         uint ICR = LiquityMath._computeCR(
-            currentStETH,
+            currentWStETH,
             currentBaseFeeLMADebt,
             _price
         );
@@ -1540,12 +1540,12 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     ) public view returns (uint) {
         uint256 price = priceFeed.lastGoodPrice();
         (
-            uint currentStETH,
+            uint currentWStETH,
             uint currentBaseFeeLMADebt
         ) = _getCurrentTroveAmounts(_borrower);
 
         uint ICR = LiquityMath._computeCR(
-            currentStETH,
+            currentWStETH,
             currentBaseFeeLMADebt,
             price
         );
@@ -1555,17 +1555,17 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     function _getCurrentTroveAmounts(
         address _borrower
     ) internal view returns (uint, uint) {
-        uint pendingStETHReward = getPendingStETHReward(_borrower);
+        uint pendingWStETHReward = getPendingWStETHReward(_borrower);
         uint pendingBaseFeeLMADebtReward = getPendingBaseFeeLMADebtReward(
             _borrower
         );
 
-        uint currentStETH = Troves[_borrower].coll.add(pendingStETHReward);
+        uint currentWStETH = Troves[_borrower].coll.add(pendingWStETHReward);
         uint currentBaseFeeLMADebt = Troves[_borrower].debt.add(
             pendingBaseFeeLMADebtReward
         );
 
-        return (currentStETH, currentBaseFeeLMADebt);
+        return (currentWStETH, currentBaseFeeLMADebt);
     }
 
     function applyPendingRewards(address _borrower) external {
@@ -1583,7 +1583,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             _requireTroveIsActive(_borrower);
 
             // Compute pending rewards
-            uint pendingStETHReward = getPendingStETHReward(_borrower);
+            uint pendingWStETHReward = getPendingWStETHReward(_borrower);
 
             uint pendingBaseFeeLMADebtReward = getPendingBaseFeeLMADebtReward(
                 _borrower
@@ -1591,7 +1591,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
             // Apply pending rewards to trove's state
             Troves[_borrower].coll = Troves[_borrower].coll.add(
-                pendingStETHReward
+                pendingWStETHReward
             );
 
             Troves[_borrower].debt = Troves[_borrower].debt.add(
@@ -1605,7 +1605,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
                 _activePool,
                 _defaultPool,
                 pendingBaseFeeLMADebtReward,
-                pendingStETHReward
+                pendingWStETHReward
             );
 
             emit TroveUpdated(
@@ -1618,24 +1618,24 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         }
     }
 
-    // Update borrower's snapshots of L_StETH and L_BaseFeeLMADebt to reflect the current values
+    // Update borrower's snapshots of L_WStETH and L_BaseFeeLMADebt to reflect the current values
     function updateTroveRewardSnapshots(address _borrower) external {
         _requireCallerIsBorrowerOperations();
         return _updateTroveRewardSnapshots(_borrower);
     }
 
     function _updateTroveRewardSnapshots(address _borrower) internal {
-        rewardSnapshots[_borrower].StETH = L_StETH;
+        rewardSnapshots[_borrower].WStETH = L_WStETH;
         rewardSnapshots[_borrower].BaseFeeLMADebt = L_BaseFeeLMADebt;
-        emit TroveSnapshotsUpdated(L_StETH, L_BaseFeeLMADebt);
+        emit TroveSnapshotsUpdated(L_WStETH, L_BaseFeeLMADebt);
     }
 
-    // Get the borrower's pending accumulated StETH reward, earned by their stake
-    function getPendingStETHReward(
+    // Get the borrower's pending accumulated WStETH reward, earned by their stake
+    function getPendingWStETHReward(
         address _borrower
     ) public view returns (uint) {
-        uint snapshotStETH = rewardSnapshots[_borrower].StETH;
-        uint rewardPerUnitStaked = L_StETH.sub(snapshotStETH);
+        uint snapshotWStETH = rewardSnapshots[_borrower].WStETH;
+        uint rewardPerUnitStaked = L_WStETH.sub(snapshotWStETH);
 
         if (
             rewardPerUnitStaked == 0 ||
@@ -1646,11 +1646,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
         uint stake = Troves[_borrower].stake;
 
-        uint pendingStETHReward = stake.mul(rewardPerUnitStaked).div(
+        uint pendingWStETHReward = stake.mul(rewardPerUnitStaked).div(
             DECIMAL_PRECISION
         );
 
-        return pendingStETHReward;
+        return pendingWStETHReward;
     }
 
     // Get the borrower's pending accumulated BaseFeeLMA reward, earned by their stake
@@ -1686,7 +1686,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             return false;
         }
 
-        return (rewardSnapshots[_borrower].StETH < L_StETH);
+        return (rewardSnapshots[_borrower].WStETH < L_WStETH);
     }
 
     // Return the Troves entire debt and coll, including pending rewards from redistributions.
@@ -1699,17 +1699,17 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             uint debt,
             uint coll,
             uint pendingBaseFeeLMADebtReward,
-            uint pendingStETHReward
+            uint pendingWStETHReward
         )
     {
         debt = Troves[_borrower].debt;
         coll = Troves[_borrower].coll;
 
         pendingBaseFeeLMADebtReward = getPendingBaseFeeLMADebtReward(_borrower);
-        pendingStETHReward = getPendingStETHReward(_borrower);
+        pendingWStETHReward = getPendingWStETHReward(_borrower);
 
         debt = debt.add(pendingBaseFeeLMADebtReward);
-        coll = coll.add(pendingStETHReward);
+        coll = coll.add(pendingWStETHReward);
     }
 
     function removeStake(address _borrower) external {
@@ -1775,7 +1775,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
         /*
          * Add distributed coll and debt rewards-per-unit-staked to the running totals. Division uses a "feedback"
-         * error correction, to keep the cumulative error low in the running totals L_StETH and L_BaseFeeLMADebt:
+         * error correction, to keep the cumulative error low in the running totals L_WStETH and L_BaseFeeLMADebt:
          *
          * 1) Form numerators which compensate for the floor division errors that occurred the last time this
          * function was called.
@@ -1784,39 +1784,39 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
          * 4) Store these errors for use in the next correction when this function is called.
          * 5) Note: static analysis tools complain about this "division before multiplication", however, it is intended.
          */
-        uint StETHNumerator = _coll.mul(DECIMAL_PRECISION).add(
-            lastStETHError_Redistribution
+        uint WStETHNumerator = _coll.mul(DECIMAL_PRECISION).add(
+            lastWStETHError_Redistribution
         );
         uint BaseFeeLMADebtNumerator = _debt.mul(DECIMAL_PRECISION).add(
             lastBaseFeeLMADebtError_Redistribution
         );
 
         // Get the per-unit-staked terms
-        uint StETHRewardPerUnitStaked = StETHNumerator.div(totalStakes);
+        uint WStETHRewardPerUnitStaked = WStETHNumerator.div(totalStakes);
         uint BaseFeeLMADebtRewardPerUnitStaked = BaseFeeLMADebtNumerator.div(
             totalStakes
         );
 
-        lastStETHError_Redistribution = StETHNumerator.sub(
-            StETHRewardPerUnitStaked.mul(totalStakes)
+        lastWStETHError_Redistribution = WStETHNumerator.sub(
+            WStETHRewardPerUnitStaked.mul(totalStakes)
         );
         lastBaseFeeLMADebtError_Redistribution = BaseFeeLMADebtNumerator.sub(
             BaseFeeLMADebtRewardPerUnitStaked.mul(totalStakes)
         );
 
         // Add per-unit-staked terms to the running totals
-        L_StETH = L_StETH.add(StETHRewardPerUnitStaked);
+        L_WStETH = L_WStETH.add(WStETHRewardPerUnitStaked);
         L_BaseFeeLMADebt = L_BaseFeeLMADebt.add(
             BaseFeeLMADebtRewardPerUnitStaked
         );
 
-        emit LTermsUpdated(L_StETH, L_BaseFeeLMADebt);
+        emit LTermsUpdated(L_WStETH, L_BaseFeeLMADebt);
 
         // Transfer coll and debt from ActivePool to DefaultPool
         _activePool.decreaseBaseFeeLMADebt(_debt);
         _defaultPool.increaseBaseFeeLMADebt(_debt);
         _defaultPool.increaseBalance(_coll);
-        _activePool.sendStETH(address(_defaultPool), _coll);
+        _activePool.sendWStETH(address(_defaultPool), _coll);
     }
 
     function closeTrove(address _borrower) external {
@@ -1836,7 +1836,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         Troves[_borrower].coll = 0;
         Troves[_borrower].debt = 0;
 
-        rewardSnapshots[_borrower].StETH = 0;
+        rewardSnapshots[_borrower].WStETH = 0;
         rewardSnapshots[_borrower].BaseFeeLMADebt = 0;
 
         _removeTroveOwner(_borrower, TroveOwnersArrayLength);
@@ -1849,9 +1849,9 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
      *
      * The calculation excludes a portion of collateral that is in the ActivePool:
      *
-     * the total StETH gas compensation from the liquidation sequence
+     * the total WStETH gas compensation from the liquidation sequence
      *
-     * The StETH as compensation must be excluded as it is always sent out at the very end of the liquidation sequence.
+     * The WStETH as compensation must be excluded as it is always sent out at the very end of the liquidation sequence.
      */
     function _updateSystemSnapshots_excludeCollRemainder(
         IActivePool _activePool,
@@ -1859,8 +1859,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     ) internal {
         totalStakesSnapshot = totalStakes;
 
-        uint activeColl = _activePool.getStETH();
-        uint liquidatedColl = defaultPool.getStETH();
+        uint activeColl = _activePool.getWStETH();
+        uint liquidatedColl = defaultPool.getWStETH();
         totalCollateralSnapshot = activeColl.sub(_collRemainder).add(
             liquidatedColl
         );
@@ -1950,7 +1950,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         return _checkRecoveryMode(priceFeed.lastGoodPrice());
     }
 
-    // Check whether or not the system *would be* in Recovery Mode, given an StETH:USD price, and the entire system coll and debt.
+    // Check whether or not the system *would be* in Recovery Mode, given an WStETH:USD price, and the entire system coll and debt.
     function _checkPotentialRecoveryMode(
         uint _entireSystemColl,
         uint _entireSystemDebt,
@@ -1981,18 +1981,18 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
      * 2) increases the redemptionBaseRate based on the amount redeemed, as a proportion of total supply
      */
     function _updateRedemptionBaseRateFromRedemption(
-        uint _StETHDrawn
+        uint _WStETHDrawn
     ) internal returns (uint) {
         uint decayedRedemptionBaseRate = _calcDecayedRedemptionBaseRate();
         // Hedgehog updates: Now calculating what part of total collateral is getting withdrawn from the
         // system
 
         // HEDGEHOG UPDATES: not dividing, but multyplying by decimal precision
-        /* Convert the drawn StETH back to BaseFeeLMA at face value rate (1 BaseFeeLMA:1 USD), in order to get
+        /* Convert the drawn WStETH back to BaseFeeLMA at face value rate (1 BaseFeeLMA:1 USD), in order to get
          * the fraction of total supply that was redeemed at face value. */
-        uint redeemedBaseFeeLMAFraction = _StETHDrawn
+        uint redeemedBaseFeeLMAFraction = _WStETHDrawn
             .mul(DECIMAL_PRECISION)
-            .div(activePool.getStETH());
+            .div(activePool.getWStETH());
 
         // Hedgehog Updates: Remove division by BETA
         uint newBaseRate = decayedRedemptionBaseRate.add(
@@ -2051,32 +2051,33 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             LiquityMath._min(
                 REDEMPTION_FEE_FLOOR.add(_redemptionBaseRate).add(
                     _redemptionColl.div(
-                        activePool.getStETH() + defaultPool.getStETH()
+                        activePool.getWStETH() + defaultPool.getWStETH()
                     )
                 ),
                 DECIMAL_PRECISION // cap at a maximum of 100%
             );
     }
 
-    function _getRedemptionFee(uint _StETHDrawn) internal view returns (uint) {
-        return _calcRedemptionFee(getRedemptionRate(_StETHDrawn), _StETHDrawn);
+    function _getRedemptionFee(uint _WStETHDrawn) internal view returns (uint) {
+        return
+            _calcRedemptionFee(getRedemptionRate(_WStETHDrawn), _WStETHDrawn);
     }
 
     function getRedemptionFeeWithDecay(
-        uint _StETHDrawn
+        uint _WStETHDrawn
     ) external view returns (uint) {
         return
             _calcRedemptionFee(
-                getRedemptionRateWithDecay(_StETHDrawn),
-                _StETHDrawn
+                getRedemptionRateWithDecay(_WStETHDrawn),
+                _WStETHDrawn
             );
     }
 
     function _calcRedemptionFee(
         uint _redemptionRate,
-        uint _StETHDrawn
+        uint _WStETHDrawn
     ) internal pure returns (uint) {
-        uint redemptionFee = _redemptionRate.mul(_StETHDrawn).div(
+        uint redemptionFee = _redemptionRate.mul(_WStETHDrawn).div(
             DECIMAL_PRECISION
         );
 

@@ -79,7 +79,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
     });
 
     it("1. Liquidation succeeds after P reduced to 1", async () => {
-      // Whale opens Trove with 100k StETH and sends 50k BaseFeeLMA to A
+      // Whale opens Trove with 100k WStETH and sends 50k BaseFeeLMA to A
       await borrowerOperations.openTrove(
         th._100pct,
         await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
@@ -164,7 +164,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
     });
 
     it("2. New deposits can be made after P reduced to 1", async () => {
-      // Whale opens Trove with 100k StETH and sends 50k BaseFeeLMA to A
+      // Whale opens Trove with 100k WStETH and sends 50k BaseFeeLMA to A
       await borrowerOperations.openTrove(
         th._100pct,
         await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
@@ -260,7 +260,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
     });
 
     it("3. Liquidation succeeds when P == 1 and liquidation has newProductFactor == 1e9", async () => {
-      // Whale opens Trove with 100k StETH and sends 50k BaseFeeLMA to A
+      // Whale opens Trove with 100k WStETH and sends 50k BaseFeeLMA to A
       await borrowerOperations.openTrove(
         th._100pct,
         await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
@@ -366,7 +366,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
     });
 
     it("4. Liquidation succeeds when P == 1 and liquidation has newProductFactor > 1e9", async () => {
-      // Whale opens Trove with 100k StETH and sends 50k BaseFeeLMA to A
+      // Whale opens Trove with 100k WStETH and sends 50k BaseFeeLMA to A
       await borrowerOperations.openTrove(
         th._100pct,
         await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
@@ -474,7 +474,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
     // --- Check depositors have correct stakes after experiencing scale change from depositing when P is tiny  ---
 
     it("5. Depositor have correct depleted stake after deposit at P == 1 and scale changing liq (with newProductFactor == 1e9)", async () => {
-      // Whale opens Trove with 100k StETH and sends 50k BaseFeeLMA to A
+      // Whale opens Trove with 100k WStETH and sends 50k BaseFeeLMA to A
       await borrowerOperations.openTrove(
         th._100pct,
         await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),
@@ -592,7 +592,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
     });
 
     it("6. Depositor have correct depleted stake after deposit at P == 1 and scale changing liq (with newProductFactor > 1e9)", async () => {
-      // Whale opens Trove with 100k StETH and sends 50k BaseFeeLMA to A
+      // Whale opens Trove with 100k WStETH and sends 50k BaseFeeLMA to A
       await borrowerOperations.openTrove(
         th._100pct,
         await getOpenTroveBaseFeeLMAAmount(dec(100000, 18)),

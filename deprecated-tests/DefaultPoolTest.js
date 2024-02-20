@@ -24,7 +24,7 @@ contract("DefaultPool", async (accounts) => {
     );
   });
 
-  it("sendStETHToActivePool(): fails if receiver cannot receive StETH", async () => {
+  it("sendWStETHToActivePool(): fails if receiver cannot receive WStETH", async () => {
     const amount = dec(1, "ether");
 
     // start pool with `amount`
@@ -36,16 +36,16 @@ contract("DefaultPool", async (accounts) => {
     assert.isTrue(tx.receipt.status);
 
     // try to send eth from pool to non-payable
-    //await th.assertRevert(defaultPool.sendStETHToActivePool(amount, { from: owner }), 'DefaultPool: sending StETH failed')
+    //await th.assertRevert(defaultPool.sendWStETHToActivePool(amount, { from: owner }), 'DefaultPool: sending WStETH failed')
     const sendETHData = th.getTransactionData(
-      "sendStETHToActivePool(uint256)",
+      "sendWStETHToActivePool(uint256)",
       [web3.utils.toHex(amount)]
     );
     await th.assertRevert(
       mockTroveManager.forward(defaultPool.address, sendETHData, {
         from: owner,
       }),
-      "DefaultPool: sending StETH failed"
+      "DefaultPool: sending WStETH failed"
     );
   });
 });

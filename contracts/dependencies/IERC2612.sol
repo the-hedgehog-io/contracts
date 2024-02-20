@@ -7,9 +7,9 @@ pragma solidity 0.8.19;
  *
  * Adds the {permit} method, which can be used to change one's
  * {IERC20-allowance} without having to send a transaction, by signing a
- * message. This allows users to spend tokens without having to hold StETH.
+ * message. This allows users to spend tokens without having to hold WStETH.
  *
- * See https://eips.stETHeum.org/EIPS/eip-2612.
+ * See https://eips.wStETHeum.org/EIPS/eip-2612.
  *
  * Code adapted from https://github.com/OpenZeppelin/openzeppelin-contracts/pull/2237/
  */
@@ -33,7 +33,7 @@ interface IERC2612 {
      * - the signature must use ``owner``'s current nonce (see {nonces}).
      *
      * For more information on the signature format, see the
-     * https://eips.stETHeum.org/EIPS/eip-2612#specification[relevant EIP
+     * https://eips.wStETHeum.org/EIPS/eip-2612#specification[relevant EIP
      * section].
      */
     function permit(

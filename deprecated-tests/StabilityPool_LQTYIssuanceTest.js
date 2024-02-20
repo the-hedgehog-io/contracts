@@ -189,8 +189,8 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
       const B_pendingHOGGain = await stabilityPool.getDepositorHOGGain(B);
       assert.equal(B_pendingHOGGain, "0");
 
-      // Check depositor B has a pending StETH gain
-      const B_pendingETHGain = await stabilityPool.getDepositorStETHGain(B);
+      // Check depositor B has a pending WStETH gain
+      const B_pendingETHGain = await stabilityPool.getDepositorWStETHGain(B);
       assert.isTrue(B_pendingETHGain.gt(toBN("0")));
     });
 
@@ -215,7 +215,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
         { from: defaulter_1, value: dec(100, "ether") }
       );
 
-      // StETH drops
+      // WStETH drops
       await priceFeed.setPrice(dec(100, 18));
 
       await th.fastForwardTime(
@@ -265,7 +265,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
       const initialIssuance = await communityIssuanceTester.totalHOGIssued();
       assert.equal(initialIssuance, 0);
 
-      // Whale opens Trove with 10k StETH
+      // Whale opens Trove with 10k WStETH
       await borrowerOperations.openTrove(
         th._100pct,
         dec(10000, 18),
@@ -378,7 +378,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
       const initialIssuance = await communityIssuanceTester.totalHOGIssued();
       assert.equal(initialIssuance, 0);
 
-      // Whale opens Trove with 10k StETH
+      // Whale opens Trove with 10k WStETH
       await borrowerOperations.openTrove(
         th._100pct,
         await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
@@ -532,7 +532,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
       const initialIssuance = await communityIssuanceTester.totalHOGIssued();
       assert.equal(initialIssuance, 0);
 
-      // Whale opens Trove with 10k StETH
+      // Whale opens Trove with 10k WStETH
       await borrowerOperations.openTrove(
         th._100pct,
         dec(10000, 18),
@@ -743,7 +743,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
       const initialIssuance = await communityIssuanceTester.totalHOGIssued();
       assert.equal(initialIssuance, 0);
 
-      // Whale opens Trove with 10k StETH
+      // Whale opens Trove with 10k WStETH
       await borrowerOperations.openTrove(
         th._100pct,
         await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
@@ -1059,22 +1059,22 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
     /* Serial scale changes
 
     A make deposit 10k BaseFeeLMA
-    1 month passes. L1 decreases P: P = 1e-5 P. L1:   9999.9 BaseFeeLMA, 100 StETH
+    1 month passes. L1 decreases P: P = 1e-5 P. L1:   9999.9 BaseFeeLMA, 100 WStETH
     B makes deposit 9999.9
-    1 month passes. L2 decreases P: P =  1e-5 P. L2:  9999.9 BaseFeeLMA, 100 StETH
+    1 month passes. L2 decreases P: P =  1e-5 P. L2:  9999.9 BaseFeeLMA, 100 WStETH
     C makes deposit  9999.9
-    1 month passes. L3 decreases P: P = 1e-5 P. L3:  9999.9 BaseFeeLMA, 100 StETH
+    1 month passes. L3 decreases P: P = 1e-5 P. L3:  9999.9 BaseFeeLMA, 100 WStETH
     D makes deposit  9999.9
-    1 month passes. L4 decreases P: P = 1e-5 P. L4:  9999.9 BaseFeeLMA, 100 StETH
+    1 month passes. L4 decreases P: P = 1e-5 P. L4:  9999.9 BaseFeeLMA, 100 WStETH
     E makes deposit  9999.9
-    1 month passes. L5 decreases P: P = 1e-5 P. L5:  9999.9 BaseFeeLMA, 100 StETH
+    1 month passes. L5 decreases P: P = 1e-5 P. L5:  9999.9 BaseFeeLMA, 100 WStETH
     =========
     F makes deposit 100
-    1 month passes. L6 empties the Pool. L6:  10000 BaseFeeLMA, 100 StETH
+    1 month passes. L6 empties the Pool. L6:  10000 BaseFeeLMA, 100 WStETH
 
     expect A, B, C, D each withdraw ~1 month's worth of HOG */
     it("withdrawFromSP(): Several deposits of 100 BaseFeeLMA span one scale factor change. Depositors withdraw correct HOG gains", async () => {
-      // Whale opens Trove with 100 StETH
+      // Whale opens Trove with 100 WStETH
       await borrowerOperations.openTrove(
         th._100pct,
         await getOpenTroveBaseFeeLMAAmount(dec(10000, 18)),
@@ -1352,7 +1352,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
       const initialIssuance = await communityIssuanceTester.totalHOGIssued();
       assert.equal(initialIssuance, 0);
 
-      // Whale opens Trove with 10k StETH
+      // Whale opens Trove with 10k WStETH
       await borrowerOperations.openTrove(
         th._100pct,
         dec(10000, 18),
@@ -1580,7 +1580,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
       const initialIssuance = await communityIssuanceTester.totalHOGIssued();
       assert.equal(initialIssuance, 0);
 
-      // Whale opens Trove with 10k StETH
+      // Whale opens Trove with 10k WStETH
       await borrowerOperations.openTrove(
         th._100pct,
         dec(10000, 18),
@@ -2195,13 +2195,13 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
     F1 kickbackRate: 80%
 
     A, B make deposit 5000 BaseFeeLMA via F1
-    1 month passes. L1 depletes P: P = 1e-5*P L1:  9999.9 BaseFeeLMA, 1 StETH.  scale = 0
+    1 month passes. L1 depletes P: P = 1e-5*P L1:  9999.9 BaseFeeLMA, 1 WStETH.  scale = 0
     C makes deposit 10000  via F1
-    1 month passes. L2 depletes P: P = 1e-5*P L2:  9999.9 BaseFeeLMA, 1 StETH  scale = 1
+    1 month passes. L2 depletes P: P = 1e-5*P L2:  9999.9 BaseFeeLMA, 1 WStETH  scale = 1
     D makes deposit 10000 via F1
-    1 month passes. L3 depletes P: P = 1e-5*P L3:  9999.9 BaseFeeLMA, 1 StETH scale = 1
+    1 month passes. L3 depletes P: P = 1e-5*P L3:  9999.9 BaseFeeLMA, 1 WStETH scale = 1
     E makes deposit 10000 via F1
-    1 month passes. L3 depletes P: P = 1e-5*P L4:  9999.9 BaseFeeLMA, 1 StETH scale = 2
+    1 month passes. L3 depletes P: P = 1e-5*P L4:  9999.9 BaseFeeLMA, 1 WStETH scale = 2
     A, B, C, D, E withdraw
 
     =========
@@ -2211,7 +2211,7 @@ contract("StabilityPool - HOG Rewards", async (accounts) => {
       const kickbackRate = toBN(dec(80, 16)); // F1 kicks 80% back to depositor
       await stabilityPool.registerFrontEnd(kickbackRate, { from: frontEnd_1 });
 
-      // Whale opens Trove with 10k StETH
+      // Whale opens Trove with 10k WStETH
       await borrowerOperations.openTrove(
         th._100pct,
         dec(10000, 18),

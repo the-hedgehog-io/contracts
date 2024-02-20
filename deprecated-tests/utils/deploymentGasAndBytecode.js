@@ -87,7 +87,7 @@ const getUSDCostFromGasCost = (
 ) => {
   const dollarCost = (deploymentGasTotal * gasPriceInGwei * ETHPrice) / 1e9;
   console.log(
-    `At gas price ${gasPriceInGwei} GWei, and StETH Price $${ETHPrice} per StETH, the total cost of deployment in USD is: $${dollarCost}`
+    `At gas price ${gasPriceInGwei} GWei, and WStETH Price $${ETHPrice} per WStETH, the total cost of deployment in USD is: $${dollarCost}`
   );
 };
 

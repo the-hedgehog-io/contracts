@@ -17,10 +17,10 @@ contract CollSurplusPool is Ownable, CheckContract {
     address public borrowerOperationsAddress;
     address public troveManagerAddress;
     address public activePoolAddress;
-    IERC20 public StETHToken;
+    IERC20 public WStETHToken;
 
-    // deposited stETH tracker
-    uint256 internal StETH;
+    // deposited wStETH tracker
+    uint256 internal WStETH;
     // Collateral surplus claimable by trove owners
     mapping(address => uint) internal balances;
 
@@ -35,7 +35,7 @@ contract CollSurplusPool is Ownable, CheckContract {
     event CollBalanceUpdated(address indexed _account, uint _newBalance);
     event EtherSent(address _to, uint _amount);
 
-    event StETHTokenAddressUpdated(IERC20 _StEthAddress);
+    event WStETHTokenAddressUpdated(IERC20 _WStEthAddress);
 
     // --- Contract setters ---
 
@@ -49,30 +49,30 @@ contract CollSurplusPool is Ownable, CheckContract {
         address _borrowerOperationsAddress,
         address _troveManagerAddress,
         address _activePoolAddress,
-        IERC20 _StETHTokenAddress
+        IERC20 _WStETHTokenAddress
     ) external onlyOwner {
         checkContract(_borrowerOperationsAddress);
         checkContract(_troveManagerAddress);
         checkContract(_activePoolAddress);
-        checkContract(address(_StETHTokenAddress));
+        checkContract(address(_WStETHTokenAddress));
 
         borrowerOperationsAddress = _borrowerOperationsAddress;
         troveManagerAddress = _troveManagerAddress;
         activePoolAddress = _activePoolAddress;
-        StETHToken = _StETHTokenAddress;
+        WStETHToken = _WStETHTokenAddress;
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit ActivePoolAddressChanged(_activePoolAddress);
-        emit StETHTokenAddressUpdated(_StETHTokenAddress);
+        emit WStETHTokenAddressUpdated(_WStETHTokenAddress);
 
         renounceOwnership();
     }
 
-    /* Returns the StETH state variable at ActivePool address.
-       Not necessarily equal to the raw stETH balance - stETH can be forcibly sent to contracts. */
-    function getStETH() external view returns (uint) {
-        return StETH;
+    /* Returns the WStETH state variable at ActivePool address.
+       Not necessarily equal to the raw wStETH balance - wStETH can be forcibly sent to contracts. */
+    function getWStETH() external view returns (uint) {
+        return WStETH;
     }
 
     function getCollateral(address _account) external view returns (uint) {
@@ -104,10 +104,10 @@ contract CollSurplusPool is Ownable, CheckContract {
         balances[_account] = 0;
         emit CollBalanceUpdated(_account, 0);
 
-        StETH = StETH.sub(claimableColl);
+        WStETH = WStETH.sub(claimableColl);
         emit EtherSent(_account, claimableColl);
 
-        StETHToken.safeTransfer(_account, claimableColl);
+        WStETHToken.safeTransfer(_account, claimableColl);
     }
 
     // --- 'require' functions ---
@@ -137,7 +137,7 @@ contract CollSurplusPool is Ownable, CheckContract {
     // New function, that increases balance tracker instead of a native token fallback
     function increaseBalance(uint256 _amount) external {
         _requireCallerIsTroveManager();
-        StETH = StETH.add(_amount);
+        WStETH = WStETH.add(_amount);
     }
 
     // --- Fallback function ---

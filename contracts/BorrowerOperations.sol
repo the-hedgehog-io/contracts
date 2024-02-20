@@ -19,7 +19,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * - Raised pragma version
  * - Removed an import of IBorrowerOperations Interface
  * - Collateral is now an ERC20 token instead of a native one
- * - Updated variable names and docs to refer to BaseFeeLMA token and stEth as a collateral
+ * - Updated variable names and docs to refer to BaseFeeLMA token and wwstETH as a collateral
  * - Logic updates with borrowing fees calculation and their distribution
  * - Removed Native Liquity Protocol Token Staking
  * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
@@ -39,7 +39,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     address gasPoolAddress;
 
-    IERC20 StETHToken;
+    IERC20 WStETHToken;
 
     ICollSurplusPool collSurplusPool;
 
@@ -103,7 +103,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     event PriceFeedAddressChanged(address _newPriceFeedAddress);
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
     event BaseFeeLMATokenAddressChanged(address _BaseFeeLMATokenAddress);
-    event StETHTokenAddressUpdated(IERC20 _StEthAddress);
+    event WStETHTokenAddressUpdated(IERC20 _WStEthAddress);
     event FeesRouterAddressUpdated(IFeesRouter _feesRouter);
 
     event TroveCreated(address indexed _borrower, uint arrayIndex);
@@ -141,7 +141,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _priceFeedAddress,
         address _sortedTrovesAddress,
         address _baseFeeLMATokenAddress,
-        IERC20 _stETHTokenAddress,
+        IERC20 _wStETHTokenAddress,
         IFeesRouter _feesRouter
     ) external onlyOwner {
         // This makes impossible to open a trove with zero withdrawn BaseFeeLMA
@@ -156,7 +156,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         checkContract(_priceFeedAddress);
         checkContract(_sortedTrovesAddress);
         checkContract(_baseFeeLMATokenAddress);
-        checkContract(address(_stETHTokenAddress));
+        checkContract(address(_wStETHTokenAddress));
         checkContract(address(_feesRouter));
 
         troveManager = ITroveManager(_troveManagerAddress);
@@ -168,7 +168,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         priceFeed = IPriceFeed(_priceFeedAddress);
         sortedTroves = ISortedTroves(_sortedTrovesAddress);
         baseFeeLMAToken = IBaseFeeLMAToken(_baseFeeLMATokenAddress);
-        StETHToken = _stETHTokenAddress;
+        WStETHToken = _wStETHTokenAddress;
         feesRouter = _feesRouter;
 
         emit TroveManagerAddressChanged(_troveManagerAddress);
@@ -180,7 +180,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         emit PriceFeedAddressChanged(_priceFeedAddress);
         emit SortedTrovesAddressChanged(_sortedTrovesAddress);
         emit BaseFeeLMATokenAddressChanged(_baseFeeLMATokenAddress);
-        emit StETHTokenAddressUpdated(_stETHTokenAddress);
+        emit WStETHTokenAddressUpdated(_wStETHTokenAddress);
         emit FeesRouterAddressUpdated(_feesRouter);
 
         renounceOwnership();
@@ -275,7 +275,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
         emit TroveCreated(msg.sender, vars.arrayIndex);
 
-        // Move the stETH to the Active Pool, and mint the BaseFeeLMAAmount to the borrower
+        // Move the wStETH to the Active Pool, and mint the BaseFeeLMAAmount to the borrower
         _activePoolAddColl(contractsCache.activePool, _collAmount);
         // HEDGEHOG UPDATES: Revert if bfe loan is less then fee + gas comp
         if (
@@ -322,7 +322,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * checking if _amount is greater then 0
      * Function is no longer payable
      */
-    // Send StETH as collateral to a trove
+    // Send WStETH as collateral to a trove
     function addColl(
         address _upperHint,
         address _lowerHint,
@@ -349,8 +349,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * checking if _amount is greater then 0
      * Function is no longer payable
      */
-    // Send StETH as collateral to a trove. Called by only the Stability Pool.
-    function moveStETHGainToTrove(
+    // Send WStETH as collateral to a trove. Called by only the Stability Pool.
+    function moveWStETHGainToTrove(
         address _borrower,
         address _upperHint,
         address _lowerHint,
@@ -375,7 +375,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * ERC20 is used as a collateral, therefore function may not rely on msg.value anymore
      * now passing a new param _collIncrease - in this particular case it is 0
      */
-    // Withdraw StETH collateral from a trove
+    // Withdraw WStETH collateral from a trove
     function withdrawColl(
         uint _collWithdrawal,
         address _upperHint,
@@ -507,7 +507,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
         _requireTroveisActive(contractsCache.troveManager, _borrower);
 
-        // Confirm the operation is either a borrower adjusting their own trove, or a pure StETH transfer from the Stability Pool to a trove
+        // Confirm the operation is either a borrower adjusting their own trove, or a pure WStETH transfer from the Stability Pool to a trove
         assert(
             msg.sender == _borrower ||
                 (msg.sender == stabilityPoolAddress &&
@@ -517,7 +517,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         contractsCache.troveManager.applyPendingRewards(_borrower);
 
-        // Get the collChange based on whether or not StETH was sent in the transaction
+        // Get the collChange based on whether or not WStETH was sent in the transaction
         (vars.collChange, vars.isCollIncrease) = _getCollChange(
             _collIncrease,
             _collWithdrawal
@@ -608,7 +608,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         emit BaseFeeLMABorrowingFeePaid(msg.sender, vars.BaseFeeLMAFee);
 
         // Use the unmodified _BaseFeeLMAChange here, as we don't send the fee to the user
-        _moveTokensAndStETHfromAdjustment(
+        _moveTokensAndWStETHfromAdjustment(
             contractsCache.activePool,
             contractsCache.baseFeeLMAToken,
             msg.sender,
@@ -671,14 +671,14 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
 
         // Send the collateral back to the user
-        activePoolCached.sendStETH(msg.sender, coll);
+        activePoolCached.sendWStETH(msg.sender, coll);
     }
 
     /**
      * Claim remaining collateral from a redemption or from a liquidation with ICR > MCR in Recovery Mode
      */
     function claimCollateral() external {
-        // send StETH from CollSurplus Pool to owner
+        // send WStETH from CollSurplus Pool to owner
         collSurplusPool.claimColl(msg.sender);
     }
 
@@ -751,7 +751,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         return (newColl, newDebt);
     }
 
-    function _moveTokensAndStETHfromAdjustment(
+    function _moveTokensAndWStETHfromAdjustment(
         IActivePool _activePool,
         IBaseFeeLMAToken _baseFeeLMAToken,
         address _borrower,
@@ -781,7 +781,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         if (_isCollIncrease) {
             _activePoolAddColl(_activePool, _collChange);
         } else {
-            _activePool.sendStETH(_borrower, _collChange);
+            _activePool.sendWStETH(_borrower, _collChange);
         }
     }
 
@@ -790,12 +790,12 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * Send funds from User's account instead of relaying native token through address(this)
      * Manualy increase balance in Active Pool, since it used to be done in the native token fallback
      */
-    // Send StETH to Active Pool and increase its recorded StETH balance
+    // Send WStETH to Active Pool and increase its recorded WStETH balance
     function _activePoolAddColl(
         IActivePool _activePool,
         uint _amount
     ) internal {
-        StETHToken.safeTransferFrom(msg.sender, address(_activePool), _amount);
+        WStETHToken.safeTransferFrom(msg.sender, address(_activePool), _amount);
         activePool.increaseBalance(_amount);
     }
 

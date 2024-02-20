@@ -17,10 +17,10 @@ const ZERO = th.toBN("0");
 
 const GAS_PRICE = 10000000;
 
-/* NOTE: These tests do not test for specific StETH and BaseFeeLMA gain values. They only test that the
+/* NOTE: These tests do not test for specific WStETH and BaseFeeLMA gain values. They only test that the
  * gains are non-zero, occur when they should, and are in correct proportion to the user's stake.
  *
- * Specific StETH/BaseFeeLMA gain values will depend on the final fee schedule used, and the final choices for
+ * Specific WStETH/BaseFeeLMA gain values will depend on the final fee schedule used, and the final choices for
  * parameters BETA and MINUTE_DECAY_FACTOR in the TroveManager, which are still TBD based on economic
  * modelling.
  *
@@ -95,7 +95,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     );
   });
 
-  it("StETH fee per HOG staked increases when a redemption fee is triggered and totalStakes > 0", async () => {
+  it("WStETH fee per HOG staked increases when a redemption fee is triggered and totalStakes > 0", async () => {
     await openTrove({
       extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
       ICR: toBN(dec(10, 18)),
@@ -135,8 +135,8 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     await hogToken.approve(hogStaking.address, dec(100, 18), { from: A });
     await hogStaking.stake(dec(100, 18), { from: A });
 
-    // Check StETH fee per unit staked is zero
-    const F_ETH_Before = await hogStaking.F_StETH();
+    // Check WStETH fee per unit staked is zero
+    const F_ETH_Before = await hogStaking.F_WStETH();
     assert.equal(F_ETH_Before, "0");
 
     const B_BalBeforeREdemption = await baseFeeLMAToken.balanceOf(B);
@@ -151,14 +151,14 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     const B_BalAfterRedemption = await baseFeeLMAToken.balanceOf(B);
     assert.isTrue(B_BalAfterRedemption.lt(B_BalBeforeREdemption));
 
-    // check StETH fee emitted in event is non-zero
+    // check WStETH fee emitted in event is non-zero
     const emittedETHFee = toBN(
       (await th.getEmittedRedemptionValues(redemptionTx))[3]
     );
     assert.isTrue(emittedETHFee.gt(toBN("0")));
 
-    // Check StETH fee per unit staked has increased by correct amount
-    const F_ETH_After = await hogStaking.F_StETH();
+    // Check WStETH fee per unit staked has increased by correct amount
+    const F_ETH_After = await hogStaking.F_WStETH();
 
     // Expect fee per unit staked = fee/100, since there is 100 BaseFeeLMA totalStaked
     const expected_F_ETH_After = emittedETHFee.div(toBN("100"));
@@ -166,7 +166,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     assert.isTrue(expected_F_ETH_After.eq(F_ETH_After));
   });
 
-  it("StETH fee per HOG staked doesn't change when a redemption fee is triggered and totalStakes == 0", async () => {
+  it("WStETH fee per HOG staked doesn't change when a redemption fee is triggered and totalStakes == 0", async () => {
     await openTrove({
       extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
       ICR: toBN(dec(10, 18)),
@@ -205,8 +205,8 @@ contract("HOGStaking revenue share tests", async (accounts) => {
       gasPrice: GAS_PRICE,
     });
 
-    // Check StETH fee per unit staked is zero
-    const F_ETH_Before = await hogStaking.F_StETH();
+    // Check WStETH fee per unit staked is zero
+    const F_ETH_Before = await hogStaking.F_WStETH();
     assert.equal(F_ETH_Before, "0");
 
     const B_BalBeforeREdemption = await baseFeeLMAToken.balanceOf(B);
@@ -221,14 +221,14 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     const B_BalAfterRedemption = await baseFeeLMAToken.balanceOf(B);
     assert.isTrue(B_BalAfterRedemption.lt(B_BalBeforeREdemption));
 
-    // check StETH fee emitted in event is non-zero
+    // check WStETH fee emitted in event is non-zero
     const emittedETHFee = toBN(
       (await th.getEmittedRedemptionValues(redemptionTx))[3]
     );
     assert.isTrue(emittedETHFee.gt(toBN("0")));
 
-    // Check StETH fee per unit staked has not increased
-    const F_ETH_After = await hogStaking.F_StETH();
+    // Check WStETH fee per unit staked has not increased
+    const F_ETH_After = await hogStaking.F_WStETH();
     assert.equal(F_ETH_After, "0");
   });
 
@@ -273,7 +273,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     await hogStaking.stake(dec(100, 18), { from: A });
 
     // Check BaseFeeLMA fee per unit staked is zero
-    const F_BaseFeeLMA_Before = await hogStaking.F_StETH();
+    const F_BaseFeeLMA_Before = await hogStaking.F_WStETH();
     assert.equal(F_BaseFeeLMA_Before, "0");
 
     const B_BalBeforeREdemption = await baseFeeLMAToken.balanceOf(B);
@@ -353,7 +353,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     await hogToken.transfer(A, dec(100, 18), { from: multisig });
 
     // Check BaseFeeLMA fee per unit staked is zero
-    const F_BaseFeeLMA_Before = await hogStaking.F_StETH();
+    const F_BaseFeeLMA_Before = await hogStaking.F_WStETH();
     assert.equal(F_BaseFeeLMA_Before, "0");
 
     const B_BalBeforeREdemption = await baseFeeLMAToken.balanceOf(B);
@@ -392,7 +392,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     assert.equal(F_BaseFeeLMA_After, "0");
   });
 
-  it("HOG Staking: A single staker earns all StETH and HOG fees that occur", async () => {
+  it("HOG Staking: A single staker earns all WStETH and HOG fees that occur", async () => {
     await openTrove({
       extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
       ICR: toBN(dec(10, 18)),
@@ -444,7 +444,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     const B_BalAfterRedemption = await baseFeeLMAToken.balanceOf(B);
     assert.isTrue(B_BalAfterRedemption.lt(B_BalBeforeREdemption));
 
-    // check StETH fee 1 emitted in event is non-zero
+    // check WStETH fee 1 emitted in event is non-zero
     const emittedETHFee_1 = toBN(
       (await th.getEmittedRedemptionValues(redemptionTx_1))[3]
     );
@@ -462,7 +462,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     const C_BalAfterRedemption = await baseFeeLMAToken.balanceOf(C);
     assert.isTrue(C_BalAfterRedemption.lt(C_BalBeforeREdemption));
 
-    // check StETH fee 2 emitted in event is non-zero
+    // check WStETH fee 2 emitted in event is non-zero
     const emittedETHFee_2 = toBN(
       (await th.getEmittedRedemptionValues(redemptionTx_2))[3]
     );
@@ -528,7 +528,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     );
   });
 
-  it("stake(): Top-up sends out all accumulated StETH and BaseFeeLMA gains to the staker", async () => {
+  it("stake(): Top-up sends out all accumulated WStETH and BaseFeeLMA gains to the staker", async () => {
     await openTrove({
       extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
       ICR: toBN(dec(10, 18)),
@@ -580,7 +580,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     const B_BalAfterRedemption = await baseFeeLMAToken.balanceOf(B);
     assert.isTrue(B_BalAfterRedemption.lt(B_BalBeforeREdemption));
 
-    // check StETH fee 1 emitted in event is non-zero
+    // check WStETH fee 1 emitted in event is non-zero
     const emittedETHFee_1 = toBN(
       (await th.getEmittedRedemptionValues(redemptionTx_1))[3]
     );
@@ -598,7 +598,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     const C_BalAfterRedemption = await baseFeeLMAToken.balanceOf(C);
     assert.isTrue(C_BalAfterRedemption.lt(C_BalBeforeREdemption));
 
-    // check StETH fee 2 emitted in event is non-zero
+    // check WStETH fee 2 emitted in event is non-zero
     const emittedETHFee_2 = toBN(
       (await th.getEmittedRedemptionValues(redemptionTx_2))[3]
     );
@@ -664,7 +664,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     );
   });
 
-  it("getPendingETHGain(): Returns the staker's correct pending StETH gain", async () => {
+  it("getPendingETHGain(): Returns the staker's correct pending WStETH gain", async () => {
     await openTrove({
       extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
       ICR: toBN(dec(10, 18)),
@@ -716,7 +716,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     const B_BalAfterRedemption = await baseFeeLMAToken.balanceOf(B);
     assert.isTrue(B_BalAfterRedemption.lt(B_BalBeforeREdemption));
 
-    // check StETH fee 1 emitted in event is non-zero
+    // check WStETH fee 1 emitted in event is non-zero
     const emittedETHFee_1 = toBN(
       (await th.getEmittedRedemptionValues(redemptionTx_1))[3]
     );
@@ -734,7 +734,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     const C_BalAfterRedemption = await baseFeeLMAToken.balanceOf(C);
     assert.isTrue(C_BalAfterRedemption.lt(C_BalBeforeREdemption));
 
-    // check StETH fee 2 emitted in event is non-zero
+    // check WStETH fee 2 emitted in event is non-zero
     const emittedETHFee_2 = toBN(
       (await th.getEmittedRedemptionValues(redemptionTx_2))[3]
     );
@@ -742,7 +742,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
 
     const expectedTotalETHGain = emittedETHFee_1.add(emittedETHFee_2);
 
-    const A_ETHGain = await hogStaking.getPendingStETHGain(A);
+    const A_ETHGain = await hogStaking.getPendingWStETHGain(A);
 
     assert.isAtMost(th.getDifference(expectedTotalETHGain, A_ETHGain), 1000);
   });
@@ -799,7 +799,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     const B_BalAfterRedemption = await baseFeeLMAToken.balanceOf(B);
     assert.isTrue(B_BalAfterRedemption.lt(B_BalBeforeREdemption));
 
-    // check StETH fee 1 emitted in event is non-zero
+    // check WStETH fee 1 emitted in event is non-zero
     const emittedETHFee_1 = toBN(
       (await th.getEmittedRedemptionValues(redemptionTx_1))[3]
     );
@@ -817,7 +817,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     const C_BalAfterRedemption = await baseFeeLMAToken.balanceOf(C);
     assert.isTrue(C_BalAfterRedemption.lt(C_BalBeforeREdemption));
 
-    // check StETH fee 2 emitted in event is non-zero
+    // check WStETH fee 2 emitted in event is non-zero
     const emittedETHFee_2 = toBN(
       (await th.getEmittedRedemptionValues(redemptionTx_2))[3]
     );
@@ -865,7 +865,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
   });
 
   // - multi depositors, several rewards
-  it("HOG Staking: Multiple stakers earn the correct share of all StETH and HOG fees, based on their stake size", async () => {
+  it("HOG Staking: Multiple stakers earn the correct share of all WStETH and HOG fees, based on their stake size", async () => {
     await openTrove({
       extraBaseFeeLMAAmount: toBN(dec(10000, 18)),
       ICR: toBN(dec(10, 18)),
@@ -1029,7 +1029,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     D_BaseFeeLMA:                                               (100*BaseFeeLMAFee_3)/650
     */
 
-    // Expected StETH gains
+    // Expected WStETH gains
     const expectedETHGain_A = toBN("100")
       .mul(emittedETHFee_1)
       .div(toBN("600"))
@@ -1102,7 +1102,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     assert.equal(await hogToken.balanceOf(hogStaking.address), "0");
     assert.equal(await hogStaking.totalHOGStaked(), "0");
 
-    // Get A-D StETH and BaseFeeLMA balances
+    // Get A-D WStETH and BaseFeeLMA balances
     const A_ETHBalance_After = toBN(await web3.eth.getBalance(A));
     const A_BaseFeeLMABalance_After = toBN(await baseFeeLMAToken.balanceOf(A));
     const B_ETHBalance_After = toBN(await web3.eth.getBalance(B));
@@ -1112,7 +1112,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     const D_ETHBalance_After = toBN(await web3.eth.getBalance(D));
     const D_BaseFeeLMABalance_After = toBN(await baseFeeLMAToken.balanceOf(D));
 
-    // Get StETH and BaseFeeLMA gains
+    // Get WStETH and BaseFeeLMA gains
     const A_ETHGain = A_ETHBalance_After.sub(A_ETHBalance_Before).add(
       toBN(A_GAS_Used * GAS_PRICE)
     );
@@ -1161,7 +1161,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     );
   });
 
-  it("unstake(): reverts if caller has StETH gains and can't receive StETH", async () => {
+  it("unstake(): reverts if caller has WStETH gains and can't receive WStETH", async () => {
     await openTrove({
       extraBaseFeeLMAAmount: toBN(dec(20000, 18)),
       ICR: toBN(dec(2, 18)),
@@ -1209,7 +1209,7 @@ contract("HOGStaking revenue share tests", async (accounts) => {
     ]); // proxy stakes 100 HOG
     await nonPayable.forward(hogStaking.address, proxystakeTxData, { from: A });
 
-    // B makes a redemption, creating StETH gain for proxy
+    // B makes a redemption, creating WStETH gain for proxy
     const redemptionTx_1 = await th.redeemCollateralAndGetTxObject(
       B,
       contracts,
@@ -1217,12 +1217,12 @@ contract("HOGStaking revenue share tests", async (accounts) => {
       (gasPrice = GAS_PRICE)
     );
 
-    const proxy_ETHGain = await hogStaking.getPendingStETHGain(
+    const proxy_ETHGain = await hogStaking.getPendingWStETHGain(
       nonPayable.address
     );
     assert.isTrue(proxy_ETHGain.gt(toBN("0")));
 
-    // Expect this tx to revert: stake() tries to send nonPayable proxy's accumulated StETH gain (albeit 0),
+    // Expect this tx to revert: stake() tries to send nonPayable proxy's accumulated WStETH gain (albeit 0),
     //  A tells proxy to unstake
     const proxyUnStakeTxData = await th.getTransactionData("unstake(uint256)", [
       "0x56bc75e2d63100000",
@@ -1233,11 +1233,11 @@ contract("HOGStaking revenue share tests", async (accounts) => {
       { from: A }
     );
 
-    // but nonPayable proxy can not accept StETH - therefore stake() reverts.
+    // but nonPayable proxy can not accept WStETH - therefore stake() reverts.
     await assertRevert(proxyUnstakeTxPromise);
   });
 
-  it("receive(): reverts when it receives StETH from an address that is not the Active Pool", async () => {
+  it("receive(): reverts when it receives WStETH from an address that is not the Active Pool", async () => {
     const ethSendTxPromise1 = web3.eth.sendTransaction({
       to: hogStaking.address,
       from: A,

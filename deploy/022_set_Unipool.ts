@@ -22,19 +22,19 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       "UniswapV2Factory",
       deployConfig.uniswapV2Factory
     );
-    const BaseFeeLMAStEthPairAddr = await uniswapV2Factory.getPair(
+    const BaseFeeLMAWStEthPairAddr = await uniswapV2Factory.getPair(
       BaseFeeLMAToken.address,
-      deployConfig.stEth
+      deployConfig.wwstETH
     );
 
-    const StEthBaseFeeLMAPairAddr = await uniswapV2Factory.getPair(
-      deployConfig.stEth,
+    const WStEthBaseFeeLMAPairAddr = await uniswapV2Factory.getPair(
+      deployConfig.wwstETH,
       BaseFeeLMAToken.address
     );
-    if (BaseFeeLMAStEthPairAddr === ethers.ZeroAddress) {
+    if (BaseFeeLMAWStEthPairAddr === ethers.ZeroAddress) {
       throw console.error("Uniswap pair is missing");
     }
-    if (BaseFeeLMAStEthPairAddr != StEthBaseFeeLMAPairAddr) {
+    if (BaseFeeLMAWStEthPairAddr != WStEthBaseFeeLMAPairAddr) {
       throw console.error("Uniswap pair addresses are not equal");
     }
 
@@ -42,7 +42,7 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       "Params: ",
       Unipool.address,
       HOGToken.address,
-      BaseFeeLMAStEthPairAddr,
+      BaseFeeLMAWStEthPairAddr,
       timeValues.SECONDS_IN_SIX_WEEKS
     );
     await executeWithLog(
@@ -50,7 +50,7 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       { from: deployer },
       "setParams",
       HOGToken.address,
-      BaseFeeLMAStEthPairAddr,
+      BaseFeeLMAWStEthPairAddr,
       timeValues.SECONDS_IN_SIX_WEEKS
     );
   }

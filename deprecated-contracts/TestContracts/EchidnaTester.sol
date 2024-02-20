@@ -189,28 +189,28 @@ contract EchidnaTester {
 
     function getAdjustedETH(
         uint actorBalance,
-        uint _StETH,
+        uint _WStETH,
         uint ratio
     ) internal view returns (uint) {
         uint price = priceFeedTestnet.getPrice();
         require(price > 0);
         uint minETH = ratio.mul(BaseFeeLMA_GAS_COMPENSATION).div(price);
         require(actorBalance > minETH);
-        uint StETH = minETH + (_StETH % (actorBalance - minETH));
-        return StETH;
+        uint WStETH = minETH + (_WStETH % (actorBalance - minETH));
+        return WStETH;
     }
 
     function getAdjustedBaseFeeLMA(
-        uint StETH,
+        uint WStETH,
         uint _BaseFeeLMAAmount,
         uint ratio
     ) internal view returns (uint) {
         uint price = priceFeedTestnet.getPrice();
         uint BaseFeeLMAAmount = _BaseFeeLMAAmount;
         uint compositeDebt = BaseFeeLMAAmount.add(BaseFeeLMA_GAS_COMPENSATION);
-        uint ICR = LiquityMath._computeCR(StETH, compositeDebt, price);
+        uint ICR = LiquityMath._computeCR(WStETH, compositeDebt, price);
         if (ICR < ratio) {
-            compositeDebt = StETH.mul(price).div(ratio);
+            compositeDebt = WStETH.mul(price).div(ratio);
             BaseFeeLMAAmount = compositeDebt.sub(BaseFeeLMA_GAS_COMPENSATION);
         }
         return BaseFeeLMAAmount;
@@ -218,7 +218,7 @@ contract EchidnaTester {
 
     function openTroveExt(
         uint _i,
-        uint _StETH,
+        uint _WStETH,
         uint _BaseFeeLMAAmount
     ) public payable {
         uint actor = _i % NUMBER_OF_ACTORS;
@@ -226,15 +226,15 @@ contract EchidnaTester {
         uint actorBalance = address(echidnaProxy).balance;
 
         // we pass in CCR instead of MCR in case it’s the first one
-        uint StETH = getAdjustedETH(actorBalance, _StETH, CCR);
+        uint WStETH = getAdjustedETH(actorBalance, _WStETH, CCR);
         uint BaseFeeLMAAmount = getAdjustedBaseFeeLMA(
-            StETH,
+            WStETH,
             _BaseFeeLMAAmount,
             CCR
         );
 
         echidnaProxy.openTrovePrx(
-            StETH,
+            WStETH,
             BaseFeeLMAAmount,
             address(0),
             address(0),
@@ -249,7 +249,7 @@ contract EchidnaTester {
 
     function openTroveRawExt(
         uint _i,
-        uint _StETH,
+        uint _WStETH,
         uint _BaseFeeLMAAmount,
         address _upperHint,
         address _lowerHint,
@@ -257,7 +257,7 @@ contract EchidnaTester {
     ) public payable {
         uint actor = _i % NUMBER_OF_ACTORS;
         echidnaProxies[actor].openTrovePrx(
-            _StETH,
+            _WStETH,
             _BaseFeeLMAAmount,
             _upperHint,
             _lowerHint,
@@ -265,24 +265,24 @@ contract EchidnaTester {
         );
     }
 
-    function addCollExt(uint _i, uint _StETH) external payable {
+    function addCollExt(uint _i, uint _WStETH) external payable {
         uint actor = _i % NUMBER_OF_ACTORS;
         EchidnaProxy echidnaProxy = echidnaProxies[actor];
         uint actorBalance = address(echidnaProxy).balance;
 
-        uint StETH = getAdjustedETH(actorBalance, _StETH, MCR);
+        uint WStETH = getAdjustedETH(actorBalance, _WStETH, MCR);
 
-        echidnaProxy.addCollPrx(StETH, address(0), address(0));
+        echidnaProxy.addCollPrx(WStETH, address(0), address(0));
     }
 
     function addCollRawExt(
         uint _i,
-        uint _StETH,
+        uint _WStETH,
         address _upperHint,
         address _lowerHint
     ) external payable {
         uint actor = _i % NUMBER_OF_ACTORS;
-        echidnaProxies[actor].addCollPrx(_StETH, _upperHint, _lowerHint);
+        echidnaProxies[actor].addCollPrx(_WStETH, _upperHint, _lowerHint);
     }
 
     function withdrawCollExt(
@@ -332,7 +332,7 @@ contract EchidnaTester {
 
     function adjustTroveExt(
         uint _i,
-        uint _StETH,
+        uint _WStETH,
         uint _collWithdrawal,
         uint _debtChange,
         bool _isDebtIncrease
@@ -341,15 +341,15 @@ contract EchidnaTester {
         EchidnaProxy echidnaProxy = echidnaProxies[actor];
         uint actorBalance = address(echidnaProxy).balance;
 
-        uint StETH = getAdjustedETH(actorBalance, _StETH, MCR);
+        uint WStETH = getAdjustedETH(actorBalance, _WStETH, MCR);
         uint debtChange = _debtChange;
         if (_isDebtIncrease) {
             // TODO: add current amount already withdrawn:
-            debtChange = getAdjustedBaseFeeLMA(StETH, uint(_debtChange), MCR);
+            debtChange = getAdjustedBaseFeeLMA(WStETH, uint(_debtChange), MCR);
         }
         // TODO: collWithdrawal, debtChange
         echidnaProxy.adjustTrovePrx(
-            StETH,
+            WStETH,
             _collWithdrawal,
             debtChange,
             _isDebtIncrease,
@@ -361,7 +361,7 @@ contract EchidnaTester {
 
     function adjustTroveRawExt(
         uint _i,
-        uint _StETH,
+        uint _WStETH,
         uint _collWithdrawal,
         uint _debtChange,
         bool _isDebtIncrease,
@@ -371,7 +371,7 @@ contract EchidnaTester {
     ) external payable {
         uint actor = _i % NUMBER_OF_ACTORS;
         echidnaProxies[actor].adjustTrovePrx(
-            _StETH,
+            _WStETH,
             _collWithdrawal,
             _debtChange,
             _isDebtIncrease,
@@ -538,15 +538,15 @@ contract EchidnaTester {
             return false;
         }
 
-        if (address(activePool).balance != activePool.getStETH()) {
+        if (address(activePool).balance != activePool.getWStETH()) {
             return false;
         }
 
-        if (address(defaultPool).balance != defaultPool.getStETH()) {
+        if (address(defaultPool).balance != defaultPool.getWStETH()) {
             return false;
         }
 
-        if (address(stabilityPool).balance != stabilityPool.getStETH()) {
+        if (address(stabilityPool).balance != stabilityPool.getWStETH()) {
             return false;
         }
 

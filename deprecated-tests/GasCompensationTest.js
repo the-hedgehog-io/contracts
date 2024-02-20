@@ -99,8 +99,8 @@ contract("Gas compensation tests", async (accounts) => {
 
   it("_getCollGasCompensation(): returns the 0.5% of collaterall if it is < $10 in value", async () => {
     /* 
-    StETH:USD price = 1
-    coll = 1 StETH: $1 in value
+    WStETH:USD price = 1
+    coll = 1 WStETH: $1 in value
     -> Expect 0.5% of collaterall as gas compensation */
     await priceFeed.setPrice(dec(1, 18));
     // const price_1 = await priceFeed.getPrice()
@@ -110,8 +110,8 @@ contract("Gas compensation tests", async (accounts) => {
     assert.equal(gasCompensation_1, dec(5, 15));
 
     /* 
-    StETH:USD price = 28.4
-    coll = 0.1 StETH: $2.84 in value
+    WStETH:USD price = 28.4
+    coll = 0.1 WStETH: $2.84 in value
     -> Expect 0.5% of collaterall as gas compensation */
     await priceFeed.setPrice("28400000000000000000");
     // const price_2 = await priceFeed.getPrice()
@@ -121,8 +121,8 @@ contract("Gas compensation tests", async (accounts) => {
     assert.equal(gasCompensation_2, dec(5, 14));
 
     /* 
-    StETH:USD price = 1000000000 (1 billion)
-    coll = 0.000000005 StETH (5e9 wei): $5 in value 
+    WStETH:USD price = 1000000000 (1 billion)
+    coll = 0.000000005 WStETH (5e9 wei): $5 in value 
     -> Expect 0.5% of collaterall as gas compensation */
     await priceFeed.setPrice(dec(1, 27));
     // const price_3 = await priceFeed.getPrice()
@@ -137,27 +137,27 @@ contract("Gas compensation tests", async (accounts) => {
     assert.equal(price, dec(200, 18));
 
     /* 
-    StETH:USD price = 200
-    coll = 9.999 StETH  
-    0.5% of coll = 0.04995 StETH. USD value: $9.99
+    WStETH:USD price = 200
+    coll = 9.999 WStETH  
+    0.5% of coll = 0.04995 WStETH. USD value: $9.99
     -> Expect 0.5% of collaterall as gas compensation */
     const gasCompensation_1 = (
       await troveManagerTester.getCollGasCompensation("9999000000000000000")
     ).toString();
     assert.equal(gasCompensation_1, "49995000000000000");
 
-    /* StETH:USD price = 200
-     coll = 0.055 StETH  
-     0.5% of coll = 0.000275 StETH. USD value: $0.055
+    /* WStETH:USD price = 200
+     coll = 0.055 WStETH  
+     0.5% of coll = 0.000275 WStETH. USD value: $0.055
      -> Expect 0.5% of collaterall as gas compensation */
     const gasCompensation_2 = (
       await troveManagerTester.getCollGasCompensation("55000000000000000")
     ).toString();
     assert.equal(gasCompensation_2, dec(275, 12));
 
-    /* StETH:USD price = 200
-    coll = 6.09232408808723580 StETH  
-    0.5% of coll = 0.004995 StETH. USD value: $6.09
+    /* WStETH:USD price = 200
+    coll = 6.09232408808723580 WStETH  
+    0.5% of coll = 0.004995 WStETH. USD value: $6.09
     -> Expect 0.5% of collaterall as gas compensation */
     const gasCompensation_3 = (
       await troveManagerTester.getCollGasCompensation("6092324088087235800")
@@ -170,9 +170,9 @@ contract("Gas compensation tests", async (accounts) => {
     assert.equal(price, dec(200, 18));
 
     /* 
-    StETH:USD price = 200
-    coll = 10 StETH  
-    0.5% of coll = 0.5 StETH. USD value: $10
+    WStETH:USD price = 200
+    coll = 10 WStETH  
+    0.5% of coll = 0.5 WStETH. USD value: $10
     -> Expect 0.5% of collaterall as gas compensation */
     const gasCompensation = (
       await troveManagerTester.getCollGasCompensation(dec(10, "ether"))
@@ -185,40 +185,40 @@ contract("Gas compensation tests", async (accounts) => {
     assert.equal(price, dec(200, 18));
 
     /* 
-    StETH:USD price = 200 $/E
-    coll = 100 StETH  
-    0.5% of coll = 0.5 StETH. USD value: $100
-    -> Expect $100 gas compensation, i.e. 0.5 StETH */
+    WStETH:USD price = 200 $/E
+    coll = 100 WStETH  
+    0.5% of coll = 0.5 WStETH. USD value: $100
+    -> Expect $100 gas compensation, i.e. 0.5 WStETH */
     const gasCompensation_1 = (
       await troveManagerTester.getCollGasCompensation(dec(100, "ether"))
     ).toString();
     assert.equal(gasCompensation_1, dec(500, "finney"));
 
     /* 
-    StETH:USD price = 200 $/E
-    coll = 10.001 StETH  
-    0.5% of coll = 0.050005 StETH. USD value: $10.001
-    -> Expect $100 gas compensation, i.e.  0.050005  StETH */
+    WStETH:USD price = 200 $/E
+    coll = 10.001 WStETH  
+    0.5% of coll = 0.050005 WStETH. USD value: $10.001
+    -> Expect $100 gas compensation, i.e.  0.050005  WStETH */
     const gasCompensation_2 = (
       await troveManagerTester.getCollGasCompensation("10001000000000000000")
     ).toString();
     assert.equal(gasCompensation_2, "50005000000000000");
 
     /* 
-    StETH:USD price = 200 $/E
-    coll = 37.5 StETH  
-    0.5% of coll = 0.1875 StETH. USD value: $37.5
-    -> Expect $37.5 gas compensation i.e.  0.1875  StETH */
+    WStETH:USD price = 200 $/E
+    coll = 37.5 WStETH  
+    0.5% of coll = 0.1875 WStETH. USD value: $37.5
+    -> Expect $37.5 gas compensation i.e.  0.1875  WStETH */
     const gasCompensation_3 = (
       await troveManagerTester.getCollGasCompensation("37500000000000000000")
     ).toString();
     assert.equal(gasCompensation_3, "187500000000000000");
 
     /* 
-    StETH:USD price = 45323.54542 $/E
-    coll = 94758.230582309850 StETH  
-    0.5% of coll = 473.7911529 StETH. USD value: $21473894.84
-    -> Expect $21473894.8385808 gas compensation, i.e.  473.7911529115490  StETH */
+    WStETH:USD price = 45323.54542 $/E
+    coll = 94758.230582309850 WStETH  
+    0.5% of coll = 473.7911529 WStETH. USD value: $21473894.84
+    -> Expect $21473894.8385808 gas compensation, i.e.  473.7911529115490  WStETH */
     await priceFeed.setPrice("45323545420000000000000");
     const gasCompensation_4 = await troveManagerTester.getCollGasCompensation(
       "94758230582309850000000"
@@ -229,10 +229,10 @@ contract("Gas compensation tests", async (accounts) => {
     );
 
     /* 
-    StETH:USD price = 1000000 $/E (1 million)
-    coll = 300000000 StETH   (300 million)
-    0.5% of coll = 1500000 StETH. USD value: $150000000000
-    -> Expect $150000000000 gas compensation, i.e. 1500000 StETH */
+    WStETH:USD price = 1000000 $/E (1 million)
+    coll = 300000000 WStETH   (300 million)
+    0.5% of coll = 1500000 WStETH. USD value: $150000000000
+    -> Expect $150000000000 gas compensation, i.e. 1500000 WStETH */
     await priceFeed.setPrice(dec(1, 24));
     const price_2 = await priceFeed.getPrice();
     const gasCompensation_5 = (
@@ -251,28 +251,28 @@ contract("Gas compensation tests", async (accounts) => {
     assert.equal(price, dec(200, 18));
 
     /* 
-    StETH:USD price = 200
-    coll = 9.999 StETH 
+    WStETH:USD price = 200
+    coll = 9.999 WStETH 
     debt = 10 BaseFeeLMA
-    0.5% of coll = 0.04995 StETH. USD value: $9.99
+    0.5% of coll = 0.04995 WStETH. USD value: $9.99
     -> Expect composite debt = 10 + 200  = 2100 BaseFeeLMA*/
     const compositeDebt_1 = await troveManagerTester.getCompositeDebt(
       dec(10, 18)
     );
     assert.equal(compositeDebt_1, dec(210, 18));
 
-    /* StETH:USD price = 200
-     coll = 0.055 StETH  
+    /* WStETH:USD price = 200
+     coll = 0.055 WStETH  
      debt = 0 BaseFeeLMA
-     0.5% of coll = 0.000275 StETH. USD value: $0.055
+     0.5% of coll = 0.000275 WStETH. USD value: $0.055
      -> Expect composite debt = 0 + 200 = 200 BaseFeeLMA*/
     const compositeDebt_2 = await troveManagerTester.getCompositeDebt(0);
     assert.equal(compositeDebt_2, dec(200, 18));
 
-    // /* StETH:USD price = 200
-    // coll = 6.09232408808723580 StETH
+    // /* WStETH:USD price = 200
+    // coll = 6.09232408808723580 WStETH
     // debt = 200 BaseFeeLMA
-    // 0.5% of coll = 0.004995 StETH. USD value: $6.09
+    // 0.5% of coll = 0.004995 WStETH. USD value: $6.09
     // -> Expect  composite debt =  200 + 200 = 400  BaseFeeLMA */
     const compositeDebt_3 = await troveManagerTester.getCompositeDebt(
       dec(200, 18)
@@ -280,16 +280,16 @@ contract("Gas compensation tests", async (accounts) => {
     assert.equal(compositeDebt_3, "400000000000000000000");
   });
 
-  // returns $10 worth of StETH when 0.5% of coll == $10
+  // returns $10 worth of WStETH when 0.5% of coll == $10
   it("getCompositeDebt(): returns (debt + 50) collateral = $10 in value", async () => {
     const price = await priceFeed.getPrice();
     assert.equal(price, dec(200, 18));
 
     /* 
-    StETH:USD price = 200
-    coll = 10 StETH  
+    WStETH:USD price = 200
+    coll = 10 WStETH  
     debt = 123.45 BaseFeeLMA
-    0.5% of coll = 0.5 StETH. USD value: $10
+    0.5% of coll = 0.5 WStETH. USD value: $10
     -> Expect composite debt = (123.45 + 200) = 323.45 BaseFeeLMA  */
     const compositeDebt = await troveManagerTester.getCompositeDebt(
       "123450000000000000000"
@@ -305,8 +305,8 @@ contract("Gas compensation tests", async (accounts) => {
     assert.equal(price, dec(200, 18));
 
     /* 
-    StETH:USD price = 200 $/E
-    coll = 100 StETH  
+    WStETH:USD price = 200 $/E
+    coll = 100 WStETH  
     debt = 2000 BaseFeeLMA
     -> Expect composite debt = (2000 + 200) = 2200 BaseFeeLMA  */
     const compositeDebt_1 = (
@@ -315,8 +315,8 @@ contract("Gas compensation tests", async (accounts) => {
     assert.equal(compositeDebt_1, "2200000000000000000000");
 
     /* 
-    StETH:USD price = 200 $/E
-    coll = 10.001 StETH  
+    WStETH:USD price = 200 $/E
+    coll = 10.001 WStETH  
     debt = 200 BaseFeeLMA
     -> Expect composite debt = (200 + 200) = 400 BaseFeeLMA  */
     const compositeDebt_2 = (
@@ -325,8 +325,8 @@ contract("Gas compensation tests", async (accounts) => {
     assert.equal(compositeDebt_2, "400000000000000000000");
 
     /* 
-    StETH:USD price = 200 $/E
-    coll = 37.5 StETH  
+    WStETH:USD price = 200 $/E
+    coll = 37.5 WStETH  
     debt = 500 BaseFeeLMA
     -> Expect composite debt = (500 + 200) = 700 BaseFeeLMA  */
     const compositeDebt_3 = (
@@ -335,8 +335,8 @@ contract("Gas compensation tests", async (accounts) => {
     assert.equal(compositeDebt_3, "700000000000000000000");
 
     /* 
-    StETH:USD price = 45323.54542 $/E
-    coll = 94758.230582309850 StETH  
+    WStETH:USD price = 45323.54542 $/E
+    coll = 94758.230582309850 WStETH  
     debt = 1 billion BaseFeeLMA
     -> Expect composite debt = (1000000000 + 200) = 1000000200 BaseFeeLMA  */
     await priceFeed.setPrice("45323545420000000000000");
@@ -350,8 +350,8 @@ contract("Gas compensation tests", async (accounts) => {
     );
 
     /* 
-    StETH:USD price = 1000000 $/E (1 million)
-    coll = 300000000 StETH   (300 million)
+    WStETH:USD price = 1000000 $/E (1 million)
+    coll = 300000000 WStETH   (300 million)
     debt = 54321.123456789 BaseFeeLMA
    -> Expect composite debt = (54321.123456789 + 200) = 54521.123456789 BaseFeeLMA */
     await priceFeed.setPrice(dec(1, 24));
@@ -367,7 +367,7 @@ contract("Gas compensation tests", async (accounts) => {
     const price = await priceFeed.getPrice();
     await openTrove({ ICR: toBN(dec(200, 18)), extraParams: { from: whale } });
 
-    // A opens with 1 StETH, 110 BaseFeeLMA
+    // A opens with 1 WStETH, 110 BaseFeeLMA
     await openTrove({
       ICR: toBN("1818181818181818181"),
       extraParams: { from: alice },
@@ -378,13 +378,13 @@ contract("Gas compensation tests", async (accounts) => {
     // Expect aliceICR = (1 * 200) / (110) = 181.81%
     assert.isAtMost(th.getDifference(alice_ICR, "1818181818181818181"), 1000);
 
-    // B opens with 0.5 StETH, 50 BaseFeeLMA
+    // B opens with 0.5 WStETH, 50 BaseFeeLMA
     await openTrove({ ICR: toBN(dec(2, 18)), extraParams: { from: bob } });
     const bob_ICR = (await troveManager.getCurrentICR(bob, price)).toString();
     // Expect Bob's ICR = (0.5 * 200) / 50 = 200%
     assert.isAtMost(th.getDifference(bob_ICR, dec(2, 18)), 1000);
 
-    // F opens with 1 StETH, 100 BaseFeeLMA
+    // F opens with 1 WStETH, 100 BaseFeeLMA
     await openTrove({
       ICR: toBN(dec(2, 18)),
       extraBaseFeeLMAAmount: dec(100, 18),
@@ -394,7 +394,7 @@ contract("Gas compensation tests", async (accounts) => {
     // Expect Flyn's ICR = (1 * 200) / 100 = 200%
     assert.isAtMost(th.getDifference(flyn_ICR, dec(2, 18)), 1000);
 
-    // C opens with 2.5 StETH, 160 BaseFeeLMA
+    // C opens with 2.5 WStETH, 160 BaseFeeLMA
     await openTrove({ ICR: toBN(dec(3125, 15)), extraParams: { from: carol } });
     const carol_ICR = (
       await troveManager.getCurrentICR(carol, price)
@@ -402,7 +402,7 @@ contract("Gas compensation tests", async (accounts) => {
     // Expect Carol's ICR = (2.5 * 200) / (160) = 312.50%
     assert.isAtMost(th.getDifference(carol_ICR, "3125000000000000000"), 1000);
 
-    // D opens with 1 StETH, 0 BaseFeeLMA
+    // D opens with 1 WStETH, 0 BaseFeeLMA
     await openTrove({ ICR: toBN(dec(4, 18)), extraParams: { from: dennis } });
     const dennis_ICR = (
       await troveManager.getCurrentICR(dennis, price)
@@ -410,7 +410,7 @@ contract("Gas compensation tests", async (accounts) => {
     // Expect Dennis's ICR = (1 * 200) / (50) = 400.00%
     assert.isAtMost(th.getDifference(dennis_ICR, dec(4, 18)), 1000);
 
-    // E opens with 4405.45 StETH, 32598.35 BaseFeeLMA
+    // E opens with 4405.45 WStETH, 32598.35 BaseFeeLMA
     await openTrove({
       ICR: toBN("27028668628933700000"),
       extraParams: { from: erin },
@@ -419,7 +419,7 @@ contract("Gas compensation tests", async (accounts) => {
     // Expect Erin's ICR = (4405.45 * 200) / (32598.35) = 2702.87%
     assert.isAtMost(th.getDifference(erin_ICR, "27028668628933700000"), 100000);
 
-    // H opens with 1 StETH, 180 BaseFeeLMA
+    // H opens with 1 WStETH, 180 BaseFeeLMA
     await openTrove({
       ICR: toBN("1111111111111111111"),
       extraParams: { from: harriet },
@@ -481,7 +481,7 @@ contract("Gas compensation tests", async (accounts) => {
     const price_1 = await priceFeed.getPrice();
 
     /* 
-    StETH:USD price = 9.99
+    WStETH:USD price = 9.99
     -> Expect 0.5% of collaterall to be sent to liquidator, as gas compensation */
 
     // Check collateral value in USD is < $10
@@ -503,7 +503,7 @@ contract("Gas compensation tests", async (accounts) => {
       await web3.eth.getBalance(liquidator)
     );
 
-    // Check liquidator's balance increases by 0.5% of A's coll (1 StETH)
+    // Check liquidator's balance increases by 0.5% of A's coll (1 WStETH)
     const compensationReceived_A = liquidatorBalance_after_A
       .sub(liquidatorBalance_before_A)
       .add(toBN(A_GAS_Used_Liquidator * GAS_PRICE))
@@ -515,16 +515,16 @@ contract("Gas compensation tests", async (accounts) => {
     const BaseFeeLMAinSP_A = await stabilityPool.getTotalBaseFeeLMADeposits();
     assert.isTrue(BaseFeeLMAinSP_A.lte(BaseFeeLMAinSP_0));
 
-    // Check StETH in SP has received the liquidation
-    const ETHinSP_A = await stabilityPool.getStETH();
-    assert.equal(ETHinSP_A.toString(), aliceColl.sub(_0pt5percent_aliceColl)); // 1 StETH - 0.5%
+    // Check WStETH in SP has received the liquidation
+    const ETHinSP_A = await stabilityPool.getWStETH();
+    assert.equal(ETHinSP_A.toString(), aliceColl.sub(_0pt5percent_aliceColl)); // 1 WStETH - 0.5%
 
     // --- Price drops to 3 ---
     await priceFeed.setPrice(dec(3, 18));
     const price_2 = await priceFeed.getPrice();
 
     /* 
-    StETH:USD price = 3
+    WStETH:USD price = 3
     -> Expect 0.5% of collaterall to be sent to liquidator, as gas compensation */
 
     // Check collateral value in USD is < $10
@@ -545,35 +545,35 @@ contract("Gas compensation tests", async (accounts) => {
       await web3.eth.getBalance(liquidator)
     );
 
-    // Check liquidator's balance increases by B's 0.5% of coll, 2 StETH
+    // Check liquidator's balance increases by B's 0.5% of coll, 2 WStETH
     const compensationReceived_B = liquidatorBalance_after_B
       .sub(liquidatorBalance_before_B)
       .add(toBN(B_GAS_Used_Liquidator * GAS_PRICE))
       .toString();
     const _0pt5percent_bobColl = bobColl.div(web3.utils.toBN("200"));
-    assert.equal(compensationReceived_B, _0pt5percent_bobColl); // 0.5% of 2 StETH
+    assert.equal(compensationReceived_B, _0pt5percent_bobColl); // 0.5% of 2 WStETH
 
     // Check SP BaseFeeLMA has decreased due to the liquidation of B
     const BaseFeeLMAinSP_B = await stabilityPool.getTotalBaseFeeLMADeposits();
     assert.isTrue(BaseFeeLMAinSP_B.lt(BaseFeeLMAinSP_A));
 
-    // Check StETH in SP has received the liquidation
-    const ETHinSP_B = await stabilityPool.getStETH();
+    // Check WStETH in SP has received the liquidation
+    const ETHinSP_B = await stabilityPool.getWStETH();
     assert.equal(
       ETHinSP_B.toString(),
       aliceColl
         .sub(_0pt5percent_aliceColl)
         .add(bobColl)
         .sub(_0pt5percent_bobColl)
-    ); // (1 + 2 StETH) * 0.995
+    ); // (1 + 2 WStETH) * 0.995
 
     // --- Price drops to 3 ---
     await priceFeed.setPrice("3141592653589793238");
     const price_3 = await priceFeed.getPrice();
 
     /* 
-    StETH:USD price = 3.141592653589793238
-    Carol coll = 3 StETH. Value = (3 * 3.141592653589793238) = $6
+    WStETH:USD price = 3.141592653589793238
+    Carol coll = 3 WStETH. Value = (3 * 3.141592653589793238) = $6
     -> Expect 0.5% of collaterall to be sent to liquidator, as gas compensation */
 
     // Check collateral value in USD is < $10
@@ -594,7 +594,7 @@ contract("Gas compensation tests", async (accounts) => {
       await web3.eth.getBalance(liquidator)
     );
 
-    // Check liquidator's balance increases by C's 0.5% of coll, 3 StETH
+    // Check liquidator's balance increases by C's 0.5% of coll, 3 WStETH
     const compensationReceived_C = liquidatorBalance_after_C
       .sub(liquidatorBalance_before_C)
       .add(toBN(C_GAS_Used_Liquidator * GAS_PRICE))
@@ -606,8 +606,8 @@ contract("Gas compensation tests", async (accounts) => {
     const BaseFeeLMAinSP_C = await stabilityPool.getTotalBaseFeeLMADeposits();
     assert.isTrue(BaseFeeLMAinSP_C.lt(BaseFeeLMAinSP_B));
 
-    // Check StETH in SP has not changed due to the lquidation of C
-    const ETHinSP_C = await stabilityPool.getStETH();
+    // Check WStETH in SP has not changed due to the lquidation of C
+    const ETHinSP_C = await stabilityPool.getWStETH();
     assert.equal(
       ETHinSP_C.toString(),
       aliceColl
@@ -616,7 +616,7 @@ contract("Gas compensation tests", async (accounts) => {
         .sub(_0pt5percent_bobColl)
         .add(carolColl)
         .sub(_0pt5percent_carolColl)
-    ); // (1+2+3 StETH) * 0.995
+    ); // (1+2+3 WStETH) * 0.995
   });
 
   it("gas compensation from pool-offset liquidations: 0.5% collateral < $10 in value. Compensates $10 worth of collateral, liquidates the remainder", async () => {
@@ -661,19 +661,19 @@ contract("Gas compensation tests", async (accounts) => {
     });
 
     const BaseFeeLMAinSP_0 = await stabilityPool.getTotalBaseFeeLMADeposits();
-    const ETHinSP_0 = await stabilityPool.getStETH();
+    const ETHinSP_0 = await stabilityPool.getWStETH();
 
     // --- Price drops to 199.999 ---
     await priceFeed.setPrice("199999000000000000000");
     const price_1 = await priceFeed.getPrice();
 
     /* 
-    StETH:USD price = 199.999
-    Alice coll = 1 StETH. Value: $199.999
-    0.5% of coll  = 0.05 StETH. Value: (0.05 * 199.999) = $9.99995
-    Minimum comp = $10 = 0.05000025000125001 StETH.
-    -> Expect 0.05000025000125001 StETH sent to liquidator, 
-    and (1 - 0.05000025000125001) = 0.94999974999875 StETH remainder liquidated */
+    WStETH:USD price = 199.999
+    Alice coll = 1 WStETH. Value: $199.999
+    0.5% of coll  = 0.05 WStETH. Value: (0.05 * 199.999) = $9.99995
+    Minimum comp = $10 = 0.05000025000125001 WStETH.
+    -> Expect 0.05000025000125001 WStETH sent to liquidator, 
+    and (1 - 0.05000025000125001) = 0.94999974999875 WStETH remainder liquidated */
 
     // Check collateral value in USD is > $10
     const aliceColl = (await troveManager.Troves(alice))[1];
@@ -709,9 +709,9 @@ contract("Gas compensation tests", async (accounts) => {
     const BaseFeeLMAinSP_A = await stabilityPool.getTotalBaseFeeLMADeposits();
     assert.isTrue(BaseFeeLMAinSP_A.lt(BaseFeeLMAinSP_0));
 
-    // Check StETH in SP has increased by the remainder of B's coll
+    // Check WStETH in SP has increased by the remainder of B's coll
     const collRemainder_A = aliceColl.sub(_0pt5percent_aliceColl);
-    const ETHinSP_A = await stabilityPool.getStETH();
+    const ETHinSP_A = await stabilityPool.getWStETH();
 
     const SPETHIncrease_A = ETHinSP_A.sub(ETHinSP_0);
 
@@ -722,12 +722,12 @@ contract("Gas compensation tests", async (accounts) => {
     const price_2 = await priceFeed.getPrice();
 
     /* 
-    StETH:USD price = 15
-    Bob coll = 15 StETH. Value: $165
-    0.5% of coll  = 0.75 StETH. Value: (0.75 * 11) = $8.25
-    Minimum comp = $10 =  0.66666...StETH.
-    -> Expect 0.666666666666666666 StETH sent to liquidator, 
-    and (15 - 0.666666666666666666) StETH remainder liquidated */
+    WStETH:USD price = 15
+    Bob coll = 15 WStETH. Value: $165
+    0.5% of coll  = 0.75 WStETH. Value: (0.75 * 11) = $8.25
+    Minimum comp = $10 =  0.66666...WStETH.
+    -> Expect 0.666666666666666666 WStETH sent to liquidator, 
+    and (15 - 0.666666666666666666) WStETH remainder liquidated */
 
     // Check collateral value in USD is > $10
     const bobColl = (await troveManager.Troves(bob))[1];
@@ -763,9 +763,9 @@ contract("Gas compensation tests", async (accounts) => {
     const BaseFeeLMAinSP_B = await stabilityPool.getTotalBaseFeeLMADeposits();
     assert.isTrue(BaseFeeLMAinSP_B.lt(BaseFeeLMAinSP_A));
 
-    // Check StETH in SP has increased by the remainder of B's coll
+    // Check WStETH in SP has increased by the remainder of B's coll
     const collRemainder_B = bobColl.sub(_0pt5percent_bobColl);
-    const ETHinSP_B = await stabilityPool.getStETH();
+    const ETHinSP_B = await stabilityPool.getWStETH();
 
     const SPETHIncrease_B = ETHinSP_B.sub(ETHinSP_A);
 
@@ -815,18 +815,18 @@ contract("Gas compensation tests", async (accounts) => {
     });
 
     const BaseFeeLMAinSP_0 = await stabilityPool.getTotalBaseFeeLMADeposits();
-    const ETHinSP_0 = await stabilityPool.getStETH();
+    const ETHinSP_0 = await stabilityPool.getWStETH();
 
     await priceFeed.setPrice(dec(200, 18));
     const price_1 = await priceFeed.getPrice();
 
     /* 
-    StETH:USD price = 200
-    Alice coll = 10.001 StETH. Value: $2000.2
-    0.5% of coll  = 0.050005 StETH. Value: (0.050005 * 200) = $10.01
-    Minimum comp = $10 = 0.05 StETH.
-    -> Expect  0.050005 StETH sent to liquidator, 
-    and (10.001 - 0.050005) StETH remainder liquidated */
+    WStETH:USD price = 200
+    Alice coll = 10.001 WStETH. Value: $2000.2
+    0.5% of coll  = 0.050005 WStETH. Value: (0.050005 * 200) = $10.01
+    Minimum comp = $10 = 0.05 WStETH.
+    -> Expect  0.050005 WStETH sent to liquidator, 
+    and (10.001 - 0.050005) WStETH remainder liquidated */
 
     // Check value of 0.5% of collateral in USD is > $10
     const aliceColl = (await troveManager.Troves(alice))[1];
@@ -862,21 +862,21 @@ contract("Gas compensation tests", async (accounts) => {
     const BaseFeeLMAinSP_A = await stabilityPool.getTotalBaseFeeLMADeposits();
     assert.isTrue(BaseFeeLMAinSP_A.lt(BaseFeeLMAinSP_0));
 
-    // Check StETH in SP has increased by the remainder of A's coll
+    // Check WStETH in SP has increased by the remainder of A's coll
     const collRemainder_A = aliceColl.sub(_0pt5percent_aliceColl);
-    const ETHinSP_A = await stabilityPool.getStETH();
+    const ETHinSP_A = await stabilityPool.getWStETH();
 
     const SPETHIncrease_A = ETHinSP_A.sub(ETHinSP_0);
 
     assert.isAtMost(th.getDifference(SPETHIncrease_A, collRemainder_A), 1000);
 
     /* 
-   StETH:USD price = 200
-   Bob coll = 37.5 StETH. Value: $7500
-   0.5% of coll  = 0.1875 StETH. Value: (0.1875 * 200) = $37.5
-   Minimum comp = $10 = 0.05 StETH.
-   -> Expect 0.1875 StETH sent to liquidator, 
-   and (37.5 - 0.1875 StETH) StETH remainder liquidated */
+   WStETH:USD price = 200
+   Bob coll = 37.5 WStETH. Value: $7500
+   0.5% of coll  = 0.1875 WStETH. Value: (0.1875 * 200) = $37.5
+   Minimum comp = $10 = 0.05 WStETH.
+   -> Expect 0.1875 WStETH sent to liquidator, 
+   and (37.5 - 0.1875 WStETH) WStETH remainder liquidated */
 
     // Check value of 0.5% of collateral in USD is > $10
     const bobColl = (await troveManager.Troves(bob))[1];
@@ -912,9 +912,9 @@ contract("Gas compensation tests", async (accounts) => {
     const BaseFeeLMAinSP_B = await stabilityPool.getTotalBaseFeeLMADeposits();
     assert.isTrue(BaseFeeLMAinSP_B.lt(BaseFeeLMAinSP_A));
 
-    // Check StETH in SP has increased by the remainder of B's coll
+    // Check WStETH in SP has increased by the remainder of B's coll
     const collRemainder_B = bobColl.sub(_0pt5percent_bobColl);
-    const ETHinSP_B = await stabilityPool.getStETH();
+    const ETHinSP_B = await stabilityPool.getWStETH();
 
     const SPETHIncrease_B = ETHinSP_B.sub(ETHinSP_A);
 
@@ -967,7 +967,7 @@ contract("Gas compensation tests", async (accounts) => {
     const price_1 = await priceFeed.getPrice();
 
     /* 
-    StETH:USD price = 9.99
+    WStETH:USD price = 9.99
     -> Expect 0.5% of collaterall to be sent to liquidator, as gas compensation */
 
     // Check collateral value in USD is < $10
@@ -1005,7 +1005,7 @@ contract("Gas compensation tests", async (accounts) => {
     const price_2 = await priceFeed.getPrice();
 
     /* 
-    StETH:USD price = 3
+    WStETH:USD price = 3
     -> Expect 0.5% of collaterall to be sent to liquidator, as gas compensation */
 
     // Check collateral value in USD is < $10
@@ -1073,19 +1073,19 @@ contract("Gas compensation tests", async (accounts) => {
     await stabilityPool.provideToSP(dec(1, 23), ZERO_ADDRESS, { from: erin });
 
     const BaseFeeLMAinSP_0 = await stabilityPool.getTotalBaseFeeLMADeposits();
-    const ETHinSP_0 = await stabilityPool.getStETH();
+    const ETHinSP_0 = await stabilityPool.getWStETH();
 
     // --- Price drops to 199.999 ---
     await priceFeed.setPrice("199999000000000000000");
     const price_1 = await priceFeed.getPrice();
 
     /* 
-    StETH:USD price = 199.999
-    Alice coll = 1 StETH. Value: $199.999
-    0.5% of coll  = 0.05 StETH. Value: (0.05 * 199.999) = $9.99995
-    Minimum comp = $10 = 0.05000025000125001 StETH.
-    -> Expect 0.05000025000125001 StETH sent to liquidator, 
-    and (1 - 0.05000025000125001) = 0.94999974999875 StETH remainder liquidated */
+    WStETH:USD price = 199.999
+    Alice coll = 1 WStETH. Value: $199.999
+    0.5% of coll  = 0.05 WStETH. Value: (0.05 * 199.999) = $9.99995
+    Minimum comp = $10 = 0.05000025000125001 WStETH.
+    -> Expect 0.05000025000125001 WStETH sent to liquidator, 
+    and (1 - 0.05000025000125001) = 0.94999974999875 WStETH remainder liquidated */
 
     // Check collateral value in USD is > $10
     const aliceColl = (await troveManager.Troves(alice))[1];
@@ -1132,12 +1132,12 @@ contract("Gas compensation tests", async (accounts) => {
     const price_2 = await priceFeed.getPrice();
 
     /* 
-    StETH:USD price = 15
-    Bob coll = 15 StETH. Value: $165
-    0.5% of coll  = 0.75 StETH. Value: (0.75 * 11) = $8.25
-    Minimum comp = $10 =  0.66666...StETH.
-    -> Expect 0.666666666666666666 StETH sent to liquidator, 
-    and (15 - 0.666666666666666666) StETH remainder liquidated */
+    WStETH:USD price = 15
+    Bob coll = 15 WStETH. Value: $165
+    0.5% of coll  = 0.75 WStETH. Value: (0.75 * 11) = $8.25
+    Minimum comp = $10 =  0.66666...WStETH.
+    -> Expect 0.666666666666666666 WStETH sent to liquidator, 
+    and (15 - 0.666666666666666666) WStETH remainder liquidated */
 
     // Check collateral value in USD is > $10
     const bobColl = (await troveManager.Troves(bob))[1];
@@ -1210,7 +1210,7 @@ contract("Gas compensation tests", async (accounts) => {
     await stabilityPool.provideToSP(dec(1, 23), ZERO_ADDRESS, { from: erin });
 
     const BaseFeeLMAinSP_0 = await stabilityPool.getTotalBaseFeeLMADeposits();
-    const ETHinSP_0 = await stabilityPool.getStETH();
+    const ETHinSP_0 = await stabilityPool.getWStETH();
 
     await priceFeed.setPrice(dec(200, 18));
     const price_1 = await priceFeed.getPrice();
@@ -1249,12 +1249,12 @@ contract("Gas compensation tests", async (accounts) => {
     assert.isAtMost(th.getDifference(expectedGasComp_A, loggedGasComp_A), 1000);
 
     /* 
-   StETH:USD price = 200
-   Bob coll = 37.5 StETH. Value: $7500
-   0.5% of coll  = 0.1875 StETH. Value: (0.1875 * 200) = $37.5
-   Minimum comp = $10 = 0.05 StETH.
-   -> Expect 0.1875 StETH sent to liquidator, 
-   and (37.5 - 0.1875 StETH) StETH remainder liquidated */
+   WStETH:USD price = 200
+   Bob coll = 37.5 WStETH. Value: $7500
+   0.5% of coll  = 0.1875 WStETH. Value: (0.1875 * 200) = $37.5
+   Minimum comp = $10 = 0.05 WStETH.
+   -> Expect 0.1875 WStETH sent to liquidator, 
+   and (37.5 - 0.1875 WStETH) WStETH remainder liquidated */
 
     // Check value of 0.5% of collateral in USD is > $10
     const bobColl = (await troveManager.Troves(bob))[1];
@@ -1413,8 +1413,8 @@ contract("Gas compensation tests", async (accounts) => {
       .toString();
     assert.equal(expectedGasComp, compensationReceived);
 
-    // Check StETH in stability pool now equals the expected liquidated collateral
-    const ETHinSP = (await stabilityPool.getStETH()).toString();
+    // Check WStETH in stability pool now equals the expected liquidated collateral
+    const ETHinSP = (await stabilityPool.getWStETH()).toString();
     assert.equal(expectedLiquidatedColl, ETHinSP);
   });
 
@@ -1526,8 +1526,8 @@ contract("Gas compensation tests", async (accounts) => {
       1000
     );
 
-    // Check StETH in defaultPool now equals the expected liquidated collateral
-    const ETHinDefaultPool = (await defaultPool.getStETH()).toString();
+    // Check WStETH in defaultPool now equals the expected liquidated collateral
+    const ETHinDefaultPool = (await defaultPool.getWStETH()).toString();
     assert.isAtMost(
       th.getDifference(expectedLiquidatedColl, ETHinDefaultPool),
       1000
@@ -1807,7 +1807,9 @@ contract("Gas compensation tests", async (accounts) => {
           try {
             assert.isTrue(ICR.gte(prevICR));
           } catch (error) {
-            console.log(`StETH price at which trove ordering breaks: ${price}`);
+            console.log(
+              `WStETH price at which trove ordering breaks: ${price}`
+            );
             logICRs(ICRList);
           }
         }
@@ -1853,7 +1855,9 @@ contract("Gas compensation tests", async (accounts) => {
           try {
             assert.isTrue(ICR.gte(prevICR));
           } catch (error) {
-            console.log(`StETH price at which trove ordering breaks: ${price}`);
+            console.log(
+              `WStETH price at which trove ordering breaks: ${price}`
+            );
             logICRs(ICRList);
           }
         }
@@ -1906,7 +1910,9 @@ contract("Gas compensation tests", async (accounts) => {
             assert.isTrue(ICR.gte(prevICR));
           } catch (error) {
             console.log(error);
-            console.log(`StETH price at which trove ordering breaks: ${price}`);
+            console.log(
+              `WStETH price at which trove ordering breaks: ${price}`
+            );
             logICRs(ICRList);
           }
         }

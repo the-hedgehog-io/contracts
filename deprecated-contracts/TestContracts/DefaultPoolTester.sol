@@ -13,6 +13,6 @@ contract DefaultPoolTester is DefaultPool {
     }
 
     function unprotectedPayable() external payable {
-        StETH = StETH.add(msg.value);
+        WStETH = WStETH.add(msg.value);
     }
 }

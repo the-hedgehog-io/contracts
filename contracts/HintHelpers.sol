@@ -115,14 +115,16 @@ contract HintHelpers is HedgehogBase, Ownable, CheckContract {
                         netBaseFeeLMADebt.sub(MIN_NET_DEBT)
                     );
 
-                    uint StETH = troveManager
+                    uint WStETH = troveManager
                         .getTroveColl(currentTroveuser)
                         .add(
-                            troveManager.getPendingStETHReward(currentTroveuser)
+                            troveManager.getPendingWStETHReward(
+                                currentTroveuser
+                            )
                         );
 
-                    // HEDGEHOG UPDATES: Change StETHLOT calculations formula from [debtToBeRedeemed * price * 10e9] to [debtToBeRedeemed / price]
-                    uint newColl = StETH.sub(
+                    // HEDGEHOG UPDATES: Change WStETHLOT calculations formula from [debtToBeRedeemed * price * 10e9] to [debtToBeRedeemed / price]
+                    uint newColl = WStETH.sub(
                         maxRedeemableBaseFeeLMA.mul(_price)
                     );
                     uint newDebt = netBaseFeeLMADebt.sub(

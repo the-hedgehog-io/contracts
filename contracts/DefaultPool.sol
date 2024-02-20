@@ -18,10 +18,10 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  *
  * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  *
- * The Default Pool holds the StETH and BaseFeeLMA debt (but not BaseFeeLMA tokens) from liquidations that have been redistributed
+ * The Default Pool holds the WStETH and BaseFeeLMA debt (but not BaseFeeLMA tokens) from liquidations that have been redistributed
  * to active troves but not yet "applied", i.e. not yet recorded on a recipient active trove's struct.
  *
- * When a trove makes an operation that applies its pending StETH and BaseFeeLMA debt, its pending StETH and BaseFeeLMA debt is moved
+ * When a trove makes an operation that applies its pending WStETH and BaseFeeLMA debt, its pending WStETH and BaseFeeLMA debt is moved
  * from the Default Pool to the Active Pool.
  */
 contract DefaultPool is Ownable, CheckContract, IPool {
@@ -32,14 +32,14 @@ contract DefaultPool is Ownable, CheckContract, IPool {
 
     address public troveManagerAddress;
     address public activePoolAddress;
-    uint256 internal StETH; // deposited StETH tracker
+    uint256 internal WStETH; // deposited WStETH tracker
     uint256 internal BaseFeeLMADebt; // debt
-    IERC20 public StETHToken;
+    IERC20 public WStETHToken;
 
     event TroveManagerAddressChanged(address _newTroveManagerAddress);
     event DefaultPoolBaseFeeLMADebtUpdated(uint _BaseFeeLMADebt);
-    event DefaultPoolStETHBalanceUpdated(uint _StETH);
-    event StETHTokenAddressUpdated(IERC20 _StEthAddress);
+    event DefaultPoolWStETHBalanceUpdated(uint _WStETH);
+    event WStETHTokenAddressUpdated(IERC20 _WStEthAddress);
 
     // --- Dependency setters ---
 
@@ -51,19 +51,19 @@ contract DefaultPool is Ownable, CheckContract, IPool {
     function setAddresses(
         address _troveManagerAddress,
         address _activePoolAddress,
-        IERC20 _StETHTokenAddress
+        IERC20 _WStETHTokenAddress
     ) external onlyOwner {
         checkContract(_troveManagerAddress);
         checkContract(_activePoolAddress);
-        checkContract(address(_StETHTokenAddress));
+        checkContract(address(_WStETHTokenAddress));
 
         troveManagerAddress = _troveManagerAddress;
         activePoolAddress = _activePoolAddress;
-        StETHToken = _StETHTokenAddress;
+        WStETHToken = _WStETHTokenAddress;
 
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit ActivePoolAddressChanged(_activePoolAddress);
-        emit StETHTokenAddressUpdated(_StETHTokenAddress);
+        emit WStETHTokenAddressUpdated(_WStETHTokenAddress);
 
         renounceOwnership();
     }
@@ -71,12 +71,12 @@ contract DefaultPool is Ownable, CheckContract, IPool {
     // --- Getters for public variables. Required by IPool interface ---
 
     /*
-     * Returns the StETH state variable.
+     * Returns the WStETH state variable.
      *
-     * Not necessarily equal to the the contract's raw StETH balance - stETH can be forcibly sent to contracts.
+     * Not necessarily equal to the the contract's raw WStETH balance - wStETH can be forcibly sent to contracts.
      */
-    function getStETH() external view returns (uint) {
-        return StETH;
+    function getWStETH() external view returns (uint) {
+        return WStETH;
     }
 
     function getBaseFeeLMADebt() external view override returns (uint) {
@@ -88,15 +88,15 @@ contract DefaultPool is Ownable, CheckContract, IPool {
     /**
      * HEDGEHOG UPDATES: use SafeERC20 safe transfer instead of native token transfer
      */
-    function sendStETHToActivePool(uint _amount) external {
+    function sendWStETHToActivePool(uint _amount) external {
         _requireCallerIsTroveManager();
         address activePool = activePoolAddress; // cache to save an SLOAD
-        StETH = StETH.sub(_amount);
-        emit DefaultPoolStETHBalanceUpdated(StETH);
-        emit StETHSent(activePool, _amount);
+        WStETH = WStETH.sub(_amount);
+        emit DefaultPoolWStETHBalanceUpdated(WStETH);
+        emit WStETHSent(activePool, _amount);
 
         IActivePool(activePool).increaseBalance(_amount);
-        StETHToken.safeTransfer(activePool, _amount);
+        WStETHToken.safeTransfer(activePool, _amount);
     }
 
     function increaseBaseFeeLMADebt(uint _amount) external override {
@@ -133,7 +133,7 @@ contract DefaultPool is Ownable, CheckContract, IPool {
      *  */
     function increaseBalance(uint256 _amount) external {
         _requireCallerIsTroveManager();
-        StETH = StETH.add(_amount);
-        emit DefaultPoolStETHBalanceUpdated(StETH);
+        WStETH = WStETH.add(_amount);
+        emit DefaultPoolWStETHBalanceUpdated(WStETH);
     }
 }

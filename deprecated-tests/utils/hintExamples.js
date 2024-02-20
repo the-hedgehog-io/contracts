@@ -36,7 +36,7 @@ async function main() {
   await priceFeedTestnet.setPrice(toBN(toWei("2500")));
 
   const BaseFeeLMAAmount = toBN(toWei("2500")); // borrower wants to withdraw 2500 BaseFeeLMA
-  const ETHColl = toBN(toWei("5")); // borrower wants to lock 5 StETH collateral
+  const ETHColl = toBN(toWei("5")); // borrower wants to lock 5 WStETH collateral
 
   // Call deployed TroveManager contract to read the liquidation reserve and latest borrowing fee
   const liquidationReserve = await troveManager.BaseFeeLMA_GAS_COMPENSATION();
@@ -77,7 +77,7 @@ async function main() {
 
   // --- adjust trove ---
 
-  const collIncrease = toBN(toWei("1")); // borrower wants to add 1 StETH
+  const collIncrease = toBN(toWei("1")); // borrower wants to add 1 WStETH
   const BaseFeeLMARepayment = toBN(toWei("230")); // borrower wants to repay 230 BaseFeeLMA
 
   // Get trove's current debt and coll

@@ -13,6 +13,6 @@ contract ActivePoolTester is ActivePool {
     }
 
     function unprotectedPayable() external payable {
-        StETH = StETH.add(msg.value);
+        WStETH = WStETH.add(msg.value);
     }
 }

@@ -13,7 +13,7 @@ async function main() {
   await lock.deployed();
 
   console.log(
-    `Lock with 1 StETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`
+    `Lock with 1 WStETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`
   );
 }
 

@@ -57,7 +57,7 @@ interface IBorrowerOperations {
         uint _amount
     ) external;
 
-    function moveStETHGainToTrove(
+    function moveWStETHGainToTrove(
         address _user,
         address _upperHint,
         address _lowerHint,

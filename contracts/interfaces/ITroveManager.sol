@@ -33,8 +33,8 @@ interface ITroveManager is IHedgehogBase {
     event Redemption(
         uint _attemptedBaseFeeLMAAmount,
         uint _actualBaseFeeLMAAmount,
-        uint _StETHSent,
-        uint _StETHFee
+        uint _WStETHSent,
+        uint _WStETHFee
     );
     event TroveUpdated(
         address indexed _borrower,
@@ -56,8 +56,8 @@ interface ITroveManager is IHedgehogBase {
         uint _totalStakesSnapshot,
         uint _totalCollateralSnapshot
     );
-    event LTermsUpdated(uint _L_StETH, uint _L_BaseFeeLMADebt);
-    event TroveSnapshotsUpdated(uint _L_StETH, uint _L_BaseFeeLMADebt);
+    event LTermsUpdated(uint _L_WStETH, uint _L_BaseFeeLMADebt);
+    event TroveSnapshotsUpdated(uint _L_WStETH, uint _L_BaseFeeLMADebt);
     event TroveIndexUpdated(address _borrower, uint _newIndex);
 
     // --- Functions ---
@@ -122,7 +122,7 @@ interface ITroveManager is IHedgehogBase {
 
     function applyPendingRewards(address _borrower) external;
 
-    function getPendingStETHReward(
+    function getPendingWStETHReward(
         address _borrower
     ) external view returns (uint);
 
@@ -141,7 +141,7 @@ interface ITroveManager is IHedgehogBase {
             uint debt,
             uint coll,
             uint pendingBaseFeeLMADebtReward,
-            uint pendingStETHReward
+            uint pendingWStETHReward
         );
 
     function closeTrove(address _borrower) external;
@@ -157,7 +157,7 @@ interface ITroveManager is IHedgehogBase {
     ) external view returns (uint);
 
     function getRedemptionFeeWithDecay(
-        uint _StETHDrawn
+        uint _WStETHDrawn
     ) external view returns (uint);
 
     function getBorrowingRate(

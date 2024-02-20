@@ -66,13 +66,13 @@ contract EchidnaProxy {
 
     // Borrower Operations
     function openTrovePrx(
-        uint _StETH,
+        uint _WStETH,
         uint _BaseFeeLMAAmount,
         address _upperHint,
         address _lowerHint,
         uint _maxFee
     ) external payable {
-        borrowerOperations.openTrove{value: _StETH}(
+        borrowerOperations.openTrove{value: _WStETH}(
             _maxFee,
             _BaseFeeLMAAmount,
             _upperHint,
@@ -81,11 +81,11 @@ contract EchidnaProxy {
     }
 
     function addCollPrx(
-        uint _StETH,
+        uint _WStETH,
         address _upperHint,
         address _lowerHint
     ) external payable {
-        borrowerOperations.addColl{value: _StETH}(_upperHint, _lowerHint);
+        borrowerOperations.addColl{value: _WStETH}(_upperHint, _lowerHint);
     }
 
     function withdrawCollPrx(
@@ -123,7 +123,7 @@ contract EchidnaProxy {
     }
 
     function adjustTrovePrx(
-        uint _StETH,
+        uint _WStETH,
         uint _collWithdrawal,
         uint _debtChange,
         bool _isDebtIncrease,
@@ -131,7 +131,7 @@ contract EchidnaProxy {
         address _lowerHint,
         uint _maxFee
     ) external payable {
-        borrowerOperations.adjustTrove{value: _StETH}(
+        borrowerOperations.adjustTrove{value: _WStETH}(
             _maxFee,
             _collWithdrawal,
             _debtChange,

@@ -163,7 +163,7 @@ contract(
           price,
         } = await setup();
 
-        const spEthBefore = await stabilityPool.getStETH();
+        const spEthBefore = await stabilityPool.getWStETH();
         const spLusdBefore = await stabilityPool.getTotalBaseFeeLMADeposits();
 
         const tx = await troveManager.batchLiquidateTroves([alice, carol]);
@@ -176,7 +176,7 @@ contract(
         assert.equal((await troveManager.Troves(alice))[3], "3");
         assert.equal((await troveManager.Troves(carol))[3], "3");
 
-        const spEthAfter = await stabilityPool.getStETH();
+        const spEthAfter = await stabilityPool.getWStETH();
         const spLusdAfter = await stabilityPool.getTotalBaseFeeLMADeposits();
 
         // liquidate collaterals with the gas compensation fee subtracted
@@ -198,7 +198,7 @@ contract(
         assert.equal(
           spEthAfter.sub(spEthBefore).toString(),
           expectedCollateralLiquidatedA.toString(),
-          "Stability Pool StETH doesn’t match"
+          "Stability Pool WStETH doesn’t match"
         );
         assert.equal(
           spLusdBefore.sub(spLusdAfter).toString(),

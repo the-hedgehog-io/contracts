@@ -647,7 +647,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     const aliceDeposit = await stabilityPool.getCompoundedBaseFeeLMADeposit(
       alice
     );
-    const aliceETHGain = await stabilityPool.getDepositorStETHGain(alice);
+    const aliceETHGain = await stabilityPool.getDepositorWStETHGain(alice);
     const aliceExpectedETHGain = spDeposit
       .mul(th.applyLiquidationFee(B_coll))
       .div(B_totalDebt);
@@ -662,10 +662,10 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     Rewards-per-unit-staked from the redistribution should be:
   
     L_BaseFeeLMADebt = 1610 / 6 = 268.333 BaseFeeLMA
-    L_StETH = 16.820475 /6 =  2.8034125 eth
+    L_WStETH = 16.820475 /6 =  2.8034125 eth
     */
     const L_BaseFeeLMADebt = (await troveManager.L_BaseFeeLMADebt()).toString();
-    const L_StETH = (await troveManager.L_StETH()).toString();
+    const L_WStETH = (await troveManager.L_WStETH()).toString();
 
     assert.isAtMost(
       th.getDifference(
@@ -676,7 +676,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     );
     assert.isAtMost(
       th.getDifference(
-        L_StETH,
+        L_WStETH,
         th.applyLiquidationFee(
           B_coll.sub(B_coll.mul(spDeposit).div(B_totalDebt))
             .mul(mv._1e18BN)
@@ -742,10 +742,10 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
 
     // Check that redistribution rewards don't change
     const L_BaseFeeLMADebt = (await troveManager.L_BaseFeeLMADebt()).toString();
-    const L_StETH = (await troveManager.L_StETH()).toString();
+    const L_WStETH = (await troveManager.L_WStETH()).toString();
 
     assert.equal(L_BaseFeeLMADebt, "0");
-    assert.equal(L_StETH, "0");
+    assert.equal(L_WStETH, "0");
 
     // Check that Bob's Trove and stake remains active with unchanged coll and debt
     const bob_Trove = await troveManager.Troves(bob);
@@ -808,12 +808,12 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     As liquidated debt (250 BaseFeeLMA) was completely offset
 
     Alice's expected compounded deposit: (1490 - 250) = 1240BaseFeeLMA
-    Alice's expected StETH gain:  Bob's liquidated capped coll (minus gas comp), 2.75*0.995 eth
+    Alice's expected WStETH gain:  Bob's liquidated capped coll (minus gas comp), 2.75*0.995 eth
   
     */
     const aliceExpectedDeposit =
       await stabilityPool.getCompoundedBaseFeeLMADeposit(alice);
-    const aliceExpectedETHGain = await stabilityPool.getDepositorStETHGain(
+    const aliceExpectedETHGain = await stabilityPool.getDepositorWStETHGain(
       alice
     );
 
@@ -902,12 +902,12 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     As liquidated debt (250 BaseFeeLMA) was completely offset
 
     Alice's expected compounded deposit: (1490 - 250) = 1240BaseFeeLMA
-    Alice's expected StETH gain:  Bob's liquidated capped coll (minus gas comp), 2.75*0.995 eth
+    Alice's expected WStETH gain:  Bob's liquidated capped coll (minus gas comp), 2.75*0.995 eth
 
     */
     const aliceExpectedDeposit =
       await stabilityPool.getCompoundedBaseFeeLMADeposit(alice);
-    const aliceExpectedETHGain = await stabilityPool.getDepositorStETHGain(
+    const aliceExpectedETHGain = await stabilityPool.getDepositorWStETHGain(
       alice
     );
 
@@ -1568,7 +1568,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     assert.equal(totalCollateralSnapshot_After, totalCollateralSnapshot_Before);
   });
 
-  it("liquidate(), with ICR > 110%, and StabilityPool BaseFeeLMA < liquidated debt: causes correct Pool offset and StETH gain, and doesn't redistribute to active troves", async () => {
+  it("liquidate(), with ICR > 110%, and StabilityPool BaseFeeLMA < liquidated debt: causes correct Pool offset and WStETH gain, and doesn't redistribute to active troves", async () => {
     // --- SETUP ---
     // Alice withdraws up to 1500 BaseFeeLMA of debt, and Dennis up to 150, resulting in ICRs of 266%.
     // Bob withdraws up to 250 BaseFeeLMA of debt, resulting in ICR of 240%. Bob has lowest ICR.
@@ -1610,7 +1610,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
 
     const aliceExpectedDeposit =
       await stabilityPool.getCompoundedBaseFeeLMADeposit(alice);
-    const aliceExpectedETHGain = await stabilityPool.getDepositorStETHGain(
+    const aliceExpectedETHGain = await stabilityPool.getDepositorWStETHGain(
       alice
     );
 
@@ -1623,7 +1623,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     const L_BaseFeeLMADebt_After = (
       await troveManager.L_BaseFeeLMADebt()
     ).toString();
-    const L_ETH_After = (await troveManager.L_StETH()).toString();
+    const L_ETH_After = (await troveManager.L_WStETH()).toString();
 
     assert.equal(L_BaseFeeLMADebt_After, "0");
     assert.equal(L_ETH_After, "0");
@@ -1759,7 +1759,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     const L_BaseFeeLMADebt_After = (
       await troveManager.L_BaseFeeLMADebt()
     ).toString();
-    const L_ETH_After = (await troveManager.L_StETH()).toString();
+    const L_ETH_After = (await troveManager.L_WStETH()).toString();
 
     assert.equal(L_BaseFeeLMADebt_After, "0");
     assert.equal(L_ETH_After, "0");
@@ -1833,13 +1833,13 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
   // ---
 
   it("liquidate(): Doesn't liquidate undercollateralized trove if it is the only trove in the system", async () => {
-    // Alice creates a single trove with 0.62 StETH and a debt of 62 BaseFeeLMA, and provides 10 BaseFeeLMA to SP
+    // Alice creates a single trove with 0.62 WStETH and a debt of 62 BaseFeeLMA, and provides 10 BaseFeeLMA to SP
     await openTrove({ ICR: toBN(dec(200, 16)), extraParams: { from: alice } });
     await stabilityPool.provideToSP(dec(10, 18), ZERO_ADDRESS, { from: alice });
 
     assert.isFalse(await th.checkRecoveryMode(contracts));
 
-    // Set StETH:USD price to 105
+    // Set WStETH:USD price to 105
     await priceFeed.setPrice("105000000000000000000");
     const price = await priceFeed.getPrice();
 
@@ -1871,7 +1871,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
   it("liquidate(): Liquidates undercollateralized trove if there are two troves in the system", async () => {
     await openTrove({ ICR: toBN(dec(200, 16)), extraParams: { from: bob } });
 
-    // Alice creates a single trove with 0.62 StETH and a debt of 62 BaseFeeLMA, and provides 10 BaseFeeLMA to SP
+    // Alice creates a single trove with 0.62 WStETH and a debt of 62 BaseFeeLMA, and provides 10 BaseFeeLMA to SP
     await openTrove({ ICR: toBN(dec(200, 16)), extraParams: { from: alice } });
 
     // Alice proves 10 BaseFeeLMA to SP
@@ -1879,7 +1879,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
 
     assert.isFalse(await th.checkRecoveryMode(contracts));
 
-    // Set StETH:USD price to 105
+    // Set WStETH:USD price to 105
     await priceFeed.setPrice("105000000000000000000");
     const price = await priceFeed.getPrice();
 
@@ -2044,7 +2044,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     await openTrove({ ICR: toBN(dec(220, 16)), extraParams: { from: bob } });
     await openTrove({ ICR: toBN(dec(200, 16)), extraParams: { from: carol } });
 
-    // Defaulter opens with 60 BaseFeeLMA, 0.6 StETH
+    // Defaulter opens with 60 BaseFeeLMA, 0.6 WStETH
     await openTrove({
       ICR: toBN(dec(200, 16)),
       extraParams: { from: defaulter_1 },
@@ -2071,7 +2071,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     assert.isTrue(bob_ICR_Before.gte(mv._MCR));
     assert.isTrue(carol_ICR_Before.lte(mv._MCR));
 
-    // Liquidate defaulter. 30 BaseFeeLMA and 0.3 StETH is distributed uniformly between A, B and C. Each receive 10 BaseFeeLMA, 0.1 StETH
+    // Liquidate defaulter. 30 BaseFeeLMA and 0.3 WStETH is distributed uniformly between A, B and C. Each receive 10 BaseFeeLMA, 0.1 WStETH
     await troveManager.liquidate(defaulter_1);
 
     const alice_ICR_After = await troveManager.getCurrentICR(alice, price);
@@ -2118,7 +2118,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     assert.equal((await troveManager.Troves(carol))[3].toString(), "3");
   });
 
-  it("liquidate(): does not affect the SP deposit or StETH gain when called on an SP depositor's address that has no trove", async () => {
+  it("liquidate(): does not affect the SP deposit or WStETH gain when called on an SP depositor's address that has no trove", async () => {
     const { collateral: C_coll, totalDebt: C_totalDebt } = await openTrove({
       ICR: toBN(dec(200, 16)),
       extraParams: { from: carol },
@@ -2145,12 +2145,12 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     // Carol gets liquidated
     await troveManager.liquidate(carol);
 
-    // Check Dennis' SP deposit has absorbed Carol's debt, and he has received her liquidated StETH
+    // Check Dennis' SP deposit has absorbed Carol's debt, and he has received her liquidated WStETH
     const dennis_Deposit_Before = (
       await stabilityPool.getCompoundedBaseFeeLMADeposit(dennis)
     ).toString();
     const dennis_ETHGain_Before = (
-      await stabilityPool.getDepositorStETHGain(dennis)
+      await stabilityPool.getDepositorWStETHGain(dennis)
     ).toString();
     assert.isAtMost(
       th.getDifference(dennis_Deposit_Before, spDeposit.sub(C_totalDebt)),
@@ -2173,7 +2173,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
       await stabilityPool.getCompoundedBaseFeeLMADeposit(dennis)
     ).toString();
     const dennis_ETHGain_After = (
-      await stabilityPool.getDepositorStETHGain(dennis)
+      await stabilityPool.getDepositorWStETHGain(dennis)
     ).toString();
     assert.equal(dennis_Deposit_Before, dennis_Deposit_After);
     assert.equal(dennis_ETHGain_Before, dennis_ETHGain_After);
@@ -2318,7 +2318,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     );
 
     // Bob re-opens the trove, price 200, total debt 80 BaseFeeLMA, ICR = 120% (lowest one)
-    // Dennis redeems 30, so Bob has a surplus of (200 * 0.48 - 30) / 200 = 0.33 StETH
+    // Dennis redeems 30, so Bob has a surplus of (200 * 0.48 - 30) / 200 = 0.33 WStETH
     await priceFeed.setPrice("200000000000000000000");
     const { collateral: B_coll_2, netDebt: B_netDebt_2 } = await openTrove({
       ICR: toBN(dec(150, 16)),
@@ -2377,7 +2377,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
       web3.currentProvider
     );
 
-    // Dennis redeems 40, so Bob has a surplus of (200 * 1 - 40) / 200 = 0.8 StETH
+    // Dennis redeems 40, so Bob has a surplus of (200 * 1 - 40) / 200 = 0.8 WStETH
     await th.redeemCollateral(dennis, contracts, B_netDebt, GAS_PRICE);
     let price = await priceFeed.getPrice();
     const bob_surplus = B_coll.sub(B_netDebt.mul(mv._1e18BN).div(price));
@@ -3144,7 +3144,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     await openTrove({ ICR: toBN(dec(220, 16)), extraParams: { from: bob } });
     await openTrove({ ICR: toBN(dec(200, 16)), extraParams: { from: carol } });
 
-    // Defaulter opens with 60 BaseFeeLMA, 0.6 StETH
+    // Defaulter opens with 60 BaseFeeLMA, 0.6 WStETH
     await openTrove({
       ICR: toBN(dec(200, 16)),
       extraParams: { from: defaulter_1 },
@@ -3171,7 +3171,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     assert.isTrue(bob_ICR_Before.gte(mv._MCR));
     assert.isTrue(carol_ICR_Before.lte(mv._MCR));
 
-    // Liquidate defaulter. 30 BaseFeeLMA and 0.3 StETH is distributed uniformly between A, B and C. Each receive 10 BaseFeeLMA, 0.1 StETH
+    // Liquidate defaulter. 30 BaseFeeLMA and 0.3 WStETH is distributed uniformly between A, B and C. Each receive 10 BaseFeeLMA, 0.1 WStETH
     await troveManager.liquidate(defaulter_1);
 
     const alice_ICR_After = await troveManager.getCurrentICR(alice, price);
@@ -3481,7 +3481,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
 
     // Check A's collateral and debt remain the same
     const entireColl_A = (await troveManager.Troves(alice))[1].add(
-      await troveManager.getPendingStETHReward(alice)
+      await troveManager.getPendingWStETHReward(alice)
     );
     const entireDebt_A = (await troveManager.Troves(alice))[0].add(
       await troveManager.getPendingBaseFeeLMADebtReward(alice)
@@ -3619,7 +3619,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     );
   });
 
-  it("liquidateTroves(): Liquidating troves at 100 < ICR < 110 with SP deposits correctly impacts their SP deposit and StETH gain", async () => {
+  it("liquidateTroves(): Liquidating troves at 100 < ICR < 110 with SP deposits correctly impacts their SP deposit and WStETH gain", async () => {
     // Whale provides BaseFeeLMA to the SP
     const { baseFeeLMAAmount: W_baseFeeLMAAmount } = await openTrove({
       ICR: toBN(dec(300, 16)),
@@ -3710,7 +3710,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     Then, liquidation hits A,B,C: 
 
     Total liquidated debt = 100 + 300 + 100 = 500 BaseFeeLMA
-    Total liquidated StETH = 1 + 3 + 1 = 5 StETH
+    Total liquidated WStETH = 1 + 3 + 1 = 5 WStETH
 
     Whale BaseFeeLMA Loss: 500 * (400/680) = 294.12 BaseFeeLMA
     Alice BaseFeeLMA Loss:  500 *(40/680) = 29.41 BaseFeeLMA
@@ -3720,19 +3720,19 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     Alice remaining deposit: (40 - 29.41) = 10.59 BaseFeeLMA
     Bob remaining deposit: (240 - 176.47) = 63.53 BaseFeeLMA
 
-    Whale StETH Gain: 5*0.995 * (400/680) = 2.93 StETH
-    Alice StETH Gain: 5*0.995 *(40/680) = 0.293 StETH
-    Bob StETH Gain: 5*0.995 * (240/680) = 1.76 StETH
+    Whale WStETH Gain: 5*0.995 * (400/680) = 2.93 WStETH
+    Alice WStETH Gain: 5*0.995 *(40/680) = 0.293 WStETH
+    Bob WStETH Gain: 5*0.995 * (240/680) = 1.76 WStETH
 
     Total remaining deposits: 180 BaseFeeLMA
-    Total StETH gain: 5*0.995 StETH */
+    Total WStETH gain: 5*0.995 WStETH */
 
     const BaseFeeLMAinSP = (
       await stabilityPool.getTotalBaseFeeLMADeposits()
     ).toString();
-    const ETHinSP = (await stabilityPool.getStETH()).toString();
+    const ETHinSP = (await stabilityPool.getWStETH()).toString();
 
-    // Check remaining BaseFeeLMA Deposits and StETH gain, for whale and depositors whose troves were liquidated
+    // Check remaining BaseFeeLMA Deposits and WStETH gain, for whale and depositors whose troves were liquidated
     const whale_Deposit_After = (
       await stabilityPool.getCompoundedBaseFeeLMADeposit(whale)
     ).toString();
@@ -3744,13 +3744,13 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     ).toString();
 
     const whale_ETHGain = (
-      await stabilityPool.getDepositorStETHGain(whale)
+      await stabilityPool.getDepositorWStETHGain(whale)
     ).toString();
     const alice_ETHGain = (
-      await stabilityPool.getDepositorStETHGain(alice)
+      await stabilityPool.getDepositorWStETHGain(alice)
     ).toString();
     const bob_ETHGain = (
-      await stabilityPool.getDepositorStETHGain(bob)
+      await stabilityPool.getDepositorWStETHGain(bob)
     ).toString();
 
     const liquidatedDebt = A_totalDebt.add(B_totalDebt).add(C_totalDebt);
@@ -3814,11 +3814,11 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
       2000
     );
 
-    // Check total remaining deposits and StETH gain in Stability Pool
+    // Check total remaining deposits and WStETH gain in Stability Pool
     const total_BaseFeeLMAinSP = (
       await stabilityPool.getTotalBaseFeeLMADeposits()
     ).toString();
-    const total_ETHinSP = (await stabilityPool.getStETH()).toString();
+    const total_ETHinSP = (await stabilityPool.getWStETH()).toString();
 
     assert.isAtMost(
       th.getDifference(total_BaseFeeLMAinSP, totalDeposit.sub(liquidatedDebt)),
@@ -3830,7 +3830,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     );
   });
 
-  it("liquidateTroves(): Liquidating troves at ICR <=100% with SP deposits does not alter their deposit or StETH gain", async () => {
+  it("liquidateTroves(): Liquidating troves at ICR <=100% with SP deposits does not alter their deposit or WStETH gain", async () => {
     // Whale provides 400 BaseFeeLMA to the SP
     await openTrove({
       ICR: toBN(dec(300, 16)),
@@ -3868,11 +3868,11 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     // Confirm Recovery Mode
     assert.isTrue(await th.checkRecoveryMode(contracts));
 
-    // Check BaseFeeLMA and StETH in Pool  before
+    // Check BaseFeeLMA and WStETH in Pool  before
     const BaseFeeLMAinSP_Before = (
       await stabilityPool.getTotalBaseFeeLMADeposits()
     ).toString();
-    const ETHinSP_Before = (await stabilityPool.getStETH()).toString();
+    const ETHinSP_Before = (await stabilityPool.getWStETH()).toString();
     assert.equal(BaseFeeLMAinSP_Before, dec(800, 18));
     assert.equal(ETHinSP_Before, "0");
 
@@ -3898,15 +3898,15 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     // check system sized reduced to 1 troves
     assert.equal((await sortedTroves.getSize()).toString(), "1");
 
-    // Check BaseFeeLMA and StETH in Pool after
+    // Check BaseFeeLMA and WStETH in Pool after
     const BaseFeeLMAinSP_After = (
       await stabilityPool.getTotalBaseFeeLMADeposits()
     ).toString();
-    const ETHinSP_After = (await stabilityPool.getStETH()).toString();
+    const ETHinSP_After = (await stabilityPool.getWStETH()).toString();
     assert.equal(BaseFeeLMAinSP_Before, BaseFeeLMAinSP_After);
     assert.equal(ETHinSP_Before, ETHinSP_After);
 
-    // Check remaining BaseFeeLMA Deposits and StETH gain, for whale and depositors whose troves were liquidated
+    // Check remaining BaseFeeLMA Deposits and WStETH gain, for whale and depositors whose troves were liquidated
     const whale_Deposit_After = (
       await stabilityPool.getCompoundedBaseFeeLMADeposit(whale)
     ).toString();
@@ -3918,13 +3918,13 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     ).toString();
 
     const whale_ETHGain_After = (
-      await stabilityPool.getDepositorStETHGain(whale)
+      await stabilityPool.getDepositorWStETHGain(whale)
     ).toString();
     const alice_ETHGain_After = (
-      await stabilityPool.getDepositorStETHGain(alice)
+      await stabilityPool.getDepositorWStETHGain(alice)
     ).toString();
     const bob_ETHGain_After = (
-      await stabilityPool.getDepositorStETHGain(bob)
+      await stabilityPool.getDepositorWStETHGain(bob)
     ).toString();
 
     assert.equal(whale_Deposit_After, dec(400, 18));
@@ -4256,7 +4256,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     That leaves 50 BaseFeeLMA in the Pool that won’t be enough to absorb any other trove */
     const tx = await troveManager.liquidateTroves(10);
 
-    // Expect system debt reduced by 203 BaseFeeLMA and system coll 2.3 StETH
+    // Expect system debt reduced by 203 BaseFeeLMA and system coll 2.3 WStETH
     const entireSystemCollAfter = await troveManager.getEntireSystemColl();
     const entireSystemDebtAfter = await troveManager.getEntireSystemDebt();
 
@@ -5169,7 +5169,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     const trovesToLiquidate = [alice, bob, carol];
     await troveManager.batchLiquidateTroves(trovesToLiquidate);
 
-    // Expect system debt reduced by 203 BaseFeeLMA and system coll by 2 StETH
+    // Expect system debt reduced by 203 BaseFeeLMA and system coll by 2 WStETH
     const entireSystemCollAfter = await troveManager.getEntireSystemColl();
     const entireSystemDebtAfter = await troveManager.getEntireSystemDebt();
 
@@ -5495,13 +5495,13 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     );
 
     const dennisColl_After = (await troveManager.Troves(dennis))[1].add(
-      await troveManager.getPendingStETHReward(dennis)
+      await troveManager.getPendingWStETHReward(dennis)
     );
     const bobColl_After = (await troveManager.Troves(bob))[1].add(
-      await troveManager.getPendingStETHReward(bob)
+      await troveManager.getPendingWStETHReward(bob)
     );
     const carolColl_After = (await troveManager.Troves(carol))[1].add(
-      await troveManager.getPendingStETHReward(carol)
+      await troveManager.getPendingWStETHReward(carol)
     );
 
     assert.isTrue(dennisColl_After.eq(dennisColl_Before));
@@ -5923,7 +5923,7 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
 
     // Check A's collateral and debt are the same
     const entireColl_A = (await troveManager.Troves(alice))[1].add(
-      await troveManager.getPendingStETHReward(alice)
+      await troveManager.getPendingWStETHReward(alice)
     );
     const entireDebt_A = (await troveManager.Troves(alice))[0].add(
       await troveManager.getPendingBaseFeeLMADebtReward(alice)

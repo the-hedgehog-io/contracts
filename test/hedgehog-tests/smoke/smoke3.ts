@@ -190,10 +190,10 @@ describe("BaseFeeOracle Tests", () => {
     };
 
     const getTrove = async (caller = bob) => {
-      const { debt, coll, pendingBaseFeeLMADebtReward, pendingStETHReward } =
+      const { debt, coll, pendingBaseFeeLMADebtReward, pendingWStETHReward } =
         await troveManager.getEntireDebtAndColl(caller.address);
 
-      return { debt, coll, pendingBaseFeeLMADebtReward, pendingStETHReward };
+      return { debt, coll, pendingBaseFeeLMADebtReward, pendingWStETHReward };
     };
 
     const logAllDebtColl = async () => {
