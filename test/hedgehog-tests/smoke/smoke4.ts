@@ -47,7 +47,8 @@ describe("BaseFeeOracle Tests", () => {
       hacker: SignerWithAddress,
       alice: SignerWithAddress,
       bob: SignerWithAddress,
-      carol: SignerWithAddress;
+      carol: SignerWithAddress,
+      dave: SignerWithAddress;
     let oracle: BaseFeeOracle;
     let priceFeed: TestPriceFeed;
     let sortedTroves: SortedTroves;
@@ -115,7 +116,7 @@ describe("BaseFeeOracle Tests", () => {
     const totalDebtCarolOpening = BigInt("2960000");
 
     before(async () => {
-      [deployer, setter, hacker, alice, bob, carol] = await getSigners({
+      [deployer, setter, hacker, alice, bob, carol, dave] = await getSigners({
         fork: true,
       });
 
@@ -599,8 +600,9 @@ describe("BaseFeeOracle Tests", () => {
         (await baseFeeLMAToken.balanceOf(carol.address)) - carolBFEBalanceBefore
       );
 
-      expect(await payToken.balanceOf(carol.address)).to.be.equal(
-        carolCollBalanceAfterLiq
+      const carolCollBalanceAfter = await payToken.balanceOf(carol.address);
+      expect(carolCollBalanceBefore - carolCollBalanceAfter).to.be.equal(
+        "1675000000000000000"
       );
     });
 
@@ -628,6 +630,13 @@ describe("BaseFeeOracle Tests", () => {
       await setNewBaseFeePrice(20);
       await setNewBaseFeePrice(20);
       await setNewBaseFeePrice(20);
+      await payToken
+        .connect(dave)
+        .transfer(alice.address, "120000000000000000000");
+      await payToken
+        .connect(dave)
+        .transfer(bob.address, "240000000000000000000");
+
       await openTrove({
         caller: alice,
         baseFeeLMAAmount: 1949741,

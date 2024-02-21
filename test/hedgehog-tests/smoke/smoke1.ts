@@ -582,10 +582,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
             ethers.parseEther("1")
           )
       ).not.to.be.reverted;
-
       const balanceCollAfter = await payToken.balanceOf(bob.address);
-      console.log("A: ", balanceCollAfter - balanceCollBefore);
-      console.log("B: ", BobCollBalanceAfterRedemption);
+
       compareWithFault(
         balanceCollAfter - balanceCollBefore,
         BobCollBalanceAfterRedemption

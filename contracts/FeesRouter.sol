@@ -11,6 +11,7 @@ error InvalidAddress();
 error InvalidLength();
 error InvalidInput();
 error TooManyConfigValues();
+error CallerIsNotHDGProtocol();
 
 /**
  * @notice Completely new contract in Hedgehog Protocol, that was never a part of Liquity Protocol
@@ -36,8 +37,10 @@ contract FeesRouter is AccessControl {
     mapping(uint256 => FeeConfig) public collFeeConfigs;
 
     uint256 public feeCount;
-    IBaseFeeLMAToken baseFeeLMAToken;
-    IActivePool activePool;
+    IBaseFeeLMAToken public baseFeeLMAToken;
+    IActivePool public activePool;
+    address public borrowersOp;
+    address public troveManager;
 
     event DebtFeeConfigUpdated(
         address indexed setter,
@@ -61,6 +64,15 @@ contract FeesRouter is AccessControl {
         address addressC
     );
 
+    modifier onlyHDGProtocol() {
+        if (msg.sender != borrowersOp) {
+            if (msg.sender != troveManager) {
+                revert CallerIsNotHDGProtocol();
+            }
+        }
+        _;
+    }
+
     constructor(address _defaultAdmin, address _ultimateAdmin) {
         if (address(_defaultAdmin) == address(0)) revert InvalidAddress();
         if (address(_ultimateAdmin) == address(0)) revert InvalidAddress();
@@ -73,13 +85,17 @@ contract FeesRouter is AccessControl {
 
     function setAddresses(
         IActivePool _activePool,
-        IBaseFeeLMAToken _baseFeeLMAToken
+        IBaseFeeLMAToken _baseFeeLMAToken,
+        address _borrowersOp,
+        address _troveManager
     ) external onlyRole(DEPLOYER) {
         if (address(_activePool) == address(0)) revert InvalidAddress();
         if (address(_baseFeeLMAToken) == address(0)) revert InvalidAddress();
 
         activePool = _activePool;
         baseFeeLMAToken = _baseFeeLMAToken;
+        borrowersOp = _borrowersOp;
+        troveManager = _troveManager;
 
         _revokeRole(DEPLOYER, msg.sender);
     }
@@ -244,7 +260,10 @@ contract FeesRouter is AccessControl {
      * @param _debt amount of BFE tokens that user receives in the event of succesful borrowing op
      * @param _fee amount of fee that user is getting cut with in the event of succseful borrowing op
      */
-    function distributeDebtFee(uint256 _debt, uint256 _fee) external {
+    function distributeDebtFee(
+        uint256 _debt,
+        uint256 _fee
+    ) external onlyHDGProtocol {
         FeeConfig memory config = debtFeeConfigs[
             (((_fee * 100) / _debt) % 5) * 5
         ];
@@ -275,7 +294,10 @@ contract FeesRouter is AccessControl {
      * @param _debt amount of BFE tokens that user receives in the event of succesful borrowing op
      * @param _fee amount of fee that user is getting cut with in the event of succseful borrowing op
      */
-    function distributeCollFee(uint256 _debt, uint256 _fee) external {
+    function distributeCollFee(
+        uint256 _debt,
+        uint256 _fee
+    ) external onlyHDGProtocol {
         FeeConfig memory config = collFeeConfigs[
             (((_fee * 100) / _debt) % 5) * 5
         ];

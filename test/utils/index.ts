@@ -18,12 +18,16 @@ export const setupContracts = async () => {
     "0x1F32b1c2345538c0c6f582fCB022739c4A194Ebb"
   );
 
-  console.log(
-    "balance at deply: ",
-    await payToken.balanceOf(bob.address),
-    bob.address
-  );
+  // console.log(
+  //   "balance at deply: ",
+  //   await payToken.balanceOf(bob.address),
+  //   bob.address
+  // );
 
+  // DEPLOYMENT OF TEST TOKEN IN CASE OF TESTS ON A LOCAL NETWORK
+  // const payToken = await (
+  //   await ethers.getContractFactory("ERC20Mock")
+  // ).deploy("name", "symbol", deployer.address, ethers.parseEther("1000000000"));
   // await payToken.transfer(hacker.address, ethers.parseEther("10000"));
   // await payToken.transfer(alice.address, ethers.parseEther("10000"));
   // await payToken.transfer(bob.address, ethers.parseEther("10000"));
@@ -280,7 +284,9 @@ export const setupContracts = async () => {
     .connect(deployer)
     .setAddresses(
       await activePool.getAddress(),
-      await baseFeeLMAToken.getAddress()
+      await baseFeeLMAToken.getAddress(),
+      await borrowerOperations.getAddress(),
+      await troveManager.getAddress()
     );
 
   return [
@@ -316,7 +322,8 @@ export const getSigners = async ({ fork }: { fork?: boolean } = {}) => {
     hacker: SignerWithAddress,
     alice: SignerWithAddress,
     bob: SignerWithAddress,
-    carol: SignerWithAddress;
+    carol: SignerWithAddress,
+    dave: SignerWithAddress;
   if (fork) {
     const deployerAddress = "0x63f6D9E7d3953106bCaf98832BD9C88A54AfCc9D";
     const setterAddress = "0x63f6D9E7d3953106bCaf98832BD9C88A54AfCc9D";
@@ -324,6 +331,7 @@ export const getSigners = async ({ fork }: { fork?: boolean } = {}) => {
     const aliceAddress = "0xdD06d01966688B4efBe18d789e8E1DDBa7Bc31F8";
     const bobAddress = "0x5a60d345FB510A6Cc230Febc83C7Ff7016eCa0bf";
     const carolAddress = "0x6C413690c19CFC80c3db3211c80993BF642C6456";
+    const daveAddress = "0xbb0b4642492b275F154e415fc52Dacc931103fD9";
 
     const [ethGiver] = await ethers.getSigners();
 
@@ -341,33 +349,40 @@ export const getSigners = async ({ fork }: { fork?: boolean } = {}) => {
 
     await impersonateAccount(carolAddress);
     carol = await ethers.getImpersonatedSigner(carolAddress);
+    await impersonateAccount(daveAddress);
+    dave = await ethers.getImpersonatedSigner(daveAddress);
 
     await ethGiver.sendTransaction({
       to: deployer.address,
-      value: parseEther("5"),
+      value: parseEther("25"),
     });
     await ethGiver.sendTransaction({
       to: setter.address,
-      value: parseEther("5"),
+      value: parseEther("25"),
     });
     await ethGiver.sendTransaction({
       to: hacker.address,
-      value: parseEther("5"),
+      value: parseEther("25"),
     });
     await ethGiver.sendTransaction({
       to: alice.address,
-      value: parseEther("5"),
+      value: parseEther("25"),
     });
     await ethGiver.sendTransaction({
       to: bob.address,
-      value: parseEther("5"),
+      value: parseEther("25"),
     });
     await ethGiver.sendTransaction({
       to: carol.address,
-      value: parseEther("5"),
+      value: parseEther("25"),
+    });
+    await ethGiver.sendTransaction({
+      to: dave.address,
+      value: parseEther("25"),
     });
   } else {
-    [deployer, setter, hacker, alice, bob, carol] = await ethers.getSigners();
+    [deployer, setter, hacker, alice, bob, carol, dave] =
+      await ethers.getSigners();
   }
-  return [deployer, setter, hacker, alice, bob, carol] as const;
+  return [deployer, setter, hacker, alice, bob, carol, dave] as const;
 };
