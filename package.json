@@ -19,5 +19,8 @@
   ],
   "volta": {
     "node": "20.11.1"
+  },
+  "scripts": {
+    "hardhat": "hardhat"
   }
 }
