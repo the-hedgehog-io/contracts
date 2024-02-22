@@ -9,7 +9,7 @@ import { parseEther } from "ethers";
 const { latestBlock } = time;
 
 export const setupContracts = async () => {
-  const [deployer, setter, hacker, alice, bob, carol] = await getSigners({
+  const [deployer, setter] = await getSigners({
     fork: true,
   });
 
@@ -17,12 +17,6 @@ export const setupContracts = async () => {
     "ERC20Mock",
     "0x1F32b1c2345538c0c6f582fCB022739c4A194Ebb"
   );
-
-  // console.log(
-  //   "balance at deply: ",
-  //   await payToken.balanceOf(bob.address),
-  //   bob.address
-  // );
 
   // DEPLOYMENT OF TEST TOKEN IN CASE OF TESTS ON A LOCAL NETWORK
   // const payToken = await (
@@ -164,12 +158,12 @@ export const setupContracts = async () => {
       .connect(deployer)
       .setFeeConfigs(
         i,
-        100,
-        0,
-        0,
+        34,
+        33,
+        33,
         setter.address,
-        ethers.ZeroAddress,
-        ethers.ZeroAddress
+        setter.address,
+        setter.address
       );
   }
 
@@ -307,6 +301,7 @@ export const setupContracts = async () => {
     payToken,
     mainOracle,
     secondaryOracle,
+    feesRouter,
   ] as const;
 };
 

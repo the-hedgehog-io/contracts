@@ -47,10 +47,10 @@ describe("BaseFeeOracle Tests", () => {
       return { answer, block, round };
     };
 
-    it("Should let admin feed new base fee value", async () => {
+    it("should let admin feed new base fee value", async () => {
       expect(await feed()).not.to.be.reverted;
     });
-    it("Should retrieve correct round", async () => {
+    it("should retrieve correct round", async () => {
       const blockNumber = (await latestBlock()) + 5;
       expect(await feed({ customBlock: blockNumber })).not.to.be.reverted;
 
@@ -63,13 +63,13 @@ describe("BaseFeeOracle Tests", () => {
         "Round number is incorrect"
       ).to.be.equal(116416460); // 3 for local network
     });
-    it("Should set answer correctly", async () => {
+    it("should set answer correctly", async () => {
       expect(
         (await latestRound()).answer,
         "Answer number is incorrect"
       ).to.be.equal(etheredValue(2));
     });
-    it("Should not let non-admin feed new base fee value", async () => {
+    it("should not let non-admin feed new base fee value", async () => {
       await expect(feed({ caller: hacker })).to.be.revertedWith(
         `AccessControl: account ${hacker.address.toLowerCase()} is missing role ${ethers.solidityPackedKeccak256(
           ["string"],
@@ -77,7 +77,7 @@ describe("BaseFeeOracle Tests", () => {
         )}`
       );
     });
-    it("Should not let ultimate admin feed new base fee value", async () => {
+    it("should not let ultimate admin feed new base fee value", async () => {
       await expect(feed({ caller: deployer })).to.be.revertedWith(
         `AccessControl: account ${deployer.address.toLowerCase()} is missing role ${ethers.solidityPackedKeccak256(
           ["string"],
@@ -85,7 +85,7 @@ describe("BaseFeeOracle Tests", () => {
         )}`
       );
     });
-    it("Should set new fed value into a new round", async () => {
+    it("should set new fed value into a new round", async () => {
       const customValue = 228;
       expect((await latestRound()).answer).not.to.be.equal(
         etheredValue(customValue)
@@ -99,10 +99,10 @@ describe("BaseFeeOracle Tests", () => {
       );
     });
 
-    it("Should return latest round data on latestRoundData call", async () => {
+    it("should return latest round data on latestRoundData call", async () => {
       expect(await oracle.latestRound()).to.be.equal(currentRoundAndValue - 1);
     });
-    it("Should set correct latest round upon each feed", async () => {
+    it("should set correct latest round upon each feed", async () => {
       const currentRound = currentRoundAndValue;
 
       expect(await oracle.latestRound()).to.be.equal(currentRound - 1);

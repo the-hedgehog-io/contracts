@@ -57,28 +57,6 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
     event HOGSupplyCapUpdated(uint256 _newCap);
     event ISSUANCE_FACTORUpdated(uint256 _newFactor);
 
-    /*
-     * HEDGEHOG UPDATES: HOGSupplyCap is not a constant variable anymore.
-     * May now be updated by a DISTRIBUTION_SETTER
-     * */
-    function setHOGSupplyCap(
-        uint _newCap
-    ) external onlyRole(DISTRIBUTION_SETTER) {
-        HOGSupplyCap = _newCap;
-        emit HOGSupplyCapUpdated(_newCap);
-    }
-
-    /*
-     * HEDGEHOG UPDATES: ISSUANCE_FACTOR is not a constant variable anymore.
-     * May now be updated by a DISTRIBUTION_SETTER
-     * */
-    function setISSUANCE_FACTOR(
-        uint _newIssFactor
-    ) external onlyRole(DISTRIBUTION_SETTER) {
-        ISSUANCE_FACTOR = _newIssFactor;
-        emit ISSUANCE_FACTORUpdated(_newIssFactor);
-    }
-
     IHOGToken public hogToken;
 
     address public stabilityPoolAddress;
@@ -167,6 +145,29 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
         _requireCallerIsStabilityPool();
 
         hogToken.transfer(_account, _HOGamount);
+    }
+
+    // --- 'admin' function ---
+    /*
+     * HEDGEHOG UPDATES: HOGSupplyCap is not a constant variable anymore.
+     * May now be updated by a DISTRIBUTION_SETTER
+     * */
+    function setHOGSupplyCap(
+        uint _newCap
+    ) external onlyRole(DISTRIBUTION_SETTER) {
+        HOGSupplyCap = _newCap;
+        emit HOGSupplyCapUpdated(_newCap);
+    }
+
+    /*
+     * HEDGEHOG UPDATES: ISSUANCE_FACTOR is not a constant variable anymore.
+     * May now be updated by a DISTRIBUTION_SETTER
+     * */
+    function setISSUANCE_FACTOR(
+        uint _newIssFactor
+    ) external onlyRole(DISTRIBUTION_SETTER) {
+        ISSUANCE_FACTOR = _newIssFactor;
+        emit ISSUANCE_FACTORUpdated(_newIssFactor);
     }
 
     // --- 'require' functions ---

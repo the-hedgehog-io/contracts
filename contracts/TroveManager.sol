@@ -13,7 +13,6 @@ import "./dependencies/HedgehogBase.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
-import "hardhat/console.sol";
 
 /**
  * @notice Fork of Liquity's TroveManager. Most of the Logic remains unchanged.

@@ -120,10 +120,15 @@ contract FeesRouter is AccessControl {
         address _addressB,
         address _addressC
     ) external onlyRole(SETTER) {
-        if (_percentage % 5 != 0) revert InvalidIndex();
-        if (_addressA == address(0)) revert InvalidAddress(); // At least A address should be initiated
-        if (_amountA == 0) revert InvalidInput(); // At least A amount should be initiated
-
+        _checkConfigCorrectness(
+            _percentage,
+            _amountA,
+            _amountB,
+            _amountC,
+            _addressA,
+            _addressB,
+            _addressC
+        );
         debtFeeConfigs[_percentage] = FeeConfig(
             _amountA,
             _amountB,
@@ -185,10 +190,15 @@ contract FeesRouter is AccessControl {
         address _addressB,
         address _addressC
     ) external onlyRole(SETTER) {
-        if (_percentage % 5 != 0) revert InvalidIndex();
-        if (_addressA == address(0)) revert InvalidAddress(); // At least A address should be initiated
-        if (_amountA == 0) revert InvalidInput(); // At least A amount should be initiated
-
+        _checkConfigCorrectness(
+            _percentage,
+            _amountA,
+            _amountB,
+            _amountC,
+            _addressA,
+            _addressB,
+            _addressC
+        );
         debtFeeConfigs[_percentage] = FeeConfig(
             _amountA,
             _amountB,
@@ -230,9 +240,15 @@ contract FeesRouter is AccessControl {
         address _addressB,
         address _addressC
     ) external onlyRole(SETTER) {
-        if (_percentage % 5 != 0) revert InvalidIndex();
-        if (_addressA == address(0)) revert InvalidAddress(); // At least A address should be initiated
-        if (_amountA == 0) revert InvalidInput(); // At least A amount should be initiated
+        _checkConfigCorrectness(
+            _percentage,
+            _amountA,
+            _amountB,
+            _amountC,
+            _addressA,
+            _addressB,
+            _addressC
+        );
 
         collFeeConfigs[_percentage] = FeeConfig(
             _amountA,
@@ -272,20 +288,27 @@ contract FeesRouter is AccessControl {
         uint256 amountC = _calculateAmount(_fee, config.amountC);
 
         uint256 totalAmounts = amountA + amountB + amountC;
-        if (totalAmounts > _fee) {
+        if (totalAmounts < _fee) {
             // Usually, that means that DAO treasure gets the extra dust
+            amountA = amountA + _fee - totalAmounts;
+        } else if (totalAmounts > _fee) {
             amountA = amountA + totalAmounts - _fee;
         }
 
         IBaseFeeLMAToken _baseFeeLMAToken = baseFeeLMAToken;
-        if (amountA > 0 && config.addressA != address(0)) {
-            _baseFeeLMAToken.mint(config.addressA, amountA);
-        }
-        if (amountB > 0 && config.addressB != address(0)) {
-            _baseFeeLMAToken.mint(config.addressB, amountB);
-        }
-        if (amountC > 0 && config.addressC != address(0)) {
-            _baseFeeLMAToken.mint(config.addressB, amountC);
+        if ((amountA + amountB + amountC) != _fee) {
+            // A precaution in case of any kind of miscalculations
+            _baseFeeLMAToken.mint(config.addressA, _fee);
+        } else {
+            if (amountA > 0 && config.addressA != address(0)) {
+                _baseFeeLMAToken.mint(config.addressA, amountA);
+            }
+            if (amountB > 0 && config.addressB != address(0)) {
+                _baseFeeLMAToken.mint(config.addressB, amountB);
+            }
+            if (amountC > 0 && config.addressC != address(0)) {
+                _baseFeeLMAToken.mint(config.addressC, amountC);
+            }
         }
     }
 
@@ -306,21 +329,27 @@ contract FeesRouter is AccessControl {
         uint256 amountC = _calculateAmount(_fee, config.amountC);
 
         uint256 totalAmounts = amountA + amountB + amountC;
-        if (totalAmounts > _fee) {
+        if (totalAmounts < _fee) {
             // Usually, that means that DAO treasure gets the extra dust
+            amountA = amountA + _fee - totalAmounts;
+        } else if (totalAmounts > _fee) {
             amountA = amountA + totalAmounts - _fee;
         }
 
         IActivePool _activePool = activePool;
-
-        if (amountA > 0 && config.addressA != address(0)) {
-            _activePool.sendWStETH(config.addressA, amountA);
-        }
-        if (amountB > 0 && config.addressB != address(0)) {
-            _activePool.sendWStETH(config.addressB, amountB);
-        }
-        if (amountC > 0 && config.addressC != address(0)) {
-            _activePool.sendWStETH(config.addressC, amountC);
+        if ((amountA + amountB + amountC) != _fee) {
+            // A precaution in case of any kind of miscalculations
+            _activePool.sendWStETH(config.addressA, _fee);
+        } else {
+            if (amountA > 0 && config.addressA != address(0)) {
+                _activePool.sendWStETH(config.addressA, amountA);
+            }
+            if (amountB > 0 && config.addressB != address(0)) {
+                _activePool.sendWStETH(config.addressB, amountB);
+            }
+            if (amountC > 0 && config.addressC != address(0)) {
+                _activePool.sendWStETH(config.addressC, amountC);
+            }
         }
     }
 
@@ -329,5 +358,22 @@ contract FeesRouter is AccessControl {
         uint256 _percentage
     ) internal pure returns (uint256) {
         return ((_fee * _percentage) / 100);
+    }
+
+    function _checkConfigCorrectness(
+        uint256 _percentage,
+        uint256 _amountA,
+        uint256 _amountB,
+        uint256 _amountC,
+        address _addressA,
+        address _addressB,
+        address _addressC
+    ) internal pure {
+        if (_percentage % 5 != 0) revert InvalidIndex();
+        if (_addressA == address(0)) revert InvalidAddress(); // At least A address should be initiated
+        if (_amountA == 0) revert InvalidInput(); // At least A amount should be initiated
+        if (_amountB > 0 && _addressB == address(0)) revert InvalidInput();
+        if (_amountC > 0 && _addressC == address(0)) revert InvalidInput();
+        if (_amountA + _amountB + _amountC != 100) revert InvalidInput();
     }
 }
