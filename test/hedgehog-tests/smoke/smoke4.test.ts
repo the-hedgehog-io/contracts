@@ -7,7 +7,6 @@ import {
   CommunityIssuance,
   ERC20Mock,
   HOGToken,
-  LockupContractFactory,
   TestPriceFeed,
 } from "../../../typechain-types";
 import {
@@ -63,7 +62,6 @@ describe("BaseFeeOracle Tests", () => {
     let baseFeeLMAToken: BaseFeeLMAToken;
     let communityIssuance: CommunityIssuance;
 
-    let lockupContractFactory: LockupContractFactory;
     let hogToken: HOGToken;
     let payToken: ERC20Mock;
     let mainOracle: BaseFeeOracle, secondaryOracle: BaseFeeOracle;
@@ -133,7 +131,6 @@ describe("BaseFeeOracle Tests", () => {
         hintHelpers,
         baseFeeLMAToken,
         communityIssuance,
-        lockupContractFactory,
         hogToken,
         payToken,
         mainOracle,

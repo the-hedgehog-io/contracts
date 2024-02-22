@@ -9,9 +9,6 @@ interface IHOGToken is IERC20, IERC2612 {
     // --- Events ---
 
     event CommunityIssuanceAddressSet(address _communityIssuanceAddress);
-    event LockupContractFactoryAddressSet(
-        address _lockupContractFactoryAddress
-    );
 
     // --- Functions ---
 

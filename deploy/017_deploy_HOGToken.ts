@@ -8,7 +8,6 @@ const deploy: DeployFunction = async ({
   const { deployer } = await getNamedAccounts();
   const CommunityIssuance = await get("CommunityIssuance");
   const HogStaking = await get("HOGStaking");
-  const LockupContractFactory = await get("LockupContractFactory");
 
   const { bountyAddress, lpRewardsAddress, multisigAddress } = deployConfig;
 
@@ -18,7 +17,6 @@ const deploy: DeployFunction = async ({
     args: [
       CommunityIssuance.address,
       HogStaking.address,
-      LockupContractFactory.address,
       bountyAddress,
       lpRewardsAddress,
       multisigAddress,

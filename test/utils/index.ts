@@ -141,12 +141,6 @@ export const setupContracts = async () => {
       .deploy()
   ).waitForDeployment();
 
-  const lockupContractFactory = await (
-    await (await ethers.getContractFactory("LockupContractFactory"))
-      .connect(deployer)
-      .deploy()
-  ).waitForDeployment();
-
   const hogToken = await (
     await (await ethers.getContractFactory("HOGToken"))
       .connect(deployer)
@@ -264,10 +258,6 @@ export const setupContracts = async () => {
       await troveManager.getAddress()
     );
 
-  await lockupContractFactory
-    .connect(deployer)
-    .setHOGTokenAddress(await hogToken.getAddress());
-
   await communityIssuance
     .connect(deployer)
     .setAddresses(
@@ -296,7 +286,6 @@ export const setupContracts = async () => {
     hintHelpers,
     baseFeeLMAToken,
     communityIssuance,
-    lockupContractFactory,
     hogToken,
     payToken,
     mainOracle,

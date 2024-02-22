@@ -4,7 +4,6 @@ pragma solidity 0.8.19;
 
 import "../dependencies/CheckContract.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "../interfaces/ILockupContractFactory.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../dependencies/IERC2612.sol";
@@ -36,7 +35,7 @@ import "../dependencies/IERC2612.sol";
  *
  * 3) Supply hard-capped at 100 million
  *
- * 4) CommunityIssuance and LockupContractFactory addresses are set at deployment
+ * 4) CommunityIssuance and LockupContractFactory addresses are set at deployment. HEDGHEHOG CHANGES: lockup contract factry is removed
  *
  * 5) Initial CommunityIssuance HOG token alloc is set at 1 million tokens
  *
@@ -94,9 +93,6 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
     // --- Events ---
 
     event CommunityIssuanceAddressSet(address _communityIssuanceAddress);
-    event LockupContractFactoryAddressSet(
-        address _lockupContractFactoryAddress
-    );
 
     // --- Functions ---
 

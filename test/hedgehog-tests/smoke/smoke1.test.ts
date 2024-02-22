@@ -7,7 +7,6 @@ import {
   CommunityIssuance,
   ERC20Mock,
   HOGToken,
-  LockupContractFactory,
   TestPriceFeed,
 } from "../../../typechain-types";
 import {
@@ -61,7 +60,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     let hintHelpers: HintHelpers;
     let baseFeeLMAToken: BaseFeeLMAToken;
     let communityIssuance: CommunityIssuance;
-    let lockupContractFactory: LockupContractFactory;
     let hogToken: HOGToken;
     let payToken: ERC20Mock;
     let mainOracle: BaseFeeOracle, secondaryOracle: BaseFeeOracle;
@@ -159,7 +157,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         hintHelpers,
         baseFeeLMAToken,
         communityIssuance,
-        lockupContractFactory,
         hogToken,
         payToken,
         mainOracle,

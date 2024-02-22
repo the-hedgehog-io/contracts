@@ -10,25 +10,12 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const HOGToken = await deployments.get("HOGToken");
   const HOGStaking = await deployments.get("HOGStaking");
   const CommunityIssuance = await deployments.get("CommunityIssuance");
-  const LockupContractFactory = await deployments.get("LockupContractFactory");
   const BaseFeeLMAToken = await deployments.get("BaseFeeLMAToken");
   const TroveManager = await deployments.get("TroveManager");
   const BorrowerOperations = await deployments.get("BorrowerOperations");
   const ActivePool = await deployments.get("ActivePool");
   const FeesRouter = await deployments.get("FeesRouter");
   const { wwstETH: WStETHAddress } = deployConfig;
-
-  if (!(await isOwnershipRenounced(LockupContractFactory.address))) {
-    console.log("Setting up LockupContractFactory...");
-
-    await executeWithLog(
-      "LockupContractFactory",
-      { from: deployer },
-      "setHOGTokenAddress",
-      HOGToken.address
-    );
-  }
-  console.log("LockupContractFactory is set");
 
   if (!(await isOwnershipRenounced(HOGStaking.address))) {
     console.log("Setting up HOGStaking...");
@@ -106,7 +93,6 @@ deploy.dependencies = [
   "StabilityPool",
   "HOGToken",
   "CommunityIssuance",
-  "LockupContractFactory",
   "FeesRouter",
 ];
 

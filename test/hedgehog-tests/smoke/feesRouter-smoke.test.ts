@@ -12,7 +12,6 @@ import {
   HintHelpers,
   BaseFeeLMAToken,
   CommunityIssuance,
-  LockupContractFactory,
   HOGToken,
   ERC20Mock,
   FeesRouter,
@@ -61,7 +60,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     let hintHelpers: HintHelpers;
     let baseFeeLMAToken: BaseFeeLMAToken;
     let communityIssuance: CommunityIssuance;
-    let lockupContractFactory: LockupContractFactory;
     let hogToken: HOGToken;
     let payToken: ERC20Mock;
     let mainOracle: BaseFeeOracle, secondaryOracle: BaseFeeOracle;
@@ -125,7 +123,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         hintHelpers,
         baseFeeLMAToken,
         communityIssuance,
-        lockupContractFactory,
         hogToken,
         payToken,
         mainOracle,
