@@ -9,7 +9,7 @@ dotenv.config();
 
 const packageJson = require("./package.json");
 
-const accountsNew =
+const newAccounts =
   process.env.PK_DEPLOYER !== undefined
     ? [process.env.PK_DEPLOYER as string]
     : [];
@@ -79,13 +79,13 @@ const config: HardhatUserConfig = {
   },
   networks: {
     optimismSepolia: {
-      accounts: [process.env.PK_DEPLOYER || ""],
+      accounts: newAccounts,
       url: "https://rpc.ankr.com/optimism_sepolia",
       gasPrice: 10000000,
       chainId: 11155420,
     },
     optimism: {
-      accounts: [process.env.PK_DEPLOYER || ""],
+      accounts: newAccounts,
       url: "https://mainnet.optimism.io",
       chainId: 10,
     },
