@@ -152,7 +152,7 @@ contract("StabilityPool Scale Factor issue tests", async (accounts) => {
 
       // Price drop -> liquidate Trove C -> price rises
       await priceFeed.setPrice(dec(100, 18));
-      // HEDGEHOG CHANGES: fixing the test so it wouldn't revert. See the last commented like that this liquidation should fail
+      // HEDGEHOG UPDATES: fixing the test so it wouldn't revert. See the last commented like that this liquidation should fail
       await th.assertAssert(
         troveManager.liquidate(C, { from: owner }),
         "VM Exception while processing transaction: reverted with panic code 0x1 (Assertion error)"

@@ -295,7 +295,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             vars.netDebt
         );
 
-        // Hedgehog changes: Not increasing net debt anymore. only transferring the gas comp tokens
+        // HEDGEHOG UPDATES: Not increasing net debt anymore. only transferring the gas comp tokens
         // Move the BaseFeeLMA gas compensation to the Gas Pool
         _withdrawBaseFeeLMA(
             contractsCache.activePool,

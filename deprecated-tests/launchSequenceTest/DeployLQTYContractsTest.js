@@ -169,7 +169,7 @@ contract(
           // Check it gives the expected error message for a failed Solidity 'assert'
         } catch (err) {
           console.log(err.message);
-          // HEDGEHOG CHANGES: Updated error name as >0.8 pragma does not return "invalid opcode" anymore
+          // HEDGEHOG UPDATES: Updated error name as >0.8 pragma does not return "invalid opcode" anymore
           assert.include(err.message, "CI: Ballance is not enough");
         }
       });

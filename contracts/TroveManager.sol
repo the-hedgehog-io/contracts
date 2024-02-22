@@ -1509,7 +1509,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     }
 
     /**
-     * Hedgehog changes:
+     * HEDGEHOG UPDATES:
      * Get Price directly from the price feed instead of param passing
      */
     // Return the current collateral ratio (ICR) of a given Trove. Takes a trove's pending coll and debt rewards from redistributions into account.

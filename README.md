@@ -15,7 +15,7 @@ However, there are some breaking changes implemented by Hedgehog Protocol's team
 - Completely new contract Fees Router is added that distributes dynamic fees
 - Some constants values are updated / made dynamic
 
-NOTE: All incode logic changes to the contracts are marked with HEDGEHOG CHANGES words.
+NOTE: All incode logic changes to the contracts are marked with HEDGEHOG UPDATES words.
 
 ## Verifying integrity of the Liquity Fork with raised pragma and updated variable names
 
