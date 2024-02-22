@@ -1,19 +1,17 @@
 type DeploymentConfig = {
-  uniswapV2Factory: string;
-  wwstETH: string;
-  bountyAddress: string;
-  lpRewardsAddress: string;
+  wstETH: string;
   multisigAddress: string;
   mainOracle: string;
   backupOracle: string;
+  gasComp: string;
+  minNetDebt: string;
 };
 
 export const deployConfig: DeploymentConfig = {
-  uniswapV2Factory: "0x8328e5dca628E50ccb25364B2694d9E29809CAd9", // 0x8328e5dca628E50ccb25364B2694d9E29809CAd9 mumbai
-  wwstETH: "0x6C5f00F929F7fD51B4994401CB6222d7e30BbcB0",
-  bountyAddress: "0x796EcfBe7a2A424f9D905dfC38b8994aB2db9FD6",
-  lpRewardsAddress: "0x796EcfBe7a2A424f9D905dfC38b8994aB2db9FD6",
-  multisigAddress: "0x796EcfBe7a2A424f9D905dfC38b8994aB2db9FD6",
-  mainOracle: "0xb228c9C6c2243D11eD05b49Ad086bEbb09eF2DcA",
-  backupOracle: "0xb228c9C6c2243D11eD05b49Ad086bEbb09eF2DcA",
+  wstETH: "0xb64A7db2a81d2B579d61528Bc4d5F662014B3020",
+  multisigAddress: "0x3BFc9CA7FA5D94461Dc96225D88CBb300B108d9E",
+  mainOracle: "0x05e9E631a506c1329B45A91BCAc7D5C0Ba76AB05",
+  backupOracle: "0xD7be32A18f2d5F281708228FE01b34d8039Ef35E",
+  gasComp: "100000",
+  minNetDebt: "100000",
 };

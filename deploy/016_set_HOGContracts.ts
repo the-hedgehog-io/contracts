@@ -1,6 +1,5 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { createExecuteWithLog, isOwnershipRenounced } from "../deploy-helpers";
-import { deployConfig } from "../deploy-helpers/deployConfig";
 import { ethers } from "hardhat";
 
 const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
@@ -8,32 +7,12 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const executeWithLog = createExecuteWithLog(deployments.execute);
   const StabilityPool = await deployments.get("StabilityPool");
   const HOGToken = await deployments.get("HOGToken");
-  const HOGStaking = await deployments.get("HOGStaking");
   const CommunityIssuance = await deployments.get("CommunityIssuance");
   const BaseFeeLMAToken = await deployments.get("BaseFeeLMAToken");
-  const TroveManager = await deployments.get("TroveManager");
-  const BorrowerOperations = await deployments.get("BorrowerOperations");
   const ActivePool = await deployments.get("ActivePool");
   const FeesRouter = await deployments.get("FeesRouter");
-  const { wwstETH: WStETHAddress } = deployConfig;
-
-  if (!(await isOwnershipRenounced(HOGStaking.address))) {
-    console.log("Setting up HOGStaking...");
-
-    await executeWithLog(
-      "HOGStaking",
-      { from: deployer },
-      "setAddresses",
-      HOGToken.address,
-      BaseFeeLMAToken.address,
-      TroveManager.address,
-      BorrowerOperations.address,
-      ActivePool.address,
-      WStETHAddress,
-      FeesRouter.address
-    );
-  }
-  console.log("HOGStaking is set");
+  const BorrowersOp = await deployments.get("BorrowerOperations");
+  const TroveManager = await deployments.get("TroveManager");
 
   if (!(await isOwnershipRenounced(CommunityIssuance.address))) {
     console.log("Setting up CommunityIssuance...");
@@ -62,7 +41,8 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       "setAddresses",
       ActivePool.address,
       BaseFeeLMAToken.address,
-      HOGStaking.address
+      BorrowersOp.address,
+      TroveManager.address
     );
   }
 
@@ -75,7 +55,7 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
           100,
           0,
           0,
-          HOGStaking.address,
+          deployer,
           ethers.ZeroAddress,
           ethers.ZeroAddress
         )

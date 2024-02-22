@@ -22,12 +22,10 @@ const deploy: DeployFunction = async ({
     throw Error("Incorrect config: Private key is not fed");
   }
 
-  const { mainOracle, backupOracle } = deployConfig;
-
   await deploy("BaseFeeOracle", {
     from: deployer,
     log: true,
-    args: [mainOracle, backupOracle],
+    args: [deployer, deployer],
   });
 };
 

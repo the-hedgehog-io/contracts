@@ -1,0 +1,41 @@
+{
+  "address": "0x335AB9a8eBE15789F1E21715652F1741cF63D6dC",
+  "abi": [],
+  "transactionHash": "0xd1679c949c5a4172a61c7675ada6857862dd1d023c9f4e9310ce76819c22ef41",
+  "receipt": {
+    "to": null,
+    "from": "0x3BFc9CA7FA5D94461Dc96225D88CBb300B108d9E",
+    "contractAddress": "0x335AB9a8eBE15789F1E21715652F1741cF63D6dC",
+    "transactionIndex": 1,
+    "gasUsed": "67060",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xf836921509d2cd1a7cc04c452863dbb51c51f6c861ce7b5176062b846d4988b1",
+    "transactionHash": "0xd1679c949c5a4172a61c7675ada6857862dd1d023c9f4e9310ce76819c22ef41",
+    "logs": [],
+    "blockNumber": 8409528,
+    "cumulativeGasUsed": "110947",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "26b7e46187074ecdc3b4eda7be7ea101",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"notice\":\"The purpose of this contract is to hold BaseFeeLMA tokens for gas compensation: https://github.com/liquity/dev#gas-compensation When a borrower opens a trove, an additional 50 BaseFeeLMA debt is issued, and 50 BaseFeeLMA is minted and sent to this contract. When a borrower closes their active trove, this gas compensation is refunded: 50 BaseFeeLMA is burned from the this contract's balance, and the corresponding 50 BaseFeeLMA debt on the trove is cancelled. See this issue for more context: https://github.com/liquity/dev/issues/186\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/GasPool.sol\":\"GasPool\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":100},\"remappings\":[]},\"sources\":{\"contracts/GasPool.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.19;\\n\\n/**\\n * The purpose of this contract is to hold BaseFeeLMA tokens for gas compensation:\\n * https://github.com/liquity/dev#gas-compensation\\n * When a borrower opens a trove, an additional 50 BaseFeeLMA debt is issued,\\n * and 50 BaseFeeLMA is minted and sent to this contract.\\n * When a borrower closes their active trove, this gas compensation is refunded:\\n * 50 BaseFeeLMA is burned from the this contract's balance, and the corresponding\\n * 50 BaseFeeLMA debt on the trove is cancelled.\\n * See this issue for more context: https://github.com/liquity/dev/issues/186\\n */\\ncontract GasPool {\\n    // do nothing, as the core contracts have permission to send to and burn from this address\\n}\\n\",\"keccak256\":\"0xbabc8db3848ab98ff966327fd07a67c13203d576339f1d5829a466da6feb7962\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea2646970667358221220caef71737300da56e1c138d3872447d1b5ddb2dec3c7cb7790995cfd2daf236664736f6c63430008130033",
+  "deployedBytecode": "0x6080604052600080fdfea2646970667358221220caef71737300da56e1c138d3872447d1b5ddb2dec3c7cb7790995cfd2daf236664736f6c63430008130033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "notice": "The purpose of this contract is to hold BaseFeeLMA tokens for gas compensation: https://github.com/liquity/dev#gas-compensation When a borrower opens a trove, an additional 50 BaseFeeLMA debt is issued, and 50 BaseFeeLMA is minted and sent to this contract. When a borrower closes their active trove, this gas compensation is refunded: 50 BaseFeeLMA is burned from the this contract's balance, and the corresponding 50 BaseFeeLMA debt on the trove is cancelled. See this issue for more context: https://github.com/liquity/dev/issues/186",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}

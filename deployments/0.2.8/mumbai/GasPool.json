@@ -1,0 +1,57 @@
+{
+  "address": "0x233193B8ffbcDB349B731f214dAdA881Fc9F7fED",
+  "abi": [],
+  "transactionHash": "0x0b6a34937237ab9c324ce22499309042c616716c6e3d7a1a09872b2a0eef5d2e",
+  "receipt": {
+    "to": null,
+    "from": "0x796EcfBe7a2A424f9D905dfC38b8994aB2db9FD6",
+    "contractAddress": "0x233193B8ffbcDB349B731f214dAdA881Fc9F7fED",
+    "transactionIndex": 6,
+    "gasUsed": "67060",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000800000000000000000000100000000004000000004000000000000000000000000000000000080000080000000000000000000000000000000000000000000000000000000000080000000000000000000200000000000000000000000000000000000000000000000000000000000004000000000000000000001000000000000000000000000000000100040000000000000000000000000000000000000000000000000000000000000000000100000",
+    "blockHash": "0x19bbb4f3f363cd08151cabfa34c004ed82194292a368a03fc371536c77c1c5c5",
+    "transactionHash": "0x0b6a34937237ab9c324ce22499309042c616716c6e3d7a1a09872b2a0eef5d2e",
+    "logs": [
+      {
+        "transactionIndex": 6,
+        "blockNumber": 46221998,
+        "transactionHash": "0x0b6a34937237ab9c324ce22499309042c616716c6e3d7a1a09872b2a0eef5d2e",
+        "address": "0x0000000000000000000000000000000000001010",
+        "topics": [
+          "0x4dfe1bbbcf077ddc3e01291eea2d5c70c2b422b415d95645b9adcfd678cb1d63",
+          "0x0000000000000000000000000000000000000000000000000000000000001010",
+          "0x000000000000000000000000796ecfbe7a2a424f9d905dfc38b8994ab2db9fd6",
+          "0x000000000000000000000000be188d6641e8b680743a4815dfa0f6208038960f"
+        ],
+        "data": "0x00000000000000000000000000000000000000000000000000005b7c6f37cc0000000000000000000000000000000000000000000000000009c76495dd698b690000000000000000000000000000000000000000000036714b35015153bf4c1f00000000000000000000000000000000000000000000000009c709196e31bf690000000000000000000000000000000000000000000036714b355ccdc2f7181f",
+        "logIndex": 40,
+        "blockHash": "0x19bbb4f3f363cd08151cabfa34c004ed82194292a368a03fc371536c77c1c5c5"
+      }
+    ],
+    "blockNumber": 46221998,
+    "cumulativeGasUsed": "2256193",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "26b7e46187074ecdc3b4eda7be7ea101",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"notice\":\"The purpose of this contract is to hold BaseFeeLMA tokens for gas compensation: https://github.com/liquity/dev#gas-compensation When a borrower opens a trove, an additional 50 BaseFeeLMA debt is issued, and 50 BaseFeeLMA is minted and sent to this contract. When a borrower closes their active trove, this gas compensation is refunded: 50 BaseFeeLMA is burned from the this contract's balance, and the corresponding 50 BaseFeeLMA debt on the trove is cancelled. See this issue for more context: https://github.com/liquity/dev/issues/186\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/GasPool.sol\":\"GasPool\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":100},\"remappings\":[]},\"sources\":{\"contracts/GasPool.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity 0.8.19;\\n\\n/**\\n * The purpose of this contract is to hold BaseFeeLMA tokens for gas compensation:\\n * https://github.com/liquity/dev#gas-compensation\\n * When a borrower opens a trove, an additional 50 BaseFeeLMA debt is issued,\\n * and 50 BaseFeeLMA is minted and sent to this contract.\\n * When a borrower closes their active trove, this gas compensation is refunded:\\n * 50 BaseFeeLMA is burned from the this contract's balance, and the corresponding\\n * 50 BaseFeeLMA debt on the trove is cancelled.\\n * See this issue for more context: https://github.com/liquity/dev/issues/186\\n */\\ncontract GasPool {\\n    // do nothing, as the core contracts have permission to send to and burn from this address\\n}\\n\",\"keccak256\":\"0xbabc8db3848ab98ff966327fd07a67c13203d576339f1d5829a466da6feb7962\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea2646970667358221220caef71737300da56e1c138d3872447d1b5ddb2dec3c7cb7790995cfd2daf236664736f6c63430008130033",
+  "deployedBytecode": "0x6080604052600080fdfea2646970667358221220caef71737300da56e1c138d3872447d1b5ddb2dec3c7cb7790995cfd2daf236664736f6c63430008130033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "notice": "The purpose of this contract is to hold BaseFeeLMA tokens for gas compensation: https://github.com/liquity/dev#gas-compensation When a borrower opens a trove, an additional 50 BaseFeeLMA debt is issued, and 50 BaseFeeLMA is minted and sent to this contract. When a borrower closes their active trove, this gas compensation is refunded: 50 BaseFeeLMA is burned from the this contract's balance, and the corresponding 50 BaseFeeLMA debt on the trove is cancelled. See this issue for more context: https://github.com/liquity/dev/issues/186",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}

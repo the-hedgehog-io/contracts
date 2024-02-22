@@ -78,10 +78,17 @@ const config: HardhatUserConfig = {
     ],
   },
   networks: {
-    // mumbai: {
-    //   accounts: [process.env.PK_DEPLOYER || ""],
-    //   url: "https://polygon-mumbai-bor.publicnode.com",
-    // },
+    optimismSepolia: {
+      accounts: [process.env.PK_DEPLOYER || ""],
+      url: "https://rpc.ankr.com/optimism_sepolia",
+      gasPrice: 10000000,
+      chainId: 11155420,
+    },
+    optimism: {
+      accounts: [process.env.PK_DEPLOYER || ""],
+      url: "https://mainnet.optimism.io",
+      chainId: 10,
+    },
     hardhat: {
       forking: {
         url: "https://rpc.ankr.com/optimism",

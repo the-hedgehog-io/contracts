@@ -16,11 +16,10 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const BaseFeeLMAToken = await deployments.get("BaseFeeLMAToken");
   const BorrowerOperations = await deployments.get("BorrowerOperations");
   const HOGToken = await deployments.get("HOGToken");
-  const HOGStaking = await deployments.get("HOGStaking");
   const CommunityIssuance = await deployments.get("CommunityIssuance");
   const HintHelpers = await deployments.get("HintHelpers");
   const FeesRouter = await deployments.get("FeesRouter");
-  const { wwstETH: WStETHAddress, mainOracle, backupOracle } = deployConfig;
+  const { wstETH: WStETHAddress, mainOracle, backupOracle } = deployConfig;
 
   if (!(await isOwnershipRenounced(SortedTroves.address))) {
     console.log("Setting up SortedTroves...");
@@ -54,23 +53,22 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       BaseFeeLMAToken.address,
       SortedTroves.address,
       HOGToken.address,
-      HOGStaking.address,
       FeesRouter.address
     );
   }
   console.log("TroveManager is set");
 
-  if (!(await isOwnershipRenounced(PriceFeed.address))) {
-    console.log("Setting up Price Feed...");
-    await executeWithLog(
-      "PriceFeed",
-      { from: deployer },
-      "setAddresses",
-      mainOracle,
-      backupOracle
-    );
-  }
-  console.log("PriceFeed is set");
+  // if (!(await isOwnershipRenounced(PriceFeed.address))) {
+  //   console.log("Setting up Price Feed...");
+  //   await executeWithLog(
+  //     "PriceFeed",
+  //     { from: deployer },
+  //     "setAddresses",
+  //     mainOracle,
+  //     backupOracle
+  //   );
+  // }
+  // console.log("PriceFeed is set");
 
   if (!(await isOwnershipRenounced(BorrowerOperations.address))) {
     console.log("Setting up BorrowerOperations...");
@@ -88,7 +86,6 @@ const deploy: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       PriceFeed.address,
       SortedTroves.address,
       BaseFeeLMAToken.address,
-      HOGStaking.address,
       WStETHAddress,
       FeesRouter.address
     );

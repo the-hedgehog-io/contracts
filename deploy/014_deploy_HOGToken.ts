@@ -7,20 +7,13 @@ const deploy: DeployFunction = async ({
 }) => {
   const { deployer } = await getNamedAccounts();
   const CommunityIssuance = await get("CommunityIssuance");
-  const HogStaking = await get("HOGStaking");
 
-  const { bountyAddress, lpRewardsAddress, multisigAddress } = deployConfig;
+  const { multisigAddress } = deployConfig;
 
   await deploy("HOGToken", {
     from: deployer,
     log: true,
-    args: [
-      CommunityIssuance.address,
-      HogStaking.address,
-      bountyAddress,
-      lpRewardsAddress,
-      multisigAddress,
-    ],
+    args: [CommunityIssuance.address, multisigAddress],
   });
 };
 

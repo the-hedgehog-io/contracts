@@ -1,6 +1,6 @@
 {
   "name": "@the-hedgehog-io/contracts",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "@openzeppelin/contracts": "^4.9.0",
@@ -16,5 +16,8 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "volta": {
+    "node": "20.11.1"
+  }
 }
