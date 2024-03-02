@@ -22,8 +22,9 @@ contract HintHelpers is HedgehogBase, Ownable, CheckContract {
 
     constructor(
         uint _gasComp,
-        uint _minNetDebt
-    ) HedgehogBase(_gasComp, _minNetDebt) {}
+        uint _minNetDebt,
+        uint _CCR
+    ) HedgehogBase(_gasComp, _minNetDebt, _CCR) {}
 
     // --- Dependency setters ---
 

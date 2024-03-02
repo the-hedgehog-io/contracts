@@ -86,6 +86,8 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
         /* HEDGEHOG UPDATES: Setting two variables that used to be constant in constructor now.
          * May now be updated by a DISTRIBUTION_SETTER and DISTRIBUTION_SETTER address is admined by DISTRIBUTION_SETTER_ADMIN
          * At deployment both admin roles set to the deployer. May be updated later
+         *
+         * At the deployment moment hog supply cap is set to 0
          */
         _grantRole(DISTRIBUTION_SETTER, msg.sender);
         _setRoleAdmin(DISTRIBUTION_SETTER, DISTRIBUTION_SETTER_ADMIN);
@@ -95,11 +97,7 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
         stabilityPoolAddress = _stabilityPoolAddress;
 
         ISSUANCE_FACTOR = 999998681227695000; // default issuance factor value;
-        HOGSupplyCap = 500 * 10e16; // default supply cap value
-
-        // When HOGToken deployed, it should have transferred CommunityIssuance's HOG entitlement
-        uint HOGBalance = hogToken.balanceOf(address(this));
-        require(HOGBalance >= HOGSupplyCap, "CI: Ballance is not enough");
+        HOGSupplyCap = 0; // default supply cap value
 
         emit HOGTokenAddressSet(_hogTokenAddress);
         emit StabilityPoolAddressSet(_stabilityPoolAddress);

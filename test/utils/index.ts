@@ -73,7 +73,7 @@ export const setupContracts = async () => {
   const troveManager = await (
     await (await ethers.getContractFactory("TroveManager"))
       .connect(deployer)
-      .deploy("50000", "50000")
+      .deploy("50000", "50000", "5000000000000000000", 0)
   ).waitForDeployment();
 
   const activePool = await (
@@ -85,7 +85,7 @@ export const setupContracts = async () => {
   const stabilityPool = await (
     await (await ethers.getContractFactory("StabilityPool"))
       .connect(deployer)
-      .deploy("50000", "50000")
+      .deploy("50000", "50000", "5000000000000000000")
   ).waitForDeployment();
 
   const defaultPool = await (
@@ -109,13 +109,13 @@ export const setupContracts = async () => {
   const borrowerOperations = await (
     await (await ethers.getContractFactory("BorrowerOperations"))
       .connect(deployer)
-      .deploy("50000", "50000")
+      .deploy("50000", "50000", "5000000000000000000")
   ).waitForDeployment();
 
   const hintHelpers = await (
     await (await ethers.getContractFactory("HintHelpers"))
       .connect(deployer)
-      .deploy("50000", "50000")
+      .deploy("50000", "50000", "5000000000000000000")
   ).waitForDeployment();
 
   const feesRouter = await (
@@ -144,7 +144,7 @@ export const setupContracts = async () => {
   const hogToken = await (
     await (await ethers.getContractFactory("HOGToken"))
       .connect(deployer)
-      .deploy(await communityIssuance.getAddress(), deployer.address)
+      .deploy(deployer.address)
   ).waitForDeployment();
 
   for (let i = 0; i < 100; i = i + 5) {
@@ -309,7 +309,7 @@ export const getSigners = async ({ fork }: { fork?: boolean } = {}) => {
     carol: SignerWithAddress,
     dave: SignerWithAddress;
   if (fork) {
-    const deployerAddress = "0x35218a1cbac5bbc3e57fd9bd38219d37571b3537";
+    const deployerAddress = "0xbb0b4642492b275f154e415fc52dacc931103fd9";
     const setterAddress = "0xd26d87bcd992d89954fb33ce316e1b9acab30ed5";
     const hackerAddress = "0xcef9cdd466d03a1cedf57e014d8f6bdc87872189";
     const aliceAddress = "0x12723917e1437a5a08f887f8765130db8814ecb3";
