@@ -91,10 +91,10 @@ const config: HardhatUserConfig = {
     },
     hardhat: {
       forking: {
-        url: "https://rpc.ankr.com/optimism",
-        blockNumber: 116416457,
+        url: "https://rpc.ankr.com/arbitrum",
+        blockNumber: 186391444,
       },
-      chainId: 10,
+      chainId: 42161,
     },
   },
 

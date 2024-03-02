@@ -1,19 +1,25 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { deployConfig } from "../deploy-helpers/deployConfig";
 
+// Protocol's Token is deployed before the rest of the protocol
+
 const deploy: DeployFunction = async ({
-  deployments: { deploy, get },
+  deployments: { deploy },
   getNamedAccounts,
+  getChainId,
 }) => {
+  if ((await getChainId()) != "1") {
+    // Hog token may only be deployed on the mainnet
+    return;
+  }
   const { deployer } = await getNamedAccounts();
-  const CommunityIssuance = await get("CommunityIssuance");
 
   const { multisigAddress } = deployConfig;
 
   await deploy("HOGToken", {
     from: deployer,
     log: true,
-    args: [CommunityIssuance.address, multisigAddress],
+    args: [multisigAddress],
   });
 };
 

@@ -15,7 +15,7 @@ export const setupContracts = async () => {
 
   const payToken = await ethers.getContractAt(
     "ERC20Mock",
-    "0x1F32b1c2345538c0c6f582fCB022739c4A194Ebb"
+    "0x5979D7b546E38E414F7E9822514be443A4800529" // WSTETH
   );
 
   // DEPLOYMENT OF TEST TOKEN IN CASE OF TESTS ON A LOCAL NETWORK
@@ -309,13 +309,13 @@ export const getSigners = async ({ fork }: { fork?: boolean } = {}) => {
     carol: SignerWithAddress,
     dave: SignerWithAddress;
   if (fork) {
-    const deployerAddress = "0x63f6D9E7d3953106bCaf98832BD9C88A54AfCc9D";
-    const setterAddress = "0x63f6D9E7d3953106bCaf98832BD9C88A54AfCc9D";
-    const hackerAddress = "0xe944646Bb5F26B0d058C736638F5387F882Bf30a";
-    const aliceAddress = "0xdD06d01966688B4efBe18d789e8E1DDBa7Bc31F8";
-    const bobAddress = "0x5a60d345FB510A6Cc230Febc83C7Ff7016eCa0bf";
-    const carolAddress = "0x6C413690c19CFC80c3db3211c80993BF642C6456";
-    const daveAddress = "0xbb0b4642492b275F154e415fc52Dacc931103fD9";
+    const deployerAddress = "0x35218a1cbac5bbc3e57fd9bd38219d37571b3537";
+    const setterAddress = "0xd26d87bcd992d89954fb33ce316e1b9acab30ed5";
+    const hackerAddress = "0xcef9cdd466d03a1cedf57e014d8f6bdc87872189";
+    const aliceAddress = "0x12723917e1437a5a08f887f8765130db8814ecb3";
+    const bobAddress = "0x9be9cd9c9b2dc0a7b47478e4ba14b08b1f640cc7";
+    const carolAddress = "0x36a5732960513ad26a99e2bd6159dff2ab94a678";
+    const daveAddress = "0x59a661f1c909ca13ba3e9114bfdd81e5a420705d";
 
     const [ethGiver] = await ethers.getSigners();
 
@@ -335,6 +335,11 @@ export const getSigners = async ({ fork }: { fork?: boolean } = {}) => {
     carol = await ethers.getImpersonatedSigner(carolAddress);
     await impersonateAccount(daveAddress);
     dave = await ethers.getImpersonatedSigner(daveAddress);
+
+    console.log(
+      await ethers.provider.getBalance(ethGiver.address),
+      deployer.address
+    );
 
     await ethGiver.sendTransaction({
       to: deployer.address,

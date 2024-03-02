@@ -271,7 +271,6 @@ contract FeesRouter is AccessControl {
         );
     }
 
-    // TODO: Only protocol's contract should be able to call
     /**
      * @param _debt amount of BFE tokens that user receives in the event of succesful borrowing op
      * @param _fee amount of fee that user is getting cut with in the event of succseful borrowing op
@@ -312,7 +311,6 @@ contract FeesRouter is AccessControl {
         }
     }
 
-    // TODO: Only protocol's contract should be able to call
     /**
      * @param _debt amount of BFE tokens that user receives in the event of succesful borrowing op
      * @param _fee amount of fee that user is getting cut with in the event of succseful borrowing op

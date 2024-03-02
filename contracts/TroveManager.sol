@@ -404,7 +404,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             singleLiquidation.entireTroveColl
         );
         singleLiquidation
-            .BaseFeeLMAGasCompensation = BaseFeeLMA_GAS_COMPENSATION; // TODO: Why is that being done if BaseFeeLMA_GAS_COMP is static
+            .BaseFeeLMAGasCompensation = BaseFeeLMA_GAS_COMPENSATION;
         uint collToLiquidate = singleLiquidation.entireTroveColl.sub(
             singleLiquidation.collGasCompensation
         );
@@ -1355,7 +1355,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         RedemptionTotals memory totals;
 
         _requireValidMaxFeePercentage(_maxFeePercentage);
-        //_requireAfterBootstrapPeriod();
+        _requireAfterBootstrapPeriod();
         totals.price = priceFeed.fetchPrice();
 
         _requireTCRoverMCR(totals.price);
