@@ -336,11 +336,6 @@ export const getSigners = async ({ fork }: { fork?: boolean } = {}) => {
     await impersonateAccount(daveAddress);
     dave = await ethers.getImpersonatedSigner(daveAddress);
 
-    console.log(
-      await ethers.provider.getBalance(ethGiver.address),
-      deployer.address
-    );
-
     await ethGiver.sendTransaction({
       to: deployer.address,
       value: parseEther("25"),

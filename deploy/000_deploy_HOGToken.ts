@@ -8,8 +8,8 @@ const deploy: DeployFunction = async ({
   getNamedAccounts,
   getChainId,
 }) => {
-  if ((await getChainId()) != "1") {
-    // Hog token may only be deployed on the mainnet
+  if ((await getChainId()) != process.env.DEPLOYMENT_PROTOCOL_TOKEN_CHAIN_ID) {
+    // Hog token may only be deployed on the Ethereum Mainnet (chainId: 1)
     return;
   }
   const { deployer } = await getNamedAccounts();

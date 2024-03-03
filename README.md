@@ -67,7 +67,13 @@ Fill in config in the /deploy-helpers/deployConfig.ts with your own contracts
 ### Running deployment flow
 
 Update hardhat.config.ts with a network you'd like to deploy contracts to.
-Currently there are options to deploy to optimism testnet and optimism mainnet.
+Protocol is set to be deployed to Arbitrum Mainnet. However Protocols' token is set to be deployed to Ethereum Mainnet
+
+Protocol's Token according to the current plan is going to be deployed prior to the protocol itself.
+
+To be able to change deployment chains - update values in .env
+
+Oracles are to be deployed separately as well.
 
 Note: if you wish to run ABI exporting scripts after making any changes to ABI - it's better to increase version in package.json
 
