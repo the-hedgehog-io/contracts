@@ -49,13 +49,6 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
     IPriceFeed public override priceFeed;
 
     constructor(uint _gasComp, uint _minNetDebt, uint _CCR) {
-        // if (block.chainid == 42161) {
-        //     // Ensure that gas comp and minNetDebt are correct in prod mainnet
-        //     require(
-        //         _gasComp == 100000 && _minNetDebt == 100000,
-        //         "Invalid Deploy variables"
-        //     );
-        // }
         BaseFeeLMA_GAS_COMPENSATION = _gasComp;
         MIN_NET_DEBT = _minNetDebt;
         CCR = _CCR;
