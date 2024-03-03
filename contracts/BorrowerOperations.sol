@@ -121,8 +121,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     constructor(
         uint _gasComp,
-        uint _minNetDebt
-    ) HedgehogBase(_gasComp, _minNetDebt) {}
+        uint _minNetDebt,
+        uint _CCR
+    ) HedgehogBase(_gasComp, _minNetDebt, _CCR) {}
 
     // --- Dependency setters ---
 
@@ -943,7 +944,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
     }
 
-    function _requireICRisAboveCCR(uint _newICR) internal pure {
+    function _requireICRisAboveCCR(uint _newICR) internal view {
         require(
             _newICR >= CCR,
             "BorrowerOps: Operation must leave trove with ICR >= CCR"
@@ -960,7 +961,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
     }
 
-    function _requireNewTCRisAboveCCR(uint _newTCR) internal pure {
+    function _requireNewTCRisAboveCCR(uint _newTCR) internal view {
         require(
             _newTCR >= CCR,
             "BorrowerOps: An operation that would result in TCR < CCR is not permitted"

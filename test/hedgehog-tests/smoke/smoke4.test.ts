@@ -630,9 +630,6 @@ describe("BaseFeeOracle Tests", () => {
       await payToken
         .connect(dave)
         .transfer(alice.address, "120000000000000000000");
-      await payToken
-        .connect(dave)
-        .transfer(bob.address, "240000000000000000000");
 
       await openTrove({
         caller: alice,
@@ -640,6 +637,7 @@ describe("BaseFeeOracle Tests", () => {
         collAmount: "120000000000000000000",
       });
       await increase(83990);
+
       await openTrove({
         caller: bob,
         baseFeeLMAAmount: 3949741,
@@ -652,6 +650,7 @@ describe("BaseFeeOracle Tests", () => {
           await borrowerOperations.getAddress(),
           "120000000000000000000"
         );
+
       await borrowerOperations
         .connect(bob)
         .adjustTrove(

@@ -61,7 +61,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     uint public constant MAX_BORROWING_FEE = DECIMAL_PRECISION; // 100%
 
     // During bootsrap period redemptions are not allowed
-    uint public constant BOOTSTRAP_PERIOD = 14 days;
+    uint public immutable BOOTSTRAP_PERIOD; // 14 days for mainnet
+    uint public immutable SYSTEM_DEPLOYMENT_TIME;
 
     /*
      * BETA: 18 digit decimal. Parameter by which to divide the redeemed fraction, in order to calc the new base rate from a redemption.
@@ -294,8 +295,13 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
     constructor(
         uint _gasComp,
-        uint _minNetDebt
-    ) HedgehogBase(_gasComp, _minNetDebt) {}
+        uint _minNetDebt,
+        uint _CCR,
+        uint256 _bootsrapDaysAmount
+    ) HedgehogBase(_gasComp, _minNetDebt, _CCR) {
+        BOOTSTRAP_PERIOD = _bootsrapDaysAmount * 60 * 60 * 24;
+        SYSTEM_DEPLOYMENT_TIME = block.timestamp;
+    }
 
     // --- Dependency setter ---
 
@@ -404,7 +410,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             singleLiquidation.entireTroveColl
         );
         singleLiquidation
-            .BaseFeeLMAGasCompensation = BaseFeeLMA_GAS_COMPENSATION; // TODO: Why is that being done if BaseFeeLMA_GAS_COMP is static
+            .BaseFeeLMAGasCompensation = BaseFeeLMA_GAS_COMPENSATION;
         uint collToLiquidate = singleLiquidation.entireTroveColl.sub(
             singleLiquidation.collGasCompensation
         );
@@ -1355,7 +1361,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         RedemptionTotals memory totals;
 
         _requireValidMaxFeePercentage(_maxFeePercentage);
-        //_requireAfterBootstrapPeriod();
+        _requireAfterBootstrapPeriod();
         totals.price = priceFeed.fetchPrice();
 
         _requireTCRoverMCR(totals.price);
@@ -1954,7 +1960,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint _entireSystemColl,
         uint _entireSystemDebt,
         uint _price
-    ) internal pure returns (bool) {
+    ) internal view returns (bool) {
         uint TCR = LiquityMath._computeCR(
             _entireSystemColl,
             _entireSystemDebt,
@@ -2326,9 +2332,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     }
 
     function _requireAfterBootstrapPeriod() internal view {
-        uint systemDeploymentTime = hogToken.getDeploymentStartTime();
         require(
-            block.timestamp >= systemDeploymentTime.add(BOOTSTRAP_PERIOD),
+            block.timestamp >= SYSTEM_DEPLOYMENT_TIME.add(BOOTSTRAP_PERIOD),
             "TroveManager: Redemptions are not allowed during bootstrap phase"
         );
     }

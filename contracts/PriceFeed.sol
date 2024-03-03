@@ -567,7 +567,6 @@ contract PriceFeed is Ownable, BaseMath {
          * future changes.
          */
         uint price;
-        // TODO: Double check that
         if (_answerDigits >= TARGET_DIGITS) {
             // Scale the returned price value down to Hedgehog's target precision
             price = _price / (10 ** (_answerDigits - TARGET_DIGITS));

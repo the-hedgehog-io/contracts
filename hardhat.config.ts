@@ -78,31 +78,28 @@ const config: HardhatUserConfig = {
     ],
   },
   networks: {
-    optimismSepolia: {
+    arbitrum: {
       accounts: newAccounts,
-      url: "https://rpc.ankr.com/optimism_sepolia",
-      gasPrice: 10000000,
-      chainId: 11155420,
+      url: "https://arbitrum-one.publicnode.com",
     },
-    optimism: {
+    ethereum: {
       accounts: newAccounts,
-      url: "https://mainnet.optimism.io",
-      chainId: 10,
+      url: "https://ethereum-rpc.publicnode.com",
     },
     hardhat: {
       forking: {
-        url: "https://rpc.ankr.com/optimism",
-        blockNumber: 116416457,
+        url: "https://rpc.ankr.com/arbitrum",
+        blockNumber: 186391444,
       },
-      chainId: 10,
+      chainId: 42161,
     },
   },
 
   mocha: { timeout: 12000000 },
 
-  // gasReporter: {
-  //   enabled: process.env.REPORT_GAS ? true : false,
-  // },
+  gasReporter: {
+    enabled: process.env.REPORT_GAS ? true : false,
+  },
 
   namedAccounts: {
     deployer: 0,

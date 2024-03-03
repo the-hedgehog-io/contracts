@@ -34,12 +34,11 @@ import "../dependencies/IERC2612.sol";
  * 2) [ DEPRECATED ] sendToHOGStaking(): callable only by Hedgehog core contracts, which move HOG tokens from user -> HOGStaking contract. [ DEPRECATED ]
  *
  * 3) Supply hard-capped at 100 million
+ * * *
  *
- * 4) CommunityIssuance and LockupContractFactory addresses are set at deployment. HEDGHEHOG CHANGES: lockup contract factry is removed
- *
- * 5) Initial CommunityIssuance HOG token alloc is set at 1 million tokens
- *
- * 8) 99 million tokens are minted at deployment to the Hedgehog multisig
+ * HEDGEHOG YPDATES:
+ * 4) Total Supply goes to the multisigAddress given at deployment
+ * 5) There is no lock period on the token anymore
  *
  * After one year has passed since deployment of the HOGToken, the restrictions on multisig operations are lifted
  * and the multisig has the same rights as any other address.
@@ -85,24 +84,14 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
     // uint for use with SafeMath
     uint internal _1_MILLION = 1e24; // 1e6 * 1e18 = 1e24
 
-    uint internal immutable deploymentStartTime;
     address public immutable multisigAddress;
-
-    address public immutable communityIssuanceAddress;
 
     // --- Events ---
 
-    event CommunityIssuanceAddressSet(address _communityIssuanceAddress);
-
     // --- Functions ---
 
-    constructor(address _communityIssuanceAddress, address _multisigAddress) {
-        checkContract(_communityIssuanceAddress);
-        // TODO: Pass addresses of all core contract to be able to restrict transfers to them
+    constructor(address _multisigAddress) {
         multisigAddress = _multisigAddress;
-        deploymentStartTime = block.timestamp;
-
-        communityIssuanceAddress = _communityIssuanceAddress;
 
         bytes32 hashedName = keccak256(bytes(_NAME));
         bytes32 hashedVersion = keccak256(bytes(_VERSION));
@@ -121,17 +110,11 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         /*
         * Hedgehog Updates:
         Not allocating anymore tokens for differrent purposes to different accounts.
-        Instead only initial HogSupplyCap goes to Community Issuance contract.
-        The rest is going to Multisig address including:
-        Bounty Entitlement, LP Rewards Entitlement, Multisig Entitlement and potential additional rewards for depositors in community issuance address
+        Bounty Entitlement, LP Rewards Entitlement, Multisig Entitlement and potential rewards for depositors in community issuance address are to be distributed manualy
         */
 
-        // HEDGEHOG UPDATES: Allocate 1 million instead of 32 initially for the stabiltiy pool entitlement
-        uint depositorsAndFrontEndsEntitlement = _1_MILLION; // Allocate 1 million to the algorithmic issuance schedule
-        _mint(_communityIssuanceAddress, depositorsAndFrontEndsEntitlement);
-
-        // Allocate the remainder to the HOG Multisig: (100 - 1) million = 99 million
-        uint multisigEntitlement = _1_MILLION.mul(99);
+        // Allocate the remainder to the HOG Multisig = 100 million
+        uint multisigEntitlement = _1_MILLION.mul(100);
 
         _mint(_multisigAddress, multisigEntitlement);
     }
@@ -146,10 +129,6 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         address account
     ) external view override returns (uint256) {
         return _balances[account];
-    }
-
-    function getDeploymentStartTime() external view returns (uint256) {
-        return deploymentStartTime;
     }
 
     function transfer(
@@ -180,10 +159,6 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         address spender,
         uint256 amount
     ) external override returns (bool) {
-        if (_isFirstYear()) {
-            _requireCallerIsNotMultisig();
-        }
-
         _approve(msg.sender, spender, amount);
         return true;
     }
@@ -193,10 +168,6 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         address recipient,
         uint256 amount
     ) external override returns (bool) {
-        if (_isFirstYear()) {
-            _requireSenderIsNotMultisig(sender);
-        }
-
         _requireValidRecipient(recipient);
 
         _transfer(sender, recipient, amount);
@@ -215,10 +186,6 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         address spender,
         uint256 addedValue
     ) external returns (bool) {
-        if (_isFirstYear()) {
-            _requireCallerIsNotMultisig();
-        }
-
         _approve(
             msg.sender,
             spender,
@@ -231,10 +198,6 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         address spender,
         uint256 subtractedValue
     ) external returns (bool) {
-        if (_isFirstYear()) {
-            _requireCallerIsNotMultisig();
-        }
-
         _approve(
             msg.sender,
             spender,
@@ -353,16 +316,6 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         emit Approval(owner, spender, amount);
     }
 
-    // --- Helper functions ---
-
-    function _callerIsMultisig() internal view returns (bool) {
-        return (msg.sender == multisigAddress);
-    }
-
-    function _isFirstYear() internal view returns (bool) {
-        return (block.timestamp.sub(deploymentStartTime) < ONE_YEAR_IN_SECONDS);
-    }
-
     // --- 'require' functions ---
 
     /**
@@ -373,20 +326,6 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         require(
             _recipient != address(0) && _recipient != address(this),
             "HOG: Cannot transfer tokens directly to the HOG token contract or the zero address"
-        );
-    }
-
-    function _requireSenderIsNotMultisig(address _sender) internal view {
-        require(
-            _sender != multisigAddress,
-            "HOGToken: sender must not be the multisig"
-        );
-    }
-
-    function _requireCallerIsNotMultisig() internal view {
-        require(
-            !_callerIsMultisig(),
-            "HOGToken: caller must not be the multisig"
         );
     }
 

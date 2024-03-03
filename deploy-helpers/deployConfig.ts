@@ -5,13 +5,20 @@ type DeploymentConfig = {
   backupOracle: string;
   gasComp: string;
   minNetDebt: string;
+  hogTokenAddress: string;
+  CCR: string;
+  bootstrapDaysAmount: number;
 };
 
+// Arbitrum Mainnet Deployment Config
 export const deployConfig: DeploymentConfig = {
-  wstETH: "0xb64A7db2a81d2B579d61528Bc4d5F662014B3020",
-  multisigAddress: "0x3BFc9CA7FA5D94461Dc96225D88CBb300B108d9E",
-  mainOracle: "0x05e9E631a506c1329B45A91BCAc7D5C0Ba76AB05",
-  backupOracle: "0xD7be32A18f2d5F281708228FE01b34d8039Ef35E",
+  wstETH: "0x5979D7b546E38E414F7E9822514be443A4800529", // Arb wstEth address: https://arbiscan.io/token/0x5979d7b546e38e414f7e9822514be443a4800529
+  multisigAddress: "0x6Ee0C7f637C8B0e223886559Fee4c3b9d90388f1", // Protocol's multisig that receives all HOG tokens on deployment
+  mainOracle: "", // To be deployed prior to protocol's deployment
+  backupOracle: "", // To be deployed prior to protocol's deployment
   gasComp: "100000",
   minNetDebt: "100000",
+  hogTokenAddress: "", // To be deployed prior to protocol's deployment
+  CCR: "2000000000000000000",
+  bootstrapDaysAmount: 14,
 };
