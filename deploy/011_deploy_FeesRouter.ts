@@ -1,4 +1,5 @@
 import { DeployFunction } from "hardhat-deploy/types";
+import { deployConfig } from "../deploy-helpers/deployConfig";
 
 const deploy: DeployFunction = async ({
   deployments: { deploy },
@@ -14,7 +15,7 @@ const deploy: DeployFunction = async ({
   await deploy("FeesRouter", {
     from: deployer,
     log: true,
-    args: [deployer, deployer],
+    args: [deployConfig.feesSetter, deployConfig.feesAdmin],
   });
 };
 

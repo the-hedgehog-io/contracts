@@ -262,7 +262,9 @@ export const setupContracts = async () => {
     .connect(deployer)
     .setAddresses(
       await hogToken.getAddress(),
-      await stabilityPool.getAddress()
+      await stabilityPool.getAddress(),
+      deployer.address,
+      deployer.address
     );
   await feesRouter
     .connect(deployer)

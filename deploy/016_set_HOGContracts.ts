@@ -30,7 +30,9 @@ const deploy: DeployFunction = async ({
         { from: deployer },
         "setAddresses",
         deployConfig.hogTokenAddress,
-        StabilityPool.address
+        StabilityPool.address,
+        deployConfig.feesAdmin,
+        deployConfig.feesSetter
       );
     }
     console.log("CommunityIssuance is set");

@@ -78,7 +78,9 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
 
     function setAddresses(
         address _hogTokenAddress,
-        address _stabilityPoolAddress
+        address _stabilityPoolAddress,
+        address _setter,
+        address _setterAdmin
     ) external onlyOwner {
         checkContract(_hogTokenAddress);
         checkContract(_stabilityPoolAddress);
@@ -89,9 +91,9 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
          *
          * At the deployment moment hog supply cap is set to 0
          */
-        _grantRole(DISTRIBUTION_SETTER, msg.sender);
+        _grantRole(DISTRIBUTION_SETTER, _setter);
         _setRoleAdmin(DISTRIBUTION_SETTER, DISTRIBUTION_SETTER_ADMIN);
-        _grantRole(DISTRIBUTION_SETTER_ADMIN, msg.sender);
+        _grantRole(DISTRIBUTION_SETTER_ADMIN, _setterAdmin);
 
         hogToken = IHOGToken(_hogTokenAddress);
         stabilityPoolAddress = _stabilityPoolAddress;
