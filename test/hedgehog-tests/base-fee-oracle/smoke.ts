@@ -36,13 +36,13 @@ describe("BaseFeeOracle Tests", () => {
     };
 
     const round = async (roundId: number) => {
-      const [answer, block, round] = await oracle.getRoundData(roundId);
+      const [round, answer, block] = await oracle.getRoundData(roundId);
 
       return { answer, block, round };
     };
 
     const latestRound = async () => {
-      const [answer, block, round] = await oracle.latestRoundData();
+      const [round, answer, block] = await oracle.latestRoundData();
 
       return { answer, block, round };
     };
@@ -57,11 +57,11 @@ describe("BaseFeeOracle Tests", () => {
       expect(
         (await latestRound()).block,
         "Block number is incorrect"
-      ).to.be.equal(blockNumber);
+      ).to.be.equal(blockNumber); // 3 for local network
       expect(
         (await latestRound()).round,
         "Round number is incorrect"
-      ).to.be.equal(186391447); // 3 for local network
+      ).to.be.equal(2);
     });
     it("should set answer correctly", async () => {
       expect(

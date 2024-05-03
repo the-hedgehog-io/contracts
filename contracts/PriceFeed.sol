@@ -26,8 +26,7 @@ contract PriceFeed is Ownable, BaseMath {
     IBaseFeeOracle public mainOracle; // Main Oracle aggregator
     IBaseFeeOracle public backupOracle; // Backup Oracle
 
-    // HEDGEHOG UPDATES: decrease to 1
-    uint public constant TARGET_DIGITS = 1;
+    uint public constant TARGET_DIGITS = 18;
 
     // Maximum time period allowed since Main Oracle's latest round data blockNumber, beyond which Main Oracle is considered frozen.
     uint public constant TIMEOUT = 69;
@@ -187,23 +186,21 @@ contract PriceFeed is Ownable, BaseMath {
                     _priceChangeAboveMax(
                         backupOracleResponse,
                         prevBackupOracleResponse,
-                        decimals
+                        backupDecimals
                     )
                 ) {
                     _changeStatus(Status.bothOraclesUntrusted);
                     return lastGoodPrice;
                 }
 
-                if (
-                    _backupIsFrozen(backupOracleResponse)
-                ) // If backup is frozen, switch to backup and return last good price
-                {
+                // If backup is frozen, switch to backup and return last good price
+                if (_backupIsFrozen(backupOracleResponse)) {
                     _changeStatus(Status.usingBackupMainUntrusted);
                     return lastGoodPrice;
                 }
 
                 _changeStatus(Status.usingBackupMainUntrusted);
-                return _storeGoodPrice(backupOracleResponse, decimals);
+                return _storeGoodPrice(backupOracleResponse, backupDecimals);
             }
 
             // If Main oracle is working and Backup is broken, remember Backup is broken
@@ -255,7 +252,7 @@ contract PriceFeed is Ownable, BaseMath {
             }
 
             // Otherwise, use Backup price
-            return _storeGoodPrice(mainOracleResponse, decimals);
+            return _storeGoodPrice(backupOracleResponse, backupDecimals);
         }
 
         // --- CASE 3: Both oracles were untrusted at the last price fetch ---
@@ -300,7 +297,7 @@ contract PriceFeed is Ownable, BaseMath {
                 }
 
                 // If Backup is working, return Backup current price
-                return _storeGoodPrice(mainOracleResponse, decimals);
+                return _storeGoodPrice(backupOracleResponse, backupDecimals);
             }
 
             if (_mainOracleIsFrozen(mainOracleResponse)) {
@@ -316,7 +313,7 @@ contract PriceFeed is Ownable, BaseMath {
                 }
 
                 // if Main Oracle is frozen and Backup is working, keep using Backup (no status change)
-                return _storeGoodPrice(mainOracleResponse, decimals);
+                return _storeGoodPrice(backupOracleResponse, backupDecimals);
             }
 
             // if Main Oracle is live and Backup is broken, remember Backup broke, and return Main Oracle price
@@ -346,7 +343,7 @@ contract PriceFeed is Ownable, BaseMath {
 
             // Otherwise if Main Oracle is live but price not within 5% of Backup, distrust Main Oracle, and return Backup price
             _changeStatus(Status.usingBackupMainUntrusted);
-            return _storeGoodPrice(mainOracleResponse, decimals);
+            return _storeGoodPrice(backupOracleResponse, backupDecimals);
         }
 
         // --- CASE 5: Using Main Oracle, Back up is untrusted ---
@@ -478,8 +475,7 @@ contract PriceFeed is Ownable, BaseMath {
     ) internal view returns (bool) {
         // Check for an invalid timeStamp that is 0, or in the future
         if (
-            _response.blockNumber == 0 ||
-            _response.blockNumber > block.timestamp
+            _response.blockNumber == 0 || _response.blockNumber > block.number
         ) {
             return true;
         }
@@ -608,10 +604,11 @@ contract PriceFeed is Ownable, BaseMath {
     {
         // Try to get latest price data:
         try mainOracle.latestRoundData() returns (
+            uint80 roundId,
             int256 answer,
-            uint64 blockNumber,
+            uint256 blockNumber,
             uint256 currentChainBN,
-            uint80 roundId
+            uint80 __roundId
         ) {
             response.roundId = roundId;
             response.answer = answer;
@@ -631,10 +628,11 @@ contract PriceFeed is Ownable, BaseMath {
     {
         // Try to get latest price data:
         try backupOracle.latestRoundData() returns (
+            uint80 roundId,
             int256 answer,
-            uint64 blockNumber,
+            uint256 blockNumber,
             uint256 currentChainBN,
-            uint80 roundId
+            uint80 __roundId
         ) {
             response.roundId = roundId;
             response.answer = answer;
@@ -657,10 +655,11 @@ contract PriceFeed is Ownable, BaseMath {
 
         // Try to get the price data from the previous round:
         try mainOracle.getRoundData(_currentRoundId - 1) returns (
+            uint80 roundId,
             int256 answer,
-            uint64 blockNumber,
+            uint256 blockNumber,
             uint256 currentChainBN,
-            uint80 roundId
+            uint80 __roundId
         ) {
             // If call to Hedgehog succeeds, return the response and success = true
             prevMainOracleResponse.roundId = roundId;
@@ -683,10 +682,11 @@ contract PriceFeed is Ownable, BaseMath {
 
         // Try to get the price data from the previous round:
         try backupOracle.getRoundData(_currentRoundId - 1) returns (
+            uint80 roundId,
             int256 answer,
-            uint64 blockNumber,
+            uint256 blockNumber,
             uint256 currentChainBN,
-            uint80 roundId
+            uint80 __roundId
         ) {
             // If call to Hedgehog succeeds, return the response and success = true
             prevBackupOracleResponse.roundId = roundId;
