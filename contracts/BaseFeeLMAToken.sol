@@ -36,7 +36,7 @@ contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
     string internal constant _NAME = "BaseFeeLMA Token";
     string internal constant _SYMBOL = "BFELMA";
     string internal constant _VERSION = "1";
-    uint8 internal constant _DECIMALS = 6;
+    uint8 internal constant _DECIMALS = 18;
 
     // --- Data for EIP2612 ---
 

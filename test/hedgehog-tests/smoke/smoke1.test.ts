@@ -817,19 +817,20 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should let provide to stability pool in recovery mode", async () => {
-      await expect(provide({ caller: carol, amount: "71905" }));
+      await expect(provide({ caller: carol, amount: "71905" })).to.not.be
+        .reverted;
     });
 
     // TODO: Get into a separate file
 
     it("should not mark oracles as broken if price was increased by more then 12.5%", async () => {
-      const amount = ethers.parseUnits("1000", "gwei");
+      const amount = ethers.parseUnits("100000", "gwei");
       const block = await latestBlock();
       await mainOracle.feedBaseFeeValue(amount, block);
       await priceFeed.fetchPrice();
       expect(await priceFeed.status()).to.be.equal(1);
       await secondaryOracle.feedBaseFeeValue(
-        ethers.parseUnits("1000", "gwei"),
+        ethers.parseUnits("100000", "gwei"),
         block
       );
       await priceFeed.fetchPrice();

@@ -16,19 +16,21 @@ interface IBaseFeeOracle {
         external
         view
         returns (
+            uint80 roundId,
             int256 answer,
-            uint64 blockNumber,
+            uint256 blockNumber,
             uint256 currentChainBN,
-            uint80 roundId
+            uint80 __roundId
         );
 
     function latestRoundData()
         external
         view
         returns (
+            uint80 roundId,
             int256 answer,
-            uint64 blockNumber,
+            uint256 blockNumber,
             uint256 currentChainBN,
-            uint80 roundId
+            uint80 __roundId
         );
 }
