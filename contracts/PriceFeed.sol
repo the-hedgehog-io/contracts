@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "./dependencies/BaseMath.sol";
 import "./dependencies/LiquityMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./interfaces/AggregatorV3Interface.sol";
+import "hardhat/console.sol";
 
 error MainOracleDisabled();
 
@@ -25,6 +27,8 @@ contract PriceFeed is Ownable, BaseMath {
 
     IBaseFeeOracle public mainOracle; // Main Oracle aggregator
     IBaseFeeOracle public backupOracle; // Backup Oracle
+    AggregatorV3Interface public constant wstEthEthOracle =
+        AggregatorV3Interface(0xb523AE262D20A936BC152e6023996e46FDC2A95D);
 
     uint public constant TARGET_DIGITS = 18;
 
@@ -45,6 +49,9 @@ contract PriceFeed is Ownable, BaseMath {
 
     // The last good price seen from an oracle by Hedgehog
     uint256 public lastGoodPrice;
+
+    // The last wsthEth/Eth ratio that was succesfuly captured
+    uint256 public lastGoodWstEthEthRatio;
 
     struct Response {
         int256 answer;
@@ -592,7 +599,13 @@ contract PriceFeed is Ownable, BaseMath {
             _decimals
         );
 
-        _storePrice(scaledPrice);
+        // HEDGEHOG UPDATES: Since hedgehog uses WstEth as a collateral and debt as bfe:ETH - we get them to a commmon denominator
+        // by retrieving wstEth/eth ratio and taking into an equation
+        uint256 scaledWstEthEthPrice = _scalePriceByDigits(
+            _getLatestWstEthEthRatio(),
+            _decimals
+        );
+        _storePrice((scaledPrice * (10 ** 18)) / scaledWstEthEthPrice);
 
         return scaledPrice;
     }
@@ -696,6 +709,32 @@ contract PriceFeed is Ownable, BaseMath {
         } catch {
             // If call to Main Oracle aggregator reverts, return a zero response with success = false
             return prevBackupOracleResponse;
+        }
+    }
+
+    /**
+     * Returns latest WstEth - Eth ratio
+     * As Arbitrum does not have reliable oracles returning WstEth - Eth ratio other than Chainlink
+     * We perform only the most basic checks before taking the ratio into account
+     *
+     * Chainlink oracle address is constant and if oracle stops pushing updates / abi seizes to exist HDG is going to keep using the latest available price
+     */
+    function _getLatestWstEthEthRatio() internal returns (uint256) {
+        try wstEthEthOracle.latestRoundData() returns (
+            uint80 roundId,
+            int256 answer,
+            uint256,
+            uint256 updatedAt,
+            uint80
+        ) {
+            if (roundId > 0 && answer > 0 && updatedAt <= block.timestamp) {
+                lastGoodWstEthEthRatio = uint256(answer);
+                return uint256(answer);
+            } else {
+                return lastGoodWstEthEthRatio;
+            }
+        } catch {
+            return lastGoodWstEthEthRatio;
         }
     }
 }
