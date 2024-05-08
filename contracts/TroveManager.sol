@@ -2108,15 +2108,13 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     /*
      * HEDGEHOG UPDATES:
      * 1) Now passing _calcDecayedBorrowBaseRate instead of _calcDecayedBaseRate function to calculate the decayed borrowBaseRate
+     * TODO: Write test
      */
     function getBorrowingRateWithDecay(
         uint _issuedBaseFeeLMA
     ) public view returns (uint) {
         return
-            _calcBorrowingRate(
-                _calcDecayedRedemptionBaseRate(),
-                _issuedBaseFeeLMA
-            );
+            _calcBorrowingRate(_calcDecayedBorrowBaseRate(), _issuedBaseFeeLMA);
     }
 
     /*
@@ -2417,8 +2415,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
     /*
      * HEDGEHOG UPDATES:
-     * removed _minutesPassedSinceLastFeeOp
-     * New function _minutesPassedSinceLastRedemption simmilar to _minutesPassedSinceLastFeeOp, that returns amount of minutes since last registered redemption
+     * New frontend helper function easing up the calculation of a baseFeeLma price coming from an oracle for a trove with given coll and debt to become eligble for liquidation
      */
     function getNormalLiquidationPrice(
         uint256 _coll,
@@ -2428,23 +2425,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             _coll,
             _debt,
             HedgehogBase.MCR
-        );
-        return price;
-    }
-
-    /*
-     * HEDGEHOG UPDATES:
-     * removed _minutesPassedSinceLastFeeOp
-     * New function _minutesPassedSinceLastRedemption simmilar to _minutesPassedSinceLastFeeOp, that returns amount of minutes since last registered redemption
-     */
-    function getRecoveryLiquidationPrice(
-        uint256 _coll,
-        uint256 _debt
-    ) external pure returns (uint256) {
-        uint256 price = LiquityMath._findPriceBelowMCR(
-            _coll,
-            _debt,
-            HedgehogBase._100pct
         );
         return price;
     }

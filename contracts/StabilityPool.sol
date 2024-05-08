@@ -485,6 +485,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         emit StabilityPoolWStETHBalanceUpdated(WStETH);
         emit WStETHSent(msg.sender, depositorWStETHGain);
 
+        // Hedgehog Updates: now have to cast an approve to allow BO move collToken from the stability pool
         WStETHToken.approve(address(borrowerOperations), depositorWStETHGain);
         borrowerOperations.moveWStETHGainToTrove(
             msg.sender,
