@@ -1983,7 +1983,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
      * This function has two impacts on the redemptionBaseRate state variable:
      * 1) decays the redemptionBaseRate based on time passed since last redemption or BaseFeeLMA borrowing operation.
      * then,
-     * 2) increases the redemptionBaseRate based on the amount redeemed, as a proportion of total supply
+     * 2) increases the redemptionBaseRate based on the amount redeemed, as a proportion of totall collateral in the system.
+     * total collateral taken into the account is a sum of default and active pools collaterals
      */
     function _updateRedemptionBaseRateFromRedemption(
         uint _WStETHDrawn
@@ -1994,11 +1995,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
         // HEDGEHOG UPDATES: not dividing, but multyplying by decimal precision
         /* Convert the drawn WStETH back to BaseFeeLMA at face value rate (1 BaseFeeLMA:1 USD), in order to get
-         * the fraction of total supply that was redeemed at face value. */
+         * the fraction of total supply that was redeemed at face value.
+         */
         uint redeemedBaseFeeLMAFraction = _WStETHDrawn
             .mul(DECIMAL_PRECISION)
-            .div(activePool.getWStETH());
-
+            .div(activePool.getWStETH() + defaultPool.getWStETH());
         // Hedgehog Updates: Remove division by BETA
         uint newBaseRate = decayedRedemptionBaseRate.add(
             redeemedBaseFeeLMAFraction
@@ -2046,7 +2047,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
      * HEDGEHOG UPDATES:
      * Redemption Rate formula now is: RedFloor + RedBaseRate*MinuteDecayFactorMinutes + RedemptionETH/TotalColl
      * 1) Rename param name (_baseRate => _redemptionBaseRate)
-     * 2) Now redeemed collateral divided by total collateral in active pool is added to the sum of redemption floor and redeem base rate
+     * 2) Now redeemed collateral divided by total collateral in active & defaul pools is added to the sum of redemption floor and redeem base rate
      */
     function _calcRedemptionRate(
         uint _redemptionBaseRate,
@@ -2106,15 +2107,13 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     /*
      * HEDGEHOG UPDATES:
      * 1) Now passing _calcDecayedBorrowBaseRate instead of _calcDecayedBaseRate function to calculate the decayed borrowBaseRate
+     * TODO: Write test
      */
     function getBorrowingRateWithDecay(
         uint _issuedBaseFeeLMA
     ) public view returns (uint) {
         return
-            _calcBorrowingRate(
-                _calcDecayedRedemptionBaseRate(),
-                _issuedBaseFeeLMA
-            );
+            _calcBorrowingRate(_calcDecayedBorrowBaseRate(), _issuedBaseFeeLMA);
     }
 
     /*
@@ -2415,8 +2414,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
     /*
      * HEDGEHOG UPDATES:
-     * removed _minutesPassedSinceLastFeeOp
-     * New function _minutesPassedSinceLastRedemption simmilar to _minutesPassedSinceLastFeeOp, that returns amount of minutes since last registered redemption
+     * New frontend helper function easing up the calculation of a baseFeeLma price coming from an oracle for a trove with given coll and debt to become eligble for liquidation
      */
     function getNormalLiquidationPrice(
         uint256 _coll,
@@ -2425,26 +2423,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint256 price = LiquityMath._findPriceBelowMCR(
             _coll,
             _debt,
-            20,
             HedgehogBase.MCR
-        );
-        return price;
-    }
-
-    /*
-     * HEDGEHOG UPDATES:
-     * removed _minutesPassedSinceLastFeeOp
-     * New function _minutesPassedSinceLastRedemption simmilar to _minutesPassedSinceLastFeeOp, that returns amount of minutes since last registered redemption
-     */
-    function getRecoveryLiquidationPrice(
-        uint256 _coll,
-        uint256 _debt
-    ) external pure returns (uint256) {
-        uint256 price = LiquityMath._findPriceBelowMCR(
-            _coll,
-            _debt,
-            20,
-            HedgehogBase._100pct
         );
         return price;
     }

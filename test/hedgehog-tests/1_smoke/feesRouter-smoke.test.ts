@@ -1,25 +1,25 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import {
-  BaseFeeOracle,
-  TestPriceFeed,
-  SortedTroves,
-  TroveManager,
-  ActivePool,
-  StabilityPool,
-  DefaultPool,
-  CollSurplusPool,
-  BorrowerOperations,
-  HintHelpers,
-  BaseFeeLMAToken,
-  CommunityIssuance,
-  HOGToken,
-  ERC20Mock,
-  FeesRouter,
-} from "../../../typechain-types";
-import { getSigners, setupContracts } from "../../utils";
+import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { BigNumberish, ethers } from "ethers";
-import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
+import {
+  ActivePool,
+  BaseFeeLMAToken,
+  BaseFeeOracle,
+  BorrowerOperations,
+  CollSurplusPool,
+  CommunityIssuance,
+  DefaultPool,
+  ERC20Mock,
+  FeesRouter,
+  HOGToken,
+  HintHelpers,
+  SortedTroves,
+  StabilityPool,
+  TestPriceFeed,
+  TroveManager,
+} from "../../../typechain-types";
+import { getSigners, setupContracts } from "../../utils";
 type OpenTroveParams = {
   caller: SignerWithAddress;
   maxFeePercentage: number;
@@ -40,13 +40,14 @@ type AdjustTroveParams = {
 const { latestBlock, increase, advanceBlock } = time;
 
 describe("Hedgehog Core Contracts Smoke tests", () => {
-  context("Base functionality and Access Control", () => {
+  context("Base functionality and Access Control: Fees Router", () => {
     let deployer: SignerWithAddress, //ultimate admin
       setter: SignerWithAddress,
       hacker: SignerWithAddress,
       alice: SignerWithAddress,
       bob: SignerWithAddress,
-      carol: SignerWithAddress;
+      carol: SignerWithAddress,
+      dave: SignerWithAddress;
     let oracle: BaseFeeOracle;
     let priceFeed: TestPriceFeed;
     let sortedTroves: SortedTroves;
@@ -106,7 +107,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     };
 
     before(async () => {
-      [deployer, setter, hacker, alice, bob, carol] = await getSigners({
+      [deployer, setter, hacker, alice, bob, carol, dave] = await getSigners({
         fork: true,
       });
 

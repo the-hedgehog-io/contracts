@@ -89,6 +89,8 @@ contract FeesRouter is AccessControl {
         address _borrowersOp,
         address _troveManager
     ) external onlyRole(DEPLOYER) {
+        if (_borrowersOp == address(0)) revert InvalidAddress();
+        if (_troveManager == address(0)) revert InvalidAddress();
         if (address(_activePool) == address(0)) revert InvalidAddress();
         if (address(_baseFeeLMAToken) == address(0)) revert InvalidAddress();
 

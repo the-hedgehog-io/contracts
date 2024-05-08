@@ -22,6 +22,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * - Updated variable names and docs to refer to BaseFeeLMA token and wwstETH as a collateral
  * - Logic updates with borrowing fees calculation and their distribution
  * - Removed Native Liquity Protocol Token Staking
+ * - Remove _getUSDValue view method as it's not used anymore
  * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  */
 
@@ -710,15 +711,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         feesRouter.distributeDebtFee(_BaseFeeLMAAmount, BaseFeeLMAFee);
 
         return BaseFeeLMAFee;
-    }
-
-    function _getUSDValue(
-        uint _coll,
-        uint _price
-    ) internal pure returns (uint) {
-        uint usdValue = _price.mul(_coll).div(DECIMAL_PRECISION);
-
-        return usdValue;
     }
 
     function _getCollChange(

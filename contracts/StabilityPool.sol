@@ -485,6 +485,8 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         emit StabilityPoolWStETHBalanceUpdated(WStETH);
         emit WStETHSent(msg.sender, depositorWStETHGain);
 
+        // Hedgehog Updates: now have to cast an approve to allow BO move collToken from the stability pool
+        WStETHToken.approve(address(borrowerOperations), depositorWStETHGain);
         borrowerOperations.moveWStETHGainToTrove(
             msg.sender,
             _upperHint,
@@ -1061,10 +1063,10 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
     /**
      * Hedgehog Updates:
      * Remove native token fallback function and replace with internal balance increaser as it is used only in the offset function
-     *
      */
     function _increaseBalance(uint256 _amount) internal {
         WStETH = WStETH.add(_amount);
+        emit StabilityPoolWStETHBalanceUpdated(WStETH);
     }
 
     // --- Fallback function ---
