@@ -712,15 +712,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         return BaseFeeLMAFee;
     }
 
-    function _getUSDValue(
-        uint _coll,
-        uint _price
-    ) internal pure returns (uint) {
-        uint usdValue = _price.mul(_coll).div(DECIMAL_PRECISION);
-
-        return usdValue;
-    }
-
     function _getCollChange(
         uint _collReceived,
         uint _requestedCollWithdrawal

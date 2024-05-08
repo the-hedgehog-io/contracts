@@ -152,13 +152,14 @@ contract ActivePool is Ownable, CheckContract, IPool {
         );
     }
 
+    // Hedgehog Updates: new access controll check, allowing FRouter to retrieve collateral
     function _requireCallerIsBOorTroveMorSPorFRoute() internal view {
         require(
             msg.sender == borrowerOperationsAddress ||
                 msg.sender == troveManagerAddress ||
                 msg.sender == stabilityPoolAddress ||
                 msg.sender == feesRouter,
-            "ActivePool: Caller is neither BorrowerOperations nor TroveManager nor StabilityPool"
+            "ActivePool: Caller is neither BO nor TM nor FRouter"
         );
     }
 
