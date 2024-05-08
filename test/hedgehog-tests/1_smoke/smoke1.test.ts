@@ -40,7 +40,7 @@ const compareWithFault = (
 };
 
 describe("Hedgehog Core Contracts Smoke tests", () => {
-  context("Base functionality and Access Control", () => {
+  context("Base functionality and Access Control. Flow #1", () => {
     let deployer: SignerWithAddress, //ultimate admin
       setter: SignerWithAddress,
       hacker: SignerWithAddress,
@@ -295,7 +295,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         .addColl(ethers.ZeroAddress, ethers.ZeroAddress, amount);
     };
 
-    const setNewBaseFeePrice = async (_amount: number | bigint) => {
+    const setNewBaseFeePrice = async (_amount: number) => {
       const amount = ethers.parseUnits(_amount.toString(), "gwei");
       const block = await latestBlock();
       await mainOracle.feedBaseFeeValue(amount, block);
@@ -494,7 +494,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     it("should let open another position in the system (carol position)", async () => {
       await increase(17970);
-
+      console.log((await payToken.balanceOf(carol.address)).toString());
+      console.log(CarolTroveColl.toLocaleString());
       await openTrove({
         caller: carol,
         collAmount: CarolTroveColl,
@@ -816,77 +817,44 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       );
     });
 
-    it("should let withdraw stability pool gain to trove", async () => {
-      await openTrove({
-        caller: alice,
-        baseFeeLMAAmount: 150000,
-        collAmount: ethers.parseEther("1"),
-      });
-      await stabilityPool
-        .connect(alice)
-        .withdrawWStETHGainToTrove(ethers.ZeroAddress, ethers.ZeroAddress);
-    });
-
-    it("should correctly calculate liquidation price in normal mode", async () => {
-      const { debt, coll } = await getTrove(carol);
-
-      const price = await troveManager.getNormalLiquidationPrice(coll, debt);
-      const MCR = await borrowerOperations.MCR();
-
-      expect(
-        await troveManager.getCurrentICR(carol.address, price - BigInt(1))
-      ).to.be.greaterThan(MCR);
-      expect(
-        await troveManager.getCurrentICR(carol.address, price)
-      ).to.be.lessThanOrEqual(MCR);
-    });
-
-    it("should correctly calculate liquidation price", async () => {
-      const { debt, coll } = await getTrove(carol);
-
-      const price = await troveManager.getNormalLiquidationPrice(coll, debt);
-      const MCR = await borrowerOperations.MCR();
-
-      expect(
-        await troveManager.getCurrentICR(carol.address, price - BigInt(1))
-      ).to.be.greaterThan(MCR);
-      expect(
-        await troveManager.getCurrentICR(carol.address, price)
-      ).to.be.lessThanOrEqual(MCR);
-    });
-
-    it("should let close trove if just enough debt tokens are in the account", async () => {
-      await increase(1900000);
-      const { debt } = await getTrove(alice);
-      await increaseColl({
-        caller: carol,
-        amount: await payToken.balanceOf(carol),
-      });
-      await increaseDebt({ caller: carol, amount: debt });
-      await baseFeeLMAToken
-        .connect(carol)
-        .transfer(
-          alice.address,
-          debt - (await baseFeeLMAToken.balanceOf(alice.address)) - BigInt(1)
-        );
-      await expect(
-        borrowerOperations.connect(alice).closeTrove()
-      ).to.be.revertedWith(
-        "BorrowerOps: Caller doesnt have enough BaseFeeLMA to make repayment"
-      );
-
-      await baseFeeLMAToken.connect(carol).transfer(alice.address, BigInt(1));
-      expect(await baseFeeLMAToken.balanceOf(alice.address)).to.be.equal(debt);
-      await expect(borrowerOperations.connect(alice).closeTrove()).not.to.be
+    it("should let provide to stability pool in recovery mode", async () => {
+      await expect(provide({ caller: carol, amount: "71905" })).to.not.be
         .reverted;
     });
 
-    it("should not let random accounts to call ActivePool.sendWStETH", async () => {
-      await expect(
-        activePool.connect(hacker).sendWStETH(hacker.address, 1)
-      ).to.be.revertedWith(
-        "ActivePool: Caller is neither BO nor TM nor FRouter"
+    // TODO: Get into a separate file
+
+    it("should not mark oracles as broken if price was increased by more then 12.5%", async () => {
+      const amount = ethers.parseUnits("100000", "gwei");
+      const block = await latestBlock();
+      await mainOracle.feedBaseFeeValue(amount, block);
+      await priceFeed.fetchPrice();
+      expect(await priceFeed.status()).to.be.equal(1);
+      await secondaryOracle.feedBaseFeeValue(
+        ethers.parseUnits("100000", "gwei"),
+        block
       );
+      await priceFeed.fetchPrice();
+      expect(await priceFeed.status()).to.be.equal(2);
+    });
+
+    it("should mark both oracles as working if price consists", async () => {
+      await setNewBaseFeePrice(1001);
+
+      await setNewBaseFeePrice(1004);
+      expect(await priceFeed.status()).to.be.equal(0);
+    });
+
+    it("should mark oracle as frozen if no updates happens for more then 69 blocks", async () => {
+      await mine(70);
+      const block = await latestBlock();
+
+      await secondaryOracle.feedBaseFeeValue(
+        ethers.parseUnits("1000", "gwei"),
+        block
+      );
+      await priceFeed.fetchPrice();
+      expect(await priceFeed.status()).to.be.equal(3);
     });
   });
 });

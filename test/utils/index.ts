@@ -9,7 +9,7 @@ import { parseEther } from "ethers";
 const { latestBlock } = time;
 
 export const setupContracts = async () => {
-  const [deployer, setter] = await getSigners({
+  const [deployer, setter, hacker, alice, bob, carol, dave] = await getSigners({
     fork: true,
   });
 
@@ -274,6 +274,12 @@ export const setupContracts = async () => {
       await borrowerOperations.getAddress(),
       await troveManager.getAddress()
     );
+
+  await payToken
+    .connect(dave)
+    .transfer(carol.address, await payToken.balanceOf(dave.address));
+
+  console.log(await payToken.balanceOf(carol.address));
 
   return [
     priceFeed,

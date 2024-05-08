@@ -2000,7 +2000,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint redeemedBaseFeeLMAFraction = _WStETHDrawn
             .mul(DECIMAL_PRECISION)
             .div(activePool.getWStETH() + defaultPool.getWStETH());
-
         // Hedgehog Updates: Remove division by BETA
         uint newBaseRate = decayedRedemptionBaseRate.add(
             redeemedBaseFeeLMAFraction
