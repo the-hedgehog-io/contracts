@@ -279,8 +279,6 @@ export const setupContracts = async () => {
     .connect(dave)
     .transfer(carol.address, await payToken.balanceOf(dave.address));
 
-  console.log(await payToken.balanceOf(carol.address));
-
   return [
     priceFeed,
     sortedTroves,
