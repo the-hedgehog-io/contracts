@@ -24,19 +24,21 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
 
     uint public constant _100pct = 1000000000000000000; // 1e18 == 100%
 
+    // HEDGEHOG UPDATES: Increased to 150%
     // Minimum collateral ratio for individual troves
     uint public constant MCR = 1500000000000000000; // 150%
 
+    // HEDGEHOG UPDATES: Increased to 200%
     // Critical system collateral ratio. If the system's total collateral ratio (TCR) falls below the CCR, Recovery Mode is triggered.
-    uint public immutable CCR; // 200%
+    uint public constant CCR = 2000000000000000000; // 200%
 
-    // HEDGEHOG: Decreased to 0.1 BFE
+    // HEDGEHOG UPDATES: Decreased to 100k wei
     // Amount of BaseFeeLMA to be locked in gas pool on opening troves
-    uint public immutable BaseFeeLMA_GAS_COMPENSATION;
+    uint public constant BaseFeeLMA_GAS_COMPENSATION = 100000;
 
-    // HEDGEHOG UPDATES: Decreased min net debt to 0.1 BFE
+    // HEDGEHOG UPDATES: Decreased to 350000000 BFE
     // Minimum amount of net BaseFeeLMA debt a trove must have
-    uint public immutable MIN_NET_DEBT;
+    uint public constant MIN_NET_DEBT = 350000000;
 
     uint public constant PERCENT_DIVISOR = 200; // dividing by 200 yields 0.5%
 
@@ -48,25 +50,15 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
 
     IPriceFeed public override priceFeed;
 
-    constructor(uint _gasComp, uint _minNetDebt, uint _CCR) {
-        BaseFeeLMA_GAS_COMPENSATION = _gasComp;
-        MIN_NET_DEBT = _minNetDebt;
-        CCR = _CCR;
-    }
-
     // --- Gas compensation functions ---
 
     // Returns the composite debt (drawn debt + gas compensation) of a trove, for the purpose of ICR calculation
-    // HEDGEHOG UPDATES:
-    // No longer deduct gas comp from a net debt
     function _getCompositeDebt(uint _debt) internal pure returns (uint) {
-        return _debt;
+        return _debt.add(BaseFeeLMA_GAS_COMPENSATION);
     }
 
-    // HEDGEHOG UPDATES:
-    // No longer deduct gas comp from a net debt
     function _getNetDebt(uint _debt) internal pure returns (uint) {
-        return _debt;
+        return _debt.sub(BaseFeeLMA_GAS_COMPENSATION);
     }
 
     // Return the amount of WStETH to be drawn from a trove's collateral and sent as gas compensation.

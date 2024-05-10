@@ -275,12 +275,6 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
     event HOGPaidToDepositor(address indexed _depositor, uint _HOG);
     event WStETHSent(address _to, uint _amount);
 
-    constructor(
-        uint _gasComp,
-        uint _minNetDebt,
-        uint _CCR
-    ) HedgehogBase(_gasComp, _minNetDebt, _CCR) {}
-
     // --- Contract setters ---
 
     /**

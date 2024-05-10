@@ -73,7 +73,7 @@ export const setupContracts = async () => {
   const troveManager = await (
     await (await ethers.getContractFactory("TroveManager"))
       .connect(deployer)
-      .deploy("50000", "50000", "5000000000000000000", 0)
+      .deploy(0)
   ).waitForDeployment();
 
   const activePool = await (
@@ -85,7 +85,7 @@ export const setupContracts = async () => {
   const stabilityPool = await (
     await (await ethers.getContractFactory("StabilityPool"))
       .connect(deployer)
-      .deploy("50000", "50000", "5000000000000000000")
+      .deploy()
   ).waitForDeployment();
 
   const defaultPool = await (
@@ -109,13 +109,13 @@ export const setupContracts = async () => {
   const borrowerOperations = await (
     await (await ethers.getContractFactory("BorrowerOperations"))
       .connect(deployer)
-      .deploy("50000", "50000", "5000000000000000000")
+      .deploy()
   ).waitForDeployment();
 
   const hintHelpers = await (
     await (await ethers.getContractFactory("HintHelpers"))
       .connect(deployer)
-      .deploy("50000", "50000", "5000000000000000000")
+      .deploy()
   ).waitForDeployment();
 
   const feesRouter = await (

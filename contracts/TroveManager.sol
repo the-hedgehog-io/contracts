@@ -293,12 +293,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         redeemCollateral
     }
 
-    constructor(
-        uint _gasComp,
-        uint _minNetDebt,
-        uint _CCR,
-        uint256 _bootsrapDaysAmount
-    ) HedgehogBase(_gasComp, _minNetDebt, _CCR) {
+    constructor(uint256 _bootsrapDaysAmount) {
         BOOTSTRAP_PERIOD = _bootsrapDaysAmount * 60 * 60 * 24;
         SYSTEM_DEPLOYMENT_TIME = block.timestamp;
     }
