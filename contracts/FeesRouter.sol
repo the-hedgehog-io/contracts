@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IBaseFeeLMAToken.sol";
 import "./interfaces/IActivePool.sol";
+import "hardhat/console.sol";
 
 error InvalidIndex();
 error InvalidAddress();
@@ -284,9 +285,11 @@ contract FeesRouter is AccessControl {
         FeeConfig memory config = debtFeeConfigs[
             (((_fee * 100) / _debt) % 5) * 5
         ];
+        console.log("1: ", _fee, _debt);
         uint256 amountA = _calculateAmount(_fee, config.amountA);
         uint256 amountB = _calculateAmount(_fee, config.amountB);
         uint256 amountC = _calculateAmount(_fee, config.amountC);
+        console.log("2: ", amountA, amountB, amountC);
 
         uint256 totalAmounts = amountA + amountB + amountC;
         if (totalAmounts < _fee) {
@@ -324,9 +327,11 @@ contract FeesRouter is AccessControl {
         FeeConfig memory config = collFeeConfigs[
             (((_fee * 100) / _debt) % 5) * 5
         ];
+        console.log("1: ", _fee, _debt);
         uint256 amountA = _calculateAmount(_fee, config.amountA);
         uint256 amountB = _calculateAmount(_fee, config.amountB);
         uint256 amountC = _calculateAmount(_fee, config.amountC);
+        console.log("2: ", amountA, amountB, amountC);
 
         uint256 totalAmounts = amountA + amountB + amountC;
         if (totalAmounts < _fee) {
