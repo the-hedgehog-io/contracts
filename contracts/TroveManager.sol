@@ -99,6 +99,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint stake;
         Status status;
         uint128 arrayIndex;
+        uint256 lastBlockUpdated; // Hedgehog Updates: New Field in the Trove structure that holds last block update of a trove. Keeps in place even if trove get's closed
     }
 
     mapping(address => Trove) public Troves;
@@ -1418,12 +1419,12 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             address nextUserToCheck = contractsCache.sortedTroves.getPrev(
                 currentBorrower
             );
+
             _applyPendingRewards(
                 contractsCache.activePool,
                 contractsCache.defaultPool,
                 currentBorrower
             );
-
             SingleRedemptionValues
                 memory singleRedemption = _redeemCollateralFromTrove(
                     contractsCache,
@@ -2365,11 +2366,24 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         return Troves[_borrower].coll;
     }
 
+    // Hedgehog Updates: New function that returns last block update number of a trove. This block is checked at the start of adjust, close and open functions.
+    function getTroveUpdateBlock(
+        address _borrower
+    ) external view returns (uint) {
+        return Troves[_borrower].lastBlockUpdated;
+    }
+
     // --- Trove property setters, called by BorrowerOperations ---
 
     function setTroveStatus(address _borrower, uint _num) external {
         _requireCallerIsBorrowerOperations();
         Troves[_borrower].status = Status(_num);
+    }
+
+    // Hedgehog Updates: New function that stores block update into a trove. This block is checked at the start of adjust, close and open functions.
+    function setTroveLastUpdatedBlock(address _borrower) external {
+        _requireCallerIsBorrowerOperations();
+        Troves[_borrower].lastBlockUpdated = block.number;
     }
 
     function increaseTroveColl(

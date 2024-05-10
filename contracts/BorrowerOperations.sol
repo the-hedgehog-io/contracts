@@ -13,6 +13,8 @@ import "./dependencies/CheckContract.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+error TroveAdjustedThisBlock();
+
 /**
  * @notice Fork of Liquity's BorrowerOperations. . Most of the Logic remains unchanged..
  * Changes to the contract:
@@ -204,6 +206,10 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _upperHint,
         address _lowerHint
     ) external {
+        // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
+        {
+            _checkAndSetUpdateBlock(msg.sender);
+        }
         ContractsCache memory contractsCache = ContractsCache(
             troveManager,
             activePool,
@@ -306,7 +312,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             BaseFeeLMA_GAS_COMPENSATION,
             0
         );
-
         emit TroveUpdated(
             msg.sender,
             vars.compositeDebt,
@@ -487,6 +492,10 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _lowerHint,
         uint _maxFeePercentage
     ) internal {
+        // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
+        {
+            _checkAndSetUpdateBlock(msg.sender);
+        }
         ContractsCache memory contractsCache = ContractsCache(
             troveManager,
             activePool,
@@ -624,6 +633,10 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     // Hedgehog Updates: Do not deduct gas fee compensation from trove Debt as user just received less tokens during position opening
     function closeTrove() external {
+        // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
+        {
+            _checkAndSetUpdateBlock(msg.sender);
+        }
         ITroveManager troveManagerCached = troveManager;
         IActivePool activePoolCached = activePool;
         IBaseFeeLMAToken baseFeeLMATokenCached = baseFeeLMAToken;
@@ -685,6 +698,14 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     }
 
     // --- Helper functions ---
+
+    // HedgehogUpdates: new private function, that checks if there was a transaction with a trove in the current block
+    function _checkAndSetUpdateBlock(address _borrower) private {
+        if (troveManager.getTroveUpdateBlock(_borrower) == block.number) {
+            revert TroveAdjustedThisBlock();
+        }
+        troveManager.setTroveLastUpdatedBlock(_borrower);
+    }
 
     // HEDGHEHOG UPDATES:
     // No longer passing token address param as it's not needed anymore
