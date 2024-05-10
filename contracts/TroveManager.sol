@@ -13,7 +13,6 @@ import "./dependencies/HedgehogBase.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
-import "hardhat/console.sol";
 
 /**
  * @notice Fork of Liquity's TroveManager. Most of the Logic remains unchanged.
@@ -100,7 +99,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint stake;
         Status status;
         uint128 arrayIndex;
-        uint256 lastBlockUpdated;
+        uint256 lastBlockUpdated; // Hedgehog Updates: New Field in the Trove structure that holds last block update of a trove. Keeps in place even if trove get's closed
     }
 
     mapping(address => Trove) public Troves;

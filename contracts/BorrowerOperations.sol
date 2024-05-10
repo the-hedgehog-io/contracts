@@ -12,7 +12,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "hardhat/console.sol";
 
 error TroveAdjustedThisBlock();
 
@@ -207,6 +206,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _upperHint,
         address _lowerHint
     ) external {
+        // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
         {
             _checkAndSetUpdateBlock(msg.sender);
         }
@@ -492,6 +492,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _lowerHint,
         uint _maxFeePercentage
     ) internal {
+        // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
         {
             _checkAndSetUpdateBlock(msg.sender);
         }
@@ -632,6 +633,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     // Hedgehog Updates: Do not deduct gas fee compensation from trove Debt as user just received less tokens during position opening
     function closeTrove() external {
+        // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
         {
             _checkAndSetUpdateBlock(msg.sender);
         }
