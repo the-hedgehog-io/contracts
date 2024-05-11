@@ -1,16 +1,61 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
+import { ethers } from "hardhat";
 import {
   ActivePool,
   ActivePoolTestSetter,
-  BaseFeeLMAToken,
   FeesRouter,
   FeesRouterTester,
   TERC20,
-  TroveManager,
 } from "../../../typechain-types";
-import { ethers } from "hardhat";
 
 const activePoolBalance = ethers.parseEther("1000000000");
+
+type SingleAmountConfig = {
+  range: string;
+  amountA: number;
+  amountB: number;
+  amountC: number;
+};
+
+type Shift<A extends Array<any>> = ((...args: A) => void) extends (
+  ...args: [A[0], ...infer R]
+) => void
+  ? R
+  : never;
+
+type GrowExpRev<
+  A extends Array<any>,
+  N extends number,
+  P extends Array<Array<any>>
+> = A["length"] extends N
+  ? A
+  : {
+      0: GrowExpRev<[...A, ...P[0]], N, P>;
+      1: GrowExpRev<A, N, Shift<P>>;
+    }[[...A, ...P[0]][N] extends undefined ? 0 : 1];
+
+type GrowExp<
+  A extends Array<any>,
+  N extends number,
+  P extends Array<Array<any>>
+> = A["length"] extends N
+  ? A
+  : {
+      0: GrowExp<[...A, ...A], N, [A, ...P]>;
+      1: GrowExpRev<A, N, P>;
+    }[[...A, ...A][N] extends undefined ? 0 : 1];
+
+type MapItemType<T, I> = { [K in keyof T]: I };
+
+export type FixedSizeArray<T, N extends number> = N extends 0
+  ? []
+  : MapItemType<GrowExp<[0], N, []>, T>;
+
+type ReceiverConfig = {
+  addressA: string;
+  addressB: string;
+  addressC: string;
+};
 
 describe("Hedgehog Core Contracts Smoke tests", () => {
   context("Fees Router Unis Tests", () => {
@@ -101,13 +146,36 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       );
     });
 
+    type AmountConfigs = FixedSizeArray<SingleAmountConfig, 20>;
+    // TODO: perhaps requires 19 instead of 20 arrays
+    const collAmountConfigs: AmountConfigs = [
+      {
+        range: "0-5",
+        amountA: 90,
+        amountB: 4,
+        amountC: 6,
+      },
+    ];
+
     it("should allow to distribute fees to BO addressed account case: 5%", async () => {
       // fails on 5, but works well on 1
       await feesRouterTester.triggerCollFee(
         ethers.parseEther("100"),
         ethers.parseEther("1")
       );
-      console.log("balance of alice", await payToken.balanceOf(alice.address));
+
+      const receiverConfig: ReceiverConfig = {
+        addressA: alice.address,
+        addressB: bob.address,
+        addressC: carol.address,
+      };
+
+      const foo = async (_percentage, _amountA, _amountB, _amountC) => {};
+
+      collAmountConfigs.map(async (config, index) => {
+        // TODO: only accept numbers and internally call required function on the contract level
+        await foo(index * 5, config.amountA, config.amountB, config.amountC);
+      });
     });
   });
 });
