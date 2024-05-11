@@ -25,6 +25,25 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     let payToken: TERC20;
     let activePoolTestSetter: ActivePoolTestSetter;
 
+    /**
+     * Write complete documentation on how ALL functions work
+     * Fees Router contract intends to route fees according to TxDebt / Fee ratio. Fee Router has a config for each 5% range: 0-5, 5-10 and so on. Config stores routes that lead certain percentage of FEE to a consecutive address.
+     * Example: Config has a setup to transfer 90% of Fees to Alice and 10% to transfer to bob. If incoming TxDebt is 1000 and fee is 10 - then it is expect that alice receives 9 and bob receives 1 of the token (might be collateral, might be debt depending on the route)
+     *
+     * SOLIDITY:
+     * 1) FIX THE SOLIDITY FORMULA IN CONTRACT THAT LEADS TO INCORRECT OUTCOME YOURSELF
+     * 2) WRITE A REVERTING CHECK, THAT WOULD REVERT WHOLE TX IF THERE IS A CONFIG MISSING FOR A CERTAIN RANGE
+     * How to fix 5.31?
+     *
+     * 0) Write a typescript Debt & Fee routings. They must be each unique for each range from 0 to 100 (step is 5).
+     * 1) Write a function that conveniently sets up range configs for both Debt & Coll function
+     * 1) Set up configs for each range from 0 to 100 (step is 5).
+     * 2) Write a function that conveniently triggers fees for the given range and performs expects with comparing that balances received correct amounts according to their config. Check config programmatically
+     * 3) Trigger all fees for al set ranges. Trigger 2 sets of each debt & coll of fees manually just to be sure
+     * 4) Reach 100% coverage in the whole test. Write meaningful tests that would fail correctly for each revert functions
+     *
+     */
+
     before(async () => {
       [deployer, alice, bob, carol] = await ethers.getSigners();
 
