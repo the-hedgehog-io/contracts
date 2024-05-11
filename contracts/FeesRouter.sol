@@ -283,7 +283,8 @@ contract FeesRouter is AccessControl {
         uint256 _fee
     ) external onlyHDGProtocol {
         FeeConfig memory config = debtFeeConfigs[
-            (((_fee * 100) / _debt) % 5) * 5
+           _getPctRange(_debt, _fee);
+            // (((_fee * 100) / _debt) % 5) * 5
         ];
         console.log("1: ", _fee, _debt);
         uint256 amountA = _calculateAmount(_fee, config.amountA);
@@ -325,7 +326,8 @@ contract FeesRouter is AccessControl {
         uint256 _fee
     ) external onlyHDGProtocol {
         FeeConfig memory config = collFeeConfigs[
-            (((_fee * 100) / _debt) % 5) * 5
+            _getPctRange(_debt, _fee);
+            // (((_fee * 100) / _debt) % 5) * 5
         ];
         console.log("1: ", _fee, _debt);
         uint256 amountA = _calculateAmount(_fee, config.amountA);
@@ -356,6 +358,13 @@ contract FeesRouter is AccessControl {
                 _activePool.sendWStETH(config.addressC, amountC);
             }
         }
+    }
+
+    function _getPctRange(
+        uint256 _debt,
+        uint256 _fee
+    ) internal pure returns (uint256) {
+        return 1;
     }
 
     function _calculateAmount(

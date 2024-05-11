@@ -66,8 +66,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     let feesRouterTester: FeesRouterTester;
     let feesRouter: FeesRouter;
     let activePool: ActivePool;
-    let bfeToken: TERC20;
-    let payToken: TERC20;
+    let debtToken: TERC20;
+    let collToken: TERC20;
     let activePoolTestSetter: ActivePoolTestSetter;
 
     /**
@@ -77,7 +77,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
      *
      * SOLIDITY:
      * 1) FIX THE SOLIDITY FORMULA IN CONTRACT THAT LEADS TO INCORRECT OUTCOME YOURSELF
-     * 2) WRITE A REVERTING CHECK, THAT WOULD REVERT WHOLE TX IF THERE IS A CONFIG MISSING FOR A CERTAIN RANGE
+     
+     * 2) WRITE A REVERTING CHECK, THAT WOULD REVERT WHOLE TX IF THERE IS A CONFIG MISSING FOR A CERTAIN RANGE (if mapping returns range address 0 - revert  )
      * How to fix 5.31?
      *
      * 0) Write a typescript Debt & Fee routings. They must be each unique for each range from 0 to 100 (step is 5).
@@ -96,11 +97,11 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         await ethers.getContractFactory("ActivePool")
       ).deploy();
 
-      bfeToken = await (
+      debtToken = await (
         await ethers.getContractFactory("TERC20")
       ).deploy("Test1", "t1", 1000000000);
 
-      payToken = await (
+      collToken = await (
         await ethers.getContractFactory("TERC20")
       ).deploy("Test1", "t1", 1000000000);
 
@@ -121,16 +122,16 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         activePoolTestSetter.target,
         activePoolTestSetter.target,
         activePoolTestSetter.target,
-        payToken.target,
+        collToken.target,
         feesRouter.target
       );
 
       await activePoolTestSetter.increasePayTokenBalance(activePoolBalance);
-      await payToken.transfer(activePool.target, activePoolBalance);
+      await collToken.transfer(activePool.target, activePoolBalance);
 
       await feesRouter.setAddresses(
         activePool.target,
-        bfeToken.target,
+        debtToken.target,
         feesRouterTester.target,
         activePoolTestSetter.target
       );
