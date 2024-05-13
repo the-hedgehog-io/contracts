@@ -385,7 +385,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint _BaseFeeLMAInStabPool
     ) internal returns (LiquidationValues memory singleLiquidation) {
         LocalVariables_InnerSingleLiquidateFunction memory vars;
-
         (
             singleLiquidation.entireTroveDebt,
             singleLiquidation.entireTroveColl,
@@ -1835,7 +1834,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         Troves[_borrower].status = closedStatus;
         Troves[_borrower].coll = 0;
         Troves[_borrower].debt = 0;
-
         rewardSnapshots[_borrower].WStETH = 0;
         rewardSnapshots[_borrower].BaseFeeLMADebt = 0;
 
