@@ -282,23 +282,21 @@ contract FeesRouter is AccessControl {
         uint256 _debt,
         uint256 _fee
     ) external onlyHDGProtocol {
-        FeeConfig memory config = debtFeeConfigs[
-           _getPctRange(_debt, _fee);
-            // (((_fee * 100) / _debt) % 5) * 5
-        ];
-        console.log("1: ", _fee, _debt);
+        FeeConfig memory config = debtFeeConfigs[_getPctRange(_debt, _fee)];
+
         uint256 amountA = _calculateAmount(_fee, config.amountA);
         uint256 amountB = _calculateAmount(_fee, config.amountB);
         uint256 amountC = _calculateAmount(_fee, config.amountC);
-        console.log("2: ", amountA, amountB, amountC);
 
         uint256 totalAmounts = amountA + amountB + amountC;
-        if (totalAmounts < _fee) {
-            // Usually, that means that DAO treasure gets the extra dust
+        if (totalAmounts != _fee) {
             amountA = amountA + _fee - totalAmounts;
-        } else if (totalAmounts > _fee) {
-            amountA = amountA + totalAmounts - _fee;
         }
+        if (
+            config.addressA == address(0) &&
+            config.addressB == address(0) &&
+            config.addressC == address(0)
+        ) revert("Configuration missing for the specified range");
 
         IBaseFeeLMAToken _baseFeeLMAToken = baseFeeLMAToken;
         if ((amountA + amountB + amountC) != _fee) {
@@ -325,23 +323,21 @@ contract FeesRouter is AccessControl {
         uint256 _debt,
         uint256 _fee
     ) external onlyHDGProtocol {
-        FeeConfig memory config = collFeeConfigs[
-            _getPctRange(_debt, _fee);
-            // (((_fee * 100) / _debt) % 5) * 5
-        ];
-        console.log("1: ", _fee, _debt);
+        FeeConfig memory config = collFeeConfigs[_getPctRange(_debt, _fee)];
         uint256 amountA = _calculateAmount(_fee, config.amountA);
         uint256 amountB = _calculateAmount(_fee, config.amountB);
         uint256 amountC = _calculateAmount(_fee, config.amountC);
-        console.log("2: ", amountA, amountB, amountC);
 
         uint256 totalAmounts = amountA + amountB + amountC;
-        if (totalAmounts < _fee) {
-            // Usually, that means that DAO treasure gets the extra dust
+        if (totalAmounts != _fee) {
             amountA = amountA + _fee - totalAmounts;
-        } else if (totalAmounts > _fee) {
-            amountA = amountA + totalAmounts - _fee;
         }
+
+        if (
+            config.addressA == address(0) &&
+            config.addressB == address(0) &&
+            config.addressC == address(0)
+        ) revert("Configuration missing for the specified range");
 
         IActivePool _activePool = activePool;
         if ((amountA + amountB + amountC) != _fee) {
@@ -364,7 +360,9 @@ contract FeesRouter is AccessControl {
         uint256 _debt,
         uint256 _fee
     ) internal pure returns (uint256) {
-        return 1;
+        return
+            (((_fee * 100) / _debt) / 5 + ((((_fee * 100) / _debt) % 5)) / 3) *
+            5;
     }
 
     function _calculateAmount(

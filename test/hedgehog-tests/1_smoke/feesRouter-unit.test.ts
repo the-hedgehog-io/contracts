@@ -78,7 +78,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
      * SOLIDITY:
      * 1) FIX THE SOLIDITY FORMULA IN CONTRACT THAT LEADS TO INCORRECT OUTCOME YOURSELF
      
-     * 2) WRITE A REVERTING CHECK, THAT WOULD REVERT WHOLE TX IF THERE IS A CONFIG MISSING FOR A CERTAIN RANGE (if mapping returns range address 0 - revert  )
+     * 2) WRITE A REVERTING CHECK, THAT WOULD REVERT WHOLE TX IF THERE IS A CONFIG MISSING FOR A CERTAIN RANGE (if range mapping returns address 0 - revert  )
      * How to fix 5.31?
      *
      * 0) Write a typescript Debt & Fee routings. They must be each unique for each range from 0 to 100 (step is 5).
@@ -145,38 +145,70 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         bob.address,
         carol.address
       );
+      await feesRouter.setCollFeeConfig(
+        10,
+        90,
+        5,
+        5,
+        alice.address,
+        bob.address,
+        carol.address
+      );
+      await feesRouter.setCollFeeConfig(
+        15,
+        85,
+        10,
+        5,
+        alice.address,
+        bob.address,
+        carol.address
+      );
     });
 
-    type AmountConfigs = FixedSizeArray<SingleAmountConfig, 20>;
+    type AmountConfigs = FixedSizeArray<SingleAmountConfig, 21>;
     // TODO: perhaps requires 19 instead of 20 arrays
     const collAmountConfigs: AmountConfigs = [
-      {
-        range: "0-5",
-        amountA: 90,
-        amountB: 4,
-        amountC: 6,
-      },
+      { range: "0", amountA: 0, amountB: 0, amountC: 0 },
+      { range: "5", amountA: 90, amountB: 10, amountC: 0 },
+      { range: "10", amountA: 90, amountB: 5, amountC: 5 },
+      { range: "15", amountA: 85, amountB: 10, amountC: 5 },
+      { range: "20", amountA: 70, amountB: 12, amountC: 18 },
+      { range: "25", amountA: 65, amountB: 14, amountC: 21 },
+      { range: "30", amountA: 60, amountB: 16, amountC: 24 },
+      { range: "35", amountA: 55, amountB: 18, amountC: 27 },
+      { range: "40", amountA: 50, amountB: 20, amountC: 30 },
+      { range: "45", amountA: 45, amountB: 4, amountC: 6 },
+      { range: "50", amountA: 40, amountB: 4, amountC: 6 },
+      { range: "55", amountA: 35, amountB: 4, amountC: 6 },
+      { range: "60", amountA: 30, amountB: 4, amountC: 6 },
+      { range: "65", amountA: 25, amountB: 4, amountC: 6 },
+      { range: "70", amountA: 20, amountB: 4, amountC: 6 },
+      { range: "75", amountA: 15, amountB: 4, amountC: 6 },
+      { range: "80", amountA: 10, amountB: 4, amountC: 6 },
+      { range: "85", amountA: 90, amountB: 4, amountC: 6 },
+      { range: "90", amountA: 90, amountB: 5, amountC: 6 },
+      { range: "95", amountA: 6, amountB: 4, amountC: 90 },
+      { range: "100", amountA: 6, amountB: 4, amountC: 90 },
     ];
-
+    // const createConfig = await feesRouter.setCollFeeConfig(collAmountConfigs, 98, 1, 1, alice.address, bob.address, carol.address)
     it("should allow to distribute fees to BO addressed account case: 5%", async () => {
       // fails on 5, but works well on 1
       await feesRouterTester.triggerCollFee(
         ethers.parseEther("100"),
-        ethers.parseEther("1")
+        ethers.parseEther("11")
       );
-
-      const receiverConfig: ReceiverConfig = {
-        addressA: alice.address,
-        addressB: bob.address,
-        addressC: carol.address,
-      };
-
-      const foo = async (_percentage, _amountA, _amountB, _amountC) => {};
-
-      collAmountConfigs.map(async (config, index) => {
-        // TODO: only accept numbers and internally call required function on the contract level
-        await foo(index * 5, config.amountA, config.amountB, config.amountC);
-      });
     });
+
+    // const receiverConfig: ReceiverConfig = {
+    //   addressA: alice.address,
+    //   addressB: bob.address,
+    //   addressC: carol.address,
+    // };
+
+    // const foo = async (_percentage, _amountA, _amountB, _amountC) => {};
+
+    // collAmountConfigs.map(async (config, index) => {
+    // TODO: only accept numbers and internally call required function on the contract level
+    // await foo(index * 5, config.amountA, config.amountB, config.amountC);
   });
 });
