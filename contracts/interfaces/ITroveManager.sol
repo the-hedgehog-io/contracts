@@ -188,6 +188,10 @@ interface ITroveManager is IHedgehogBase {
 
     function getTroveColl(address _borrower) external view returns (uint);
 
+    function getTroveUpdateBlock(
+        address _borrower
+    ) external view returns (uint256);
+
     function setTroveStatus(address _borrower, uint num) external;
 
     function increaseTroveColl(
@@ -209,6 +213,8 @@ interface ITroveManager is IHedgehogBase {
         address _borrower,
         uint _collDecrease
     ) external returns (uint);
+
+    function setTroveLastUpdatedBlock(address _borrower) external;
 
     function getTCR(uint _price) external view returns (uint);
 

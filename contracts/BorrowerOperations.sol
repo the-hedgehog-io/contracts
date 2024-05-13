@@ -13,6 +13,8 @@ import "./dependencies/CheckContract.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+error TroveAdjustedThisBlock();
+
 /**
  * @notice Fork of Liquity's BorrowerOperations. . Most of the Logic remains unchanged..
  * Changes to the contract:
@@ -22,6 +24,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * - Updated variable names and docs to refer to BaseFeeLMA token and wwstETH as a collateral
  * - Logic updates with borrowing fees calculation and their distribution
  * - Removed Native Liquity Protocol Token Staking
+ * - Remove _getUSDValue view method as it's not used anymore
  * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  */
 
@@ -119,12 +122,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint _BaseFeeLMAFee
     );
 
-    constructor(
-        uint _gasComp,
-        uint _minNetDebt,
-        uint _CCR
-    ) HedgehogBase(_gasComp, _minNetDebt, _CCR) {}
-
     // --- Dependency setters ---
 
     /**
@@ -203,6 +200,10 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _upperHint,
         address _lowerHint
     ) external {
+        // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
+        {
+            _checkAndSetUpdateBlock(msg.sender);
+        }
         ContractsCache memory contractsCache = ContractsCache(
             troveManager,
             activePool,
@@ -229,8 +230,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         // vars.netDebt = vars.netDebt.sub(vars.BaseFeeLMAFee);
 
         _requireAtLeastMinNetDebt(vars.netDebt);
-        // HEDGEHOG UPDATES: composite debt now is just BaseFeeLMA amount. Without borrowing fee and without gas comp
-        vars.compositeDebt = vars.netDebt;
+        vars.compositeDebt = vars.netDebt + BaseFeeLMA_GAS_COMPENSATION;
         assert(vars.compositeDebt > 0);
 
         vars.ICR = LiquityMath._computeCR(
@@ -285,14 +285,12 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         ) {
             revert("BO: Fee exceeds gain");
         }
-        // Hedgehog Updates: Now amount transferred to the user is decrease by Fee and Gas Compensation reserve
+        // Hedgehog Updates: Now amount transferred to the user is decreased by Fee
         _withdrawBaseFeeLMA(
             contractsCache.activePool,
             contractsCache.baseFeeLMAToken,
             msg.sender,
-            _BaseFeeLMAAmount -
-                vars.BaseFeeLMAFee -
-                BaseFeeLMA_GAS_COMPENSATION,
+            _BaseFeeLMAAmount - vars.BaseFeeLMAFee,
             vars.netDebt
         );
 
@@ -303,9 +301,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             contractsCache.baseFeeLMAToken,
             gasPoolAddress,
             BaseFeeLMA_GAS_COMPENSATION,
-            0
+            BaseFeeLMA_GAS_COMPENSATION
         );
-
         emit TroveUpdated(
             msg.sender,
             vars.compositeDebt,
@@ -486,6 +483,10 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _lowerHint,
         uint _maxFeePercentage
     ) internal {
+        // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
+        {
+            _checkAndSetUpdateBlock(msg.sender);
+        }
         ContractsCache memory contractsCache = ContractsCache(
             troveManager,
             activePool,
@@ -623,6 +624,10 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     // Hedgehog Updates: Do not deduct gas fee compensation from trove Debt as user just received less tokens during position opening
     function closeTrove() external {
+        // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
+        {
+            _checkAndSetUpdateBlock(msg.sender);
+        }
         ITroveManager troveManagerCached = troveManager;
         IActivePool activePoolCached = activePool;
         IBaseFeeLMAToken baseFeeLMATokenCached = baseFeeLMAToken;
@@ -639,7 +644,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         _requireSufficientBaseFeeLMABalance(
             baseFeeLMATokenCached,
             msg.sender,
-            debt // Hedgehog Updates: do not deduct gas comp anymore
+            debt.sub(BaseFeeLMA_GAS_COMPENSATION)
         );
 
         uint newTCR = _getNewTCRFromTroveChange(
@@ -656,13 +661,12 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         emit TroveUpdated(msg.sender, 0, 0, 0, BorrowerOperation.closeTrove);
 
-        // Hedgehog Updates: No longer deducts gas comp from the repayment as it's not included into the debt during the initial mint
         // Burn the repaid BaseFeeLMA from the user's balance and the gas compensation from the Gas Pool
         _repayBaseFeeLMA(
             activePoolCached,
             baseFeeLMATokenCached,
             msg.sender,
-            debt
+            debt.sub(BaseFeeLMA_GAS_COMPENSATION)
         );
         _repayBaseFeeLMA(
             activePoolCached,
@@ -684,6 +688,14 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     }
 
     // --- Helper functions ---
+
+    // HedgehogUpdates: new private function, that checks if there was a transaction with a trove in the current block
+    function _checkAndSetUpdateBlock(address _borrower) private {
+        if (troveManager.getTroveUpdateBlock(_borrower) == block.number) {
+            revert TroveAdjustedThisBlock();
+        }
+        troveManager.setTroveLastUpdatedBlock(_borrower);
+    }
 
     // HEDGHEHOG UPDATES:
     // No longer passing token address param as it's not needed anymore
@@ -710,15 +722,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         feesRouter.distributeDebtFee(_BaseFeeLMAAmount, BaseFeeLMAFee);
 
         return BaseFeeLMAFee;
-    }
-
-    function _getUSDValue(
-        uint _coll,
-        uint _price
-    ) internal pure returns (uint) {
-        uint usdValue = _price.mul(_coll).div(DECIMAL_PRECISION);
-
-        return usdValue;
     }
 
     function _getCollChange(
@@ -975,13 +978,12 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
     }
 
-    // Hedgehog updates: not subtracting gas compensation from the debt
     function _requireValidBaseFeeLMARepayment(
         uint _currentDebt,
         uint _debtRepayment
     ) internal pure {
         require(
-            _debtRepayment <= _currentDebt,
+            _debtRepayment <= _currentDebt.sub(BaseFeeLMA_GAS_COMPENSATION),
             "BorrowerOps: Amount repaid must not be larger than the Trove's debt"
         );
     }

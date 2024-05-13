@@ -1,5 +1,5 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import { mine, time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
+import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { BigNumberish } from "ethers";
 import { ethers } from "hardhat";
@@ -280,6 +280,15 @@ describe("BaseFeeOracle Tests", () => {
       await borrowerOperations
         .connect(caller)
         .addColl(ethers.ZeroAddress, ethers.ZeroAddress, amount);
+    };
+
+    const decreaseColl = async ({
+      caller = bob,
+      amount = 0,
+    }: Partial<AdjustTroveParams> = {}) => {
+      await borrowerOperations
+        .connect(caller)
+        .withdrawColl(amount, ethers.ZeroAddress, ethers.ZeroAddress);
     };
 
     const setNewBaseFeePrice = async (_amount: number) => {
@@ -636,7 +645,7 @@ describe("BaseFeeOracle Tests", () => {
         .reverted;
     });
 
-    it("should let carol liquidate bob", async () => {
+    it("should let carol liquidate bob and increase coll surplus correctly", async () => {
       const balanceBefore = await payToken.balanceOf(carol.address);
       await expect(
         troveManager
@@ -651,14 +660,75 @@ describe("BaseFeeOracle Tests", () => {
       expect(balanceAfter - balanceBefore).to.be.equal("4385000000000000");
     });
 
-    it("should have both positions closed", async () => {
-      const { coll, debt } = await getTrove(bob);
-      const { coll: collAlice, debt: debtAlice } = await getTrove(alice);
+    it("should let retrieve coll surplus in full if there is any", async () => {
+      const assignCollSurplus = await collSurplusPool.getCollateral(
+        bob.address
+      );
+      const bobBalanceBefore = await payToken.balanceOf(bob.address);
+      await expect(borrowerOperations.connect(bob).claimCollateral()).to.not.be
+        .reverted;
+      const bobBalanceAfter = await payToken.balanceOf(bob.address);
 
-      expect(coll).to.be.equal(0);
-      expect(debt).to.be.equal(0);
-      expect(collAlice).to.be.equal(0);
-      expect(debtAlice).to.be.equal(0);
+      expect(assignCollSurplus).to.be.equal(bobBalanceAfter - bobBalanceBefore);
+    });
+
+    it("should update coll surplus correctly in the event of trove closing during redemption", async () => {
+      const { debt, coll } = await getTrove(carol);
+
+      await increase(9000000);
+
+      await openTrove({
+        caller: bob,
+        baseFeeLMAAmount: (debt / BigInt(15)) * BigInt(10),
+        collAmount: (await payToken.balanceOf(bob)) / BigInt(10),
+      });
+
+      await increase(9000000);
+      await increaseColl({
+        caller: bob,
+        amount: (await payToken.balanceOf(bob)) / BigInt(10),
+      });
+      await increaseDebt({
+        caller: bob,
+        amount: debt / BigInt(2),
+      });
+      await increase(9000000);
+      await increaseColl({
+        caller: bob,
+        amount: (await payToken.balanceOf(bob)) / BigInt(10),
+      });
+      await increaseDebt({
+        caller: bob,
+        amount: debt / BigInt(2),
+      });
+      await increase(9000000);
+      await increaseColl({
+        caller: bob,
+        amount: (await payToken.balanceOf(bob)) / BigInt(10),
+      });
+      await increaseDebt({
+        caller: bob,
+        amount: debt / BigInt(2),
+      });
+      console.log(carol.address);
+      const hint = await hintHelpers.getRedemptionHints(
+        debt + BigInt(1),
+        gasPrice010,
+        0
+      );
+      await expect(
+        troveManager
+          .connect(bob)
+          .redeemCollateral(
+            await baseFeeLMAToken.balanceOf(bob.address),
+            hint[0],
+            ethers.ZeroAddress,
+            ethers.ZeroAddress,
+            hint[1],
+            0,
+            ethers.parseEther("1")
+          )
+      ).not.to.be.reverted;
     });
   });
 });

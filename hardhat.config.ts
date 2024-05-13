@@ -14,7 +14,7 @@ const newAccounts =
     ? [process.env.PK_DEPLOYER as string]
     : [];
 
-task("deploy:export", "Export deployment data", async (_, hre, runSuper) => {
+task("deploy:export", "Export deployment data", async (_, hre) => {
   console.log("Exporting deployment data...");
   await exportDeployment(hre);
   console.log("Deployment data exported!");
@@ -98,7 +98,7 @@ const config: HardhatUserConfig = {
   mocha: { timeout: 12000000 },
 
   gasReporter: {
-    enabled: process.env.REPORT_GAS == "true" ? true : false,
+    enabled: false,
   },
 
   namedAccounts: {
