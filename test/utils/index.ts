@@ -9,23 +9,40 @@ import { parseEther } from "ethers";
 const { latestBlock } = time;
 
 export const setupContracts = async () => {
-  const [deployer, setter, hacker, alice, bob, carol, dave] = await getSigners({
-    fork: true,
+  const [deployer, setter, hacker, alice, bob, carol] = await getSigners({
+    fork: false,
   });
 
-  const payToken = await ethers.getContractAt(
-    "ERC20Mock",
-    "0x5979D7b546E38E414F7E9822514be443A4800529" // WSTETH
-  );
+  // const payToken = await ethers.getContractAt(
+  //   "ERC20Mock",
+  //   "0x5979D7b546E38E414F7E9822514be443A4800529" // WSTETH
+  // );
 
   // DEPLOYMENT OF TEST TOKEN IN CASE OF TESTS ON A LOCAL NETWORK
-  // const payToken = await (
-  //   await ethers.getContractFactory("ERC20Mock")
-  // ).deploy("name", "symbol", deployer.address, ethers.parseEther("1000000000"));
-  // await payToken.transfer(hacker.address, ethers.parseEther("10000"));
-  // await payToken.transfer(alice.address, ethers.parseEther("10000"));
-  // await payToken.transfer(bob.address, ethers.parseEther("10000"));
-  // await payToken.transfer(carol.address, ethers.parseEther("10000"));
+  const payToken = await (
+    await ethers.getContractFactory("ERC20Mock")
+  ).deploy(
+    "name",
+    "symbol",
+    deployer.address,
+    ethers.parseEther("1000000000000000000000000000")
+  );
+  await payToken.transfer(
+    hacker.address,
+    ethers.parseEther("100000000000000000000000000")
+  );
+  await payToken.transfer(
+    alice.address,
+    ethers.parseEther("100000000000000000000000000")
+  );
+  await payToken.transfer(
+    bob.address,
+    ethers.parseEther("100000000000000000000000000")
+  );
+  await payToken.transfer(
+    carol.address,
+    ethers.parseEther("100000000000000000000000000")
+  );
 
   const mainOracle = await (
     await (await ethers.getContractFactory("BaseFeeOracle"))
@@ -73,7 +90,7 @@ export const setupContracts = async () => {
   const troveManager = await (
     await (await ethers.getContractFactory("TroveManager"))
       .connect(deployer)
-      .deploy("50000", "50000", "5000000000000000000", 0)
+      .deploy(0)
   ).waitForDeployment();
 
   const activePool = await (
@@ -85,7 +102,7 @@ export const setupContracts = async () => {
   const stabilityPool = await (
     await (await ethers.getContractFactory("StabilityPool"))
       .connect(deployer)
-      .deploy("50000", "50000", "5000000000000000000")
+      .deploy()
   ).waitForDeployment();
 
   const defaultPool = await (
@@ -109,13 +126,13 @@ export const setupContracts = async () => {
   const borrowerOperations = await (
     await (await ethers.getContractFactory("BorrowerOperations"))
       .connect(deployer)
-      .deploy("50000", "50000", "5000000000000000000")
+      .deploy()
   ).waitForDeployment();
 
   const hintHelpers = await (
     await (await ethers.getContractFactory("HintHelpers"))
       .connect(deployer)
-      .deploy("50000", "50000", "5000000000000000000")
+      .deploy()
   ).waitForDeployment();
 
   const feesRouter = await (
@@ -275,10 +292,6 @@ export const setupContracts = async () => {
       await troveManager.getAddress()
     );
 
-  await payToken
-    .connect(dave)
-    .transfer(carol.address, await payToken.balanceOf(dave.address));
-
   return [
     priceFeed,
     sortedTroves,
@@ -313,7 +326,8 @@ export const getSigners = async ({ fork }: { fork?: boolean } = {}) => {
     alice: SignerWithAddress,
     bob: SignerWithAddress,
     carol: SignerWithAddress,
-    dave: SignerWithAddress;
+    dave: SignerWithAddress,
+    eric: SignerWithAddress;
   if (fork) {
     const deployerAddress = "0xbb0b4642492b275f154e415fc52dacc931103fd9";
     const setterAddress = "0xd26d87bcd992d89954fb33ce316e1b9acab30ed5";
