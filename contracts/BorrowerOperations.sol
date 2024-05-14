@@ -964,14 +964,14 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
     }
 
-    function _requireNewTCRisAboveCCR(uint _newTCR) internal view {
+    function _requireNewTCRisAboveCCR(uint _newTCR) internal pure {
         require(
             _newTCR >= CCR,
             "BorrowerOps: An operation that would result in TCR < CCR is not permitted"
         );
     }
 
-    function _requireAtLeastMinNetDebt(uint _netDebt) internal view {
+    function _requireAtLeastMinNetDebt(uint _netDebt) internal pure {
         require(
             _netDebt >= MIN_NET_DEBT,
             "BorrowerOps: Trove's net debt must be greater than minimum"

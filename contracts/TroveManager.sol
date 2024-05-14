@@ -471,6 +471,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
         // If ICR <= 100%, purely redistribute the Trove across all active Troves
         if (_ICR <= _100pct) {
+            console.log("recovery liq1", _borrower);
             _movePendingTroveRewardsToActivePool(
                 _activePool,
                 _defaultPool,
@@ -502,6 +503,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
             // If 100% < ICR < MCR, offset as much as possible, and redistribute the remainder
         } else if ((_ICR > _100pct) && (_ICR < MCR)) {
+            console.log("recovery liq2");
             _movePendingTroveRewardsToActivePool(
                 _activePool,
                 _defaultPool,
@@ -546,6 +548,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             (_ICR < _TCR) &&
             (singleLiquidation.entireTroveDebt <= _BaseFeeLMAInStabPool)
         ) {
+            console.log("recovery liq3", _borrower);
             _movePendingTroveRewardsToActivePool(
                 _activePool,
                 _defaultPool,
@@ -563,6 +566,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
             _closeTrove(_borrower, Status.closedByLiquidation);
             if (singleLiquidation.collSurplus > 0) {
+                console.log("surplus pool dis", singleLiquidation.collSurplus);
                 collSurplusPool.accountSurplus(
                     _borrower,
                     singleLiquidation.collSurplus
@@ -1996,12 +2000,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint redeemedBaseFeeLMAFraction = _WStETHDrawn
             .mul(DECIMAL_PRECISION)
             .div(activePool.getWStETH() + defaultPool.getWStETH());
-        console.log(
-            "ARRRR",
-            _WStETHDrawn,
-            activePool.getWStETH() + defaultPool.getWStETH()
-        );
-        console.log(decayedRedemptionBaseRate);
 
         // Hedgehog Updates: Remove division by BETA
         uint newBaseRate = decayedRedemptionBaseRate.add(
