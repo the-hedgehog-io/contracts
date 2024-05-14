@@ -1202,7 +1202,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         // Determine the remaining amount (lot) to be redeemed, capped by the entire debt of the Trove minus the liquidation reserve
         singleRedemption.BaseFeeLMALot = LiquityMath._min(
             _maxBaseFeeLMAamount,
-            Troves[_borrower].debt
+            Troves[_borrower].debt.sub(BaseFeeLMA_GAS_COMPENSATION)
         );
 
         // Get the WStETHLot of equivalent value in USD
@@ -1213,7 +1213,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint newDebt = (Troves[_borrower].debt).sub(
             singleRedemption.BaseFeeLMALot
         );
-        console.log("new Debt: ", newDebt);
         uint newColl = (Troves[_borrower].coll).sub(singleRedemption.WStETHLot);
 
         if (newDebt == BaseFeeLMA_GAS_COMPENSATION) {
@@ -1421,6 +1420,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
                 contractsCache.defaultPool,
                 currentBorrower
             );
+
             SingleRedemptionValues
                 memory singleRedemption = _redeemCollateralFromTrove(
                     contractsCache,
@@ -1996,6 +1996,13 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         uint redeemedBaseFeeLMAFraction = _WStETHDrawn
             .mul(DECIMAL_PRECISION)
             .div(activePool.getWStETH() + defaultPool.getWStETH());
+        console.log(
+            "ARRRR",
+            _WStETHDrawn,
+            activePool.getWStETH() + defaultPool.getWStETH()
+        );
+        console.log(decayedRedemptionBaseRate);
+
         // Hedgehog Updates: Remove division by BETA
         uint newBaseRate = decayedRedemptionBaseRate.add(
             redeemedBaseFeeLMAFraction
@@ -2241,6 +2248,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             MINUTE_DECAY_REDEMPTION_FACTOR,
             minutesPassed
         );
+
         return redemptionBaseRate.mul(decayFactor).div(DECIMAL_PRECISION);
     }
 
