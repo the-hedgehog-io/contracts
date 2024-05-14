@@ -327,6 +327,8 @@ contract FeesRouter is AccessControl {
         uint256 amountA = _calculateAmount(_fee, config.amountA);
         uint256 amountB = _calculateAmount(_fee, config.amountB);
         uint256 amountC = _calculateAmount(_fee, config.amountC);
+        console.log("config", _getPctRange(_debt, _fee));
+        console.log("amounts", amountA, amountB, amountC);
 
         uint256 totalAmounts = amountA + amountB + amountC;
         if (totalAmounts != _fee) {
@@ -360,9 +362,15 @@ contract FeesRouter is AccessControl {
         uint256 _debt,
         uint256 _fee
     ) internal pure returns (uint256) {
-        return
-            (((_fee * 100) / _debt) / 5 + ((((_fee * 100) / _debt) % 5)) / 3) *
-            5;
+        if (_fee < 3 && _fee > 0) {
+            return 5;
+        } else {
+            return
+                (((_fee * 100) / _debt) /
+                    5 +
+                    ((((_fee * 100) / _debt) % 5)) /
+                    3) * 5;
+        }
     }
 
     function _calculateAmount(

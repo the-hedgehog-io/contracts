@@ -11,7 +11,7 @@ import {
 const activePoolBalance = ethers.parseEther("1000000000");
 
 type SingleAmountConfig = {
-  range: string;
+  percentage: number;
   amountA: number;
   amountB: number;
   amountC: number;
@@ -136,79 +136,107 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         activePoolTestSetter.target
       );
 
-      await feesRouter.setCollFeeConfig(
-        5,
-        90,
-        10,
-        0,
-        alice.address,
-        bob.address,
-        carol.address
-      );
-      await feesRouter.setCollFeeConfig(
-        10,
-        90,
-        5,
-        5,
-        alice.address,
-        bob.address,
-        carol.address
-      );
-      await feesRouter.setCollFeeConfig(
-        15,
-        85,
-        10,
-        5,
-        alice.address,
-        bob.address,
-        carol.address
-      );
+      // await feesRouter.setCollFeeConfig(
+      //   5,
+      //   100,
+      //   0,
+      //   0,
+      //   alice.address,
+      //   bob.address,
+      //   carol.address
+      // );
     });
 
     type AmountConfigs = FixedSizeArray<SingleAmountConfig, 21>;
-    // TODO: perhaps requires 19 instead of 20 arrays
     const collAmountConfigs: AmountConfigs = [
-      { range: "0", amountA: 0, amountB: 0, amountC: 0 },
-      { range: "5", amountA: 90, amountB: 10, amountC: 0 },
-      { range: "10", amountA: 90, amountB: 5, amountC: 5 },
-      { range: "15", amountA: 85, amountB: 10, amountC: 5 },
-      { range: "20", amountA: 70, amountB: 12, amountC: 18 },
-      { range: "25", amountA: 65, amountB: 14, amountC: 21 },
-      { range: "30", amountA: 60, amountB: 16, amountC: 24 },
-      { range: "35", amountA: 55, amountB: 18, amountC: 27 },
-      { range: "40", amountA: 50, amountB: 20, amountC: 30 },
-      { range: "45", amountA: 45, amountB: 4, amountC: 6 },
-      { range: "50", amountA: 40, amountB: 4, amountC: 6 },
-      { range: "55", amountA: 35, amountB: 4, amountC: 6 },
-      { range: "60", amountA: 30, amountB: 4, amountC: 6 },
-      { range: "65", amountA: 25, amountB: 4, amountC: 6 },
-      { range: "70", amountA: 20, amountB: 4, amountC: 6 },
-      { range: "75", amountA: 15, amountB: 4, amountC: 6 },
-      { range: "80", amountA: 10, amountB: 4, amountC: 6 },
-      { range: "85", amountA: 90, amountB: 4, amountC: 6 },
-      { range: "90", amountA: 90, amountB: 5, amountC: 6 },
-      { range: "95", amountA: 6, amountB: 4, amountC: 90 },
-      { range: "100", amountA: 6, amountB: 4, amountC: 90 },
+      { percentage: 0, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 5, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 10, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 15, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 20, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 25, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 30, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 35, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 40, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 45, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 50, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 55, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 60, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 65, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 70, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 75, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 80, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 85, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 90, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 95, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 100, amountA: 100, amountB: 0, amountC: 0 },
     ];
-    // const createConfig = await feesRouter.setCollFeeConfig(collAmountConfigs, 98, 1, 1, alice.address, bob.address, carol.address)
     it("should allow to distribute fees to BO addressed account case: 5%", async () => {
       // fails on 5, but works well on 1
-      await feesRouterTester.triggerCollFee(
+      const tx = await feesRouterTester.triggerCollFee(
         ethers.parseEther("100"),
-        ethers.parseEther("11")
+        ethers.parseEther("5")
       );
+
+      // const receiverConfig: ReceiverConfig = {
+      //   addressA: alice.address,
+      //   addressB: bob.address,
+      //   addressC: carol.address,
+      // };
+
+      const foo = async (
+        percentage = 0,
+        amountA = 100,
+        amountB = 0,
+        amountC = 0,
+        addressA = alice.address,
+        addressB = bob.address,
+        addressC = carol.address
+      ) => {
+        amountA = amountA - (amountA * percentage) / 100;
+        amountB = Math.floor(percentage / 2);
+        amountC = Math.round(percentage / 2);
+        return {
+          percentage,
+          amountA,
+          amountB,
+          amountC,
+          addressA,
+          addressB,
+          addressC,
+        };
+      };
+      const newConfigs = await Promise.all(
+        collAmountConfigs.map(async (config, index) => {
+          // TODO: only accept numbers and internally call required function on the contract level
+          return await foo(
+            index * 5,
+            config.amountA,
+            config.amountB,
+            config.amountC,
+            alice.address,
+            bob.address,
+            carol.address
+          );
+        })
+      );
+      console.log("return", newConfigs);
+
+      const triggerFees = async (newConfigs: SingleAmountConfig) => {
+        await feesRouter.setCollFeeConfig(
+          newConfigs.percentage,
+          ethers.parseEther(newConfigs.amountA.toString()),
+          ethers.parseEther(newConfigs.amountB.toString()),
+          ethers.parseEther(newConfigs.amountC.toString()),
+          alice.address,
+          bob.address,
+          carol.address
+        );
+      };
+
+      const setAllFees = async () => {
+        await triggerFees(newConfigs[0]), await triggerFees(newConfigs[1]);
+      };
     });
-
-    // const receiverConfig: ReceiverConfig = {
-    //   addressA: alice.address,
-    //   addressB: bob.address,
-    //   addressC: carol.address,
-    // };
-
-    // const foo = async (_percentage, _amountA, _amountB, _amountC) => {};
-
-    // collAmountConfigs.map(async (config, index) => {
-    // TODO: only accept numbers and internally call required function on the contract level
-    // await foo(index * 5, config.amountA, config.amountB, config.amountC);
   });
 });
