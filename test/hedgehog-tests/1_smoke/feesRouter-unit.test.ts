@@ -135,16 +135,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         feesRouterTester.target,
         activePoolTestSetter.target
       );
-
-      // await feesRouter.setCollFeeConfig(
-      //   5,
-      //   100,
-      //   0,
-      //   0,
-      //   alice.address,
-      //   bob.address,
-      //   carol.address
-      // );
     });
 
     type AmountConfigs = FixedSizeArray<SingleAmountConfig, 21>;
@@ -172,18 +162,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       { percentage: 100, amountA: 100, amountB: 0, amountC: 0 },
     ];
     it("should allow to distribute fees to BO addressed account case: 5%", async () => {
-      // fails on 5, but works well on 1
-      const tx = await feesRouterTester.triggerCollFee(
-        ethers.parseEther("100"),
-        ethers.parseEther("5")
-      );
-
-      // const receiverConfig: ReceiverConfig = {
-      //   addressA: alice.address,
-      //   addressB: bob.address,
-      //   addressC: carol.address,
-      // };
-
       const foo = async (
         percentage = 0,
         amountA = 100,
@@ -222,21 +200,41 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       );
       console.log("return", newConfigs);
 
-      const triggerFees = async (newConfigs: SingleAmountConfig) => {
+      const setCollFeeConfig = async (newConfigs: SingleAmountConfig) => {
         await feesRouter.setCollFeeConfig(
           newConfigs.percentage,
-          ethers.parseEther(newConfigs.amountA.toString()),
-          ethers.parseEther(newConfigs.amountB.toString()),
-          ethers.parseEther(newConfigs.amountC.toString()),
+          newConfigs.amountA,
+          newConfigs.amountB,
+          newConfigs.amountC,
           alice.address,
           bob.address,
           carol.address
         );
       };
 
-      const setAllFees = async () => {
-        await triggerFees(newConfigs[0]), await triggerFees(newConfigs[1]);
-      };
+      await setCollFeeConfig(newConfigs[0]);
+      await setCollFeeConfig(newConfigs[1]);
+      await setCollFeeConfig(newConfigs[2]);
+      await setCollFeeConfig(newConfigs[3]);
+      await setCollFeeConfig(newConfigs[4]);
+      await setCollFeeConfig(newConfigs[5]);
+      await setCollFeeConfig(newConfigs[6]);
+      await setCollFeeConfig(newConfigs[7]);
+      await setCollFeeConfig(newConfigs[8]);
+      await setCollFeeConfig(newConfigs[9]);
+      await setCollFeeConfig(newConfigs[10]);
+      await setCollFeeConfig(newConfigs[11]);
+      await setCollFeeConfig(newConfigs[12]);
+      await setCollFeeConfig(newConfigs[13]);
+      await setCollFeeConfig(newConfigs[14]);
+      await setCollFeeConfig(newConfigs[15]);
+      await setCollFeeConfig(newConfigs[16]);
+      await setCollFeeConfig(newConfigs[17]);
+      await setCollFeeConfig(newConfigs[18]);
+      await setCollFeeConfig(newConfigs[19]);
+      await setCollFeeConfig(newConfigs[20]);
+
+      await feesRouterTester.triggerCollFee(100, 72);
     });
   });
 });

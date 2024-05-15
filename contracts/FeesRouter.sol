@@ -328,12 +328,12 @@ contract FeesRouter is AccessControl {
         uint256 amountB = _calculateAmount(_fee, config.amountB);
         uint256 amountC = _calculateAmount(_fee, config.amountC);
         console.log("config", _getPctRange(_debt, _fee));
-        console.log("amounts", amountA, amountB, amountC);
 
         uint256 totalAmounts = amountA + amountB + amountC;
         if (totalAmounts != _fee) {
             amountA = amountA + _fee - totalAmounts;
         }
+        console.log("amounts", amountA, amountB, amountC);
 
         if (
             config.addressA == address(0) &&
@@ -391,7 +391,7 @@ contract FeesRouter is AccessControl {
     ) internal pure {
         if (_percentage % 5 != 0) revert InvalidIndex();
         if (_addressA == address(0)) revert InvalidAddress(); // At least A address should be initiated
-        if (_amountA == 0) revert InvalidInput(); // At least A amount should be initiated
+        if (_amountA + _amountB == 0) revert InvalidInput(); // At least A amount should be initiated
         if (_amountB > 0 && _addressB == address(0)) revert InvalidInput();
         if (_amountC > 0 && _addressC == address(0)) revert InvalidInput();
         if (_amountA + _amountB + _amountC != 100) revert InvalidInput();
