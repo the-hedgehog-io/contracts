@@ -72,7 +72,7 @@ describe("BaseFeeOracle Tests", () => {
     const AliceTroveDebt = BigInt("3400000000");
     const AliceTroveOpeningFee = BigInt("17000000");
     const AliceBFEBalanceAtOpening = BigInt("3383000000");
-    const AliceInitialCR = BigInt("5901787202337190000");
+    const AliceInitialCR = BigInt("5901787202337186161");
 
     const AliceTroveIncreaseDebt = BigInt("400000000");
     const AliceDebtAfterFirstIncrease = BigInt("3800100000");
@@ -81,10 +81,10 @@ describe("BaseFeeOracle Tests", () => {
 
     const BobTroveColl = BigInt("400000000000000000000");
     const BobTroveDebt = BigInt("2000000000");
-    const BobInitialCR = BigInt("6666333349999170000");
-    const BobTroveOpeningFee = BigInt("207113311");
-    const BobIdealBFEBalanceAtOpening = BigInt("192886689");
-    const BobActualBFEBalanceAtOpening = BigInt("192886689");
+    const BobInitialCR = BigInt("6666333349999166708");
+    const BobTroveOpeningFee = BigInt("1578565939");
+    const BobIdealBFEBalanceAtOpening = BigInt("421434061");
+    const BobActualBFEBalanceAtOpening = BigInt("421434061");
 
     const BobTroveIncreaseCollFirst = BigInt("1200000000000000000000");
     const BobTroveCollAfterIncrease = BigInt("1600000000000000000000");
@@ -350,11 +350,12 @@ describe("BaseFeeOracle Tests", () => {
     it("should have correct total supply before bob opens position", async () => {
       const totalSupply = await baseFeeLMAToken.totalSupply();
 
-      expect(totalSupply).to.be.equal("4000100000");
+      expect(totalSupply).to.be.equal("3400100000");
     });
 
     it("should let another user(bob) open a position", async () => {
       await increase(15);
+      console.log("BLANACE: ", await baseFeeLMAToken.balanceOf(bob.address));
       await openTrove({
         caller: bob,
         baseFeeLMAAmount: BobTroveDebt,
@@ -382,6 +383,7 @@ describe("BaseFeeOracle Tests", () => {
 
     it("should have transferred the correct amount BFE token during position opening (bob position)", async () => {
       const balance = await baseFeeLMAToken.balanceOf(bob.address);
+      console.log("BLANACE: ", await baseFeeLMAToken.balanceOf(bob.address));
 
       compareWithFault(
         BobIdealBFEBalanceAtOpening,

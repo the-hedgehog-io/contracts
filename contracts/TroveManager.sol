@@ -642,7 +642,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         singleLiquidation.entireTroveColl = _entireTroveColl;
 
         // HEDGEHOG UPDATES:
-        // Changed the cappedCollPortion formula from [entireTroveDebt] * [MCR] / [price]  to => [entireTroveDebt] * [MCR] * [price] / [DECIMAL_PRECISION]/ [DECIMAL_PRECISION]
+        // Changed the cappedCollPortion formula from [entireTroveDebt] * [MCR] / [price]  to => [entireTroveDebt] * [MCR] * [price] / [DECIMAL_PRECISION]
         uint cappedCollPortion = _entireTroveDebt.mul(MCR).mul(_price).div(
             DECIMAL_PRECISION
         );
@@ -2050,9 +2050,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         return
             LiquityMath._min(
                 REDEMPTION_FEE_FLOOR.add(_redemptionBaseRate).add(
-                    _redemptionColl.div(
-                        activePool.getWStETH() + defaultPool.getWStETH()
-                    )
+                    _redemptionColl
+                        .mul(DECIMAL_PRECISION)
+                        .div(activePool.getWStETH() + defaultPool.getWStETH())
+                        .div(DECIMAL_PRECISION)
                 ),
                 DECIMAL_PRECISION // cap at a maximum of 100%
             );

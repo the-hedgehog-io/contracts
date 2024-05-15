@@ -357,7 +357,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         );
         uint BaseFeeLMALoss = initialDeposit.sub(compoundedBaseFeeLMADeposit); // Needed only for event log
 
-        // HEDGEHOG UPDATES: No longer perfor any kind of "frontend" payments
+        // HEDGEHOG UPDATES: No longer perform any kind of "frontend" payments
         // First pay out any HOG gains
         _payOutHOGGains(communityIssuanceCached, msg.sender);
 
@@ -408,7 +408,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         );
         uint BaseFeeLMALoss = initialDeposit.sub(compoundedBaseFeeLMADeposit); // Needed only for event log
 
-        // HEDGEHOG UPDATES: No longer perfor any kind of "frontend" payments
+        // HEDGEHOG UPDATES: No longer perform any kind of "frontend" payments
         // First pay out any HOG gains
         _payOutHOGGains(communityIssuanceCached, msg.sender);
 
@@ -459,7 +459,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         );
         uint BaseFeeLMALoss = initialDeposit.sub(compoundedBaseFeeLMADeposit); // Needed only for event log
 
-        // HEDGEHOG UPDATES: No longer perfor any kind of "frontend" payments
+        // HEDGEHOG UPDATES: No longer perform any kind of "frontend" payments
         // First pay out any HOG gains
         _payOutHOGGains(communityIssuanceCached, msg.sender);
 
@@ -829,7 +829,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         return HOGGain;
     }
 
-    // --- Compounded deposit and compounded front end stake ---
+    // --- Compounded deposit ---
 
     /*
      * Return the user's compounded deposit. Given by the formula:  d = d0 * P/P(0)
@@ -852,7 +852,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         return compoundedDeposit;
     }
 
-    // Internal function, used to calculcate compounded deposits and compounded front end stakes.
+    // Internal function, used to calculcate compounded deposits
     function _getCompoundedStakeFromSnapshots(
         uint initialStake,
         Snapshots memory snapshots
