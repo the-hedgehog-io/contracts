@@ -129,7 +129,7 @@ contract DefaultPool is Ownable, CheckContract, IPool {
 
     /**
      * Hedgehog Updates:
-     * New function that can be called only by active pool instead of a native token fallback
+     * New function that can be called only by trove manager instead of a native token fallback
      *  */
     function increaseBalance(uint256 _amount) external {
         _requireCallerIsTroveManager();

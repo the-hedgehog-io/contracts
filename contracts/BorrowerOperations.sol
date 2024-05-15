@@ -483,8 +483,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _lowerHint,
         uint _maxFeePercentage
     ) internal {
-        // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
         {
+            // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
             _checkAndSetUpdateBlock(msg.sender);
         }
         ContractsCache memory contractsCache = ContractsCache(
@@ -609,7 +609,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
         emit BaseFeeLMABorrowingFeePaid(msg.sender, vars.BaseFeeLMAFee);
 
-        // Use the unmodified _BaseFeeLMAChange here, as we don't send the fee to the user
         _moveTokensAndWStETHfromAdjustment(
             contractsCache.activePool,
             contractsCache.baseFeeLMAToken,

@@ -47,12 +47,11 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
     /*
      * HEDGEHOG UPDATES: Not a constant variable anymore.
      * May now be updated by a DISTRIBUTION_SETTER
+     *
      * The community HOG supply cap is the starting balance of the Community Issuance contract.
      * It should be minted to this contract by HOGToken, when the token is deployed.
-     *
-     * Set to 32M (slightly less than 1/3) of total HOG supply.
      */
-    uint256 public HOGSupplyCap; // 32 million
+    uint256 public HOGSupplyCap;
 
     event HOGSupplyCapUpdated(uint256 _newCap);
     event ISSUANCE_FACTORUpdated(uint256 _newFactor);

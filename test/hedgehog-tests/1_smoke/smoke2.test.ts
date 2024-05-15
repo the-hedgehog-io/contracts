@@ -607,7 +607,7 @@ describe("BaseFeeOracle Tests", () => {
         .reverted;
     });
 
-    it("should let carol liquidate bob", async () => {
+    it("should let carol liquidate bob and alice", async () => {
       const bfeBalance = await baseFeeLMAToken.balanceOf(carol.address);
       const balanceBefore = await payToken.balanceOf(carol.address);
       await expect(
@@ -648,6 +648,35 @@ describe("BaseFeeOracle Tests", () => {
 
       expect(bfeBalanceAfter - bfeBalanceBefore).to.be.equal(
         "315976000000000000000"
+      );
+    });
+
+    it("should let close trove in recovery mode", async () => {
+      await setNewBaseFeePrice(30);
+      await setNewBaseFeePrice(30);
+      await setNewBaseFeePrice(30);
+      await openTrove({
+        caller: alice,
+        collAmount: ethers.parseEther("25"),
+        baseFeeLMAAmount: 500000000,
+      });
+      await setNewBaseFeePrice(450);
+      await setNewBaseFeePrice(450);
+      await setNewBaseFeePrice(450);
+
+      expect(await troveManager.checkUnreliableRecoveryMode()).to.be.equal(
+        true
+      );
+      await baseFeeLMAToken
+        .connect(carol)
+        .transfer(
+          alice.address,
+          await baseFeeLMAToken.balanceOf(carol.address)
+        );
+      await expect(
+        borrowerOperations.connect(alice).closeTrove()
+      ).to.be.revertedWith(
+        "BorrowerOps: Operation not permitted during Recovery Mode"
       );
     });
   });

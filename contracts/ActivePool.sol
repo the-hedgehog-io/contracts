@@ -19,9 +19,9 @@ import "./interfaces/IPool.sol";
  * - Collateral is now an ERC20 token instead of a native one
  * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  *
- * The Active Pool holds the stWStETH collateral and BaseFeeLMA debt (but not BaseFeeLMA tokens) for all active troves.
+ * The Active Pool holds the WstETH collateral and BaseFeeLMA debt (but not BaseFeeLMA tokens) for all active troves.
  *
- * When a trove is liquidated, it's stWStETH and BaseFeeLMA debt are transferred from the Active Pool, to either the
+ * When a trove is liquidated, it's WstETH and BaseFeeLMA debt are transferred from the Active Pool, to either the
  * Stability Pool, the Default Pool, or both, depending on the liquidation conditions.
  *
  */
@@ -47,7 +47,7 @@ contract ActivePool is Ownable, CheckContract, IPool {
     );
     event TroveManagerAddressChanged(address _newTroveManagerAddress);
     event ActivePoolBaseFeeLMADebtUpdated(uint _BaseFeeLMADebt);
-    event ActivePoolWStETHBalanceUpdated(uint _stWStETH);
+    event ActivePoolWStETHBalanceUpdated(uint _WstETH);
     event WStETHTokenAddressUpdated(IERC20 _WStEthAddress);
     event FeesRouterAddressUpdated(address _feesRouter);
 
@@ -95,7 +95,7 @@ contract ActivePool is Ownable, CheckContract, IPool {
     /*
      * Hedgehog Updates:
      * In case WStETH is 0 return 1 to avoid division by zero in base rate calculations
-     * Returns the stWStETH state variable.
+     * Returns the WstETH state variable.
      *
      * Not necessarily equal to the the contract's raw WStETH balance - wStETH can be forcibly sent to contracts.
      */
