@@ -327,7 +327,7 @@ contract FeesRouter is AccessControl {
         uint256 amountA = _calculateAmount(_fee, config.amountA);
         uint256 amountB = _calculateAmount(_fee, config.amountB);
         uint256 amountC = _calculateAmount(_fee, config.amountC);
-        console.log("config", _getPctRange(_debt, _fee));
+        console.log("config", _getPctRange(_debt, _fee), config.addressA);
 
         uint256 totalAmounts = amountA + amountB + amountC;
         if (totalAmounts != _fee) {

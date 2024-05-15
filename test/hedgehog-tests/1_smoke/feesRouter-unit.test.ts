@@ -7,6 +7,7 @@ import {
   FeesRouterTester,
   TERC20,
 } from "../../../typechain-types";
+import { expect } from "chai";
 
 const activePoolBalance = ethers.parseEther("1000000000");
 
@@ -90,6 +91,59 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
      *
      */
 
+    type AmountConfigs = FixedSizeArray<SingleAmountConfig, 21>;
+    const collAmountConfigs: AmountConfigs = [
+      { percentage: 0, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 5, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 10, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 15, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 20, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 25, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 30, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 35, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 40, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 45, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 50, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 55, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 60, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 65, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 70, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 75, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 80, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 85, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 90, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 95, amountA: 100, amountB: 0, amountC: 0 },
+      { percentage: 100, amountA: 100, amountB: 0, amountC: 0 },
+    ];
+
+    const setCollFeeConfig = async (newConfigs: SingleAmountConfig) => {
+      await feesRouter.setCollFeeConfig(
+        newConfigs.percentage,
+        newConfigs.amountA,
+        newConfigs.amountB,
+        newConfigs.amountC,
+        alice.address,
+        bob.address,
+        carol.address
+      );
+    };
+    const setConfig = async (
+      percentage = 0,
+      amountA = 100,
+      amountB = 0,
+      amountC = 0
+    ) => {
+      // amountA = amountA - (amountA * percentage) / 100;
+      // amountB = Math.floor(percentage / 2);
+      // amountC = Math.round(percentage / 2);
+      await setCollFeeConfig({
+        percentage,
+        amountA,
+        amountB,
+        amountC,
+      });
+    };
+
     before(async () => {
       [deployer, alice, bob, carol] = await ethers.getSigners();
 
@@ -135,105 +189,22 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         feesRouterTester.target,
         activePoolTestSetter.target
       );
+
+      for (const config of collAmountConfigs) {
+        await setConfig(
+          config.percentage,
+          config.amountA,
+          config.amountB,
+          config.amountC
+        );
+        expect(config.amountA).to.be.equal(
+          (await feesRouter.collFeeConfigs(config.percentage)).amountA
+        );
+        console.log(config, alice.address);
+      }
     });
 
-    type AmountConfigs = FixedSizeArray<SingleAmountConfig, 21>;
-    const collAmountConfigs: AmountConfigs = [
-      { percentage: 0, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 5, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 10, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 15, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 20, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 25, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 30, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 35, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 40, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 45, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 50, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 55, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 60, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 65, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 70, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 75, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 80, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 85, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 90, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 95, amountA: 100, amountB: 0, amountC: 0 },
-      { percentage: 100, amountA: 100, amountB: 0, amountC: 0 },
-    ];
     it("should allow to distribute fees to BO addressed account case: 5%", async () => {
-      const foo = async (
-        percentage = 0,
-        amountA = 100,
-        amountB = 0,
-        amountC = 0,
-        addressA = alice.address,
-        addressB = bob.address,
-        addressC = carol.address
-      ) => {
-        amountA = amountA - (amountA * percentage) / 100;
-        amountB = Math.floor(percentage / 2);
-        amountC = Math.round(percentage / 2);
-        return {
-          percentage,
-          amountA,
-          amountB,
-          amountC,
-          addressA,
-          addressB,
-          addressC,
-        };
-      };
-      const newConfigs = await Promise.all(
-        collAmountConfigs.map(async (config, index) => {
-          // TODO: only accept numbers and internally call required function on the contract level
-          return await foo(
-            index * 5,
-            config.amountA,
-            config.amountB,
-            config.amountC,
-            alice.address,
-            bob.address,
-            carol.address
-          );
-        })
-      );
-      console.log("return", newConfigs);
-
-      const setCollFeeConfig = async (newConfigs: SingleAmountConfig) => {
-        await feesRouter.setCollFeeConfig(
-          newConfigs.percentage,
-          newConfigs.amountA,
-          newConfigs.amountB,
-          newConfigs.amountC,
-          alice.address,
-          bob.address,
-          carol.address
-        );
-      };
-
-      await setCollFeeConfig(newConfigs[0]);
-      await setCollFeeConfig(newConfigs[1]);
-      await setCollFeeConfig(newConfigs[2]);
-      await setCollFeeConfig(newConfigs[3]);
-      await setCollFeeConfig(newConfigs[4]);
-      await setCollFeeConfig(newConfigs[5]);
-      await setCollFeeConfig(newConfigs[6]);
-      await setCollFeeConfig(newConfigs[7]);
-      await setCollFeeConfig(newConfigs[8]);
-      await setCollFeeConfig(newConfigs[9]);
-      await setCollFeeConfig(newConfigs[10]);
-      await setCollFeeConfig(newConfigs[11]);
-      await setCollFeeConfig(newConfigs[12]);
-      await setCollFeeConfig(newConfigs[13]);
-      await setCollFeeConfig(newConfigs[14]);
-      await setCollFeeConfig(newConfigs[15]);
-      await setCollFeeConfig(newConfigs[16]);
-      await setCollFeeConfig(newConfigs[17]);
-      await setCollFeeConfig(newConfigs[18]);
-      await setCollFeeConfig(newConfigs[19]);
-      await setCollFeeConfig(newConfigs[20]);
-
       await feesRouterTester.triggerCollFee(100, 72);
     });
   });
