@@ -173,8 +173,7 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
     };
 
     before(async () => {
-      [deployer, alice, bob, carol, borrowersOp, troveManager] =
-        await ethers.getSigners();
+      [deployer, alice, bob, carol, borrowersOp] = await ethers.getSigners();
 
       activePool = await (
         await ethers.getContractFactory("ActivePool")
@@ -254,6 +253,7 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
       return { balanceAlice, balanceBob, balanceCarol };
     };
     const triggerDebtConfig = async (debt: number, fee: number) => {
+      console.log(await collToken.balanceOf(bob.address), "bobbb");
       await feesRouterTester.triggerDebtFee(debt, fee);
       const balanceAlice = await collToken.balanceOf(alice.address);
       const balanceBob = await collToken.balanceOf(bob.address);
