@@ -13,6 +13,7 @@ error InvalidLength();
 error InvalidInput();
 error TooManyConfigValues();
 error CallerIsNotHDGProtocol();
+error ConfigNotFound();
 
 /**
  * @notice Completely new contract in Hedgehog Protocol, that was never a part of Liquity Protocol
@@ -282,38 +283,32 @@ contract FeesRouter is AccessControl {
         uint256 _debt,
         uint256 _fee
     ) external onlyHDGProtocol {
-        FeeConfig memory config = debtFeeConfigs[
-           _getPctRange(_debt, _fee);
-            // (((_fee * 100) / _debt) % 5) * 5
-        ];
-        console.log("1: ", _fee, _debt);
+        FeeConfig memory config = debtFeeConfigs[_getPctRange(_debt, _fee)];
+
         uint256 amountA = _calculateAmount(_fee, config.amountA);
         uint256 amountB = _calculateAmount(_fee, config.amountB);
         uint256 amountC = _calculateAmount(_fee, config.amountC);
-        console.log("2: ", amountA, amountB, amountC);
 
         uint256 totalAmounts = amountA + amountB + amountC;
-        if (totalAmounts < _fee) {
-            // Usually, that means that DAO treasure gets the extra dust
+        if (totalAmounts != _fee) {
             amountA = amountA + _fee - totalAmounts;
-        } else if (totalAmounts > _fee) {
-            amountA = amountA + totalAmounts - _fee;
         }
 
+        if (
+            config.addressA == address(0) &&
+            config.addressB == address(0) &&
+            config.addressC == address(0)
+        ) revert ConfigNotFound();
+
         IBaseFeeLMAToken _baseFeeLMAToken = baseFeeLMAToken;
-        if ((amountA + amountB + amountC) != _fee) {
-            // A precaution in case of any kind of miscalculations
-            _baseFeeLMAToken.mint(config.addressA, _fee);
-        } else {
-            if (amountA > 0 && config.addressA != address(0)) {
-                _baseFeeLMAToken.mint(config.addressA, amountA);
-            }
-            if (amountB > 0 && config.addressB != address(0)) {
-                _baseFeeLMAToken.mint(config.addressB, amountB);
-            }
-            if (amountC > 0 && config.addressC != address(0)) {
-                _baseFeeLMAToken.mint(config.addressC, amountC);
-            }
+        if (amountA > 0 && config.addressA != address(0)) {
+            _baseFeeLMAToken.mint(config.addressA, amountA);
+        }
+        if (amountB > 0 && config.addressB != address(0)) {
+            _baseFeeLMAToken.mint(config.addressB, amountB);
+        }
+        if (amountC > 0 && config.addressC != address(0)) {
+            _baseFeeLMAToken.mint(config.addressC, amountC);
         }
     }
 
@@ -325,38 +320,32 @@ contract FeesRouter is AccessControl {
         uint256 _debt,
         uint256 _fee
     ) external onlyHDGProtocol {
-        FeeConfig memory config = collFeeConfigs[
-            _getPctRange(_debt, _fee);
-            // (((_fee * 100) / _debt) % 5) * 5
-        ];
-        console.log("1: ", _fee, _debt);
+        FeeConfig memory config = collFeeConfigs[_getPctRange(_debt, _fee)];
         uint256 amountA = _calculateAmount(_fee, config.amountA);
         uint256 amountB = _calculateAmount(_fee, config.amountB);
         uint256 amountC = _calculateAmount(_fee, config.amountC);
-        console.log("2: ", amountA, amountB, amountC);
 
         uint256 totalAmounts = amountA + amountB + amountC;
-        if (totalAmounts < _fee) {
-            // Usually, that means that DAO treasure gets the extra dust
+        if (totalAmounts != _fee) {
             amountA = amountA + _fee - totalAmounts;
-        } else if (totalAmounts > _fee) {
-            amountA = amountA + totalAmounts - _fee;
         }
 
+        if (
+            config.addressA == address(0) &&
+            config.addressB == address(0) &&
+            config.addressC == address(0)
+        ) revert("Configuration missing for the specified range");
+
         IActivePool _activePool = activePool;
-        if ((amountA + amountB + amountC) != _fee) {
-            // A precaution in case of any kind of miscalculations
-            _activePool.sendWStETH(config.addressA, _fee);
-        } else {
-            if (amountA > 0 && config.addressA != address(0)) {
-                _activePool.sendWStETH(config.addressA, amountA);
-            }
-            if (amountB > 0 && config.addressB != address(0)) {
-                _activePool.sendWStETH(config.addressB, amountB);
-            }
-            if (amountC > 0 && config.addressC != address(0)) {
-                _activePool.sendWStETH(config.addressC, amountC);
-            }
+
+        if (amountA > 0 && config.addressA != address(0)) {
+            _activePool.sendWStETH(config.addressA, amountA);
+        }
+        if (amountB > 0 && config.addressB != address(0)) {
+            _activePool.sendWStETH(config.addressB, amountB);
+        }
+        if (amountC > 0 && config.addressC != address(0)) {
+            _activePool.sendWStETH(config.addressC, amountC);
         }
     }
 
@@ -364,7 +353,15 @@ contract FeesRouter is AccessControl {
         uint256 _debt,
         uint256 _fee
     ) internal pure returns (uint256) {
-        return 1;
+        if ((_fee * 100) / _debt < 3 && (_fee * 100) / _debt > 0) {
+            return 5;
+        } else {
+            return
+                (((_fee * 100) / _debt) /
+                    5 +
+                    ((((_fee * 100) / _debt) % 5)) /
+                    3) * 5;
+        }
     }
 
     function _calculateAmount(
