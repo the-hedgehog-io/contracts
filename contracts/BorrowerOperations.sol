@@ -226,11 +226,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             _BaseFeeLMAAmount,
             _maxFeePercentage
         );
-        // HEDGEHOG UPDATES: Do no subtract the fee from the debt
-        // vars.netDebt = vars.netDebt.sub(vars.BaseFeeLMAFee);
-
         _requireAtLeastMinNetDebt(vars.netDebt);
-        vars.compositeDebt = vars.netDebt + BaseFeeLMA_GAS_COMPENSATION;
+
+        vars.compositeDebt = _getCompositeDebt(vars.netDebt);
         assert(vars.compositeDebt > 0);
 
         vars.ICR = LiquityMath._computeCR(
