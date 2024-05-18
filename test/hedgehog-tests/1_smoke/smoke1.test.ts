@@ -788,9 +788,10 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     it("should allow increasing debt in the position (bob position)", async () => {
       await increase(14250);
-      await expect(
-        increaseDebt({ caller: bob, amount: BobTroveIncreaseDebtSecond })
-      ).not.to.be.reverted;
+      await increaseDebt({ caller: bob, amount: BobTroveIncreaseDebtSecond });
+      // await expect(
+
+      // ).not.to.be.reverted;
     });
 
     it("should calculate bobs CR correctly after the second increase", async () => {

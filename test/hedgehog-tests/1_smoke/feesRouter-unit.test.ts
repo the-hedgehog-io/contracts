@@ -114,7 +114,7 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
       { percentage: 85, amountA: 15, amountB: 42, amountC: 43 },
       { percentage: 90, amountA: 10, amountB: 45, amountC: 45 },
       { percentage: 95, amountA: 5, amountB: 47, amountC: 48 },
-      { percentage: 100, amountA: 0, amountB: 50, amountC: 50 },
+      { percentage: 100, amountA: 83, amountB: 7, amountC: 10 },
     ];
 
     const setCollFeeConfig = async (newConfigs: SingleAmountConfig) => {

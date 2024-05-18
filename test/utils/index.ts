@@ -164,7 +164,7 @@ export const setupContracts = async () => {
       .deploy(deployer.address)
   ).waitForDeployment();
 
-  for (let i = 0; i < 100; i = i + 5) {
+  for (let i = 0; i <= 100; i = i + 5) {
     await feesRouter
       .connect(deployer)
       .setFeeConfigs(
