@@ -17,4 +17,8 @@ contract TERC20 is ERC20 {
     function decimals() public pure override returns (uint8) {
         return 18;
     }
+
+    function mint(address _account, uint256 _amount) external {
+        _mint(_account, _amount);
+    }
 }
