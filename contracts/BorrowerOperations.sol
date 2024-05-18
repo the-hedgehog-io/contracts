@@ -226,11 +226,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             _BaseFeeLMAAmount,
             _maxFeePercentage
         );
-        // HEDGEHOG UPDATES: Do no subtract the fee from the debt
-        // vars.netDebt = vars.netDebt.sub(vars.BaseFeeLMAFee);
-
         _requireAtLeastMinNetDebt(vars.netDebt);
-        vars.compositeDebt = vars.netDebt + BaseFeeLMA_GAS_COMPENSATION;
+
+        vars.compositeDebt = _getCompositeDebt(vars.netDebt);
         assert(vars.compositeDebt > 0);
 
         vars.ICR = LiquityMath._computeCR(
@@ -285,6 +283,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         ) {
             revert("BO: Fee exceeds gain");
         }
+
         // Hedgehog Updates: Now amount transferred to the user is decreased by Fee
         _withdrawBaseFeeLMA(
             contractsCache.activePool,
@@ -483,8 +482,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _lowerHint,
         uint _maxFeePercentage
     ) internal {
-        // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
         {
+            // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
             _checkAndSetUpdateBlock(msg.sender);
         }
         ContractsCache memory contractsCache = ContractsCache(
@@ -609,7 +608,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
         emit BaseFeeLMABorrowingFeePaid(msg.sender, vars.BaseFeeLMAFee);
 
-        // Use the unmodified _BaseFeeLMAChange here, as we don't send the fee to the user
         _moveTokensAndWStETHfromAdjustment(
             contractsCache.activePool,
             contractsCache.baseFeeLMAToken,
@@ -964,14 +962,14 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
     }
 
-    function _requireNewTCRisAboveCCR(uint _newTCR) internal view {
+    function _requireNewTCRisAboveCCR(uint _newTCR) internal pure {
         require(
             _newTCR >= CCR,
             "BorrowerOps: An operation that would result in TCR < CCR is not permitted"
         );
     }
 
-    function _requireAtLeastMinNetDebt(uint _netDebt) internal view {
+    function _requireAtLeastMinNetDebt(uint _netDebt) internal pure {
         require(
             _netDebt >= MIN_NET_DEBT,
             "BorrowerOps: Trove's net debt must be greater than minimum"

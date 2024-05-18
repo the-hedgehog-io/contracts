@@ -14,7 +14,7 @@ const newAccounts =
     ? [process.env.PK_DEPLOYER as string]
     : [];
 
-task("deploy:export", "Export deployment data", async (_, hre, runSuper) => {
+task("deploy:export", "Export deployment data", async (_, hre) => {
   console.log("Exporting deployment data...");
   await exportDeployment(hre);
   console.log("Deployment data exported!");

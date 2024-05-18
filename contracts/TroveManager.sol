@@ -642,7 +642,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         singleLiquidation.entireTroveColl = _entireTroveColl;
 
         // HEDGEHOG UPDATES:
-        // Changed the cappedCollPortion formula from [entireTroveDebt] * [MCR] / [price]  to => [entireTroveDebt] * [MCR] * [price] / [DECIMAL_PRECISION]/ [DECIMAL_PRECISION]
+        // Changed the cappedCollPortion formula from [entireTroveDebt] * [MCR] / [price]  to => [entireTroveDebt] * [MCR] * [price] / [DECIMAL_PRECISION]
         uint cappedCollPortion = _entireTroveDebt.mul(MCR).mul(_price).div(
             DECIMAL_PRECISION
         );
@@ -722,6 +722,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             totals.totalCollToRedistribute
         );
         if (totals.totalCollSurplus > 0) {
+            collSurplusPool.increaseBalance(totals.totalCollSurplus);
             contractsCache.activePool.sendWStETH(
                 address(collSurplusPool),
                 totals.totalCollSurplus
@@ -1188,7 +1189,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     // --- Redemption functions ---
 
     // Redeem as much collateral as possible from _borrower's Trove in exchange for BaseFeeLMA up to _maxBaseFeeLMAamount
-    // HEDGEHOG Updates: Not subtracting gas compensation from the debt anymore
     function _redeemCollateralFromTrove(
         ContractsCache memory _contractsCache,
         address _borrower,
@@ -1201,11 +1201,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         // Determine the remaining amount (lot) to be redeemed, capped by the entire debt of the Trove minus the liquidation reserve
         singleRedemption.BaseFeeLMALot = LiquityMath._min(
             _maxBaseFeeLMAamount,
-            Troves[_borrower].debt
+            Troves[_borrower].debt.sub(BaseFeeLMA_GAS_COMPENSATION)
         );
 
         // Get the WStETHLot of equivalent value in USD
-        // HEDGEHOG UPDATES: Change WStETHLOT calculations formula from [debtToBeRedeemed * price * 10e9] to [debtToBeRedeemed / price]
+        // HEDGEHOG UPDATES: Change WStETHLOT calculations formula from [debtToBeRedeemed * price * 10e9] to [debtToBeRedeemed * price]
         singleRedemption.WStETHLot = singleRedemption.BaseFeeLMALot.mul(_price);
 
         // Decrease the debt and collateral of the current Trove according to the BaseFeeLMA lot and corresponding WStETH to send
@@ -1240,7 +1240,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
              *
              * If the resultant net debt of the partial is less than the minimum, net debt we bail.
              */
-
             if (
                 newNICR != _partialRedemptionHintNICR ||
                 _getNetDebt(newDebt) < MIN_NET_DEBT
@@ -1290,6 +1289,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         _contractsCache.activePool.decreaseBaseFeeLMADebt(_BaseFeeLMA);
 
         // send WStETH from Active Pool to CollSurplus Pool
+        collSurplusPool.increaseBalance(_WStETH);
         _contractsCache.collSurplusPool.accountSurplus(_borrower, _WStETH);
         _contractsCache.activePool.sendWStETH(
             address(_contractsCache.collSurplusPool),
@@ -1419,6 +1419,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
                 contractsCache.defaultPool,
                 currentBorrower
             );
+
             SingleRedemptionValues
                 memory singleRedemption = _redeemCollateralFromTrove(
                     contractsCache,
@@ -1949,7 +1950,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         return _checkRecoveryMode(priceFeed.lastGoodPrice());
     }
 
-    // Check whether or not the system *would be* in Recovery Mode, given an WStETH:USD price, and the entire system coll and debt.
+    // Check whether or not the system *would be* in Recovery Mode, given an BaseFeeLMA:WStETH price, and the entire system coll and debt.
     function _checkPotentialRecoveryMode(
         uint _entireSystemColl,
         uint _entireSystemDebt,
@@ -1987,13 +1988,12 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         // Hedgehog updates: Now calculating what part of total collateral is getting withdrawn from the
         // system
 
-        // HEDGEHOG UPDATES: not dividing, but multyplying by decimal precision
-        /* Convert the drawn WStETH back to BaseFeeLMA at face value rate (1 BaseFeeLMA:1 USD), in order to get
-         * the fraction of total supply that was redeemed at face value.
-         */
+        // HEDGEHOG UPDATES: Calculation the fraction now as a ratio of Collateral that is about to get redeemed and a sum of collateral in active & default pools.
+
         uint redeemedBaseFeeLMAFraction = _WStETHDrawn
             .mul(DECIMAL_PRECISION)
             .div(activePool.getWStETH() + defaultPool.getWStETH());
+
         // Hedgehog Updates: Remove division by BETA
         uint newBaseRate = decayedRedemptionBaseRate.add(
             redeemedBaseFeeLMAFraction
@@ -2015,26 +2015,17 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     /*
      * HEDGEHOG UPDATES:
      * 1) Now passing redemptionBaseRate instead of combined baseRate
-     * 2) Now accepts a new param: redemptionColl as we can't get that amount from value anymore since of ERC20 transition
      */
-    function getRedemptionRate(
-        uint _redemptionColl
-    ) public view returns (uint) {
-        return _calcRedemptionRate(redemptionBaseRate, _redemptionColl);
+    function getRedemptionRate() public view returns (uint) {
+        return _calcRedemptionRate(redemptionBaseRate);
     }
 
     /*
      * HEDGEHOG UPDATES:
      * Now accepts a new param: redemptionColl as we can't get that amount from value anymore since of ERC20 transition
      */
-    function getRedemptionRateWithDecay(
-        uint _redemptionColl
-    ) public view returns (uint) {
-        return
-            _calcRedemptionRate(
-                _calcDecayedRedemptionBaseRate(),
-                _redemptionColl
-            );
+    function getRedemptionRateWithDecay() public view returns (uint) {
+        return _calcRedemptionRate(_calcDecayedRedemptionBaseRate());
     }
 
     /*
@@ -2044,33 +2035,23 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
      * 2) Now redeemed collateral divided by total collateral in active & defaul pools is added to the sum of redemption floor and redeem base rate
      */
     function _calcRedemptionRate(
-        uint _redemptionBaseRate,
-        uint _redemptionColl
+        uint _redemptionBaseRate
     ) internal view returns (uint) {
         return
             LiquityMath._min(
-                REDEMPTION_FEE_FLOOR.add(_redemptionBaseRate).add(
-                    _redemptionColl.div(
-                        activePool.getWStETH() + defaultPool.getWStETH()
-                    )
-                ),
+                REDEMPTION_FEE_FLOOR.add(_redemptionBaseRate),
                 DECIMAL_PRECISION // cap at a maximum of 100%
             );
     }
 
     function _getRedemptionFee(uint _WStETHDrawn) internal view returns (uint) {
-        return
-            _calcRedemptionFee(getRedemptionRate(_WStETHDrawn), _WStETHDrawn);
+        return _calcRedemptionFee(getRedemptionRate(), _WStETHDrawn);
     }
 
     function getRedemptionFeeWithDecay(
         uint _WStETHDrawn
     ) external view returns (uint) {
-        return
-            _calcRedemptionFee(
-                getRedemptionRateWithDecay(_WStETHDrawn),
-                _WStETHDrawn
-            );
+        return _calcRedemptionFee(getRedemptionRateWithDecay(), _WStETHDrawn);
     }
 
     function _calcRedemptionFee(
@@ -2081,7 +2062,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             DECIMAL_PRECISION
         );
 
-        // Hedgehog Updates: check if fee is too big is now performed at the BO contract
+        // Hedgehog Updates: check if fee is too big is now performed at the redeemCollateral function
 
         return redemptionFee;
     }

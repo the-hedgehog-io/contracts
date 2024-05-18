@@ -96,6 +96,7 @@ contract CollSurplusPool is Ownable, CheckContract {
     function claimColl(address _account) external {
         _requireCallerIsBorrowerOperations();
         uint claimableColl = balances[_account];
+
         require(
             claimableColl > 0,
             "CollSurplusPool: No collateral available to claim"

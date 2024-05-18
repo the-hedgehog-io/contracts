@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 error MainOracleDisabled();
 
 /*
- * PriceFeed for production deployment, to be connected to Main Oracle's live BaseFee:stWStETH aggregator reference
+ * PriceFeed for production deployment, to be connected to Main Oracle's live BaseFee:WstETH aggregator reference
  * contract, and a Backup oracle contract.
  *
  * The PriceFeed uses "Main Oracle" as primary oracle, and "Back Up" as fallback. It contains logic for
@@ -107,7 +107,7 @@ contract PriceFeed is Ownable, BaseMath {
      *
      * Also callable by anyone externally.
      *
-     * Non-view function - it stores the last good price seen by Liquity.
+     * Non-view function - it stores the last good price seen by Hedgehog.
      *
      * Uses a main oracle and a fallback oracle in case main one fails. If both fail,
      * it uses the last good price seen by Hedgehog.
@@ -547,7 +547,7 @@ contract PriceFeed is Ownable, BaseMath {
             DECIMAL_PRECISION) / minPrice;
 
         /*
-         * Return true if the relative price difference is <= 3%: if so, we assume both oracles are probably reporting
+         * Return true if the relative price difference is <= 5%: if so, we assume both oracles are probably reporting
          * the honest market price, as it is unlikely that both have been broken/hacked and are still in-sync.
          */
         return percentPriceDifference <= MAX_PRICE_DIFFERENCE_BETWEEN_ORACLES;
@@ -616,7 +616,7 @@ contract PriceFeed is Ownable, BaseMath {
 
             return response;
         } catch {
-            // If call to Main Oracle aggregator reverts, return a zero response with success = false
+            // If call to Main Oracle aggregator reverts
             return response;
         }
     }
@@ -640,7 +640,7 @@ contract PriceFeed is Ownable, BaseMath {
 
             return response;
         } catch {
-            // If call to Backup aggregator reverts, return a zero response with success = false
+            // If call to Backup aggregator reverts with empty response
             return response;
         }
     }
@@ -667,7 +667,7 @@ contract PriceFeed is Ownable, BaseMath {
             prevMainOracleResponse.blockNumber = uint64(currentChainBN);
             return prevMainOracleResponse;
         } catch {
-            // If call to Main Oracle aggregator reverts, return a zero response with success = false
+            // If call to Main Oracle aggregator reverts
             return prevMainOracleResponse;
         }
     }
@@ -694,7 +694,7 @@ contract PriceFeed is Ownable, BaseMath {
             prevBackupOracleResponse.blockNumber = uint64(currentChainBN);
             return prevBackupOracleResponse;
         } catch {
-            // If call to Main Oracle aggregator reverts, return a zero response with success = false
+            // If call to Main Oracle aggregator reverts
             return prevBackupOracleResponse;
         }
     }
