@@ -1204,7 +1204,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
             Troves[_borrower].debt.sub(BaseFeeLMA_GAS_COMPENSATION)
         );
 
-        // Get the WStETHLot of equivalent value in USD
+        // Get the WStETHLot of equivalent value in BaseFeeLMA
         // HEDGEHOG UPDATES: Change WStETHLOT calculations formula from [debtToBeRedeemed * price * 10e9] to [debtToBeRedeemed * price]
         singleRedemption.WStETHLot = singleRedemption.BaseFeeLMALot.mul(_price);
 
@@ -1883,7 +1883,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         address _borrower
     ) internal returns (uint128 index) {
         /* Max array size is 2**128 - 1, i.e. ~3e30 troves. No risk of overflow, since troves have minimum BaseFeeLMA
-        debt of liquidation reserve plus MIN_NET_DEBT. 3e30 BaseFeeLMA dwarfs the value of all wealth in the world ( which is < 1e15 USD). */
+        debt of liquidation reserve plus MIN_NET_DEBT. 3e30 BaseFeeLMA dwarfs the value of all wealth in the world ( which is < 1e15 BaseFeeLMA). */
 
         // Push the Troveowner to the array
         TroveOwners.push(_borrower);
@@ -2001,7 +2001,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
         newBaseRate = LiquityMath._min(newBaseRate, DECIMAL_PRECISION); // cap baseRate at a maximum of 100%
         //assert(newBaseRate <= DECIMAL_PRECISION); // This is already enforced in the line above
-        assert(newBaseRate > 0); // Base rate is always non-zero after redemption
+        // Hedgehog Updates: Remove assertion check to make sure first redemption does not revert after the bootstrapping period if more then 10^18 WstETH was transfer into the contract
+        // assert(newBaseRate > 0); // Base rate is always non-zero after redemption
 
         // HEDGEHOG UPDATES: succesful redemption now updates only the redemption base rate. Redemption base rate update also received a new event.
         // Update the baseRate state variable
@@ -2171,8 +2172,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         assert(decayedBaseRate <= DECIMAL_PRECISION); // The baseRate can decay to 0
         // HEDGEHOG LOGIC CHANGES: Updating a unique borrowing base rate instead of just "baseRate"
         borrowBaseRate = decayedBaseRate;
-
-        emit BorrowBaseRateUpdated(decayedBaseRate);
 
         _updateLastBorrowTime();
     }

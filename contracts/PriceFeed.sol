@@ -214,16 +214,6 @@ contract PriceFeed is Ownable, BaseMath {
 
         // --- CASE 2: The system fetched last price from Backup ---
         if (status == Status.usingBackupMainUntrusted) {
-            if (
-                _priceChangeAboveMax(
-                    backupOracleResponse,
-                    prevBackupOracleResponse,
-                    decimals
-                )
-            ) {
-                _changeStatus(Status.bothOraclesUntrusted);
-                return lastGoodPrice;
-            }
             // If both Backup and Main oracle are live, unbroken, and reporting similar prices, switch back to Main
             if (
                 _bothOraclesLiveAndUnbrokenAndSimilarPrice(
@@ -248,6 +238,17 @@ contract PriceFeed is Ownable, BaseMath {
              * Backup may need to be tipped to return current data.
              */
             if (_backupIsFrozen(backupOracleResponse)) {
+                return lastGoodPrice;
+            }
+
+            if (
+                _priceChangeAboveMax(
+                    backupOracleResponse,
+                    prevBackupOracleResponse,
+                    backupDecimals
+                )
+            ) {
+                _changeStatus(Status.bothOraclesUntrusted);
                 return lastGoodPrice;
             }
 
@@ -388,7 +389,7 @@ contract PriceFeed is Ownable, BaseMath {
                 return lastGoodPrice;
             }
 
-            // Otherwise if Main Oracle is live and deviated <50% from it's previous price and Backup is still untrusted,
+            // Otherwise if Main Oracle is live and deviated <17.5% from it's previous price and Backup is still untrusted,
             // return Main Oracle price (no status change)
             return _storeGoodPrice(mainOracleResponse, decimals);
         }

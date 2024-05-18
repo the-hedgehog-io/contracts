@@ -920,7 +920,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         block
       );
       await priceFeed.fetchPrice();
-      expect(await priceFeed.status()).to.be.equal(2);
+      expect(await priceFeed.status()).to.be.equal(0);
     });
 
     it("should mark both oracles as working if price consists", async () => {

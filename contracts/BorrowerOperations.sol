@@ -527,7 +527,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         vars.netDebtChange = _BaseFeeLMAChange;
 
         // If the adjustment incorporates a debt increase then trigger a borrowing fee
-        // HEDGEHOG UPDATES: Trigger borrowing fee in both recovero and normal modes
+        // HEDGEHOG UPDATES: Trigger borrowing fee in both recovery and normal modes
         if (_isDebtIncrease) {
             vars.BaseFeeLMAFee = _triggerBorrowingFee(
                 contractsCache.troveManager,

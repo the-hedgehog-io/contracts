@@ -38,7 +38,7 @@ import "./dependencies/CheckContract.sol";
  * - Keys have been removed from nodes
  *
  * - Ordering checks for insertion are performed by comparing an NICR argument to the current NICR, calculated at runtime.
- *   The list relies on the property that ordering by ICR is maintained as the WStETH:USD price varies.
+ *   The list relies on the property that ordering by ICR is maintained as the WStETH:BaseFeeLMA price varies.
  *
  * - Public functions with parameters have been made internal to save gas, and given an external wrapper function for external access
  */
