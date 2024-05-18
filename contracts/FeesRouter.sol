@@ -362,7 +362,7 @@ contract FeesRouter is AccessControl {
         uint256 _debt,
         uint256 _fee
     ) internal pure returns (uint256) {
-        if (_fee < 3 && _fee > 0) {
+        if ((_fee * 100) / _debt < 3 && (_fee * 100) / _debt > 0) {
             return 5;
         } else {
             return
