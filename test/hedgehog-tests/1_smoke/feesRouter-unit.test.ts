@@ -63,7 +63,8 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
     let deployer: SignerWithAddress,
       alice: SignerWithAddress,
       bob: SignerWithAddress,
-      carol: SignerWithAddress;
+      carol: SignerWithAddress,
+      borrowersOp: SignerWithAddress;
     let feesRouterTester: FeesRouterTester;
     let feesRouter: FeesRouter;
     let activePool: ActivePool;
@@ -78,7 +79,7 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
      *
      * SOLIDITY:
      * 1) FIX THE SOLIDITY FORMULA IN CONTRACT THAT LEADS TO INCORRECT OUTCOME YOURSELF
-     
+
      * 2) WRITE A REVERTING CHECK, THAT WOULD REVERT WHOLE TX IF THERE IS A CONFIG MISSING FOR A CERTAIN RANGE (if range mapping returns address 0 - revert  )
      * How to fix 5.31?
      *
@@ -172,7 +173,8 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
     };
 
     before(async () => {
-      [deployer, alice, bob, carol] = await ethers.getSigners();
+      [deployer, alice, bob, carol, borrowersOp, troveManager] =
+        await ethers.getSigners();
 
       activePool = await (
         await ethers.getContractFactory("ActivePool")
@@ -293,6 +295,12 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
     it("check Debt", async () => {
       const checkDebt = await triggerDebtConfig(100000, 34000);
       console.log("checkDebt", checkDebt);
+    });
+
+    it("check modifier", async () => {
+      await expect(
+        feesRouter.connect(borrowersOp).distributeDebtFee(100000, 34000)
+      ).to.be.reverted;
     });
   });
 });
