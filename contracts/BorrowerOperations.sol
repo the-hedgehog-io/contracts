@@ -12,7 +12,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "hardhat/console.sol";
 
 error TroveAdjustedThisBlock();
 
@@ -286,11 +285,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         ) {
             revert("BO: Fee exceeds gain");
         }
-        console.log(
-            _BaseFeeLMAAmount - vars.BaseFeeLMAFee,
-            _BaseFeeLMAAmount,
-            vars.BaseFeeLMAFee
-        );
+
         // Hedgehog Updates: Now amount transferred to the user is decreased by Fee
         _withdrawBaseFeeLMA(
             contractsCache.activePool,
@@ -713,7 +708,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         (uint BaseFeeLMAFee, uint baseRate) = _troveManager.getBorrowingFee(
             _BaseFeeLMAAmount
         );
-        console.log(BaseFeeLMAFee, baseRate);
 
         troveManager.updateBaseRateFromBorrowing(baseRate);
 

@@ -2017,24 +2017,16 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
      * 1) Now passing redemptionBaseRate instead of combined baseRate
      * 2) Now accepts a new param: redemptionColl as we can't get that amount from value anymore since of ERC20 transition
      */
-    function getRedemptionRate(
-        uint _redemptionColl
-    ) public view returns (uint) {
-        return _calcRedemptionRate(redemptionBaseRate, _redemptionColl);
+    function getRedemptionRate() public view returns (uint) {
+        return _calcRedemptionRate(redemptionBaseRate);
     }
 
     /*
      * HEDGEHOG UPDATES:
      * Now accepts a new param: redemptionColl as we can't get that amount from value anymore since of ERC20 transition
      */
-    function getRedemptionRateWithDecay(
-        uint _redemptionColl
-    ) public view returns (uint) {
-        return
-            _calcRedemptionRate(
-                _calcDecayedRedemptionBaseRate(),
-                _redemptionColl
-            );
+    function getRedemptionRateWithDecay() public view returns (uint) {
+        return _calcRedemptionRate(_calcDecayedRedemptionBaseRate());
     }
 
     /*
@@ -2044,34 +2036,23 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
      * 2) Now redeemed collateral divided by total collateral in active & defaul pools is added to the sum of redemption floor and redeem base rate
      */
     function _calcRedemptionRate(
-        uint _redemptionBaseRate,
-        uint _redemptionColl
+        uint _redemptionBaseRate
     ) internal view returns (uint) {
         return
             LiquityMath._min(
-                REDEMPTION_FEE_FLOOR.add(_redemptionBaseRate).add(
-                    _redemptionColl
-                        .mul(DECIMAL_PRECISION)
-                        .div(activePool.getWStETH() + defaultPool.getWStETH())
-                        .div(DECIMAL_PRECISION)
-                ),
+                REDEMPTION_FEE_FLOOR.add(_redemptionBaseRate),
                 DECIMAL_PRECISION // cap at a maximum of 100%
             );
     }
 
     function _getRedemptionFee(uint _WStETHDrawn) internal view returns (uint) {
-        return
-            _calcRedemptionFee(getRedemptionRate(_WStETHDrawn), _WStETHDrawn);
+        return _calcRedemptionFee(getRedemptionRate(), _WStETHDrawn);
     }
 
     function getRedemptionFeeWithDecay(
         uint _WStETHDrawn
     ) external view returns (uint) {
-        return
-            _calcRedemptionFee(
-                getRedemptionRateWithDecay(_WStETHDrawn),
-                _WStETHDrawn
-            );
+        return _calcRedemptionFee(getRedemptionRateWithDecay(), _WStETHDrawn);
     }
 
     function _calcRedemptionFee(

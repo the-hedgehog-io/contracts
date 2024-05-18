@@ -615,18 +615,19 @@ describe("BaseFeeOracle Tests", () => {
       expect(
         await baseFeeLMAToken.balanceOf(await stabilityPool.getAddress())
       ).to.equal(BigInt("3651472685"));
-      expect(balanceAfter - balanceBefore).to.be.equal("6163488716370860000");
-      console.log(await collSurplusPool.getCollateral(carol.address));
+      expect(balanceAfter - balanceBefore).to.be.equal("1010000000000000000");
     });
 
     it("should have both positions closed", async () => {
       const { coll, debt } = await getTrove(bob);
       const { coll: collAlice, debt: debtAlice } = await getTrove(alice);
-
+      const { coll: collCarol, debt: debtCarol } = await getTrove(carol);
       expect(collAlice).to.be.equal(0);
       expect(debtAlice).to.be.equal(0);
-      expect(coll).to.be.equal(0);
-      expect(debt).to.be.equal(0);
+      expect(collCarol).to.be.equal("1412012459893048127640");
+      expect(debtCarol).to.be.equal("1757086640");
+      expect(debt).to.be.equal("6833210400");
+      expect(coll).to.be.equal("2528977540106951870400");
     });
   });
 });

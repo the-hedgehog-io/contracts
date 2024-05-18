@@ -44,12 +44,12 @@ contract SingleTxCaller {
         address _lowerPartialRedemptionHint,
         uint _partialRedemptionHintNICR
     ) public {
-        IERC20(_payToken).approve(_bo, _coll);
+        IERC20(_payToken).approve(_bo, 9000000000000000000000);
         IERC20(_debtToken).approve(_tm, 44000);
         BOps(_bo).openTrove(
             1e18,
-            100000,
-            2000000000000000000,
+            350000000,
+            9000000000000000000000,
             address(0),
             address(0)
         );
@@ -59,7 +59,7 @@ contract SingleTxCaller {
             _firstRedemptionHint,
             _upperPartialRedemptionHint,
             _lowerPartialRedemptionHint,
-            131182008368200836820083682008368,
+            149983505461847068282088101533157,
             0,
             1e18
         );
