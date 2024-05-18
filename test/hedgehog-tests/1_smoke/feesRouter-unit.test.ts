@@ -228,7 +228,6 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
         expect(config.amountA).to.be.equal(
           (await feesRouter.collFeeConfigs(config.percentage)).amountA
         );
-        console.log(config);
       }
       for (const config of collAmountConfigs) {
         await setDebtConfig(
@@ -240,7 +239,6 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
         // expect(config.amountA).to.be.equal(
         //   (await feesRouter.debtFeeConfigs(config.percentage)).amountA
         // );
-        console.log(config);
       }
     });
 
@@ -253,11 +251,10 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
       return { balanceAlice, balanceBob, balanceCarol };
     };
     const triggerDebtConfig = async (debt: number, fee: number) => {
-      console.log(await collToken.balanceOf(bob.address), "bobbb");
       await feesRouterTester.triggerDebtFee(debt, fee);
-      const balanceAlice = await collToken.balanceOf(alice.address);
-      const balanceBob = await collToken.balanceOf(bob.address);
-      const balanceCarol = await collToken.balanceOf(carol.address);
+      const balanceAlice = await debtToken.balanceOf(alice.address);
+      const balanceBob = await debtToken.balanceOf(bob.address);
+      const balanceCarol = await debtToken.balanceOf(carol.address);
 
       return { balanceAlice, balanceBob, balanceCarol };
     };
@@ -269,32 +266,39 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
       const checkingBalance = await triggerConfig(DEBT, FEE);
       expect(checkingBalance).to.not.be.reverted;
 
-      console.log("Alic1", second.amountA);
-
-      // expect(checkingBalance.balanceAlice).to.be.equal(
-      //   (FEE * second.amountA) / 100
-      // );
-    });
-    it("should allow the 1% and 2% debts and fees to be allocated to the 5% configuration correctly", async () => {
-      const balanceAliceBefore = await collToken.balanceOf(alice.address);
-      const configuration = await triggerConfig(10000, 200);
-      console.log("Alic2", configuration.balanceAlice);
-      expect(configuration.balanceAlice - balanceAliceBefore).to.be.equal(
-        (200 * 95) / 100
+      expect(checkingBalance.balanceAlice).to.be.equal(
+        (FEE * second.amountA) / 100
       );
     });
+    it("should allow the 1% and 2% debts and fees to be allocated to the 5% configuration correctly", async () => {
+      const DEBT = 100000;
+      const FEE = 2000;
+      const [first, second] = collAmountConfigs;
+      const balanceAliceBefore = await collToken.balanceOf(alice.address);
+
+      const configuration = await triggerConfig(DEBT, FEE);
+
+      expect(configuration.balanceAlice - balanceAliceBefore).to.be.equal(
+        (FEE * second.amountA) / 100
+      );
+    });
+
     it("check Activ", async () => {
       await activePoolTestSetter.increasePayTokenBalance(1000);
       await collToken.balanceOf(alice);
-      console.log(
-        "123",
-        await activePoolTestSetter.increasePayTokenBalance(1000)
-      );
-      console.log("1", await collToken.balanceOf(alice));
     });
+
     it("check Debt", async () => {
-      const checkDebt = await triggerDebtConfig(100000, 34000);
-      console.log("checkDebt", checkDebt);
+      const balanceBobBefore = await debtToken.balanceOf(bob.address);
+
+      const DEBT = 100000;
+      const FEE = 34000;
+      const [first, second] = collAmountConfigs;
+      const checkDebt = await triggerDebtConfig(DEBT, FEE);
+
+      expect(checkDebt.balanceBob - balanceBobBefore).to.be.equal(
+        (FEE * 17) / 100
+      );
     });
 
     it("check modifier", async () => {

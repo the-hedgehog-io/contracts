@@ -292,6 +292,7 @@ contract FeesRouter is AccessControl {
         if (totalAmounts != _fee) {
             amountA = amountA + _fee - totalAmounts;
         }
+
         if (
             config.addressA == address(0) &&
             config.addressB == address(0) &&
@@ -327,7 +328,6 @@ contract FeesRouter is AccessControl {
         if (totalAmounts != _fee) {
             amountA = amountA + _fee - totalAmounts;
         }
-
 
         if (
             config.addressA == address(0) &&
