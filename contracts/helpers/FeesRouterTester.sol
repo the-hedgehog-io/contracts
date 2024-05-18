@@ -20,4 +20,9 @@ contract FeesRouterTester {
         console.log("fees router: ", address(feesRouter));
         feesRouter.distributeCollFee(_debt, _fee);
     }
+
+    function triggerDebtFee(uint256 _debt, uint256 _fee) public {
+        console.log("fees router: ", address(feesRouter));
+        feesRouter.distributeDebtFee(_debt, _fee);
+    }
 }

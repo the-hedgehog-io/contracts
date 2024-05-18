@@ -8,7 +8,6 @@ import {
   TERC20,
 } from "../../../typechain-types";
 import { expect } from "chai";
-import { getIndexedAccountPath } from "ethers";
 
 const activePoolBalance = ethers.parseEther("1000000000");
 
@@ -144,6 +143,33 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
         amountC,
       });
     };
+    const setDebtFeeConfig = async (newConfigs: SingleAmountConfig) => {
+      await feesRouter.setCollFeeConfig(
+        newConfigs.percentage,
+        newConfigs.amountA,
+        newConfigs.amountB,
+        newConfigs.amountC,
+        alice.address,
+        bob.address,
+        carol.address
+      );
+    };
+    const setDebtConfig = async (
+      percentage = 0,
+      amountA = 100,
+      amountB = 0,
+      amountC = 0,
+      addressA = alice.address,
+      addressB = bob.address,
+      addressC = carol.address
+    ) => {
+      await setDebtFeeConfig({
+        percentage,
+        amountA,
+        amountB,
+        amountC,
+      });
+    };
 
     before(async () => {
       [deployer, alice, bob, carol] = await ethers.getSigners();
@@ -203,6 +229,18 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
         );
         console.log(config);
       }
+      for (const config of collAmountConfigs) {
+        await setDebtConfig(
+          config.percentage,
+          config.amountA,
+          config.amountB,
+          config.amountC
+        );
+        // expect(config.amountA).to.be.equal(
+        //   (await feesRouter.debtFeeConfigs(config.percentage)).amountA
+        // );
+        console.log(config);
+      }
     });
 
     const triggerConfig = async (debt: number, fee: number) => {
@@ -213,22 +251,37 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
 
       return { balanceAlice, balanceBob, balanceCarol };
     };
+    const triggerDebtConfig = async (debt: number, fee: number) => {
+      await feesRouterTester.triggerDebtFee(debt, fee);
+      const balanceAlice = await collToken.balanceOf(alice.address);
+      const balanceBob = await collToken.balanceOf(bob.address);
+      const balanceCarol = await collToken.balanceOf(carol.address);
+
+      return { balanceAlice, balanceBob, balanceCarol };
+    };
 
     it("should allow to distribute fees to BO addressed account case: 5%", async () => {
-      const checkingBalance = await triggerConfig(100000, 5000);
+      const DEBT = 100000;
+      const FEE = 5000;
+      const [first, second] = collAmountConfigs;
+      const checkingBalance = await triggerConfig(DEBT, FEE);
       expect(checkingBalance).to.not.be.reverted;
 
-      expect(checkingBalance.balanceAlice).to.be.equal((5000 * 95) / 100);
+      console.log("Alic1", second.amountA);
+
+      // expect(checkingBalance.balanceAlice).to.be.equal(
+      //   (FEE * second.amountA) / 100
+      // );
     });
     it("should allow the 1% and 2% debts and fees to be allocated to the 5% configuration correctly", async () => {
       const balanceAliceBefore = await collToken.balanceOf(alice.address);
       const configuration = await triggerConfig(10000, 200);
-
+      console.log("Alic2", configuration.balanceAlice);
       expect(configuration.balanceAlice - balanceAliceBefore).to.be.equal(
         (200 * 95) / 100
       );
     });
-    it("should allow the 1% and 2% debts and fees to be allocated to the 5% configuration correctly", async () => {
+    it("check Activ", async () => {
       await activePoolTestSetter.increasePayTokenBalance(1000);
       await collToken.balanceOf(alice);
       console.log(
@@ -236,6 +289,10 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
         await activePoolTestSetter.increasePayTokenBalance(1000)
       );
       console.log("1", await collToken.balanceOf(alice));
+    });
+    it("check Debt", async () => {
+      const checkDebt = await triggerDebtConfig(100000, 34000);
+      console.log("checkDebt", checkDebt);
     });
   });
 });

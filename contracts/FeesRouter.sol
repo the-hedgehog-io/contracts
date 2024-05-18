@@ -299,19 +299,14 @@ contract FeesRouter is AccessControl {
         ) revert("Configuration missing for the specified range");
 
         IBaseFeeLMAToken _baseFeeLMAToken = baseFeeLMAToken;
-        if ((amountA + amountB + amountC) != _fee) {
-            // A precaution in case of any kind of miscalculations
-            _baseFeeLMAToken.mint(config.addressA, _fee);
-        } else {
-            if (amountA > 0 && config.addressA != address(0)) {
-                _baseFeeLMAToken.mint(config.addressA, amountA);
-            }
-            if (amountB > 0 && config.addressB != address(0)) {
-                _baseFeeLMAToken.mint(config.addressB, amountB);
-            }
-            if (amountC > 0 && config.addressC != address(0)) {
-                _baseFeeLMAToken.mint(config.addressC, amountC);
-            }
+        if (amountA > 0 && config.addressA != address(0)) {
+            _baseFeeLMAToken.mint(config.addressA, amountA);
+        }
+        if (amountB > 0 && config.addressB != address(0)) {
+            _baseFeeLMAToken.mint(config.addressB, amountB);
+        }
+        if (amountC > 0 && config.addressC != address(0)) {
+            _baseFeeLMAToken.mint(config.addressC, amountC);
         }
     }
 
@@ -342,19 +337,15 @@ contract FeesRouter is AccessControl {
         ) revert("Configuration missing for the specified range");
 
         IActivePool _activePool = activePool;
-        if ((amountA + amountB + amountC) != _fee) {
-            // A precaution in case of any kind of miscalculations
-            _activePool.sendWStETH(config.addressA, _fee);
-        } else {
-            if (amountA > 0 && config.addressA != address(0)) {
-                _activePool.sendWStETH(config.addressA, amountA);
-            }
-            if (amountB > 0 && config.addressB != address(0)) {
-                _activePool.sendWStETH(config.addressB, amountB);
-            }
-            if (amountC > 0 && config.addressC != address(0)) {
-                _activePool.sendWStETH(config.addressC, amountC);
-            }
+
+        if (amountA > 0 && config.addressA != address(0)) {
+            _activePool.sendWStETH(config.addressA, amountA);
+        }
+        if (amountB > 0 && config.addressB != address(0)) {
+            _activePool.sendWStETH(config.addressB, amountB);
+        }
+        if (amountC > 0 && config.addressC != address(0)) {
+            _activePool.sendWStETH(config.addressC, amountC);
         }
     }
 
