@@ -2015,7 +2015,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     /*
      * HEDGEHOG UPDATES:
      * 1) Now passing redemptionBaseRate instead of combined baseRate
-     * 2) Now accepts a new param: redemptionColl as we can't get that amount from value anymore since of ERC20 transition
      */
     function getRedemptionRate() public view returns (uint) {
         return _calcRedemptionRate(redemptionBaseRate);
