@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IBaseFeeLMAToken.sol";
 import "./interfaces/IActivePool.sol";
-import "hardhat/console.sol";
 
 error InvalidIndex();
 error InvalidAddress();
@@ -66,6 +65,7 @@ contract FeesRouter is AccessControl {
         address addressC
     );
 
+    // Checks if function caller address is either Borrowers Operations or Trove Manager set in the setAddresses function
     modifier onlyHDGProtocol() {
         if (msg.sender != borrowersOp) {
             if (msg.sender != troveManager) {
@@ -85,6 +85,9 @@ contract FeesRouter is AccessControl {
         _grantRole(DEPLOYER, msg.sender);
     }
 
+    /**
+     * An initialiser function where HDG protocol address are getting set
+     */
     function setAddresses(
         IActivePool _activePool,
         IBaseFeeLMAToken _baseFeeLMAToken,
@@ -334,7 +337,7 @@ contract FeesRouter is AccessControl {
             config.addressA == address(0) &&
             config.addressB == address(0) &&
             config.addressC == address(0)
-        ) revert("Configuration missing for the specified range");
+        ) revert ConfigNotFound();
 
         IActivePool _activePool = activePool;
 
@@ -349,6 +352,13 @@ contract FeesRouter is AccessControl {
         }
     }
 
+    /**
+     *  Finds range in config with rounding based on total tx value(can be BaseFeeLMA token or WstETH) and absolute fee amount
+     *  In case the fee is less then 3% it's going to round to 5% anyway
+     *
+     * @param _debt total tx payment amount (BaseFee LMA Token or WstETH)
+     * @param _fee total tx fee in an absolute number (BaseFee LMA Token or WstETH)
+     */
     function _getPctRange(
         uint256 _debt,
         uint256 _fee
@@ -364,6 +374,7 @@ contract FeesRouter is AccessControl {
         }
     }
 
+    // helper util that performs a simple calculation to find the _percentage of _fee
     function _calculateAmount(
         uint256 _fee,
         uint256 _percentage
@@ -371,6 +382,16 @@ contract FeesRouter is AccessControl {
         return ((_fee * _percentage) / 100);
     }
 
+    /**
+     * Checks if provided config is correct. In a single range config at least first receiver must get set. Second and third are optional.
+     * @param _percentage range id. May only be divisible by 5
+     * @param _amountA % of the fee that is going to get transferred to _addressA
+     * @param _amountB % of the fee that is going to get transferred to _addressB
+     * @param _amountC % of the fee that is going to get transferred to _addressC
+     * @param _addressA address that's going to receive _amountA
+     * @param _addressB address that's going to receive _amountB
+     * @param _addressC address that's going to receive _amountC
+     */
     function _checkConfigCorrectness(
         uint256 _percentage,
         uint256 _amountA,
