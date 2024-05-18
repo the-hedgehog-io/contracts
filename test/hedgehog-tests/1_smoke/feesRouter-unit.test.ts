@@ -144,7 +144,7 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
       });
     };
     const setDebtFeeConfig = async (newConfigs: SingleAmountConfig) => {
-      await feesRouter.setCollFeeConfig(
+      await feesRouter.setDebtFeeConfig(
         newConfigs.percentage,
         newConfigs.amountA,
         newConfigs.amountB,
