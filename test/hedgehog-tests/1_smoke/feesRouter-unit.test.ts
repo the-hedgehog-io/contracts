@@ -283,12 +283,12 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
       );
     });
 
-    it("check Activ", async () => {
-      await activePoolTestSetter.increasePayTokenBalance(1000);
-      await collToken.balanceOf(alice);
+    it("should allow the transaction to be carried out correctly", async () => {
+      const tx = await activePoolTestSetter.increasePayTokenBalance(1000);
+      expect(tx).to.not.be.reverted;
     });
 
-    it("check Debt", async () => {
+    it("should allow to distribute fees to BO addressed account case: 5%", async () => {
       const balanceBobBefore = await debtToken.balanceOf(bob.address);
 
       const DEBT = 100000;
@@ -301,7 +301,7 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
       );
     });
 
-    it("check modifier", async () => {
+    it("Check: sanity check", async () => {
       await expect(
         feesRouter.connect(borrowersOp).distributeDebtFee(100000, 34000)
       ).to.be.reverted;
