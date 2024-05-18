@@ -13,6 +13,7 @@ error InvalidLength();
 error InvalidInput();
 error TooManyConfigValues();
 error CallerIsNotHDGProtocol();
+error ConfigNotFound();
 
 /**
  * @notice Completely new contract in Hedgehog Protocol, that was never a part of Liquity Protocol
@@ -297,7 +298,7 @@ contract FeesRouter is AccessControl {
             config.addressA == address(0) &&
             config.addressB == address(0) &&
             config.addressC == address(0)
-        ) revert("Configuration missing for the specified range");
+        ) revert ConfigNotFound();
 
         IBaseFeeLMAToken _baseFeeLMAToken = baseFeeLMAToken;
         if (amountA > 0 && config.addressA != address(0)) {
@@ -381,7 +382,7 @@ contract FeesRouter is AccessControl {
     ) internal pure {
         if (_percentage % 5 != 0) revert InvalidIndex();
         if (_addressA == address(0)) revert InvalidAddress(); // At least A address should be initiated
-        if (_amountA + _amountB == 0) revert InvalidInput(); // At least A amount should be initiated
+        if (_amountA == 0) revert InvalidInput(); // At least A amount should be initiated
         if (_amountB > 0 && _addressB == address(0)) revert InvalidInput();
         if (_amountC > 0 && _addressC == address(0)) revert InvalidInput();
         if (_amountA + _amountB + _amountC != 100) revert InvalidInput();
