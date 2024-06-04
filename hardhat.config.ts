@@ -93,6 +93,11 @@ const config: HardhatUserConfig = {
       },
       chainId: 42161,
     },
+    sepolia: {
+      accounts: newAccounts,
+      url: "https://ethereum-sepolia-rpc.publicnode.com",
+      chainId: 11155111,
+    },
   },
 
   mocha: { timeout: 12000000 },

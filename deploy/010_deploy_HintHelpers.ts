@@ -15,7 +15,7 @@ const deploy: DeployFunction = async ({
   await deploy("HintHelpers", {
     from: deployer,
     log: true,
-    args: [deployConfig.gasComp, deployConfig.minNetDebt, deployConfig.CCR],
+    args: [],
   });
 };
 

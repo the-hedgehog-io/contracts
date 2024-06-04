@@ -15,12 +15,7 @@ const deploy: DeployFunction = async ({
   await deploy("TroveManager", {
     from: deployer,
     log: true,
-    args: [
-      deployConfig.gasComp,
-      deployConfig.minNetDebt,
-      deployConfig.CCR,
-      deployConfig.bootstrapDaysAmount,
-    ],
+    args: [deployConfig.bootstrapDaysAmount],
   });
 };
 
