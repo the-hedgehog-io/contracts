@@ -62,7 +62,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     let payToken: TERC20;
     let mainOracle: BaseFeeOracle, secondaryOracle: BaseFeeOracle;
 
-    const gasCompensationReserve = BigInt("100000");
+    const gasCompensationReserve = BigInt("100000000000000000000000");
     const gasPrice010 = "30000000000";
     const gasPrice1114 = "60000000000";
 

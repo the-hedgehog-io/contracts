@@ -64,7 +64,7 @@ describe("BaseFeeOracle Tests", () => {
     let payToken: ERC20Mock;
     let mainOracle: BaseFeeOracle, secondaryOracle: BaseFeeOracle;
 
-    const gasCompensationReserve = BigInt("100000");
+    const gasCompensationReserve = BigInt("100000000000000000000000");
     const gasPrice010 = "30000000000";
     const gasPrice1114 = "60000000000";
 
@@ -83,7 +83,7 @@ describe("BaseFeeOracle Tests", () => {
     const BobTroveDebt = BigInt("2000000000");
     const BobInitialCR = BigInt("4999750012499375031");
     const BobTroveOpeningFee = BigInt("1009975001");
-    const BobIdealBFEBalanceAtOpening = BigInt("990024999");
+    const BobIdealBFEBalanceAtOpening = BigInt("3999999999999999999980000000");
     const BobActualBFEBalanceAtOpening = BigInt("990024999");
 
     const BobTroveIncreaseCollFirst = BigInt("1600000000000000000000");
@@ -109,7 +109,7 @@ describe("BaseFeeOracle Tests", () => {
     const CarolRepayment = BigInt("100000");
 
     const totalCollateralAliceOpening = BigInt("602000000000000000000");
-    const totalDebtAliceOpening = BigInt("4000100000");
+    const totalDebtAliceOpening = BigInt("4000100000000000000000000000");
     const totalCollateralBobOpening = BigInt("902000000000000000000");
     const totalDebtBobOpening = BigInt("6000200000");
     const totalDebtAliceIncrease = BigInt("6400200000");

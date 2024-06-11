@@ -118,9 +118,11 @@ contract HintHelpers is HedgehogBase, Ownable, CheckContract {
                             )
                         );
 
-                    // HEDGEHOG UPDATES: Change WStETHLOT calculations formula from [debtToBeRedeemed * price * 10e9] to [debtToBeRedeemed / price]
+                    // HEDGEHOG UPDATES: Change WStETHLOT calculations formula from [debtToBeRedeemed * price * 10e9] to [debtToBeRedeemed / price / DECIMAL_PRECISION]
                     uint newColl = WStETH.sub(
-                        maxRedeemableBaseFeeLMA.mul(_price)
+                        maxRedeemableBaseFeeLMA.mul(_price).div(
+                            DECIMAL_PRECISION
+                        )
                     );
                     uint newDebt = netBaseFeeLMADebt.sub(
                         maxRedeemableBaseFeeLMA

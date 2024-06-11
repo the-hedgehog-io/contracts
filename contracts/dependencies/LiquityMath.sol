@@ -126,9 +126,11 @@ library LiquityMath {
         uint _price
     ) internal pure returns (uint) {
         if (_debt > 0) {
-            uint newCollRatio = _coll.mul(DECIMAL_PRECISION).div(_debt).div(
-                _price
-            );
+            uint newCollRatio = _coll
+                .mul(DECIMAL_PRECISION)
+                .div(_debt)
+                .mul(DECIMAL_PRECISION)
+                .div(_price);
 
             return newCollRatio;
         }

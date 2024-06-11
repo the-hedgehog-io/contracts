@@ -642,10 +642,12 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         singleLiquidation.entireTroveColl = _entireTroveColl;
 
         // HEDGEHOG UPDATES:
-        // Changed the cappedCollPortion formula from [entireTroveDebt] * [MCR] / [price]  to => [entireTroveDebt] * [MCR] * [price] / [DECIMAL_PRECISION]
-        uint cappedCollPortion = _entireTroveDebt.mul(MCR).mul(_price).div(
-            DECIMAL_PRECISION
-        );
+        // Changed the cappedCollPortion formula from [entireTroveDebt] * [MCR] / [price]  to => [entireTroveDebt] * [MCR] / [DECIMAL_PRECISION] * [price] / [DECIMAL_PRECISION]
+        uint cappedCollPortion = _entireTroveDebt
+            .div(DECIMAL_PRECISION)
+            .mul(MCR)
+            .mul(_price)
+            .div(DECIMAL_PRECISION);
 
         singleLiquidation.collGasCompensation = _getCollGasCompensation(
             cappedCollPortion
@@ -1205,8 +1207,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         );
 
         // Get the WStETHLot of equivalent value in BaseFeeLMA
-        // HEDGEHOG UPDATES: Change WStETHLOT calculations formula from [debtToBeRedeemed * price * 10e9] to [debtToBeRedeemed * price]
-        singleRedemption.WStETHLot = singleRedemption.BaseFeeLMALot.mul(_price);
+        // HEDGEHOG UPDATES: Change WStETHLOT calculations formula from [debtToBeRedeemed * price * 10e9] to [debtToBeRedeemed * price / 10e18]
+        singleRedemption.WStETHLot = singleRedemption
+            .BaseFeeLMALot
+            .mul(_price)
+            .div(DECIMAL_PRECISION);
 
         // Decrease the debt and collateral of the current Trove according to the BaseFeeLMA lot and corresponding WStETH to send
         uint newDebt = (Troves[_borrower].debt).sub(

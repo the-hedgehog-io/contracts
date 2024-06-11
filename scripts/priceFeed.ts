@@ -1,34 +1,24 @@
 import { ethers } from "hardhat";
 
 const config = {
-  admin: "0x796EcfBe7a2A424f9D905dfC38b8994aB2db9FD6",
-  oracle: "0x60733d043772C90251d1A807EE235Bec70162aA8",
+  admin: "0x5071Fa4Ab4870d970aD6d22A020774ad6a9F6C72",
+  oracle: "0x5071Fa4Ab4870d970aD6d22A020774ad6a9F6C72",
+  oracle2: "0xdFaE403Fd82e9eD37F57240F957f7f8B6FE9aB26",
 };
 
 async function main() {
-  const priceFeed = await ethers.getContractAt(
-    "PriceFeed",
-    "0xE15fE01995312eD902B69d08fd7025cb3950dED5"
-  );
-  // const oracle = await (
-  //   await (
-  //     await ethers.getContractFactory("BaseFeeOracle")
-  //   ).deploy(config.admin, config.admin)
-  // ).waitForDeployment();
-  // console.log("Oracle is deployed", await oracle.getAddress());
-
   const oracle = await ethers.getContractAt("BaseFeeOracle", config.oracle);
+  const oracle2 = await ethers.getContractAt("BaseFeeOracle", config.oracle2);
+  const value = "29000000000";
 
   console.log("Starting...");
   const block = await ethers.provider.getBlock("latest");
-  console.log("Setting price first");
-  await (await oracle.feedBaseFeeValue("29000000000", block!.number)).wait();
+  console.log("Setting price first", block?.number);
+  await (await oracle.feedBaseFeeValue(value, block!.number)).wait();
   const oracleAddress = await oracle.getAddress();
   const secondBlock = await ethers.provider.getBlock("latest");
   console.log("Setting price second");
-  await (
-    await oracle.feedBaseFeeValue("3000000000", secondBlock!.number)
-  ).wait();
+  await (await oracle2.feedBaseFeeValue(value, secondBlock!.number)).wait();
 
   // console.log("Setting address: "),
   //   await priceFeed.setAddresses(oracleAddress, oracleAddress);

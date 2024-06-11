@@ -34,11 +34,11 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
 
     // HEDGEHOG UPDATES: Decreased to 100k wei
     // Amount of BaseFeeLMA to be locked in gas pool on opening troves
-    uint public constant BaseFeeLMA_GAS_COMPENSATION = 100000;
+    uint public constant BaseFeeLMA_GAS_COMPENSATION = 100000000000000000000000;
 
     // HEDGEHOG UPDATES: Decreased to 350000000 BFE
     // Minimum amount of net BaseFeeLMA debt a trove must have
-    uint public constant MIN_NET_DEBT = 350000000;
+    uint public constant MIN_NET_DEBT = 350000000000000000000000000;
 
     uint public constant PERCENT_DIVISOR = 200; // dividing by 200 yields 0.5%
 
