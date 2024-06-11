@@ -219,24 +219,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       };
     };
 
-    const logAllDebtColl = async () => {
-      const coll = await troveManager.getEntireSystemColl();
-      const debt = await troveManager.getEntireSystemDebt();
-
-      const { debt: aliceDebt, coll: aliceColl } = await getTrove(alice);
-      const { debt: bobDebt, coll: bobColl } = await getTrove(bob);
-      const { debt: carolDebt, coll: carolColl } = await getTrove(carol);
-
-      console.log("total debt: ", debt);
-      console.log("total coll: ", coll);
-      console.log("aliceColl: ", aliceColl);
-      console.log("aliceDebt: ", aliceDebt);
-      console.log("bobColl: ", bobColl);
-      console.log("bobDebt: ", bobDebt);
-      console.log("carolColl: ", carolColl);
-      console.log("carolDebt: ", carolDebt);
-    };
-
     type ProvideParams = {
       caller: SignerWithAddress;
       amount: string | BigNumberish;
@@ -256,24 +238,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       maxFeePercentage: string | BigNumberish;
       upperHint: string;
       lowerHint: string;
-    };
-
-    const decreaseDebt = async ({
-      caller = bob,
-      amount = 0,
-      maxFeePercentage = ethers.parseEther("1"),
-    }: Partial<AdjustTroveParams> = {}) => {
-      await borrowerOperations
-        .connect(caller)
-        .adjustTrove(
-          maxFeePercentage,
-          0,
-          0,
-          amount,
-          false,
-          ethers.ZeroAddress,
-          ethers.ZeroAddress
-        );
     };
 
     const increaseDebt = async ({
