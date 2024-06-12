@@ -37,7 +37,7 @@ contract ActivePool is Ownable, CheckContract, IPool {
     address public defaultPoolAddress;
     address public feesRouter;
     IERC20 public WStETHToken;
-    uint256 internal WStETH; // deposited wwstETH tracker
+    uint256 internal WStETH; // deposited wstETH tracker
     uint256 internal BaseFeeLMADebt;
 
     // --- Events ---
