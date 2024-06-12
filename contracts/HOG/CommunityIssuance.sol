@@ -68,6 +68,7 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
     event HOGTokenAddressSet(address _hogTokenAddress);
     event StabilityPoolAddressSet(address _stabilityPoolAddress);
     event TotalHOGIssuedUpdated(uint _totalHOGIssued);
+    event TotalHogIssuedManuallyUpdated(uint256 _totalHOGIssued);
 
     // --- Functions ---
 
@@ -112,7 +113,12 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
         uint latestTotalHOGIssued = HOGSupplyCap
             .mul(_getCumulativeIssuanceFraction())
             .div(DECIMAL_PRECISION);
-        uint issuance = latestTotalHOGIssued.sub(totalHOGIssued);
+
+        // Hedgehog Updates: Since now Issuance Factor is dynamic it is possible to block the whole system in case the factor reduction
+        // Because of that we simply stop the issuance in such cases in case of letting it underflow
+        uint issuance = latestTotalHOGIssued > totalHOGIssued
+            ? latestTotalHOGIssued.sub(totalHOGIssued)
+            : latestTotalHOGIssued;
 
         totalHOGIssued = latestTotalHOGIssued;
         emit TotalHOGIssuedUpdated(latestTotalHOGIssued);
@@ -167,6 +173,17 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
     ) external onlyRole(DISTRIBUTION_SETTER) {
         ISSUANCE_FACTOR = _newIssFactor;
         emit ISSUANCE_FACTORUpdated(_newIssFactor);
+    }
+
+    /*
+     * HEDGEHOG UPDATES: ISSUANCE_FACTOR is not a constant variable anymore.
+     * May now be updated by a DISTRIBUTION_SETTER
+     * */
+    function setTotalHogIssued(
+        uint _newHogIssued
+    ) external onlyRole(DISTRIBUTION_SETTER) {
+        totalHOGIssued = _newHogIssued;
+        emit TotalHogIssuedManuallyUpdated(_newHogIssued);
     }
 
     // --- 'require' functions ---
