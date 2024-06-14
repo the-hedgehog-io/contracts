@@ -38,7 +38,7 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
 
     // HEDGEHOG UPDATES: Updated to to 350000000000000000000000000 BFE
     // Minimum amount of net BaseFeeLMA debt a trove must have
-    uint public constant MIN_NET_DEBT = 350000000000000000000000000;
+    uint public constant MIN_NET_DEBT = 50000000000000000000000000;
 
     uint public constant PERCENT_DIVISOR = 200; // dividing by 200 yields 0.5%
 

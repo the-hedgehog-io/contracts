@@ -1,6 +1,7 @@
 {
   "11155111": {
     "ActivePool": {
+<<<<<<< Updated upstream
       "address": "0xA6D643C5a474b6Ca53BEBf3246B9a9bA1fd0bAFC",
       "blockNumber": 6085797
     },
@@ -55,6 +56,62 @@
     "TroveManager": {
       "address": "0x5F4379c2B8829F488a2cA96D3B7779E7BC6DB08d",
       "blockNumber": 6085795
+=======
+      "address": "0x455d415af86F3A194E04a5b99c5D736d289C0DE1",
+      "blockNumber": 6106230
+    },
+    "BaseFeeLMAToken": {
+      "address": "0x9Fce78BFe06B52c2648F1923311fcD2E4a54F769",
+      "blockNumber": 6106238
+    },
+    "BorrowerOperations": {
+      "address": "0x6227708902A66c560710D67cD131aBEF659B5b38",
+      "blockNumber": 6106235
+    },
+    "CollSurplusPool": {
+      "address": "0xB2d462FA62391F71963D7Ebcf8eB116fEB304cc4",
+      "blockNumber": 6106234
+    },
+    "CommunityIssuance": {
+      "address": "0xEEA5516b577f0c9Ee7008a3ed5502ada7e828bbB",
+      "blockNumber": 6106239
+    },
+    "DefaultPool": {
+      "address": "0xbe3120eD26462eCee0b3BF4edC8520633Cb5B965",
+      "blockNumber": 6106233
+    },
+    "FeesRouter": {
+      "address": "0xd005410F22304cC477bD8EeF64fEE481b5f10f4E",
+      "blockNumber": 6106237
+    },
+    "GasPool": {
+      "address": "0xcfFe19d11a1Bd54bAFDCAC56e9354C4eD1B274f1",
+      "blockNumber": 6106232
+    },
+    "HOGToken": {
+      "address": "0x3b770eDE29fEaa94Ee8aCD15b0D1F781D0D8d80E",
+      "blockNumber": 6106226
+    },
+    "HintHelpers": {
+      "address": "0xC5b9b0C82a07637BA857Ea11FBdeb9F7B312926e",
+      "blockNumber": 6106236
+    },
+    "PriceFeed": {
+      "address": "0x533CefFA165A143A8c9251F9471fD290A6d37aAD",
+      "blockNumber": 6106227
+    },
+    "SortedTroves": {
+      "address": "0x80e2a80e964f41AB97850566089196518d3A013F",
+      "blockNumber": 6106228
+    },
+    "StabilityPool": {
+      "address": "0xb6051B28D9Fbd3b98B68062eA1d7515Df1757E83",
+      "blockNumber": 6106231
+    },
+    "TroveManager": {
+      "address": "0xD5A7cDDAc37BB4e996E88797dd4fAcbB53b3d6Ca",
+      "blockNumber": 6106229
+>>>>>>> Stashed changes
     }
   }
 }

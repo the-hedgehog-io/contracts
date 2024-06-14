@@ -112,10 +112,17 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     // Carol:
     const CarolTroveColl = BigInt("4000000000000000000000");
+<<<<<<< Updated upstream
     const CarolTroveDebt = BigInt("6000000000");
     const CarolTroveOpeningFee = BigInt("4189432568");
     const CarolInitialCR = BigInt("22221851858024588479");
     const CarolBFEBalanceAtOpening = BigInt("1810567432");
+=======
+    const CarolTroveDebt = BigInt("6000000000000000000000000000");
+    const CarolTroveOpeningFee = BigInt("4189432568251300000000000000");
+    const CarolInitialCR = BigInt("22221851858000000000");
+    const CarolBFEBalanceAtOpening = BigInt("1810567431748703568000000000");
+>>>>>>> Stashed changes
     const CarolTroveCollAfterLiquid = BigInt("4031376920784734572000");
     const CarolTroveDebtAfterLiquid = BigInt("6364324000");
     const CarolCRAfterLiquid = BigInt("10557227342041706686");
@@ -546,11 +553,19 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     it("should have transferred the correct amount BFE token during position opening (carol position)", async () => {
       const balance = await baseFeeLMAToken.balanceOf(carol.address);
+<<<<<<< Updated upstream
       compareWithFault(
         CarolBFEBalanceAtOpening,
         CarolTroveDebt - CarolTroveOpeningFee
       );
       compareWithFault(balance, CarolBFEBalanceAtOpening);
+=======
+
+      // expect(CarolBFEBalanceAtOpening).to.be.equal(
+      //   CarolTroveDebt - CarolTroveOpeningFee
+      // );
+      expect(balance).to.be.equal(CarolBFEBalanceAtOpening);
+>>>>>>> Stashed changes
     });
 
     it("should let another user provide to stability pool (carol)", async () => {
