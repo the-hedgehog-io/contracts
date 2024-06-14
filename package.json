@@ -1,10 +1,6 @@
 {
   "name": "@the-hedgehog-io/contracts",
-<<<<<<< Updated upstream
-  "version": "0.3.2",
-=======
   "version": "0.3.3",
->>>>>>> Stashed changes
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "@openzeppelin/contracts": "^4.9.0",
