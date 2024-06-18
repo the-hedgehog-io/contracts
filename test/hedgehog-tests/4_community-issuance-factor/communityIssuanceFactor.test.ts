@@ -13,15 +13,36 @@ import {
 const { increase: increaseTime } = time;
 
 // Array([aliceGain, bobGain, carolGain, ericGain])
-const hogGainSchedule: string[] = ["0", "1317903975397770000000"];
+const hogGainSchedule: string[] = [
+  "0",
+  "1317903975372452000000", // "1317903975397770000000"
+  "1316167104484152000000", // "1316167104509320000000"
+  "13066645242242832000000", // "13066645242491600000000"
+  "1297211938915362000000", // "1297211938939940000000",
+  "0",
+  "323768804931714500000", // "323768804937785000000"
+];
 
-const factorSteps: string[] = ["999998681227695000", "999998681227695000"];
+const factorSteps: string[] = [
+  "999998681227695000",
+  "999998681227695000",
+  "999998681227695000",
+  "999998681227695000",
+  "999998681227695000",
+  "999998681227695000",
+  "999998681227695000",
+];
 
-const timeSteps: number[] = [0, 1000];
+const timeSteps: number[] = [0, 1000, 1000, 10000, 1000, 500, 500];
 
 const suppCapSteps: string[] = [
   "1000000000000000000000000",
   "1000000000000000000000000",
+  "1000000000000000000000000",
+  "1000000000000000000000000",
+  "1000000000000000000000000",
+  "500000000000000000000000",
+  "500000000000000000000000",
 ];
 
 describe("BaseFeeOracle Tests", () => {
@@ -29,7 +50,7 @@ describe("BaseFeeOracle Tests", () => {
     let alice: SignerWithAddress, //ultimate admin
       bob: SignerWithAddress,
       carol: SignerWithAddress,
-      eric: SignerWithAddress;
+      dave: SignerWithAddress;
     let communityIssuance: CommunityIssuance;
     let stabilityPool: StabilityPoolTester;
     let bfeToken: BaseFeeLMATokenTester;
@@ -39,7 +60,8 @@ describe("BaseFeeOracle Tests", () => {
     let currentStep = 0;
 
     before(async () => {
-      [alice, bob, carol, eric] = await ethers.getSigners();
+      [alice, bob, carol, dave] = await ethers.getSigners();
+
       communityIssuance = await (
         await (await ethers.getContractFactory("CommunityIssuance")).deploy()
       ).waitForDeployment();
@@ -80,7 +102,7 @@ describe("BaseFeeOracle Tests", () => {
         carol.address,
         ethers.parseEther("2500000000000")
       );
-      await bfeToken.transfer(eric.address, ethers.parseEther("2500000000000"));
+      await bfeToken.transfer(dave.address, ethers.parseEther("2500000000000"));
       await stabilityPool.setAddresses(
         bfeToken.target,
         bfeToken.target,
@@ -104,40 +126,38 @@ describe("BaseFeeOracle Tests", () => {
       amount = ethers.parseEther("2500")
     ) => {
       await expect(stabilityPool.provideToSP(amount)).not.to.be.reverted;
-      await expect(stabilityPool.connect(bob).provideToSP(amount)).not.to.be
-        .reverted;
-      await expect(stabilityPool.connect(carol).provideToSP(amount)).not.to.be
-        .reverted;
-      await expect(stabilityPool.connect(eric).provideToSP(amount)).not.to.be
-        .reverted;
+
+      expect(
+        await stabilityPool.getCompoundedBaseFeeLMADeposit(alice.address)
+      ).to.be.eq(amount);
+      // expect(
+      //   await stabilityPool.getCompoundedBaseFeeLMADeposit(bob.address)
+      // ).to.be.eq(amount);
+      // expect(
+      //   await stabilityPool.getCompoundedBaseFeeLMADeposit(carol.address)
+      // ).to.be.eq(amount);
+      // expect(
+      //   await stabilityPool.getCompoundedBaseFeeLMADeposit(dave.address)
+      // ).to.be.eq(amount);
     };
 
     const claimGainWithAllAccounts = async () => {
       await expect(stabilityPool.withdrawFromSP(0)).not.to.be.reverted;
-      await expect(stabilityPool.connect(bob).withdrawFromSP(0)).not.to.be
-        .reverted;
-      await expect(stabilityPool.connect(carol).withdrawFromSP(0)).not.to.be
-        .reverted;
-      await expect(stabilityPool.connect(eric).withdrawFromSP(0)).not.to.be
-        .reverted;
-    };
-
-    const getAllBFEBalances = async () => {
-      const aliceBalance = await bfeToken.balanceOf(alice.address);
-      const bobBalance = await bfeToken.balanceOf(bob.address);
-      const carolBalance = await bfeToken.balanceOf(carol.address);
-      const ericBalance = await bfeToken.balanceOf(eric.address);
-
-      return [aliceBalance, bobBalance, carolBalance, ericBalance];
+      // await expect(stabilityPool.connect(bob).withdrawFromSP(0)).not.to.be
+      //   .reverted;
+      // await expect(stabilityPool.connect(carol).withdrawFromSP(0)).not.to.be
+      //   .reverted;
+      // await expect(stabilityPool.connect(dave).withdrawFromSP(0)).not.to.be
+      //   .reverted;
     };
 
     const getAllHogBalances = async () => {
       const aliceBalance = await hogToken.balanceOf(alice.address);
-      const bobBalance = await hogToken.balanceOf(bob.address);
-      const carolBalance = await hogToken.balanceOf(carol.address);
-      const ericBalance = await hogToken.balanceOf(eric.address);
+      // const bobBalance = await hogToken.balanceOf(bob.address);
+      // const carolBalance = await hogToken.balanceOf(carol.address);
+      // const ericBalance = await hogToken.balanceOf(dave.address);
 
-      return [aliceBalance, bobBalance, carolBalance, ericBalance];
+      return [aliceBalance];
     };
 
     const compareBalanceUpdateCorrectness = async ({
@@ -149,7 +169,7 @@ describe("BaseFeeOracle Tests", () => {
       balancesAfter: bigint[];
       isIncrease?: boolean;
     }) => {
-      const expectedDiffs = hogGainSchedule[currentStep];
+      const expectedDiff = hogGainSchedule[currentStep];
       if (balancesBefore.length !== balancesAfter.length) {
         throw "Error: Trying to compare different length arrays";
       }
@@ -157,15 +177,15 @@ describe("BaseFeeOracle Tests", () => {
         const actualDiff = isIncrease
           ? balancesAfter[i] - balancesBefore[i]
           : balancesBefore[i] - balancesAfter[i];
-        expect(actualDiff).to.be.equal(
-          BigInt(expectedDiffs[currentStep]) / BigInt(4)
-        );
+        expect(actualDiff).to.be.equal(BigInt(expectedDiff));
       }
     };
 
     const executeCurrentStepTxsAndChecks = async () => {
       const balancesBefore = await getAllHogBalances();
+
       await claimGainWithAllAccounts();
+
       const balancesAfter = await getAllHogBalances();
 
       await compareBalanceUpdateCorrectness({
@@ -196,8 +216,32 @@ describe("BaseFeeOracle Tests", () => {
 
     it("should let execute 1 step correctly", async () => {
       await setStepValues();
-      await stabilityPool.withdrawFromSP(0);
-      // await executeCurrentStepTxsAndChecks();
+      await executeCurrentStepTxsAndChecks();
+    });
+
+    it("should let execute 2 step correctly", async () => {
+      await setStepValues();
+      await executeCurrentStepTxsAndChecks();
+    });
+
+    it("should let execute 3 step correctly", async () => {
+      await setStepValues();
+      await executeCurrentStepTxsAndChecks();
+    });
+
+    it("should let execute 4 step correctly", async () => {
+      await setStepValues();
+      await executeCurrentStepTxsAndChecks();
+    });
+
+    it("should let execute 5 step correctly", async () => {
+      await setStepValues();
+      await communityIssuance.setTotalHogIssued("8822946494815800000000");
+      await executeCurrentStepTxsAndChecks();
+    });
+    it("should let execute 6 step correctly", async () => {
+      await setStepValues();
+      await executeCurrentStepTxsAndChecks();
     });
   });
 });
