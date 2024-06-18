@@ -2,27 +2,30 @@ import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import timestring from "timestring";
 import {
-  BaseFeeLMATokenTester,
   CommunityIssuance,
   StabilityPoolTester,
   TERC20,
 } from "../../../typechain-types";
+import { BaseFeeLMAToken } from "../../../typechain-types/contracts";
 
 const { increase: increaseTime } = time;
 
 // Array([aliceGain, bobGain, carolGain, ericGain])
-const hogGainSchedule: string[] = ["0", "1317903975397770000000"];
-
-const factorSteps: string[] = ["999998681227695000", "999998681227695000"];
-
-const timeSteps: number[] = [0, 1000];
-
-const suppCapSteps: string[] = [
-  "1000000000000000000000000",
-  "1000000000000000000000000",
+const hogGainSchedule: bigint[][] = [
+  [
+    ethers.parseEther("1"),
+    ethers.parseEther("1"),
+    ethers.parseEther("1"),
+    ethers.parseEther("1"),
+  ],
 ];
+
+const factorSteps: string[] = ["999998681227695000"];
+
+const timeSteps: number[] = [0];
+
+const suppCapSteps: string[] = ["1000000000000000000000000"];
 
 describe("BaseFeeOracle Tests", () => {
   context("Base functionality and Access Control", () => {
@@ -32,7 +35,7 @@ describe("BaseFeeOracle Tests", () => {
       eric: SignerWithAddress;
     let communityIssuance: CommunityIssuance;
     let stabilityPool: StabilityPoolTester;
-    let bfeToken: BaseFeeLMATokenTester;
+    let bfeToken: BaseFeeLMAToken;
     let collToken: TERC20;
     let hogToken: TERC20;
 
@@ -49,7 +52,7 @@ describe("BaseFeeOracle Tests", () => {
 
       bfeToken = await (
         await (
-          await ethers.getContractFactory("BaseFeeLMATokenTester")
+          await ethers.getContractFactory("BaseFeeLMAToken")
         ).deploy(
           communityIssuance.target,
           stabilityPool.target,
@@ -70,33 +73,14 @@ describe("BaseFeeOracle Tests", () => {
         ).deploy("HOG Token", "HOG", 10000000000000)
       ).waitForDeployment();
 
-      await hogToken.transfer(
-        communityIssuance.target,
-        ethers.parseEther("10000000000000")
-      );
-
-      await bfeToken.transfer(bob.address, ethers.parseEther("2500000000000"));
-      await bfeToken.transfer(
+      await collToken.transfer(bob.address, ethers.parseEther("2500000000000"));
+      await collToken.transfer(
         carol.address,
         ethers.parseEther("2500000000000")
       );
-      await bfeToken.transfer(eric.address, ethers.parseEther("2500000000000"));
-      await stabilityPool.setAddresses(
-        bfeToken.target,
-        bfeToken.target,
-        bfeToken.target,
-        bfeToken.target,
-        bfeToken.target,
-        bfeToken.target,
-        communityIssuance.target,
-        bfeToken.target
-      );
-
-      await communityIssuance.setAddresses(
-        hogToken.target,
-        stabilityPool.target,
-        alice.address,
-        alice.address
+      await collToken.transfer(
+        eric.address,
+        ethers.parseEther("2500000000000")
       );
     });
 
@@ -122,15 +106,6 @@ describe("BaseFeeOracle Tests", () => {
         .reverted;
     };
 
-    const getAllBFEBalances = async () => {
-      const aliceBalance = await bfeToken.balanceOf(alice.address);
-      const bobBalance = await bfeToken.balanceOf(bob.address);
-      const carolBalance = await bfeToken.balanceOf(carol.address);
-      const ericBalance = await bfeToken.balanceOf(eric.address);
-
-      return [aliceBalance, bobBalance, carolBalance, ericBalance];
-    };
-
     const getAllHogBalances = async () => {
       const aliceBalance = await hogToken.balanceOf(alice.address);
       const bobBalance = await hogToken.balanceOf(bob.address);
@@ -150,16 +125,17 @@ describe("BaseFeeOracle Tests", () => {
       isIncrease?: boolean;
     }) => {
       const expectedDiffs = hogGainSchedule[currentStep];
-      if (balancesBefore.length !== balancesAfter.length) {
+      if (
+        balancesBefore.length !== balancesAfter.length ||
+        balancesBefore.length !== expectedDiffs.length
+      ) {
         throw "Error: Trying to compare different length arrays";
       }
       for (let i = 0; i < balancesBefore.length; i++) {
         const actualDiff = isIncrease
           ? balancesAfter[i] - balancesBefore[i]
           : balancesBefore[i] - balancesAfter[i];
-        expect(actualDiff).to.be.equal(
-          BigInt(expectedDiffs[currentStep]) / BigInt(4)
-        );
+        expect(actualDiff).to.be.equal(expectedDiffs[i]);
       }
     };
 
@@ -175,29 +151,36 @@ describe("BaseFeeOracle Tests", () => {
       currentStep++;
     };
 
-    const setStepValues = async () => {
-      await communityIssuance.setISSUANCE_FACTOR(factorSteps[currentStep]);
-
-      await communityIssuance.setHOGSupplyCap(suppCapSteps[currentStep]);
-
-      if (timeSteps[currentStep] != 0) {
-        await increaseTime(timestring(`${timeSteps[currentStep]} minutes`));
-      }
-    };
-
     it("should let provide debt tokens to stability pool with a default issuance factor", async () => {
+      // Each of 4 users deposit 2.5k tokens
+
       await depositWithAllAccounts();
     });
 
-    it("should let execute 0 step correctly", async () => {
-      await setStepValues();
+    it("should let claim correct amount of HOG after N seconds passed correctly", async () => {
+      await increaseTime(100);
+
       await executeCurrentStepTxsAndChecks();
     });
 
-    it("should let execute 1 step correctly", async () => {
-      await setStepValues();
-      await stabilityPool.withdrawFromSP(0);
-      // await executeCurrentStepTxsAndChecks();
+    it("should not let admin set community issuance factor", async () => {
+      await expect(communityIssuance.connect(bob).setISSUANCE_FACTOR(1)).to.be
+        .reverted;
+    });
+
+    it("should let admin decrease community issuance factor", async () => {
+      await expect(communityIssuance.setISSUANCE_FACTOR(1)).not.to.be.reverted;
+    });
+
+    it("it should result into 0 hog gains after complete community issuance factor decrease", async () => {
+      await increaseTime(100);
+
+      await executeCurrentStepTxsAndChecks();
+    });
+
+    it("should let admin increase community issuance factor", async () => {
+      // TODO: Update Issuance Factor to be in line with a test suite
+      await expect(communityIssuance.setISSUANCE_FACTOR(1)).not.to.be.reverted;
     });
   });
 });

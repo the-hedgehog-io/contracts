@@ -6,10 +6,10 @@
     "@openzeppelin/contracts": "^4.9.0",
     "@openzeppelin/test-helpers": "^0.5.10",
     "dotenv": "^16.1.1",
+    "ethers": "^6.7.1",
     "hardhat": "^2.17.2",
     "hardhat-abi-exporter": "^2.10.1",
-    "hardhat-deploy": "^0.11.30",
-    "ethers": "^6.7.1"
+    "hardhat-deploy": "^0.11.30"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
@@ -22,5 +22,9 @@
   },
   "scripts": {
     "hardhat": "hardhat"
+  },
+  "dependencies": {
+    "@types/timestring": "^6.0.5",
+    "timestring": "^7.0.0"
   }
 }
