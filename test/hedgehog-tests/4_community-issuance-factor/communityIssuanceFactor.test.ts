@@ -15,12 +15,23 @@ const { increase: increaseTime } = time;
 // Array([aliceGain, bobGain, carolGain, ericGain])
 const hogGainSchedule: string[] = [
   "0",
-  "1317903975372452000000", // "1317903975397770000000"
-  "1316167104484152000000", // "1316167104509320000000"
+  "1317903975372452000000", // "1317903975396110000000"
+  "1316167104484152000000", // "1316167104510990000000"
   "13066645242242832000000", // "13066645242491600000000"
   "1297211938915362000000", // "1297211938939940000000",
   "0",
   "323768804931714500000", // "323768804937785000000"
+  "646897495231310500000", // "646897495243494000000"
+  "646044946450686500000", // "646044946462864000000"
+  "0",
+  "109475863570035000000", // "109475863524222000000"
+  "109451803908871500000", // "109451803863070000000"
+  "109427749535333000000", //"109427749489577000000"
+  "1420374199722784000000", // "1420374199129440000000"
+  "109091542856110000000", // "109091542810635000000"
+  "116546149676417000000", // "116436660046349000000"
+  "109469836420618000000", //"109469848014854000000"
+  "101223819996069500000", // "101224290254997000000"
 ];
 
 const factorSteps: string[] = [
@@ -31,9 +42,23 @@ const factorSteps: string[] = [
   "999998681227695000",
   "999998681227695000",
   "999998681227695000",
+  "999998681227695000",
+  "999998681227695000",
+  "999999780204495000",
+  "999999780204495000",
+  "999999780204495000",
+  "999999780204495000",
+  "999999780204495000",
+  "999999780204495000",
+  "999999890102241000",
+  "999999890102241000",
+  "999999780204495000",
 ];
 
-const timeSteps: number[] = [0, 1000, 1000, 10000, 1000, 500, 500];
+const timeSteps: number[] = [
+  0, 1000, 1000, 10000, 1000, 500, 500, 1000, 1000, 1000, 1000, 1000, 1000,
+  13000, 1000, 1000, 1000, 1000,
+];
 
 const suppCapSteps: string[] = [
   "1000000000000000000000000",
@@ -42,6 +67,17 @@ const suppCapSteps: string[] = [
   "1000000000000000000000000",
   "1000000000000000000000000",
   "500000000000000000000000",
+  "500000000000000000000000",
+  "500000000000000000000000",
+  "500000000000000000000000",
+  "500000000000000000000000",
+  "500000000000000000000000",
+  "500000000000000000000000",
+  "500000000000000000000000",
+  "500000000000000000000000",
+  "500000000000000000000000",
+  "1000000000000000000000000",
+  "1000000000000000000000000",
   "500000000000000000000000",
 ];
 
@@ -240,6 +276,50 @@ describe("BaseFeeOracle Tests", () => {
       await executeCurrentStepTxsAndChecks();
     });
     it("should let execute 6 step correctly", async () => {
+      await setStepValues();
+      await executeCurrentStepTxsAndChecks();
+    });
+    it("should let execute 7 step correctly", async () => {
+      await setStepValues();
+      await executeCurrentStepTxsAndChecks();
+    });
+    it("should let execute 8 step correctly", async () => {
+      await setStepValues();
+      await executeCurrentStepTxsAndChecks();
+    });
+    it("should let execute 9 step correctly", async () => {
+      await setStepValues();
+      await executeCurrentStepTxsAndChecks();
+    });
+    it("should let execute 10 step correctly", async () => {
+      await setStepValues();
+      await executeCurrentStepTxsAndChecks();
+    });
+    it("should let execute 11 step correctly", async () => {
+      await setStepValues();
+      await executeCurrentStepTxsAndChecks();
+    });
+    it("should let execute 12 step correctly", async () => {
+      await setStepValues();
+      await executeCurrentStepTxsAndChecks();
+    });
+    it("should let execute 13 step correctly", async () => {
+      await setStepValues();
+      await executeCurrentStepTxsAndChecks();
+    });
+    it("should let execute 14 step correctly", async () => {
+      await setStepValues();
+      await executeCurrentStepTxsAndChecks();
+    });
+    it("should let execute 15 step correctly", async () => {
+      await setStepValues();
+      await executeCurrentStepTxsAndChecks();
+    });
+    it("should let execute 16 step correctly", async () => {
+      await setStepValues();
+      await executeCurrentStepTxsAndChecks();
+    });
+    it("should let execute 17 step correctly", async () => {
       await setStepValues();
       await executeCurrentStepTxsAndChecks();
     });
