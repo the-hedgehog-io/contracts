@@ -164,6 +164,19 @@
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_totalHOGIssued",
+        "type": "uint256"
+      }
+    ],
+    "name": "TotalHogIssuedManuallyUpdated",
+    "type": "event"
+  },
+  {
     "inputs": [],
     "name": "DECIMAL_PRECISION",
     "outputs": [
@@ -465,6 +478,19 @@
       }
     ],
     "name": "setISSUANCE_FACTOR",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_newHogIssued",
+        "type": "uint256"
+      }
+    ],
+    "name": "setTotalHogIssued",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
