@@ -10,7 +10,6 @@ import "../dependencies/CheckContract.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "hardhat/console.sol";
 
 contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
     using SafeMath for uint;
@@ -114,9 +113,6 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
         uint latestTotalHOGIssued = HOGSupplyCap
             .mul(_getCumulativeIssuanceFraction())
             .div(DECIMAL_PRECISION);
-
-        console.log("latestTotalHOGIssued", latestTotalHOGIssued);
-        console.log("totalHOGIssued", totalHOGIssued);
 
         // Hedgehog Updates: Since now Issuance Factor is dynamic it is possible to block the whole system in case the factor reduction
         // Because of that we simply stop the issuance in such cases in case of letting it underflow
