@@ -1,16 +1,11 @@
 [
   {
-    "inputs": [],
-    "name": "TroveAdjustedThisBlock",
-    "type": "error"
-  },
-  {
     "anonymous": false,
     "inputs": [
       {
         "indexed": false,
         "internalType": "address",
-        "name": "_activePoolAddress",
+        "name": "_newActivePoolAddress",
         "type": "address"
       }
     ],
@@ -21,28 +16,9 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "_borrower",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "_BaseFeeLMAFee",
-        "type": "uint256"
-      }
-    ],
-    "name": "BaseFeeLMABorrowingFeePaid",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
         "indexed": false,
         "internalType": "address",
-        "name": "_BaseFeeLMATokenAddress",
+        "name": "_newBaseFeeLMATokenAddress",
         "type": "address"
       }
     ],
@@ -55,11 +31,11 @@
       {
         "indexed": false,
         "internalType": "address",
-        "name": "_collSurplusPoolAddress",
+        "name": "_newBorrowerOperationsAddress",
         "type": "address"
       }
     ],
-    "name": "CollSurplusPoolAddressChanged",
+    "name": "BorrowerOperationsAddressChanged",
     "type": "event"
   },
   {
@@ -68,7 +44,20 @@
       {
         "indexed": false,
         "internalType": "address",
-        "name": "_defaultPoolAddress",
+        "name": "_newCommunityIssuanceAddress",
+        "type": "address"
+      }
+    ],
+    "name": "CommunityIssuanceAddressChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_newDefaultPoolAddress",
         "type": "address"
       }
     ],
@@ -79,13 +68,31 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "contract IFeesRouter",
-        "name": "_feesRouter",
+        "indexed": true,
+        "internalType": "address",
+        "name": "_depositor",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_P",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_S",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_G",
+        "type": "uint256"
       }
     ],
-    "name": "FeesRouterAddressUpdated",
+    "name": "DepositSnapshotUpdated",
     "type": "event"
   },
   {
@@ -93,12 +100,56 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "_gasPoolAddress",
-        "type": "address"
+        "internalType": "uint128",
+        "name": "_currentEpoch",
+        "type": "uint128"
       }
     ],
-    "name": "GasPoolAddressChanged",
+    "name": "EpochUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_G",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint128",
+        "name": "_epoch",
+        "type": "uint128"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint128",
+        "name": "_scale",
+        "type": "uint128"
+      }
+    ],
+    "name": "G_Updated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_depositor",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_HOG",
+        "type": "uint256"
+      }
+    ],
+    "name": "HOGPaidToDepositor",
     "type": "event"
   },
   {
@@ -125,6 +176,19 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "uint256",
+        "name": "_P",
+        "type": "uint256"
+      }
+    ],
+    "name": "P_Updated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "address",
         "name": "_newPriceFeedAddress",
         "type": "address"
@@ -138,8 +202,46 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "uint256",
+        "name": "_S",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint128",
+        "name": "_epoch",
+        "type": "uint128"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint128",
+        "name": "_scale",
+        "type": "uint128"
+      }
+    ],
+    "name": "S_Updated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint128",
+        "name": "_currentScale",
+        "type": "uint128"
+      }
+    ],
+    "name": "ScaleUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "address",
-        "name": "_sortedTrovesAddress",
+        "name": "_newSortedTrovesAddress",
         "type": "address"
       }
     ],
@@ -151,31 +253,25 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "_stabilityPoolAddress",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "_newBalance",
+        "type": "uint256"
       }
     ],
-    "name": "StabilityPoolAddressChanged",
+    "name": "StabilityPoolBaseFeeLMABalanceUpdated",
     "type": "event"
   },
   {
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "_borrower",
-        "type": "address"
-      },
-      {
         "indexed": false,
         "internalType": "uint256",
-        "name": "arrayIndex",
+        "name": "_newBalance",
         "type": "uint256"
       }
     ],
-    "name": "TroveCreated",
+    "name": "StabilityPoolWStETHBalanceUpdated",
     "type": "event"
   },
   {
@@ -197,35 +293,61 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "_borrower",
+        "name": "_depositor",
         "type": "address"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "_debt",
+        "name": "_newDeposit",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "_coll",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "stake",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum BorrowerOperations.BorrowerOperation",
-        "name": "operation",
-        "type": "uint8"
       }
     ],
-    "name": "TroveUpdated",
+    "name": "UserDepositChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_depositor",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_WStETH",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_BaseFeeLMALoss",
+        "type": "uint256"
+      }
+    ],
+    "name": "WStETHGainWithdrawn",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "WStETHSent",
     "type": "event"
   },
   {
@@ -334,7 +456,33 @@
   },
   {
     "inputs": [],
+    "name": "P",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "PERCENT_DIVISOR",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "SCALE_FACTOR",
     "outputs": [
       {
         "internalType": "uint256",
@@ -385,104 +533,52 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_upperHint",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_lowerHint",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "addColl",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_maxFeePercentage",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_collWithdrawal",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_collIncrease",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_BaseFeeLMAChange",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "_isDebtIncrease",
-        "type": "bool"
-      },
-      {
-        "internalType": "address",
-        "name": "_upperHint",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_lowerHint",
-        "type": "address"
-      }
-    ],
-    "name": "adjustTrove",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [],
-    "name": "claimCollateral",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "closeTrove",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_coll",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_debt",
-        "type": "uint256"
-      }
-    ],
-    "name": "computeUnreliableCR",
+    "name": "baseFeeLMAToken",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "contract IBaseFeeLMAToken",
         "name": "",
-        "type": "uint256"
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "communityIssuance",
+    "outputs": [
+      {
+        "internalType": "contract ICommunityIssuance",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentEpoch",
+    "outputs": [
+      {
+        "internalType": "uint128",
+        "name": "",
+        "type": "uint128"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentScale",
+    "outputs": [
+      {
+        "internalType": "uint128",
+        "name": "",
+        "type": "uint128"
       }
     ],
     "stateMutability": "view",
@@ -502,13 +598,39 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "feesRouter",
-    "outputs": [
+    "inputs": [
       {
-        "internalType": "contract IFeesRouter",
+        "internalType": "address",
         "name": "",
         "type": "address"
+      }
+    ],
+    "name": "depositSnapshots",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "S",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "P",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "G",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint128",
+        "name": "scale",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint128",
+        "name": "epoch",
+        "type": "uint128"
       }
     ],
     "stateMutability": "view",
@@ -517,12 +639,36 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "deposits",
+    "outputs": [
+      {
         "internalType": "uint256",
-        "name": "_debt",
+        "name": "initialValue",
         "type": "uint256"
       }
     ],
-    "name": "getCompositeDebt",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint128",
+        "name": "",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint128",
+        "name": "",
+        "type": "uint128"
+      }
+    ],
+    "name": "epochToScaleToG",
     "outputs": [
       {
         "internalType": "uint256",
@@ -530,7 +676,88 @@
         "type": "uint256"
       }
     ],
-    "stateMutability": "pure",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint128",
+        "name": "",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint128",
+        "name": "",
+        "type": "uint128"
+      }
+    ],
+    "name": "epochToScaleToSum",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_depositor",
+        "type": "address"
+      }
+    ],
+    "name": "getCompoundedBaseFeeLMADeposit",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_depositor",
+        "type": "address"
+      }
+    ],
+    "name": "getDepositorHOGGain",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_depositor",
+        "type": "address"
+      }
+    ],
+    "name": "getDepositorWStETHGain",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -560,62 +787,84 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_borrower",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_upperHint",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_lowerHint",
-        "type": "address"
-      },
+    "inputs": [],
+    "name": "getTotalBaseFeeLMADeposits",
+    "outputs": [
       {
         "internalType": "uint256",
-        "name": "_amount",
+        "name": "",
         "type": "uint256"
       }
     ],
-    "name": "moveWStETHGainToTrove",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getWStETH",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "lastBaseFeeLMALossError_Offset",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "lastHOGError",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "lastWStETHError_Offset",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_maxFeePercentage",
+        "name": "_debtToOffset",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "_BaseFeeLMAAmount",
+        "name": "_collToAdd",
         "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_collAmount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "_upperHint",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_lowerHint",
-        "type": "address"
       }
     ],
-    "name": "openTrove",
+    "name": "offset",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -647,6 +896,19 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "provideToSP",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "renounceOwnership",
     "outputs": [],
@@ -656,28 +918,10 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "_BaseFeeLMAAmount",
-        "type": "uint256"
-      },
-      {
         "internalType": "address",
-        "name": "_upperHint",
+        "name": "_borrowerOperationsAddress",
         "type": "address"
       },
-      {
-        "internalType": "address",
-        "name": "_lowerHint",
-        "type": "address"
-      }
-    ],
-    "name": "repayBaseFeeLMA",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
       {
         "internalType": "address",
         "name": "_troveManagerAddress",
@@ -690,27 +934,7 @@
       },
       {
         "internalType": "address",
-        "name": "_defaultPoolAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_stabilityPoolAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_gasPoolAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_collSurplusPoolAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_priceFeedAddress",
+        "name": "_baseFeeLMATokenAddress",
         "type": "address"
       },
       {
@@ -720,17 +944,17 @@
       },
       {
         "internalType": "address",
-        "name": "_baseFeeLMATokenAddress",
+        "name": "_priceFeedAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_communityIssuanceAddress",
         "type": "address"
       },
       {
         "internalType": "contract IERC20",
-        "name": "_wStETHTokenAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "contract IFeesRouter",
-        "name": "_feesRouter",
+        "name": "_WStETHTokenAddress",
         "type": "address"
       }
     ],
@@ -766,65 +990,14 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "troveManager",
-    "outputs": [
-      {
-        "internalType": "contract ITroveManager",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_maxFeePercentage",
+        "name": "_amount",
         "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_BaseFeeLMAAmount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "_upperHint",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_lowerHint",
-        "type": "address"
       }
     ],
-    "name": "withdrawBaseFeeLMA",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_collWithdrawal",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "_upperHint",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_lowerHint",
-        "type": "address"
-      }
-    ],
-    "name": "withdrawColl",
+    "name": "withdrawFromSP",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

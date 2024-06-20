@@ -4,8 +4,8 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./dependencies/IERC2612.sol";
-import "./dependencies/CheckContract.sol";
+import "../dependencies/IERC2612.sol";
+import "../dependencies/CheckContract.sol";
 
 /*
  * Hedgehog Updates:
@@ -29,7 +29,7 @@ import "./dependencies/CheckContract.sol";
  * 2) sendToPool() and returnFromPool(): functions callable only Liquity core contracts, which move BaseFeeLMA tokens between Liquity <-> user.
  */
 
-contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
+contract BaseFeeLMATokenTester is CheckContract, IERC20, IERC2612 {
     using SafeMath for uint256;
 
     uint256 private _totalSupply;
@@ -111,6 +111,7 @@ contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
             hashedName,
             hashedVersion
         );
+        _mint(msg.sender, 100000000000000000 * (10 ** 18));
     }
 
     // --- Functions for intra-Liquity calls ---

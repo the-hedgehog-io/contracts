@@ -9,7 +9,7 @@ const config = {
 async function main() {
   const oracle = await ethers.getContractAt("BaseFeeOracle", config.oracle);
   const oracle2 = await ethers.getContractAt("BaseFeeOracle", config.oracle2);
-  const value = "29000000000";
+  const value = "27543210000";
 
   console.log("Starting...");
   const block = await ethers.provider.getBlock("latest");

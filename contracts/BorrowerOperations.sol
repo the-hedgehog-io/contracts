@@ -42,7 +42,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     address gasPoolAddress;
 
-    IERC20 WStETHToken;
+    IERC20 public WStETHToken;
 
     ICollSurplusPool collSurplusPool;
 
@@ -276,11 +276,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         // Move the wStETH to the Active Pool, and mint the BaseFeeLMAAmount to the borrower
         _activePoolAddColl(contractsCache.activePool, _collAmount);
-        // HEDGEHOG UPDATES: Revert if bfe loan is less then fee + gas comp
-        if (
-            _BaseFeeLMAAmount <=
-            vars.BaseFeeLMAFee + BaseFeeLMA_GAS_COMPENSATION
-        ) {
+        if (_BaseFeeLMAAmount <= vars.BaseFeeLMAFee) {
             revert("BO: Fee exceeds gain");
         }
 

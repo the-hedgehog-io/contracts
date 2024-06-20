@@ -1,60 +1,60 @@
 {
   "11155111": {
     "ActivePool": {
-      "address": "0xdbfC1401a4B55Bf78Fb4593E36dD9785E8879580",
-      "blockNumber": 6035913
+      "address": "0x455d415af86F3A194E04a5b99c5D736d289C0DE1",
+      "blockNumber": 6106230
     },
     "BaseFeeLMAToken": {
-      "address": "0x222Ae0Ed69ba17BECf3369A4b547D24DCe55E623",
-      "blockNumber": 6035997
+      "address": "0x9Fce78BFe06B52c2648F1923311fcD2E4a54F769",
+      "blockNumber": 6106238
     },
     "BorrowerOperations": {
-      "address": "0x679EaB9A70A68408fD56bb1c4A5feE753257bf2C",
-      "blockNumber": 6035926
+      "address": "0x6227708902A66c560710D67cD131aBEF659B5b38",
+      "blockNumber": 6106235
     },
     "CollSurplusPool": {
-      "address": "0x78d47cA0Af3F893aA236728925f72A120F83F451",
-      "blockNumber": 6035925
+      "address": "0xB2d462FA62391F71963D7Ebcf8eB116fEB304cc4",
+      "blockNumber": 6106234
     },
     "CommunityIssuance": {
-      "address": "0xE8127bfd349B162c73607800B3c23738022aF0CC",
-      "blockNumber": 6035998
+      "address": "0xEEA5516b577f0c9Ee7008a3ed5502ada7e828bbB",
+      "blockNumber": 6106239
     },
     "DefaultPool": {
-      "address": "0x158C1dFC43a49f9eCD38090492B2B1bE16502007",
-      "blockNumber": 6035924
+      "address": "0xbe3120eD26462eCee0b3BF4edC8520633Cb5B965",
+      "blockNumber": 6106233
     },
     "FeesRouter": {
-      "address": "0x063588Aa1DFe88CA9b96789BE10111CbbA867F8E",
-      "blockNumber": 6035928
+      "address": "0xd005410F22304cC477bD8EeF64fEE481b5f10f4E",
+      "blockNumber": 6106237
     },
     "GasPool": {
-      "address": "0xDd10CE14dDF8434aB54FAE6015Fe73a48A74Ec54",
-      "blockNumber": 6035923
+      "address": "0xcfFe19d11a1Bd54bAFDCAC56e9354C4eD1B274f1",
+      "blockNumber": 6106232
     },
     "HOGToken": {
-      "address": "0xadec2418d1F7FEfB0B8528941C87580FCb9cf5dA",
-      "blockNumber": 6035889
+      "address": "0x3b770eDE29fEaa94Ee8aCD15b0D1F781D0D8d80E",
+      "blockNumber": 6106226
     },
     "HintHelpers": {
-      "address": "0x10720d4408b5F0d16bB4acA5A2C1f006Bbf623A8",
-      "blockNumber": 6035927
+      "address": "0xC5b9b0C82a07637BA857Ea11FBdeb9F7B312926e",
+      "blockNumber": 6106236
     },
     "PriceFeed": {
-      "address": "0x29f5B03BdBbc643F3Da42a6395e4b0A48BBEb09B",
-      "blockNumber": 6035890
+      "address": "0x533CefFA165A143A8c9251F9471fD290A6d37aAD",
+      "blockNumber": 6106227
     },
     "SortedTroves": {
-      "address": "0x0ac38911a26Ccdf2AFcC3b481a23c38c4C5aA36c",
-      "blockNumber": 6035891
+      "address": "0x80e2a80e964f41AB97850566089196518d3A013F",
+      "blockNumber": 6106228
     },
     "StabilityPool": {
-      "address": "0x0A0f15B89Fc79A4A49710012334E483Cdb6dB45A",
-      "blockNumber": 6035922
+      "address": "0xb6051B28D9Fbd3b98B68062eA1d7515Df1757E83",
+      "blockNumber": 6106231
     },
     "TroveManager": {
-      "address": "0x1aBFF6d4d720f54a20C738Aa7d942ABA5a13EFd1",
-      "blockNumber": 6035912
+      "address": "0xD5A7cDDAc37BB4e996E88797dd4fAcbB53b3d6Ca",
+      "blockNumber": 6106229
     }
   }
 }

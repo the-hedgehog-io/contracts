@@ -32,13 +32,13 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
     // Critical system collateral ratio. If the system's total collateral ratio (TCR) falls below the CCR, Recovery Mode is triggered.
     uint public constant CCR = 2000000000000000000; // 200%
 
-    // HEDGEHOG UPDATES: Decreased to 100k wei
+    // HEDGEHOG UPDATES: Updated to 100000000000000000000000
     // Amount of BaseFeeLMA to be locked in gas pool on opening troves
     uint public constant BaseFeeLMA_GAS_COMPENSATION = 100000000000000000000000;
 
-    // HEDGEHOG UPDATES: Decreased to 350000000 BFE
+    // HEDGEHOG UPDATES: Updated to to 350000000000000000000000000 BFE
     // Minimum amount of net BaseFeeLMA debt a trove must have
-    uint public constant MIN_NET_DEBT = 350000000000000000000000000;
+    uint public constant MIN_NET_DEBT = 50000000000000000000000000;
 
     uint public constant PERCENT_DIVISOR = 200; // dividing by 200 yields 0.5%
 

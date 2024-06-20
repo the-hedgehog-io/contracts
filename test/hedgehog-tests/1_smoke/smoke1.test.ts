@@ -117,7 +117,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const CarolTroveDebt = BigInt("6000000000000000000000000000");
     const CarolTroveOpeningFee = BigInt("4189432568000000000000000000");
     const CarolInitialCR = BigInt("22221851858000000000");
-    const CarolBFEBalanceAtOpening = BigInt("1810567431748703568000000000");
     const CarolTroveCollAfterLiquid = BigInt("4031376920784734572000");
     const CarolTroveDebtAfterLiquid = BigInt("6364324000");
     const CarolCRAfterLiquid = BigInt("10557227342041706686");
