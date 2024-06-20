@@ -40,7 +40,7 @@ const compareWithFault = (
 };
 
 describe("BaseFeeOracle Tests", () => {
-  context("Base functionality and Access Control . Flow #2", () => {
+  context("Base functionality and Access Control . CollSurp", () => {
     let deployer: SignerWithAddress, //ultimate admin
       setter: SignerWithAddress,
       hacker: SignerWithAddress,

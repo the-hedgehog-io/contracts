@@ -612,7 +612,7 @@ describe("BaseFeeOracle Tests", () => {
       await openTrove({
         caller: alice,
         collAmount: ethers.parseEther("25"),
-        baseFeeLMAAmount: 500000000,
+        baseFeeLMAAmount: "50000000000000000000000000",
       });
       await setNewBaseFeePrice(450);
       await setNewBaseFeePrice(450);

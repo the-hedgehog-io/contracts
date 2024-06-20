@@ -48,18 +48,18 @@ contract SingleTxCaller {
         IERC20(_debtToken).approve(_tm, 44000);
         BOps(_bo).openTrove(
             1e18,
-            350000000,
+            350000000000000000000000000,
             9000000000000000000000,
             address(0),
             address(0)
         );
 
         TM(_tm).redeemCollateral(
-            44000,
+            44000000000000000000000,
             _firstRedemptionHint,
             _upperPartialRedemptionHint,
             _lowerPartialRedemptionHint,
-            149983505461847068282088101533157,
+            149983505461847,
             0,
             1e18
         );

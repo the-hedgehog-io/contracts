@@ -83,16 +83,16 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const BobInitialCR = BigInt("49997500124966666666");
     const BobTroveOpeningFee = BigInt("1009975001");
     const BobIdealBFEBalanceAtOpening = BigInt("990024999000000000000000000");
-    const BobActualBFEBalanceAtOpening = BigInt("990024999");
-    const BobUnstakeFirst = BigInt("990024999");
-    const BobRedemptionFirst = BigInt("990024999");
+    const BobActualBFEBalanceAtOpening = BigInt("990024999000000000000000000");
+    const BobUnstakeFirst = BigInt("990024999000000000000000000");
+    const BobRedemptionFirst = BigInt("990024999000000000000000000");
 
     // Carol:
     const CarolTroveColl = BigInt("4000000000000000000000");
     const CarolTroveDebt = BigInt("6000000000000000000000000000");
     const CarolTroveOpeningFee = BigInt("4189432568");
     const CarolInitialCR = BigInt("22221851858000000000");
-    const CarolBFEBalanceAtOpening = BigInt("1810567432000000000000000000");
+    const CarolBFEBalanceAtOpening = BigInt("1810567431748703568000000000");
 
     const totalCollateralAliceOpening = BigInt("602000000000000000000");
     const totalDebtAliceOpening = BigInt("4000100000000000000000000000");
@@ -389,7 +389,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         await stabilityPool.getAddress()
       );
 
-      expect(balance).to.be.equal("4970024999");
+      expect(balance).to.be.equal("4970024999000000000000000000");
     });
 
     it("should have correct total supply before alice increase", async () => {
@@ -464,7 +464,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         CarolBFEBalanceAtOpening,
         CarolTroveDebt - CarolTroveOpeningFee
       );
-      compareWithFault(balance, CarolBFEBalanceAtOpening);
+      expect(balance).to.be.eq(CarolBFEBalanceAtOpening);
     });
 
     it("should let another user provide to stability pool (carol)", async () => {
@@ -483,7 +483,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       const balance = await baseFeeLMAToken.balanceOf(
         await stabilityPool.getAddress()
       );
-      expect(balance).to.be.equal("6780592431");
+      expect(balance).to.be.equal("6780592430748703568000000000");
     });
 
     it("should let withdraw provided funds", async () => {

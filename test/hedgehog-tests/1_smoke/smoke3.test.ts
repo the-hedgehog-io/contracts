@@ -82,14 +82,14 @@ describe("BaseFeeOracle Tests", () => {
     const BobInitialCR = BigInt("6666333349966666666");
     const BobTroveOpeningFee = BigInt("1578565939");
     const BobIdealBFEBalanceAtOpening = BigInt("421434061409356496000000000");
-    const BobActualBFEBalanceAtOpening = BigInt("421434061");
+    const BobActualBFEBalanceAtOpening = BigInt("421434061409356496000000000");
 
     const BobTroveIncreaseCollFirst = BigInt("2000000000000000000000");
     const BobTroveCollAfterIncrease = BigInt("2400000000000000000000");
     const BobTroveDebtAfterIncrease = BigInt("2000100000000000000000000000");
     const BobCRAfterIncrease = BigInt("19999000049983333333");
 
-    const BobTroveIncreaseDebtSecond = BigInt("2940000000");
+    const BobTroveIncreaseDebtSecond = BigInt("2940000000000000000000000000");
 
     const CarolTroveColl = BigInt("90000000000000000000");
     const CarolTroveDebt = BigInt("600000000000000000000000000");
@@ -369,7 +369,7 @@ describe("BaseFeeOracle Tests", () => {
         await stabilityPool.getAddress()
       );
 
-      expect(balance).to.be.equal("2958684061");
+      expect(balance).to.be.equal("2958684061409356496000000000");
     });
 
     it("should have correct total supply before alice increase", async () => {
@@ -463,7 +463,7 @@ describe("BaseFeeOracle Tests", () => {
         await stabilityPool.getAddress()
       );
 
-      expect(balance).to.be.equal("3583497130");
+      expect(balance).to.be.equal("3454637831210212536928859299");
     });
 
     it("should let increase collateral to the position (bob position)", async () => {
@@ -506,7 +506,7 @@ describe("BaseFeeOracle Tests", () => {
 
       expect(
         (await baseFeeLMAToken.balanceOf(bob.address)) - balanceBefore
-      ).to.be.equal("1321406578");
+      ).to.be.equal("1321406577397566118620000000");
     });
 
     it("should correctly set system into a recovery mode", async () => {
@@ -538,21 +538,22 @@ describe("BaseFeeOracle Tests", () => {
             ethers.parseEther("1"),
             0,
             "1250000000000000000000",
-            "100000000",
+            "100000000000000000000000000",
             true,
             ethers.ZeroAddress,
             ethers.ZeroAddress
           )
       ).to.not.be.reverted;
 
-      expect("67975555").to.be.equal(
+      expect("67975554076726728500000000").to.be.equal(
         (await baseFeeLMAToken.balanceOf(carol.address)) - carolBFEBalanceBefore
       );
     });
 
     it("should let provide to stability pool in recovery mode", async () => {
-      await expect(provide({ caller: carol, amount: "67975555" })).to.be.not
-        .reverted;
+      await expect(
+        provide({ caller: carol, amount: "67975554076726728500000000" })
+      ).to.be.not.reverted;
     });
 
     it("should let carol liquidate bob and alice", async () => {
@@ -566,7 +567,7 @@ describe("BaseFeeOracle Tests", () => {
       const balanceAfter = await payToken.balanceOf(carol.address);
       expect(
         await baseFeeLMAToken.balanceOf(await stabilityPool.getAddress())
-      ).to.equal(BigInt("3651472685"));
+      ).to.equal(BigInt("3522613385286939265428859299"));
       expect(balanceAfter - balanceBefore).to.be.equal("1010000000000000000");
     });
 
@@ -577,8 +578,8 @@ describe("BaseFeeOracle Tests", () => {
       expect(collAlice).to.be.equal(0);
       expect(debtAlice).to.be.equal(0);
       expect(collCarol).to.be.equal("1412012459893048127640");
-      expect(debtCarol).to.be.equal("1757086640");
-      expect(debt).to.be.equal("6833210400");
+      expect(debtCarol).to.be.equal("1757087700534759358288769860");
+      expect(debt).to.be.equal("6833212299465240641711229600");
       expect(coll).to.be.equal("2528977540106951870400");
     });
   });
