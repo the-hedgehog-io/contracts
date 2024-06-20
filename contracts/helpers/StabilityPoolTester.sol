@@ -15,8 +15,6 @@ import "../dependencies/CheckContract.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "hardhat/console.sol";
-
 /**
  * @notice Fork of Liquity's Stability Pool. Logic remains unchanged.
  * Changes to the contract:
@@ -912,7 +910,6 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
     ) internal {
         // Pay out depositor's HOG gain
         uint depositorHOGGain = getDepositorHOGGain(_depositor);
-        console.log("HOG GAIN: ", _depositor, depositorHOGGain);
         _communityIssuance.sendHOG(_depositor, depositorHOGGain);
         emit HOGPaidToDepositor(_depositor, depositorHOGGain);
     }
