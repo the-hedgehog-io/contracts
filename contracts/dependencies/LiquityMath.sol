@@ -147,6 +147,9 @@ library LiquityMath {
         uint _mcr
     ) internal pure returns (uint256 price) {
         // Finds an exact price at which CR becomes MCR. Liqudation does not happen in the event of them being equal, hence we add 1 to it to find closest liqudation price
-        price = ((_coll * DECIMAL_PRECISION) / _debt / _mcr) + 1;
+        price =
+            ((((_coll * DECIMAL_PRECISION) / _debt) * DECIMAL_PRECISION) /
+                _mcr) +
+            1;
     }
 }
