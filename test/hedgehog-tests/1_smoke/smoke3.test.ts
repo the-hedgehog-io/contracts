@@ -28,7 +28,7 @@ const { latestBlock, increase, advanceBlock } = time;
 const compareWithFault = (
   arg1: bigint | number,
   arg2: bigint | number,
-  faultScale = 100000
+  faultScale = 100000000000000000000000
 ) => {
   expect(arg1).to.be.lessThanOrEqual(
     BigInt(arg2) / BigInt(faultScale) + BigInt(arg2)
@@ -47,7 +47,7 @@ describe("BaseFeeOracle Tests", () => {
       alice: SignerWithAddress,
       bob: SignerWithAddress,
       carol: SignerWithAddress;
-    let oracle: BaseFeeOracle;
+
     let priceFeed: TestPriceFeed;
     let sortedTroves: SortedTroves;
     let troveManager: TroveManager;
@@ -65,60 +65,48 @@ describe("BaseFeeOracle Tests", () => {
     let mainOracle: BaseFeeOracle, secondaryOracle: BaseFeeOracle;
 
     const gasCompensationReserve = BigInt("100000000000000000000000");
-    const gasPrice010 = "30000000000";
-    const gasPrice1114 = "60000000000";
 
     const AliceTroveColl = BigInt("202000000000000000000");
-    const AliceTroveDebt = BigInt("2550000000");
-    const AliceTroveOpeningFee = BigInt("12750000");
-    const AliceBFEBalanceAtOpening = BigInt("2537250000");
-    const AliceInitialCR = BigInt("2640419329960916565");
+    const AliceTroveDebt = BigInt("2550000000000000000000000000");
+    const AliceTroveOpeningFee = BigInt("12750000000000000000000000");
+    const AliceBFEBalanceAtOpening = BigInt("2537250000000000000000000000");
+    const AliceInitialCR = BigInt("2640419329933333333");
 
-    const AliceTroveIncreaseDebt = BigInt("400000000");
-    const AliceDebtAfterFirstIncrease = BigInt("2950100000");
+    const AliceTroveIncreaseDebt = BigInt("400000000000000000000000000");
+    const AliceDebtAfterFirstIncrease = BigInt("2950100000000000000000000000");
     const AliceCollAfterFirstIncrease = BigInt("202000000000000000000");
-    const AliceCRAfterFirstIncrease = BigInt("2282408505926352779");
+    const AliceCRAfterFirstIncrease = BigInt("2282408505900000000");
 
     const BobTroveColl = BigInt("400000000000000000000");
-    const BobTroveDebt = BigInt("2000000000");
-    const BobInitialCR = BigInt("6666333349999166708");
+    const BobTroveDebt = BigInt("2000000000000000000000000000");
+    const BobInitialCR = BigInt("6666333349966666666");
     const BobTroveOpeningFee = BigInt("1578565939");
-    const BobIdealBFEBalanceAtOpening = BigInt("421434061");
+    const BobIdealBFEBalanceAtOpening = BigInt("421434061409356496000000000");
     const BobActualBFEBalanceAtOpening = BigInt("421434061");
 
     const BobTroveIncreaseCollFirst = BigInt("2000000000000000000000");
     const BobTroveCollAfterIncrease = BigInt("2400000000000000000000");
-    const BobTroveDebtAfterIncrease = BigInt("2000100000");
-    const BobCRAfterIncrease = BigInt("19999000049997500124");
+    const BobTroveDebtAfterIncrease = BigInt("2000100000000000000000000000");
+    const BobCRAfterIncrease = BigInt("19999000049983333333");
 
     const BobTroveIncreaseDebtSecond = BigInt("2940000000");
 
     const CarolTroveColl = BigInt("90000000000000000000");
-    const CarolTroveDebt = BigInt("600000000");
+    const CarolTroveDebt = BigInt("600000000000000000000000000");
     const CarolTroveOpeningFee = BigInt("104046230");
-    const CarolInitialCR = BigInt("4999166805532411264");
-    const CarolBFEBalanceAtOpening = BigInt("495953770");
-    const CarolTroveCollAfterLiquid = BigInt("3065768314496680000");
-    const CarolTroveDebtAfterLiquid = BigInt(4644705);
-    const CarolCRAfterLiquid = 1100;
-    const CarolIncreaseDebt = BigInt("50000");
-    const CarolRepayment = BigInt("100000");
+    const CarolInitialCR = BigInt("4999166805500000000");
+    const CarolBFEBalanceAtOpening = BigInt("495953769800856040800000000");
 
     const totalCollateralAliceOpening = BigInt("202000000000000000000");
-    const totalDebtAliceOpening = BigInt("2550100000");
+    const totalDebtAliceOpening = BigInt("2550100000000000000000000000");
     const totalCollateralBobOpening = BigInt("602000000000000000000");
-    const totalDebtBobOpening = BigInt("4550200000");
-    const totalDebtAliceIncrease = BigInt("4950200000");
+    const totalDebtBobOpening = BigInt("4550200000000000000000000000");
+    const totalDebtAliceIncrease = BigInt("4950200000000000000000000000");
     const totalCollAliceIncrease = BigInt("602000000000000000000");
     const totalCollCarolOpening = BigInt("692000000000000000000");
-    const totalDebtCarolOpening = BigInt("5550300000");
-    const totalCollBobFirstRedemption = BigInt("3787650000000000000");
-    const totalDebtBobFirstRedemption = BigInt("7355000");
+    const totalDebtCarolOpening = BigInt("5550300000000000000000000000");
     const totalCollBobIncrease = BigInt("2692000000000000000000");
-    const totalDebtBobIncrease = BigInt("5550300000");
-
-    const totalCollAliceLiquidated = BigInt("4447752704427490000");
-    const totalDebtAliceLiquidated = BigInt("4559762");
+    const totalDebtBobIncrease = BigInt("5550300000000000000000000000");
 
     before(async () => {
       [deployer, setter, hacker, alice, bob, carol] = await getSigners({
@@ -189,24 +177,6 @@ describe("BaseFeeOracle Tests", () => {
       return { debt, coll, pendingBaseFeeLMADebtReward, pendingWStETHReward };
     };
 
-    const logAllDebtColl = async () => {
-      const coll = await troveManager.getEntireSystemColl();
-      const debt = await troveManager.getEntireSystemDebt();
-
-      const { debt: aliceDebt, coll: aliceColl } = await getTrove(alice);
-      const { debt: bobDebt, coll: bobColl } = await getTrove(bob);
-      const { debt: carolDebt, coll: carolColl } = await getTrove(carol);
-
-      console.log("total debt: ", debt);
-      console.log("total coll: ", coll);
-      console.log("aliceColl: ", aliceColl);
-      console.log("aliceDebt: ", aliceDebt);
-      console.log("bobColl: ", bobColl);
-      console.log("bobDebt: ", bobDebt);
-      console.log("carolColl: ", carolColl);
-      console.log("carolDebt: ", carolDebt);
-    };
-
     type ProvideParams = {
       caller: SignerWithAddress;
       amount: string | BigNumberish;
@@ -226,24 +196,6 @@ describe("BaseFeeOracle Tests", () => {
       maxFeePercentage: string | BigNumberish;
       upperHint: string;
       lowerHint: string;
-    };
-
-    const decreaseDebt = async ({
-      caller = bob,
-      amount = 0,
-      maxFeePercentage = ethers.parseEther("1"),
-    }: Partial<AdjustTroveParams> = {}) => {
-      await borrowerOperations
-        .connect(caller)
-        .adjustTrove(
-          maxFeePercentage,
-          0,
-          0,
-          amount,
-          false,
-          ethers.ZeroAddress,
-          ethers.ZeroAddress
-        );
     };
 
     const increaseDebt = async ({
@@ -348,7 +300,7 @@ describe("BaseFeeOracle Tests", () => {
     it("should have correct total supply before bob opens position", async () => {
       const totalSupply = await baseFeeLMAToken.totalSupply();
 
-      expect(totalSupply).to.be.equal("2550100000");
+      expect(totalSupply).to.be.equal("2550100000000000000000000000");
     });
 
     it("should let another user(bob) open a position", async () => {
@@ -423,7 +375,7 @@ describe("BaseFeeOracle Tests", () => {
     it("should have correct total supply before alice increase", async () => {
       const totalSupply = await baseFeeLMAToken.totalSupply();
 
-      expect(totalSupply).to.be.equal("4550200000");
+      expect(totalSupply).to.be.equal("4550200000000000000000000000");
     });
 
     it("should let adjust the position (alice position)", async () => {
@@ -457,7 +409,7 @@ describe("BaseFeeOracle Tests", () => {
     it("should have correct total supply before carol mint", async () => {
       const totalSupply = await baseFeeLMAToken.totalSupply();
 
-      expect(totalSupply).to.be.equal("4950200000");
+      expect(totalSupply).to.be.equal("4950200000000000000000000000");
     });
 
     it("should let open another position in the system (carol position)", async () => {
