@@ -153,7 +153,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * The product P (and snapshot P_t) is re-used, as the ratio P/P_t tracks a deposit's depletion due to liquidations.
  *
  */
-contract StabilityPool is HedgehogBase, Ownable, CheckContract {
+contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
     using LiquitySafeMath128 for uint128;
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -237,43 +237,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
 
     // --- Events ---
 
-    event StabilityPoolWStETHBalanceUpdated(uint _newBalance);
-    event StabilityPoolBaseFeeLMABalanceUpdated(uint _newBalance);
-
-    event BorrowerOperationsAddressChanged(
-        address _newBorrowerOperationsAddress
-    );
-    event TroveManagerAddressChanged(address _newTroveManagerAddress);
-    event ActivePoolAddressChanged(address _newActivePoolAddress);
-    event DefaultPoolAddressChanged(address _newDefaultPoolAddress);
-    event BaseFeeLMATokenAddressChanged(address _newBaseFeeLMATokenAddress);
-    event SortedTrovesAddressChanged(address _newSortedTrovesAddress);
-    event PriceFeedAddressChanged(address _newPriceFeedAddress);
-    event CommunityIssuanceAddressChanged(address _newCommunityIssuanceAddress);
-    event WStETHTokenAddressUpdated(IERC20 _WStEthAddress);
-
-    event P_Updated(uint _P);
-    event S_Updated(uint _S, uint128 _epoch, uint128 _scale);
-    event G_Updated(uint _G, uint128 _epoch, uint128 _scale);
-    event EpochUpdated(uint128 _currentEpoch);
-    event ScaleUpdated(uint128 _currentScale);
-
-    event DepositSnapshotUpdated(
-        address indexed _depositor,
-        uint _P,
-        uint _S,
-        uint _G
-    );
-
     event UserDepositChanged(address indexed _depositor, uint _newDeposit);
-
-    event WStETHGainWithdrawn(
-        address indexed _depositor,
-        uint _WStETH,
-        uint _BaseFeeLMALoss
-    );
-    event HOGPaidToDepositor(address indexed _depositor, uint _HOG);
-    event WStETHSent(address _to, uint _amount);
 
     // --- Contract setters ---
 
@@ -290,7 +254,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         address _sortedTrovesAddress,
         address _priceFeedAddress,
         address _communityIssuanceAddress,
-        IERC20 _WStETHTokenAddress
+        address _WStETHTokenAddress
     ) external onlyOwner {
         checkContract(_borrowerOperationsAddress);
         checkContract(_troveManagerAddress);
@@ -299,7 +263,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         checkContract(_sortedTrovesAddress);
         checkContract(_priceFeedAddress);
         checkContract(_communityIssuanceAddress);
-        checkContract(address(_WStETHTokenAddress));
+        checkContract(_WStETHTokenAddress);
 
         borrowerOperations = IBorrowerOperations(_borrowerOperationsAddress);
         troveManager = ITroveManager(_troveManagerAddress);
@@ -308,7 +272,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract {
         sortedTroves = ISortedTroves(_sortedTrovesAddress);
         priceFeed = IPriceFeed(_priceFeedAddress);
         communityIssuance = ICommunityIssuance(_communityIssuanceAddress);
-        WStETHToken = _WStETHTokenAddress;
+        WStETHToken = IERC20(_WStETHTokenAddress);
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);

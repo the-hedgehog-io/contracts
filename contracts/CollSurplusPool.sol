@@ -7,8 +7,9 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
+import "./interfaces/ICollSurplusPool.sol";
 
-contract CollSurplusPool is Ownable, CheckContract {
+contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -26,16 +27,9 @@ contract CollSurplusPool is Ownable, CheckContract {
 
     // --- Events ---
 
-    event BorrowerOperationsAddressChanged(
-        address _newBorrowerOperationsAddress
-    );
-    event TroveManagerAddressChanged(address _newTroveManagerAddress);
-    event ActivePoolAddressChanged(address _newActivePoolAddress);
-
-    event CollBalanceUpdated(address indexed _account, uint _newBalance);
     event EtherSent(address _to, uint _amount);
 
-    event WStETHTokenAddressUpdated(IERC20 _WStEthAddress);
+    event WStETHTokenAddressUpdated(address _WStEthAddress);
 
     // --- Contract setters ---
 
@@ -49,17 +43,17 @@ contract CollSurplusPool is Ownable, CheckContract {
         address _borrowerOperationsAddress,
         address _troveManagerAddress,
         address _activePoolAddress,
-        IERC20 _WStETHTokenAddress
+        address _WStETHTokenAddress
     ) external onlyOwner {
         checkContract(_borrowerOperationsAddress);
         checkContract(_troveManagerAddress);
         checkContract(_activePoolAddress);
-        checkContract(address(_WStETHTokenAddress));
+        checkContract(_WStETHTokenAddress);
 
         borrowerOperationsAddress = _borrowerOperationsAddress;
         troveManagerAddress = _troveManagerAddress;
         activePoolAddress = _activePoolAddress;
-        WStETHToken = _WStETHTokenAddress;
+        WStETHToken = IERC20(_WStETHTokenAddress);
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);

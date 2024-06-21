@@ -118,7 +118,7 @@ library LiquityMath {
     /**
      * HEDGEHOG UPDATES:
      * Change coll ration calculation from [coll] * [price] / [debt] to
-     * [coll] / [debt] / [gasPrice]
+     * [coll] / [debt] / [gasPrice] * 1e36
      */
     function _computeCR(
         uint _coll,

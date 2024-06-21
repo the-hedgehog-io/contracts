@@ -31,9 +31,9 @@
       },
       {
         "indexed": false,
-        "internalType": "uint80",
+        "internalType": "uint256",
         "name": "roundId",
-        "type": "uint80"
+        "type": "uint256"
       },
       {
         "indexed": false,
@@ -186,17 +186,17 @@
   {
     "inputs": [
       {
-        "internalType": "uint80",
+        "internalType": "uint256",
         "name": "_roundId",
-        "type": "uint80"
+        "type": "uint256"
       }
     ],
     "name": "getRoundData",
     "outputs": [
       {
-        "internalType": "uint80",
+        "internalType": "uint256",
         "name": "",
-        "type": "uint80"
+        "type": "uint256"
       },
       {
         "internalType": "int256",
@@ -214,9 +214,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint80",
+        "internalType": "uint256",
         "name": "",
-        "type": "uint80"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -269,9 +269,9 @@
     "name": "latestRound",
     "outputs": [
       {
-        "internalType": "uint80",
+        "internalType": "uint256",
         "name": "",
-        "type": "uint80"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -282,9 +282,9 @@
     "name": "latestRoundData",
     "outputs": [
       {
-        "internalType": "uint80",
+        "internalType": "uint256",
         "name": "",
-        "type": "uint80"
+        "type": "uint256"
       },
       {
         "internalType": "int256",
@@ -302,9 +302,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint80",
+        "internalType": "uint256",
         "name": "",
-        "type": "uint80"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -354,9 +354,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint80",
+        "internalType": "uint256",
         "name": "roundId",
-        "type": "uint80"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",

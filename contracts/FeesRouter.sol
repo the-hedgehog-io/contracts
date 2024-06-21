@@ -15,6 +15,7 @@ error CallerIsNotHDGProtocol();
 error ConfigNotFound();
 
 /**
+ * HEDGEHOG UPDATES:
  * @notice Completely new contract in Hedgehog Protocol, that was never a part of Liquity Protocol
  *
  * Accepts fees and routes it to different places(or a single one) assigned by the account with "SETTER" rights
@@ -37,7 +38,6 @@ contract FeesRouter is AccessControl {
     mapping(uint256 => FeeConfig) public debtFeeConfigs;
     mapping(uint256 => FeeConfig) public collFeeConfigs;
 
-    uint256 public feeCount;
     IBaseFeeLMAToken public baseFeeLMAToken;
     IActivePool public activePool;
     address public borrowersOp;
@@ -109,6 +109,7 @@ contract FeesRouter is AccessControl {
 
     /**
      * Sets both debt and coll fees configs. Should be used if routing logic is the same for both procesesses.
+     * Only callable by an admin
      *
      * @param _percentage range at which new config is valid
      * @param _amountA amount of tokens that _addressA is going to receive in the event of tx fee appears in _percentage range. Must be > 0
@@ -179,6 +180,7 @@ contract FeesRouter is AccessControl {
 
     /**
      * Sets debt fees configs. Should be used if routing logic is unique for BFE token fees.
+     * Only callable by an admin
      *
      * @param _percentage range at which new config is valid
      * @param _amountA amount of tokens that _addressA is going to receive in the event of tx fee appears in _percentage range. Must be > 0
@@ -228,7 +230,8 @@ contract FeesRouter is AccessControl {
     }
 
     /**
-     * Sets coll fees configs. Should be used if routing logic is unique for WWStETH token fees.
+     * Sets coll fees configs. Should be used if routing logic is unique for WStETH token fees.
+     * Only callable by an admin
      *
      * @param _percentage range at which new config is valid
      * @param _amountA amount of tokens that _addressA is going to receive in the event of tx fee appears in _percentage range. Must be > 0
@@ -281,6 +284,9 @@ contract FeesRouter is AccessControl {
     /**
      * @param _debt amount of BFE tokens that user receives in the event of succesful borrowing op
      * @param _fee amount of fee that user is getting cut with in the event of succseful borrowing op
+     *
+     * Distributes fees that are coming in BFEE according to the config set by an admin.
+     * During the execution it is calculated the % that _fee is of _debt to find an appropriate config routing
      */
     function distributeDebtFee(
         uint256 _debt,
@@ -316,14 +322,17 @@ contract FeesRouter is AccessControl {
     }
 
     /**
-     * @param _debt amount of BFE tokens that user receives in the event of succesful borrowing op
+     * @param _coll amount of BFE tokens that user receives in the event of succesful borrowing op
      * @param _fee amount of fee that user is getting cut with in the event of succseful borrowing op
+     *
+     * Distributes fees that are coming in WstETH according to the config set by an admin.
+     * During the execution it is calculated the % that _fee is of _debt to find an appropriate config routing
      */
     function distributeCollFee(
-        uint256 _debt,
+        uint256 _coll,
         uint256 _fee
     ) external onlyHDGProtocol {
-        FeeConfig memory config = collFeeConfigs[_getPctRange(_debt, _fee)];
+        FeeConfig memory config = collFeeConfigs[_getPctRange(_coll, _fee)];
         uint256 amountA = _calculateAmount(_fee, config.amountA);
         uint256 amountB = _calculateAmount(_fee, config.amountB);
         uint256 amountC = _calculateAmount(_fee, config.amountC);

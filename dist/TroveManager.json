@@ -42,6 +42,19 @@
       {
         "indexed": false,
         "internalType": "uint256",
+        "name": "_baseRate",
+        "type": "uint256"
+      }
+    ],
+    "name": "BaseRateUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
         "name": "_borrowBaseRate",
         "type": "uint256"
       }
@@ -93,8 +106,8 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "contract IFeesRouter",
-        "name": "_feesRouter",
+        "internalType": "address",
+        "name": "_feesRouterAddressUpdated",
         "type": "address"
       }
     ],
@@ -157,6 +170,19 @@
       }
     ],
     "name": "LastBorrowTimeUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_lastFeeOpTime",
+        "type": "uint256"
+      }
+    ],
+    "name": "LastFeeOpTimeUpdated",
     "type": "event"
   },
   {
@@ -442,19 +468,6 @@
     ],
     "name": "TroveUpdated",
     "type": "event"
-  },
-  {
-    "inputs": [],
-    "name": "BETA",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
   },
   {
     "inputs": [],
@@ -1782,7 +1795,7 @@
         "type": "address"
       },
       {
-        "internalType": "contract IFeesRouter",
+        "internalType": "address",
         "name": "_feesRouterAddress",
         "type": "address"
       }

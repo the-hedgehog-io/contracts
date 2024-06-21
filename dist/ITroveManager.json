@@ -83,6 +83,19 @@
       {
         "indexed": false,
         "internalType": "address",
+        "name": "_feesRouterAddressUpdated",
+        "type": "address"
+      }
+    ],
+    "name": "FeesRouterAddressUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "_gasPoolAddress",
         "type": "address"
       }
@@ -735,13 +748,7 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_redemptionColl",
-        "type": "uint256"
-      }
-    ],
+    "inputs": [],
     "name": "getRedemptionRate",
     "outputs": [
       {
@@ -754,13 +761,7 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_redemptionColl",
-        "type": "uint256"
-      }
-    ],
+    "inputs": [],
     "name": "getRedemptionRateWithDecay",
     "outputs": [
       {
@@ -1041,7 +1042,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_BaseFeeLMAAmount",
+        "name": "_BaseFeeLMAamount",
         "type": "uint256"
       },
       {
@@ -1071,7 +1072,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "_maxFee",
+        "name": "_maxFeePercentage",
         "type": "uint256"
       }
     ],
@@ -1143,6 +1144,11 @@
       {
         "internalType": "address",
         "name": "_hogTokenAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_feesRouterAddress",
         "type": "address"
       }
     ],

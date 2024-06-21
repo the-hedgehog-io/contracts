@@ -355,8 +355,8 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "contract IERC20",
-        "name": "_WStEthAddress",
+        "internalType": "address",
+        "name": "_WStETHTokenAddres",
         "type": "address"
       }
     ],
@@ -966,7 +966,7 @@
         "type": "address"
       },
       {
-        "internalType": "contract IERC20",
+        "internalType": "address",
         "name": "_WStETHTokenAddress",
         "type": "address"
       }

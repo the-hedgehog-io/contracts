@@ -168,6 +168,11 @@
         "internalType": "address",
         "name": "_activePoolAddress",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_WStETHTokenAddress",
+        "type": "address"
       }
     ],
     "name": "setAddresses",

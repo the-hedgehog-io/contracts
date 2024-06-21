@@ -15,6 +15,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * Changes to the contract:
  * - Raised pragma version
  * - Removed an import of Default Interface and updated with IPool
+ * - Removed _requireCallerIsActivePool modifier as it is not used anymore
  *
  * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  *
@@ -23,6 +24,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  *
  * When a trove makes an operation that applies its pending WStETH and BaseFeeLMA debt, its pending WStETH and BaseFeeLMA debt is moved
  * from the Default Pool to the Active Pool.
+ *
  */
 contract DefaultPool is Ownable, CheckContract, IPool {
     using SafeMath for uint256;
@@ -113,13 +115,6 @@ contract DefaultPool is Ownable, CheckContract, IPool {
 
     // --- 'require' functions ---
 
-    function _requireCallerIsActivePool() internal view {
-        require(
-            msg.sender == activePoolAddress,
-            "DefaultPool: Caller is not the ActivePool"
-        );
-    }
-
     function _requireCallerIsTroveManager() internal view {
         require(
             msg.sender == troveManagerAddress,
@@ -130,7 +125,7 @@ contract DefaultPool is Ownable, CheckContract, IPool {
     /**
      * Hedgehog Updates:
      * New function that can be called only by trove manager instead of a native token fallback
-     *  */
+     */
     function increaseBalance(uint256 _amount) external {
         _requireCallerIsTroveManager();
         WStETH = WStETH.add(_amount);

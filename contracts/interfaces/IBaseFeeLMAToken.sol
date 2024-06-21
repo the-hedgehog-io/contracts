@@ -14,8 +14,6 @@ interface IBaseFeeLMAToken is IERC20, IERC2612 {
         address _newBorrowerOperationsAddress
     );
 
-    event BaseFeeLMATokenBalanceUpdated(address _user, uint _amount);
-
     // --- Functions ---
 
     function mint(address _account, uint256 _amount) external;

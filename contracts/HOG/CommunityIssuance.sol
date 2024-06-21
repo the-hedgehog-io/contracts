@@ -176,8 +176,8 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
     }
 
     /*
-     * HEDGEHOG UPDATES: ISSUANCE_FACTOR is not a constant variable anymore.
-     * May now be updated by a DISTRIBUTION_SETTER
+     * HEDGEHOG UPDATES:
+     * totalHOGIssued may now be updated by a DISTRIBUTION_SETTER
      * */
     function setTotalHogIssued(
         uint _newHogIssued

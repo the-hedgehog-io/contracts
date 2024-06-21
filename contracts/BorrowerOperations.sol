@@ -227,6 +227,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             _maxFeePercentage
         );
         _requireAtLeastMinNetDebt(vars.netDebt);
+        if (_BaseFeeLMAAmount <= vars.BaseFeeLMAFee) {
+            revert("BO: Fee exceeds gain");
+        }
 
         vars.compositeDebt = _getCompositeDebt(vars.netDebt);
         assert(vars.compositeDebt > 0);
@@ -276,9 +279,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         // Move the wStETH to the Active Pool, and mint the BaseFeeLMAAmount to the borrower
         _activePoolAddColl(contractsCache.activePool, _collAmount);
-        if (_BaseFeeLMAAmount <= vars.BaseFeeLMAFee) {
-            revert("BO: Fee exceeds gain");
-        }
 
         // Hedgehog Updates: Now amount transferred to the user is decreased by Fee
         _withdrawBaseFeeLMA(

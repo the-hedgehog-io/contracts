@@ -79,8 +79,6 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
 
     // --- HOGToken specific data ---
 
-    uint public constant ONE_YEAR_IN_SECONDS = 31536000; // 60 * 60 * 24 * 365
-
     // uint for use with SafeMath
     uint internal _1_MILLION = 1e24; // 1e6 * 1e18 = 1e24
 
@@ -291,7 +289,6 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         uint256 amount
     ) internal {
         require(sender != address(0), "ERC20: transfer from the zero address");
-        require(recipient != address(0), "ERC20: transfer to the zero address");
         _balances[sender] = _balances[sender].sub(
             amount,
             "ERC20: transfer amount exceeds balance"

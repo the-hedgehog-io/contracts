@@ -23,7 +23,7 @@ import "./dependencies/CheckContract.sol";
  * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  */
 
-contract TroveManager is HedgehogBase, Ownable, CheckContract {
+contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
     using SafeMath for uint256;
     string public constant NAME = "TroveManager";
 
@@ -63,12 +63,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     // During bootsrap period redemptions are not allowed
     uint public immutable BOOTSTRAP_PERIOD; // 14 days for mainnet
     uint public immutable SYSTEM_DEPLOYMENT_TIME;
-
-    /*
-     * BETA: 18 digit decimal. Parameter by which to divide the redeemed fraction, in order to calc the new base rate from a redemption.
-     * Corresponds to (1 / ALPHA) in the white paper.
-     */
-    uint public constant BETA = 2;
 
     // HEDGEHOG UPDATES: BaseRate is different for redemption and minting tokens
     // 1) Remove baseRate variable
@@ -225,32 +219,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
 
     // --- Events ---
 
-    event BorrowerOperationsAddressChanged(
-        address _newBorrowerOperationsAddress
-    );
-    event PriceFeedAddressChanged(address _newPriceFeedAddress);
-    event BaseFeeLMATokenAddressChanged(address _newBaseFeeLMATokenAddress);
-    event ActivePoolAddressChanged(address _activePoolAddress);
-    event DefaultPoolAddressChanged(address _defaultPoolAddress);
-    event StabilityPoolAddressChanged(address _stabilityPoolAddress);
-    event GasPoolAddressChanged(address _gasPoolAddress);
-    event CollSurplusPoolAddressChanged(address _collSurplusPoolAddress);
-    event SortedTrovesAddressChanged(address _sortedTrovesAddress);
-    event HOGTokenAddressChanged(address _hogTokenAddress);
-    event FeesRouterAddressUpdated(IFeesRouter _feesRouter);
-
-    event Liquidation(
-        uint _liquidatedDebt,
-        uint _liquidatedColl,
-        uint _collGasCompensation,
-        uint _BaseFeeLMAGasCompensation
-    );
-    event Redemption(
-        uint _attemptedBaseFeeLMAAmount,
-        uint _actualBaseFeeLMAAmount,
-        uint _WStETHSent,
-        uint _WStETHFee
-    );
     event TroveUpdated(
         address indexed _borrower,
         uint _debt,
@@ -278,14 +246,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
     // 3) Create LastBorrowTimeUpdated event that accepts _lastBorrowTime
     event LastRedemptionTimeUpdated(uint _lastRedemptionTime);
     event LastBorrowTimeUpdated(uint _lastBorrowTime);
-    event TotalStakesUpdated(uint _newTotalStakes);
-    event SystemSnapshotsUpdated(
-        uint _totalStakesSnapshot,
-        uint _totalCollateralSnapshot
-    );
-    event LTermsUpdated(uint _L_WStETH, uint _L_BaseFeeLMADebt);
-    event TroveSnapshotsUpdated(uint _L_WStETH, uint _L_BaseFeeLMADebt);
-    event TroveIndexUpdated(address _borrower, uint _newIndex);
 
     enum TroveManagerOperation {
         applyPendingRewards,
@@ -312,7 +272,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         address _baseFeeLMATokenAddress,
         address _sortedTrovesAddress,
         address _hogTokenAddress,
-        IFeesRouter _feesRouterAddress
+        address _feesRouterAddress
     ) external onlyOwner {
         checkContract(_borrowerOperationsAddress);
         checkContract(_activePoolAddress);
@@ -324,7 +284,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         checkContract(_baseFeeLMATokenAddress);
         checkContract(_sortedTrovesAddress);
         checkContract(_hogTokenAddress);
-        checkContract(address(_feesRouterAddress));
+        checkContract(_feesRouterAddress);
 
         borrowerOperationsAddress = _borrowerOperationsAddress;
         activePool = IActivePool(_activePoolAddress);
@@ -644,8 +604,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         // HEDGEHOG UPDATES:
         // Changed the cappedCollPortion formula from [entireTroveDebt] * [MCR] / [price]  to => [entireTroveDebt] * [MCR] / [DECIMAL_PRECISION] * [price] / [DECIMAL_PRECISION]
         uint cappedCollPortion = _entireTroveDebt
-            .div(DECIMAL_PRECISION)
             .mul(MCR)
+            .div(DECIMAL_PRECISION)
             .mul(_price)
             .div(DECIMAL_PRECISION);
 
@@ -1994,15 +1954,12 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract {
         // system
 
         // HEDGEHOG UPDATES: Calculation the fraction now as a ratio of Collateral that is about to get redeemed and a sum of collateral in active & default pools.
-
-        uint redeemedBaseFeeLMAFraction = _WStETHDrawn
-            .mul(DECIMAL_PRECISION)
-            .div(activePool.getWStETH() + defaultPool.getWStETH());
+        uint redeemedCollFraction = _WStETHDrawn.mul(DECIMAL_PRECISION).div(
+            activePool.getWStETH() + defaultPool.getWStETH()
+        );
 
         // Hedgehog Updates: Remove division by BETA
-        uint newBaseRate = decayedRedemptionBaseRate.add(
-            redeemedBaseFeeLMAFraction
-        );
+        uint newBaseRate = decayedRedemptionBaseRate.add(redeemedCollFraction);
 
         newBaseRate = LiquityMath._min(newBaseRate, DECIMAL_PRECISION); // cap baseRate at a maximum of 100%
         //assert(newBaseRate <= DECIMAL_PRECISION); // This is already enforced in the line above

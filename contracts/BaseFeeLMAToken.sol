@@ -75,8 +75,6 @@ contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
     );
     event FeesRouterAddressUpdated(address _feesRouter);
 
-    event BaseFeeLMATokenBalanceUpdated(address _user, uint _amount);
-
     constructor(
         address _troveManagerAddress,
         address _stabilityPoolAddress,

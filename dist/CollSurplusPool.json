@@ -100,7 +100,26 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "contract IERC20",
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "WStETHSent",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "_WStEthAddress",
         "type": "address"
       }
@@ -274,7 +293,7 @@
         "type": "address"
       },
       {
-        "internalType": "contract IERC20",
+        "internalType": "address",
         "name": "_WStETHTokenAddress",
         "type": "address"
       }

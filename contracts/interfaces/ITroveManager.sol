@@ -23,6 +23,7 @@ interface ITroveManager is IHedgehogBase {
     event CollSurplusPoolAddressChanged(address _collSurplusPoolAddress);
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
     event HOGTokenAddressChanged(address _hogTokenAddress);
+    event FeesRouterAddressUpdated(address _feesRouterAddressUpdated);
 
     event Liquidation(
         uint _liquidatedDebt,
@@ -72,7 +73,8 @@ interface ITroveManager is IHedgehogBase {
         address _priceFeedAddress,
         address _baseFeeLMATokenAddress,
         address _sortedTrovesAddress,
-        address _hogTokenAddress
+        address _hogTokenAddress,
+        address _feesRouterAddress
     ) external;
 
     function stabilityPool() external view returns (IStabilityPool);
@@ -101,13 +103,13 @@ interface ITroveManager is IHedgehogBase {
     function batchLiquidateTroves(address[] calldata _troveArray) external;
 
     function redeemCollateral(
-        uint _BaseFeeLMAAmount,
+        uint _BaseFeeLMAamount,
         address _firstRedemptionHint,
         address _upperPartialRedemptionHint,
         address _lowerPartialRedemptionHint,
         uint _partialRedemptionHintNICR,
         uint _maxIterations,
-        uint _maxFee
+        uint _maxFeePercentage
     ) external;
 
     function updateStakeAndTotalStakes(
@@ -148,13 +150,9 @@ interface ITroveManager is IHedgehogBase {
 
     function removeStake(address _borrower) external;
 
-    function getRedemptionRate(
-        uint _redemptionColl
-    ) external view returns (uint);
+    function getRedemptionRate() external view returns (uint);
 
-    function getRedemptionRateWithDecay(
-        uint _redemptionColl
-    ) external view returns (uint);
+    function getRedemptionRateWithDecay() external view returns (uint);
 
     function getRedemptionFeeWithDecay(
         uint _WStETHDrawn

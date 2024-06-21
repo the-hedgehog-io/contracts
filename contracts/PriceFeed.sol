@@ -474,6 +474,10 @@ contract PriceFeed is Ownable, BaseMath {
     function _backupOracleIsBroken(
         Response memory _response
     ) internal view returns (bool) {
+        // Check for an invalid roundId that is 0
+        if (_response.roundId == 0) {
+            return true;
+        }
         // Check for an invalid timeStamp that is 0, or in the future
         if (
             _response.blockNumber == 0 || _response.blockNumber > block.number
@@ -481,7 +485,7 @@ contract PriceFeed is Ownable, BaseMath {
             return true;
         }
         // Check for zero price
-        if (_response.answer == 0) {
+        if (_response.answer <= 0) {
             return true;
         }
 

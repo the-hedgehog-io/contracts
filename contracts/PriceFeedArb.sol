@@ -427,6 +427,7 @@ contract PriceFeedArb is Ownable, BaseMath {
         if (_response.roundId == 0) {
             return true;
         }
+        // Hedgehog Updates: In case of a deployment to Arbitrum we gather current block.number via ArbSys method
         // Check for an invalid timeStamp that is 0, or in the future
         if (
             _response.blockNumber == 0 ||
@@ -445,6 +446,7 @@ contract PriceFeedArb is Ownable, BaseMath {
     function _mainOracleIsFrozen(
         Response memory _response
     ) internal view returns (bool) {
+        // Hedgehog Updates: In case of a deployment to Arbitrum we gather current block.number via ArbSys method
         return (arbsys.arbBlockNumber() - _response.blockNumber) > TIMEOUT;
     }
 
@@ -481,6 +483,7 @@ contract PriceFeedArb is Ownable, BaseMath {
     function _backupOracleIsBroken(
         Response memory _response
     ) internal view returns (bool) {
+        // Hedgehog Updates: In case of a deployment to Arbitrum we gather current block.number via ArbSys method
         // Check for an invalid timeStamp that is 0, or in the future
         if (
             _response.blockNumber == 0 ||
@@ -499,6 +502,7 @@ contract PriceFeedArb is Ownable, BaseMath {
     function _backupIsFrozen(
         Response memory _backupResponse
     ) internal view returns (bool) {
+        // Hedgehog Updates: In case of a deployment to Arbitrum we gather current block.number via ArbSys method
         return arbsys.arbBlockNumber() - _backupResponse.blockNumber > TIMEOUT;
     }
 

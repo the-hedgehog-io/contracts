@@ -313,6 +313,19 @@
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_WStETHTokenAddres",
+        "type": "address"
+      }
+    ],
+    "name": "WStETHTokenAddressUpdated",
+    "type": "event"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -461,6 +474,11 @@
       {
         "internalType": "address",
         "name": "_communityIssuanceAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_WStETHTokenAddress",
         "type": "address"
       }
     ],
