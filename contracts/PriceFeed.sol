@@ -49,7 +49,7 @@ contract PriceFeed is Ownable, BaseMath {
     struct Response {
         int256 answer;
         uint64 blockNumber;
-        uint80 roundId;
+        uint256 roundId;
     }
 
     enum Status {
@@ -609,11 +609,11 @@ contract PriceFeed is Ownable, BaseMath {
     {
         // Try to get latest price data:
         try mainOracle.latestRoundData() returns (
-            uint80 roundId,
+            uint256 roundId,
             int256 answer,
             uint256 blockNumber,
             uint256 currentChainBN,
-            uint80 __roundId
+            uint256 __roundId
         ) {
             response.roundId = roundId;
             response.answer = answer;
@@ -633,11 +633,11 @@ contract PriceFeed is Ownable, BaseMath {
     {
         // Try to get latest price data:
         try backupOracle.latestRoundData() returns (
-            uint80 roundId,
+            uint256 roundId,
             int256 answer,
             uint256 blockNumber,
             uint256 currentChainBN,
-            uint80 __roundId
+            uint256 __roundId
         ) {
             response.roundId = roundId;
             response.answer = answer;
@@ -651,7 +651,7 @@ contract PriceFeed is Ownable, BaseMath {
     }
 
     function _getPrevOracleResponse(
-        uint80 _currentRoundId
+        uint256 _currentRoundId
     ) internal view returns (Response memory prevMainOracleResponse) {
         /*
          * NOTE: Oracle only offers a current decimals() value - there is no way to obtain the decimal precision used in a
@@ -660,11 +660,11 @@ contract PriceFeed is Ownable, BaseMath {
 
         // Try to get the price data from the previous round:
         try mainOracle.getRoundData(_currentRoundId - 1) returns (
-            uint80 roundId,
+            uint256 roundId,
             int256 answer,
             uint256 blockNumber,
             uint256 currentChainBN,
-            uint80 __roundId
+            uint256 __roundId
         ) {
             // If call to Hedgehog succeeds, return the response and success = true
             prevMainOracleResponse.roundId = roundId;
@@ -678,7 +678,7 @@ contract PriceFeed is Ownable, BaseMath {
     }
 
     function _getPrevBackupOracleResponse(
-        uint80 _currentRoundId
+        uint256 _currentRoundId
     ) internal view returns (Response memory prevBackupOracleResponse) {
         /*
          * NOTE: Oracle only offers a current decimals() value - there is no way to obtain the decimal precision used in a
@@ -687,11 +687,11 @@ contract PriceFeed is Ownable, BaseMath {
 
         // Try to get the price data from the previous round:
         try backupOracle.getRoundData(_currentRoundId - 1) returns (
-            uint80 roundId,
+            uint256 roundId,
             int256 answer,
             uint256 blockNumber,
             uint256 currentChainBN,
-            uint80 __roundId
+            uint256 __roundId
         ) {
             // If call to Hedgehog succeeds, return the response and success = true
             prevBackupOracleResponse.roundId = roundId;

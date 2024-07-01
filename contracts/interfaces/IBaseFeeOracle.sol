@@ -11,26 +11,26 @@ interface IBaseFeeOracle {
     // if they do not have data to report, instead of returning unset values
     // which could be misinterpreted as actual reported values.
     function getRoundData(
-        uint80 _roundId
+        uint256 _roundId
     )
         external
         view
         returns (
-            uint80 roundId,
+            uint256 roundId,
             int256 answer,
             uint256 blockNumber,
             uint256 currentChainBN,
-            uint80 __roundId
+            uint256 __roundId
         );
 
     function latestRoundData()
         external
         view
         returns (
-            uint80 roundId,
+            uint256 roundId,
             int256 answer,
             uint256 blockNumber,
             uint256 currentChainBN,
-            uint80 __roundId
+            uint256 __roundId
         );
 }
