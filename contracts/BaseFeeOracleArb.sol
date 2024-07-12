@@ -14,18 +14,18 @@ contract BaseFeeOracleArb is AccessControl {
         int256 answer;
         uint256 blockNumber;
         uint256 currentChainBN;
-        uint80 roundId;
+        uint256 roundId;
     }
 
     mapping(uint256 => Response) public responseById;
-    uint80 public latestRound;
+    uint256 public latestRound;
 
     bytes32 internal constant SETTER = keccak256("SETTER");
     bytes32 internal constant ULTIMATE_ADMIN = keccak256("ULTIMATE_ADMIN");
 
     uint256 public constant decimals = 18;
 
-    event BaseFeeSet(int256 newValue, uint80 roundId, uint256 blockNumber);
+    event BaseFeeSet(int256 newValue, uint256 roundId, uint256 blockNumber);
 
     ArbSys constant arbsys = ArbSys(address(100));
 
@@ -39,7 +39,7 @@ contract BaseFeeOracleArb is AccessControl {
         int256 _newValue,
         uint64 _blockNumber
     ) external onlyRole(SETTER) {
-        uint80 round = latestRound + 1;
+        uint256 round = latestRound + 1;
         (, , uint256 blockNumber, , ) = getRoundData(latestRound);
 
         if (_blockNumber <= blockNumber) {
@@ -58,8 +58,8 @@ contract BaseFeeOracleArb is AccessControl {
     }
 
     function getRoundData(
-        uint80 _roundId
-    ) public view returns (uint80, int256, uint256, uint256, uint80) {
+        uint256 _roundId
+    ) public view returns (uint256, int256, uint256, uint256, uint256) {
         Response memory response = responseById[_roundId];
         return (
             response.roundId,
@@ -73,7 +73,7 @@ contract BaseFeeOracleArb is AccessControl {
     function latestRoundData()
         external
         view
-        returns (uint80, int256, uint256, uint256, uint80)
+        returns (uint256, int256, uint256, uint256, uint256)
     {
         return getRoundData(latestRound);
     }
