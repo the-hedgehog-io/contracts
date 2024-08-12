@@ -152,4 +152,23 @@ library LiquityMath {
                 _mcr) +
             1;
     }
+
+    function _checkWithdrawlLimit(
+        uint256 _collInSystem,
+        uint256 _lastWithdrawTimestamp,
+        uint256 _expandDuration,
+        uint256 _withdrawAmount
+    ) internal view returns (uint256 minCollTarget, uint256 withdrable) {
+        // F: Totall Coll === _collInSystem
+        // K: Expand to (after) === minCollTarget
+        // B in previous cell === _lastWithdrawTimestamp
+        minCollTarget = _collInSystem - (_collInSystem / 4);
+
+        uint256 minutesPassed = block.timestamp - _lastWithdrawTimestamp;
+        uint256 collDifference = _collInSystem - _withdrawAmount;
+        withdrable =
+            _withdrawAmount +
+            (collDifference * minutesPassed) /
+            _expandDuration;
+    }
 }

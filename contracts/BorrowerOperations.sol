@@ -53,6 +53,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     // A doubly linked list of Troves, sorted by their collateral ratios
     ISortedTroves public sortedTroves;
 
+    uint256 lastWithdrawlTimestamp;
+
     /* --- Variable container structs  ---
 
     Used to hold, return and assign variables inside a function, in order to avoid the error:
@@ -519,6 +521,26 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             _collIncrease,
             _collWithdrawal
         );
+        if (_collWithdrawal > 0) {
+            (uint256 minCollTarget, uint256 withdrable) = LiquityMath
+                ._checkWithdrawlLimit(
+                    activePool.getWStETH(),
+                    lastWithdrawlTimestamp,
+                    EXPAND_DURATION,
+                    _collWithdrawal
+                );
+
+            if (minCollTarget > CALL_WITHDRAWL_MAX_DIFF) {
+                revert("BO: Cannot withdraw more then 25% systems coll");
+            }
+            if ((withdrable * 80) / 100 < _collWithdrawal) {
+                revert(
+                    "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+                );
+            }
+
+            lastWithdrawlTimestamp = block.timestamp;
+        }
 
         vars.netDebtChange = _BaseFeeLMAChange;
 

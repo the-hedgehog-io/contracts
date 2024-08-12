@@ -72,6 +72,19 @@
   },
   {
     "inputs": [],
+    "name": "CALL_WITHDRAWL_MAX_DIFF",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "CCR",
     "outputs": [
       {
@@ -86,6 +99,19 @@
   {
     "inputs": [],
     "name": "DECIMAL_PRECISION",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "EXPAND_DURATION",
     "outputs": [
       {
         "internalType": "uint256",
