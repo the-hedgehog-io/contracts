@@ -10,6 +10,7 @@ import "../dependencies/CheckContract.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "hardhat/console.sol";
 
 contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
     using SafeMath for uint;
@@ -108,6 +109,7 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
     }
 
     function issueHOG() external returns (uint) {
+        console.log("tut");
         _requireCallerIsStabilityPool();
 
         uint latestTotalHOGIssued = HOGSupplyCap

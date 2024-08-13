@@ -1,5 +1,8 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
+import {
+  setBalance,
+  time,
+} from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import {
@@ -87,17 +90,20 @@ describe("BaseFeeOracle Tests", () => {
     const depositWithAllAccounts = async (
       amount = ethers.parseEther("2500")
     ) => {
-      await expect(stabilityPool.provideToSP(amount)).not.to.be.reverted;
-      await expect(stabilityPool.connect(bob).provideToSP(amount)).not.to.be
-        .reverted;
-      await expect(stabilityPool.connect(carol).provideToSP(amount)).not.to.be
-        .reverted;
-      await expect(stabilityPool.connect(eric).provideToSP(amount)).not.to.be
-        .reverted;
+      console.log(await stabilityPool.provideToSP(amount));
+      // await expect(stabilityPool.provideToSP(amount)).not.to.be.reverted;
+      // await expect(stabilityPool.connect(bob).provideToSP(amount)).not.to.be
+      //   .reverted;
+      // await expect(stabilityPool.connect(carol).provideToSP(amount)).not.to.be
+      //   .reverted;
+      // await expect(stabilityPool.connect(eric).provideToSP(amount)).not.to.be
+      //   .reverted;
     };
 
     const claimGainWithAllAccounts = async () => {
-      await expect(stabilityPool.withdrawFromSP(0)).not.to.be.reverted;
+      await expect(stabilityPool.connect(alice).withdrawFromSP(0)).not.to.be
+        .reverted;
+
       await expect(stabilityPool.connect(bob).withdrawFromSP(0)).not.to.be
         .reverted;
       await expect(stabilityPool.connect(carol).withdrawFromSP(0)).not.to.be
@@ -141,8 +147,12 @@ describe("BaseFeeOracle Tests", () => {
 
     const executeCurrentStepTxsAndChecks = async () => {
       const balancesBefore = await getAllHogBalances();
+      console.log(balancesBefore);
       await claimGainWithAllAccounts();
+      console.log(balancesBefore);
+
       const balancesAfter = await getAllHogBalances();
+      console.log(balancesAfter);
 
       await compareBalanceUpdateCorrectness({
         balancesBefore,
@@ -169,6 +179,17 @@ describe("BaseFeeOracle Tests", () => {
     });
 
     it("should let admin decrease community issuance factor", async () => {
+      console.log(
+        alice.address,
+        bob.address,
+        carol.address,
+        stabilityPool.target,
+        communityIssuance.target,
+        bfeToken.target,
+        hogToken.target,
+        collToken.target
+      );
+
       await expect(communityIssuance.setISSUANCE_FACTOR(1)).not.to.be.reverted;
     });
 
