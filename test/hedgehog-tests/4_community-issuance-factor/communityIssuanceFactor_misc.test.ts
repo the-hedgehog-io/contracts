@@ -1,3 +1,4 @@
+
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import {
   setBalance,
@@ -6,6 +7,7 @@ import {
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import {
+  BaseFeeLMATokenTester,
   CommunityIssuance,
   StabilityPoolTester,
   TERC20,
@@ -38,7 +40,7 @@ describe("BaseFeeOracle Tests", () => {
       eric: SignerWithAddress;
     let communityIssuance: CommunityIssuance;
     let stabilityPool: StabilityPoolTester;
-    let bfeToken: BaseFeeLMAToken;
+    let bfeToken: BaseFeeLMATokenTester;
     let collToken: TERC20;
     let hogToken: TERC20;
 
@@ -55,7 +57,7 @@ describe("BaseFeeOracle Tests", () => {
 
       bfeToken = await (
         await (
-          await ethers.getContractFactory("BaseFeeLMAToken")
+          await ethers.getContractFactory("BaseFeeLMATokenTester")
         ).deploy(
           communityIssuance.target,
           stabilityPool.target,
@@ -76,28 +78,49 @@ describe("BaseFeeOracle Tests", () => {
         ).deploy("HOG Token", "HOG", 10000000000000)
       ).waitForDeployment();
 
-      await collToken.transfer(bob.address, ethers.parseEther("2500000000000"));
-      await collToken.transfer(
+      await hogToken.transfer(bob.address, ethers.parseEther("2500000000000"));
+      await hogToken.transfer(
         carol.address,
         ethers.parseEther("2500000000000")
       );
-      await collToken.transfer(
+      await hogToken.transfer(
         eric.address,
         ethers.parseEther("2500000000000")
       );
+      
+      await stabilityPool.setAddresses(
+        bfeToken.target,
+        bfeToken.target,
+        bfeToken.target,
+        bfeToken.target,
+        bfeToken.target,
+        bfeToken.target,
+        communityIssuance.target,
+        bfeToken.target
+      );
+
+      await communityIssuance.setAddresses(
+        hogToken.target,
+        stabilityPool.target,
+        alice.address,
+        alice.address
+      );
+      await bfeToken.transfer(bob.address, ethers.parseEther("2500000000000"));
+      await bfeToken.transfer(carol.address, ethers.parseEther("2500000000000"));
+      await bfeToken.transfer(eric.address, ethers.parseEther("2500000000000"));
     });
 
     const depositWithAllAccounts = async (
       amount = ethers.parseEther("2500")
     ) => {
-      console.log(await stabilityPool.provideToSP(amount));
-      // await expect(stabilityPool.provideToSP(amount)).not.to.be.reverted;
-      // await expect(stabilityPool.connect(bob).provideToSP(amount)).not.to.be
-      //   .reverted;
-      // await expect(stabilityPool.connect(carol).provideToSP(amount)).not.to.be
-      //   .reverted;
-      // await expect(stabilityPool.connect(eric).provideToSP(amount)).not.to.be
-      //   .reverted;
+
+      await expect(stabilityPool.provideToSP(amount)).not.to.be.reverted;
+      await expect(stabilityPool.connect(bob).provideToSP(amount)).not.to.be
+        .reverted;
+      await expect(stabilityPool.connect(carol).provideToSP(amount)).not.to.be
+        .reverted;
+      await expect(stabilityPool.connect(eric).provideToSP(amount)).not.to.be
+        .reverted;
     };
 
     const claimGainWithAllAccounts = async () => {
@@ -114,12 +137,12 @@ describe("BaseFeeOracle Tests", () => {
 
     const getAllHogBalances = async () => {
       const aliceBalance = await hogToken.balanceOf(alice.address);
-      const bobBalance = await hogToken.balanceOf(bob.address);
-      const carolBalance = await hogToken.balanceOf(carol.address);
-      const ericBalance = await hogToken.balanceOf(eric.address);
-
-      return [aliceBalance, bobBalance, carolBalance, ericBalance];
-    };
+      // const bobBalance = await hogToken.balanceOf(bob.address);
+      // const carolBalance = await hogToken.balanceOf(carol.address);
+      // const ericBalance = await hogToken.balanceOf(eric.address);
+     
+      return [aliceBalance];
+    }
 
     const compareBalanceUpdateCorrectness = async ({
       balancesBefore,
@@ -147,12 +170,12 @@ describe("BaseFeeOracle Tests", () => {
 
     const executeCurrentStepTxsAndChecks = async () => {
       const balancesBefore = await getAllHogBalances();
-      console.log(balancesBefore);
+      console.log("balnceBefore",balancesBefore);
       await claimGainWithAllAccounts();
-      console.log(balancesBefore);
-
+    console.log("claim");
       const balancesAfter = await getAllHogBalances();
-      console.log(balancesAfter);
+      console.log("balanceafter",balancesAfter);
+      
 
       await compareBalanceUpdateCorrectness({
         balancesBefore,
@@ -163,8 +186,9 @@ describe("BaseFeeOracle Tests", () => {
 
     it("should let provide debt tokens to stability pool with a default issuance factor", async () => {
       // Each of 4 users deposit 2.5k tokens
-
-      await depositWithAllAccounts();
+      console.log("bob before",await bfeToken.balanceOf(bob));
+            await depositWithAllAccounts();
+      console.log("bob after",await bfeToken.balanceOf(bob));
     });
 
     it("should let claim correct amount of HOG after N seconds passed correctly", async () => {
@@ -179,16 +203,6 @@ describe("BaseFeeOracle Tests", () => {
     });
 
     it("should let admin decrease community issuance factor", async () => {
-      console.log(
-        alice.address,
-        bob.address,
-        carol.address,
-        stabilityPool.target,
-        communityIssuance.target,
-        bfeToken.target,
-        hogToken.target,
-        collToken.target
-      );
 
       await expect(communityIssuance.setISSUANCE_FACTOR(1)).not.to.be.reverted;
     });
