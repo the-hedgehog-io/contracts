@@ -3,6 +3,7 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "hardhat/console.sol";
 
 /**
  * @notice A fork of Liquity Math library with an upgraded pragma
@@ -156,19 +157,24 @@ library LiquityMath {
     function _checkWithdrawlLimit(
         uint256 _collInSystem,
         uint256 _lastWithdrawTimestamp,
-        uint256 _expandDuration,
-        uint256 _withdrawAmount
-    ) internal view returns (uint256 minCollTarget, uint256 withdrable) {
-        // F: Totall Coll === _collInSystem
-        // K: Expand to (after) === minCollTarget
-        // B in previous cell === _lastWithdrawTimestamp
-        minCollTarget = _collInSystem - (_collInSystem / 4);
-
+        uint256 _expandDuration
+    ) internal view returns (uint256 maxCollTarget, uint256 withdrable) {
+        // First we get 25% of total system coll
+        maxCollTarget = _collInSystem / 4;
+        console.log("MaxCollTarget: ", maxCollTarget);
+        // Secondly, we calculate how much time has passed since the last withdrawl
         uint256 minutesPassed = block.timestamp - _lastWithdrawTimestamp;
-        uint256 collDifference = _collInSystem - _withdrawAmount;
-        withdrable =
-            _withdrawAmount +
-            (collDifference * minutesPassed) /
-            _expandDuration;
+
+        // Thirdly, we calculate what is the withdrawable in case more then 720 minutes has passed
+        uint256 maxWithdrable = (maxCollTarget * 80) / 100;
+        // We calculate the percentage based on the time diff between last withdrawl and now
+        uint256 percentageToGet = minutesPassed > _expandDuration
+            ? 100
+            : (minutesPassed * 100) / _expandDuration;
+
+        // In the end - we calculate the absolute wei amount user may receive in curretn circumstances
+        withdrable = (maxWithdrable * percentageToGet) / 100;
+
+        console.log("Withdrawable: ", withdrable);
     }
 }

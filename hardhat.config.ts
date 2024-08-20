@@ -88,7 +88,7 @@ const config: HardhatUserConfig = {
     },
     hardhat: {
       forking: {
-        url: "https://rpc.ankr.com/arbitrum",
+        url: "https://arbitrum-one-rpc.publicnode.com",
         blockNumber: 186391444,
       },
       chainId: 42161,
@@ -103,7 +103,7 @@ const config: HardhatUserConfig = {
   mocha: { timeout: 12000000 },
 
   gasReporter: {
-    enabled: true,
+    enabled: false,
     gasPrice: 0.01,
   },
 

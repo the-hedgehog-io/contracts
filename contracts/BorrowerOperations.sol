@@ -521,26 +521,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             _collIncrease,
             _collWithdrawal
         );
-        if (_collWithdrawal > 0) {
-            (uint256 minCollTarget, uint256 withdrable) = LiquityMath
-                ._checkWithdrawlLimit(
-                    activePool.getWStETH(),
-                    lastWithdrawlTimestamp,
-                    EXPAND_DURATION,
-                    _collWithdrawal
-                );
-
-            if (minCollTarget > CALL_WITHDRAWL_MAX_DIFF) {
-                revert("BO: Cannot withdraw more then 25% systems coll");
-            }
-            if ((withdrable * 80) / 100 < _collWithdrawal) {
-                revert(
-                    "BO: Cannot withdraw more then 80% of withdrawble in one tx"
-                );
-            }
-
-            lastWithdrawlTimestamp = block.timestamp;
-        }
+        _checkWithdrawlLimit(_collWithdrawal);
 
         vars.netDebtChange = _BaseFeeLMAChange;
 
@@ -1144,5 +1125,28 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint price = priceFeed.lastGoodPrice();
 
         return LiquityMath._computeCR(_coll, _debt, price);
+    }
+
+    function _checkWithdrawlLimit(uint256 _collWithdrawal) internal {
+        if (_collWithdrawal > 0) {
+            console.log("ActivePool Coll: ", activePool.getWStETH());
+            (uint256 maxCollTarget, uint256 withdrable) = LiquityMath
+                ._checkWithdrawlLimit(
+                    activePool.getWStETH(),
+                    lastWithdrawlTimestamp,
+                    EXPAND_DURATION
+                );
+
+            // if (maxCollTarget < _collWithdrawal) {
+            //     revert("BO: Cannot withdraw more then 25% systems coll");
+            // }
+            if ((withdrable * 80) / 100 < _collWithdrawal) {
+                revert(
+                    "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+                );
+            }
+
+            lastWithdrawlTimestamp = block.timestamp;
+        }
     }
 }
