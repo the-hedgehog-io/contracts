@@ -138,7 +138,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await expect(await decreaseColl({ amount: firstWithdraw })).not.to.be
         .reverted;
 
-      await increase(timestring("2 minutes"));
+      await increase(timestring("1 minutes"));
     });
 
     it("should revert if user tries to withdraw more then 80% withdrawable: step2", async () => {
@@ -146,7 +146,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should not revert after enough time has passed: step3", async () => {
-      await increase(timestring("62 minutes"));
+      await increase(timestring("60 minutes"));
+
       await expect(decreaseColl({ amount: thirdWithdraw })).not.to.be.reverted;
     });
 
