@@ -1134,7 +1134,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
                 ._checkWithdrawlLimit(
                     activePool.getWStETH(),
                     lastWithdrawlTimestamp,
-                    EXPAND_DURATION
+                    EXPAND_DURATION,
+                    0
                 );
 
             // if (maxCollTarget < _collWithdrawal) {

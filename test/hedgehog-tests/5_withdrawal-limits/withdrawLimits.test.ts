@@ -146,8 +146,13 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should not revert after enough time has passed: step3", async () => {
-      await increase(timestring("63 minutes"));
+      await increase(timestring("62 minutes"));
       await expect(decreaseColl({ amount: thirdWithdraw })).not.to.be.reverted;
+    });
+
+    it("should revert step4", async () => {
+      await increase(timestring("10 minutes"));
+      await expect(decreaseColl({ amount: fourthWithdraw })).to.be.reverted;
     });
   });
 });

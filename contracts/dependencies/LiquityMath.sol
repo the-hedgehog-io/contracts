@@ -155,25 +155,30 @@ library LiquityMath {
     }
 
     function _checkWithdrawlLimit(
-        uint256 _collInSystem,
+        uint256 _collCheckpoint,
         uint256 _lastWithdrawTimestamp,
-        uint256 _expandDuration
+        uint256 _expandDuration,
+        uint256 _collAddedSinceLastWithdraw
     ) internal view returns (uint256 maxCollTarget, uint256 withdrable) {
-        // First we get 25% of total system coll
-        maxCollTarget = _collInSystem / 4;
-        console.log("MaxCollTarget: ", maxCollTarget);
-        // Secondly, we calculate how much time has passed since the last withdrawl
+        // First, we calculate how much time has passed since the last withdrawl
         uint256 minutesPassed = block.timestamp - _lastWithdrawTimestamp;
 
-        // Thirdly, we calculate what is the withdrawable in case more then 720 minutes has passed
-        uint256 maxWithdrable = (maxCollTarget * 80) / 100;
         // We calculate the percentage based on the time diff between last withdrawl and now
         uint256 percentageToGet = minutesPassed > _expandDuration
             ? 100
             : (minutesPassed * 100) / _expandDuration;
 
-        // In the end - we calculate the absolute wei amount user may receive in curretn circumstances
-        withdrable = (maxWithdrable * percentageToGet) / 100;
+        console.log("Percentage to get: ", percentageToGet);
+        uint256 fullyExpandedTarget = ((_collCheckpoint * 3) / 4);
+
+        maxCollTarget =
+            ((fullyExpandedTarget * percentageToGet) / 100) +
+            _collAddedSinceLastWithdraw;
+
+        console.log("MaxCollTarget: ", maxCollTarget);
+
+        // Thirdly, we calculate what is the withdrawable in case more then 720 minutes has passed
+        withdrable = (maxCollTarget * 80) / 100;
 
         console.log("Withdrawable: ", withdrable);
     }

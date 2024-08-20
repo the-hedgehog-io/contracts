@@ -8,6 +8,8 @@ import "hardhat/console.sol";
 contract BorrowerOperationsWithdrawalTest is HedgehogBase {
     uint256 lastWithdrawlTimestamp;
     IERC20 collToken;
+    uint256 collWithdrawCheckpoint;
+    uint256 collAddedSinceWithdraw;
 
     constructor(address _activePool, IERC20 _collToken) {
         activePool = IActivePool(_activePool);
@@ -42,6 +44,7 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
     ) external {
         collToken.transferFrom(msg.sender, address(activePool), _collAmount);
         activePool.increaseBalance(_collAmount);
+        collAddedSinceWithdraw += _collAmount;
     }
 
     function addColl(
@@ -105,6 +108,7 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
                 _collIncrease
             );
             activePool.increaseBalance(_collIncrease);
+            collAddedSinceWithdraw += _collIncrease;
         }
     }
 
@@ -112,12 +116,12 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
         if (_collWithdrawal > 0) {
             // TODO: If activePool.getWStETH() is less then baseLimit - do not perform the check
             console.log("ActivePool Coll: ", activePool.getWStETH());
-            (uint256 maxCollTarget, uint256 withdrable) = LiquityMath
-                ._checkWithdrawlLimit(
-                    activePool.getWStETH(),
-                    lastWithdrawlTimestamp,
-                    EXPAND_DURATION
-                );
+            (, uint256 withdrable) = LiquityMath._checkWithdrawlLimit(
+                collWithdrawCheckpoint,
+                lastWithdrawlTimestamp,
+                EXPAND_DURATION,
+                collAddedSinceWithdraw
+            );
 
             // if (maxCollTarget < _collWithdrawal) {
             //     revert("BO: Cannot withdraw more then 25% systems coll");
@@ -127,8 +131,9 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
                     "BO: Cannot withdraw more then 80% of withdrawble in one tx"
                 );
             }
-
+            collWithdrawCheckpoint = activePool.getWStETH();
             lastWithdrawlTimestamp = block.timestamp;
+            collAddedSinceWithdraw = 0;
         }
     }
 }
