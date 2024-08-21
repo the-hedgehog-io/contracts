@@ -58,6 +58,7 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
         address _lowerHint,
         uint _amount
     ) external {
+        console.log("amount", _amount);
         require(_amount > 0, "Borrower Operations: Invalid amount");
 
         _adjustTrove(
@@ -108,21 +109,26 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
             activePool.sendWStETH(msg.sender, _collWithdrawal);
         }
         if (_collIncrease > 0) {
+            console.log("collIncrease:",_collIncrease);
             collToken.transferFrom(
                 msg.sender,
                 address(activePool),
                 _collIncrease
             );
             activePool.increaseBalance(_collIncrease);
+            console.log("unusedLimit",unusedWithdrawlLimit);
             uint256 newLimit = unusedWithdrawlLimit + _collIncrease;
+            console.log("unusedLimitAfter",unusedWithdrawlLimit);
+
             if (newLimit > (unusedWithdrawlLimit * 3) / 4) {
                 unusedWithdrawlLimit = (activePool.getWStETH() * 3) / 4;
                 lastWithdrawlTimestamp = block.timestamp - 720 minutes;
             } else {
                 unusedWithdrawlLimit = newLimit;
+                            console.log("unusedLimitAfter",unusedWithdrawlLimit);
+                }
             }
-        }
-    }
+        }    
 
     function _checkWithdrawlLimit(uint256 _collWithdrawal) internal {
         if (_collWithdrawal > 0) {
@@ -134,6 +140,7 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
                     unusedWithdrawlLimit,
                     activePool.getWStETH()
                 );
+                console.log("collWithdrawal:",_collWithdrawal);
 
             if (withdrable < _collWithdrawal) {
                 revert(
@@ -141,6 +148,7 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
                 );
             }
             unusedWithdrawlLimit = maxCollTarget - _collWithdrawal;
+            console.log("maxCollTarget",maxCollTarget);
             lastWithdrawlTimestamp = block.timestamp;
             collAddedSinceWithdraw = 0;
         }

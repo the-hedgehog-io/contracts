@@ -88,7 +88,7 @@ const config: HardhatUserConfig = {
     },
     hardhat: {
       forking: {
-        url: "https://arbitrum-one-rpc.publicnode.com",
+        url: "https://rpc.ankr.com/arbitrum",
         blockNumber: 186391444,
       },
       chainId: 42161,
