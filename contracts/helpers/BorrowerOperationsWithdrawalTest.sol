@@ -3,7 +3,7 @@ import {HedgehogBase} from "../dependencies/HedgehogBase.sol";
 import {IActivePool} from "../interfaces/IActivePool.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "../dependencies/LiquityMath.sol";
-import "hardhat/console.sol";
+
 
 contract BorrowerOperationsWithdrawalTest is HedgehogBase {
     uint256 lastWithdrawlTimestamp;
@@ -45,12 +45,11 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
         collToken.transferFrom(msg.sender, address(activePool), _collAmount);
         activePool.increaseBalance(_collAmount);
         uint256 newLimit = unusedWithdrawlLimit + _collAmount;
-        if (unusedWithdrawlLimit > (newLimit* 3) / 4  ) {
+        
+        if (newLimit > (unusedWithdrawlLimit* 3) / 4  ) {
             unusedWithdrawlLimit = (activePool.getWStETH() * 3) / 4;
             lastWithdrawlTimestamp = block.timestamp - 720 minutes;
-        } else {
-            unusedWithdrawlLimit = newLimit;
-        }
+        } 
     }
 
     function addColl(
@@ -58,7 +57,6 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
         address _lowerHint,
         uint _amount
     ) external {
-        console.log("amount", _amount);
         require(_amount > 0, "Borrower Operations: Invalid amount");
 
         _adjustTrove(
@@ -109,23 +107,19 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
             activePool.sendWStETH(msg.sender, _collWithdrawal);
         }
         if (_collIncrease > 0) {
-            console.log("collIncrease:",_collIncrease);
             collToken.transferFrom(
                 msg.sender,
                 address(activePool),
                 _collIncrease
             );
             activePool.increaseBalance(_collIncrease);
-            console.log("unusedLimit",unusedWithdrawlLimit);
             uint256 newLimit = unusedWithdrawlLimit + _collIncrease;
-            console.log("unusedLimitAfter",unusedWithdrawlLimit);
 
             if (newLimit > (unusedWithdrawlLimit * 3) / 4) {
                 unusedWithdrawlLimit = (activePool.getWStETH() * 3) / 4;
                 lastWithdrawlTimestamp = block.timestamp - 720 minutes;
             } else {
                 unusedWithdrawlLimit = newLimit;
-                            console.log("unusedLimitAfter",unusedWithdrawlLimit);
                 }
             }
         }    
@@ -140,17 +134,20 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
                     unusedWithdrawlLimit,
                     activePool.getWStETH()
                 );
-                console.log("collWithdrawal:",_collWithdrawal);
-
+            //     console .log("activepool",activePool.getWStETH());
+            if (activePool.getWStETH()> 100*(10**18)) {
             if (withdrable < _collWithdrawal) {
                 revert(
                     "BO: Cannot withdraw more then 80% of withdrawble in one tx"
                 );
             }
             unusedWithdrawlLimit = maxCollTarget - _collWithdrawal;
-            console.log("maxCollTarget",maxCollTarget);
-            lastWithdrawlTimestamp = block.timestamp;
-            collAddedSinceWithdraw = 0;
+            
+        } else { 
+            unusedWithdrawlLimit = activePool.getWStETH();
         }
+        lastWithdrawlTimestamp = block.timestamp;
+            collAddedSinceWithdraw = 0;
     }
+}
 }

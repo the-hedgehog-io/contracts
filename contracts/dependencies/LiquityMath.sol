@@ -169,16 +169,17 @@ library LiquityMath {
             : (minutesPassed * 100) / _expandDuration;
 
         uint256 additionFromNewColl;
-        console.log("unuseWithdrawLimit",_unusedWithdrawlLimit);
-        console.log("_currentTotalColl",_currentTotalColl);
+
+        if(_currentTotalColl>(100*(10**18))) {
 
         additionFromNewColl = (_currentTotalColl * 3 / 4 - _unusedWithdrawlLimit)* percentageToGet / 100;
-      console.log("additionfromNewColl",additionFromNewColl);
         fullyExpandedTarget =  _unusedWithdrawlLimit + additionFromNewColl;
-        console.log("fullyExpandedtarget",fullyExpandedTarget);
-
         withdrable = (fullyExpandedTarget * 80) / 100;
-       
-        console.log("Withdrawable: ", withdrable);
+    
+        } else { 
+            withdrable = _currentTotalColl;
+        }
+
+         console.log("Withdrawable: ", withdrable);
     }
 }
