@@ -130,77 +130,75 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       );
     };
 
-    it("should let open the trove", async () => {
+    it("should let open the trove: step 1", async () => {
       await expect(openTrove({ collAmount: firstDeposit })).not.to.be.reverted;
     });
 
-    it("should let withdraw: step1", async () => {
+    it("should let withdraw: step2", async () => {
       await expect(await decreaseColl({ amount: firstWithdraw })).not.to.be
         .reverted;
-
-     
     });
 
-    it("should revert if user tries to withdraw more then 80% withdrawable: step2", async () => {
+    it("should revert if user tries to withdraw more then 80% withdrawable: step3", async () => {
       await increase(timestring("1 minutes"));
       await expect(decreaseColl({ amount: secondWithdraw })).to.be.revertedWith("BO: Cannot withdraw more then 80% of withdrawble in one tx");
     });
 
-    it("should not revert after enough time has passed: step3", async () => {
+    it("should not revert after enough time has passed: step4", async () => {
       await increase(timestring("60 minutes"));
 
       await expect(decreaseColl({ amount: thirdWithdraw })).not.to.be.reverted;
     });
 
-    it("should revert step 4", async () => {
+    it("should revert step 5", async () => {
       await increase(timestring("10 minutes"));
       await expect(decreaseColl({ amount: fourthWithdraw })).to.be.revertedWith("BO: Cannot withdraw more then 80% of withdrawble in one tx");
     });
 
-    it("should not revert after increasing the time by 12 hours: step 5", async () => {
+    it("should not revert after increasing the time by 12 hours: step 6", async () => {
       await increase(timestring("12 hours"));
       await expect(decreaseColl({ amount: fifthWithdraw })).not.to.be.reverted;
     });
 
-    it("should not be reverted when the deposit is increased: increase 2", async () => {
+    it("should not be reverted when the deposit is increased: step 7", async () => {
       await increase(timestring("1 minute"));
       await expect(increaseColl({ amount: secondDeposit })).not.to.be.reverted;
     });
 
-    it("should not be reverted when the deposit is increased again: increase 3", async () => {
+    it("should not be reverted when the deposit is increased again: step 8", async () => {
       await increase(timestring("1 minute"));
       await expect(increaseColl({ amount: thirdDeposit })).not.to.be.reverted;
     });
 
-    it("should not revert after increasing the deposit: step 6", async () => {
+    it("should not revert after increasing the deposit: step 9", async () => {
       await increase(timestring("1 minute"));
       await expect(decreaseColl({ amount: sixthWithdraw })).not.to.be.reverted;
     });
 
-    it("should not revert: step 7", async () => {
+    it("should not revert: step 10", async () => {
       await increase(timestring("1 minute"));
       await decreaseColl({ amount: seventhWithdraw });
     });
 
-    // it("should not be reverted when the deposit is increased: increase 4", async () => {
+    // it("should not be reverted when the deposit is increased: step 11", async () => {
     //   await increase(timestring("1 minute"));
     //   await expect(increaseColl({ amount: fourthDeposit })).not.to.be.reverted;
     // });
 
-    // it("should revert step 8", async () => {
+    // it("should revert step 12", async () => {
     //   await increase(timestring("1 minute"));
     //   await decreaseColl({ amount: eighthWithdraw });
     // });
 
-    // it("should not revert step 9", async () => {
+    // it("should not revert step 13", async () => {
     //   await decreaseColl({ amount: ninthWithdraw });
     // });
 
-    // it("should not revert step 10", async () => {
+    // it("should not revert step 14", async () => {
     //   await decreaseColl({ amount: tenthWithdraw });
     // });
    
-    // it("should revert step 11", async () => {
+    // it("should revert step 15", async () => {
     //   await decreaseColl({ amount: eleventhWithdraw });
     // });
   });

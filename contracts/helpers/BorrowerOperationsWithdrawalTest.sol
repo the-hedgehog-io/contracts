@@ -45,7 +45,7 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
         collToken.transferFrom(msg.sender, address(activePool), _collAmount);
         activePool.increaseBalance(_collAmount);
         uint256 newLimit = unusedWithdrawlLimit + _collAmount;
-        if (newLimit > (unusedWithdrawlLimit * 3) / 4) {
+        if (unusedWithdrawlLimit > (newLimit* 3) / 4  ) {
             unusedWithdrawlLimit = (activePool.getWStETH() * 3) / 4;
             lastWithdrawlTimestamp = block.timestamp - 720 minutes;
         } else {
