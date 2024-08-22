@@ -527,7 +527,12 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             _collIncrease,
             _collWithdrawal
         );
-        _checkWithdrawlLimit(_collWithdrawal);
+        /**
+         * HEDGEHOG UPDATES: Perform withdrawl limit check if adjustTrove intent is coll withdraw
+         */
+        if (_collWithdrawal > 0) {
+            _checkWithdrawlLimit(_collWithdrawal);
+        }
 
         vars.netDebtChange = _BaseFeeLMAChange;
 
@@ -559,7 +564,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             vars.price
         );
         assert(_collWithdrawal <= vars.coll);
-        _checkWithdrawlLimit(_collWithdrawal);
 
         // Check the adjustment satisfies all conditions for the current system mode
         _requireValidAdjustmentInCurrentMode(
@@ -1156,30 +1160,28 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     }
 
     function _checkWithdrawlLimit(uint256 _collWithdrawal) internal {
-        if (_collWithdrawal > 0) {
-            // If coll in the system is greater then threshold - we check if user may withdraw the desired amount. Otherwise they are free to withdraw whole amount
-            if (activePool.getWStETH() > WITHDRAWL_LIMIT_THRESHOLD) {
-                (uint256 fullLimit, uint256 singleTxWithdrawable) = LiquityMath
-                    ._checkWithdrawlLimit(
-                        lastWithdrawlTimestamp,
-                        EXPAND_DURATION,
-                        unusedWithdrawlLimit,
-                        activePool.getWStETH()
-                    );
+        // If coll in the system is greater then threshold - we check if user may withdraw the desired amount. Otherwise they are free to withdraw whole amount
+        if (activePool.getWStETH() > WITHDRAWL_LIMIT_THRESHOLD) {
+            (uint256 fullLimit, uint256 singleTxWithdrawable) = LiquityMath
+                ._checkWithdrawlLimit(
+                    lastWithdrawlTimestamp,
+                    EXPAND_DURATION,
+                    unusedWithdrawlLimit,
+                    activePool.getWStETH()
+                );
 
-                if (singleTxWithdrawable < _collWithdrawal) {
-                    revert(
-                        "BO: Cannot withdraw more then 80% of withdrawble in one tx"
-                    );
-                }
-
-                // Update current unusedWithdrawlLimit
-                unusedWithdrawlLimit = fullLimit - _collWithdrawal;
-            } else {
-                unusedWithdrawlLimit = activePool.getWStETH();
+            if (singleTxWithdrawable < _collWithdrawal) {
+                revert(
+                    "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+                );
             }
-            // Update the withdrawl recorded timestamp
-            lastWithdrawlTimestamp = block.timestamp;
+
+            // Update current unusedWithdrawlLimit
+            unusedWithdrawlLimit = fullLimit - _collWithdrawal;
+        } else {
+            unusedWithdrawlLimit = activePool.getWStETH();
         }
+        // Update the withdrawl recorded timestamp
+        lastWithdrawlTimestamp = block.timestamp;
     }
 }
