@@ -168,7 +168,6 @@ library LiquityMath {
             ? DENOMINATOR
             : (minutesPassed * DENOMINATOR) / _expandDuration;
 
-        // TODO: Coll in the system. Is DefaultPool.Coll getting subtracted?
         // We calculate 75% of the current total coll
         uint256 totalCollBasedLimit = (_currentTotalColl * 3) / 4;
 

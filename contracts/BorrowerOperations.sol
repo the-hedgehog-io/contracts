@@ -1144,21 +1144,37 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         return LiquityMath._computeCR(_coll, _debt, price);
     }
 
-    function _updateWithdrawlLimitFromCollIncrease(
-        uint256 _previousColl,
-        uint256 _collIncrease
-    ) internal {
-        uint256 newColl = _previousColl + _collIncrease;
-
-        uint256 newLimit = (_previousColl * 3) / 4 + ((_collIncrease * 3) / 4);
-        if (newLimit >= _previousColl) {
-            newLimit = (newColl * 3) / 4;
-            lastWithdrawlTimestamp = block.timestamp - 720 minutes;
-        }
-
-        unusedWithdrawlLimit = newLimit;
-    }
-
+    /**
+     * HEDGEHOG UPDATES:
+     * New function to handle dynamic Withdrawl Limit.
+     * the new dynamic collateral withdrawal limit in our smart contract, inspired by a similar mechanism in the Fluid InstaDApp protocol.
+     * The purpose of this mechanism is to dynamically adjust the withdrawal limit based on the collateral added or removed from the system,
+     * while considering the time elapsed since the last withdrawal.
+     *
+     * Basic Withdrawl Dynamic Limits overview:
+     * When Collateral is Added to the System:
+     * 1) When a user adds collateral, the new collateral amount is calculated by adding the deposit to the existing collateral.
+     * 2) Calculate New Withdrawal Limit:
+     * The system calculates the new withdrawal limit as the sum of the old limit plus 75% of the deposit.
+     * Condition Check:
+     * If this new limit is greater than or equal to 75% of the new total collateral, the withdrawal limit is immediately set to 75% of the new collateral,
+     * and the time counter is reset until the next withdrawal.
+     * If the new limit is less than 75% of the new total collateral, the withdrawal limit is set to the calculated value (old limit + 75% of the deposit).
+     * The target limit is set to 75% of the new total collateral, and the time counter continues from the last withdrawal.
+     *
+     * When Collateral is Withdrawn from the System:
+     * 1) Calculate the Current Withdrawal Limit: The system calculates the current withdrawal limit as:
+     * Current Limit = Old Limit + (75% + Current Collateral - Old Limit) * ( Time Elapsed(minutes) / 720 )
+     * This formula accounts for the time elapsed since the last withdrawal, with the withdrawal limit gradually increasing towards the target limit over a 12-hour period.
+     *
+     * 2) Determine User's Withdrawal Limit for the Transaction:
+     * The user's withdrawal limit for the current transaction is calculated as 80% of the current limit.
+     *
+     * After the collateral is withdraw from the system:
+     * 1) When collateral is withdrawn, the new collateral amount is calculated by subtracting the withdrawn amount from the current collateral.
+     * 2) The system subtracts the withdrawn amount from the current withdrawal limit to determine the new limit. This new limit will be considered as the old limit for the next withdrawal.
+     * 3) The system records the time of the withdrawal and starts a new 12-hour countdown for the dynamic adjustment of the withdrawal limit.
+     */
     function _handleWithdrawlLimit(uint256 _collWithdrawal) internal {
         // If coll in the system is greater then threshold - we check if user may withdraw the desired amount. Otherwise they are free to withdraw whole amount
         if (activePool.getWStETH() > WITHDRAWL_LIMIT_THRESHOLD) {
@@ -1183,5 +1199,26 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         }
         // Update the withdrawl recorded timestamp
         lastWithdrawlTimestamp = block.timestamp;
+    }
+
+    /**
+     * HEDGEHOG UPDATES:
+     * New function that updates dynamic withdrawl limit during the coll increase
+     *
+     * Accepts activePool.getWstETH() as _previousColl and _collIncrease as the amount of coll that is about to get added to activePool
+     */
+    function _updateWithdrawlLimitFromCollIncrease(
+        uint256 _previousColl,
+        uint256 _collIncrease
+    ) internal {
+        uint256 newColl = _previousColl + _collIncrease;
+
+        uint256 newLimit = (_previousColl * 3) / 4 + ((_collIncrease * 3) / 4);
+        if (newLimit >= _previousColl) {
+            newLimit = (newColl * 3) / 4;
+            lastWithdrawlTimestamp = block.timestamp - 720 minutes;
+        }
+
+        unusedWithdrawlLimit = newLimit;
     }
 }
