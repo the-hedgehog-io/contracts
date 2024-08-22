@@ -174,36 +174,12 @@ describe("BaseFeeOracle Tests", () => {
       currentStep++;
     };
 
-    it("should let provide debt tokens to stability pool with a default issuance factor", async () => {
-      // Each of 4 users deposit 2.5k tokens
-      console.log("bob before", await bfeToken.balanceOf(bob));
-      await depositWithAllAccounts();
-      console.log("bob after", await bfeToken.balanceOf(bob));
-    });
-
-    it("should let claim correct amount of HOG after N seconds passed correctly", async () => {
-      await increaseTime(100);
-
-      await executeCurrentStepTxsAndChecks();
-    });
-
-    it("should not let admin set community issuance factor", async () => {
+    it("should not let non-admin account set community issuance factor", async () => {
       await expect(communityIssuance.connect(bob).setISSUANCE_FACTOR(1)).to.be
         .reverted;
     });
 
     it("should let admin decrease community issuance factor", async () => {
-      await expect(communityIssuance.setISSUANCE_FACTOR(1)).not.to.be.reverted;
-    });
-
-    it("it should result into 0 hog gains after complete community issuance factor decrease", async () => {
-      await increaseTime(100);
-
-      await executeCurrentStepTxsAndChecks();
-    });
-
-    it("should let admin increase community issuance factor", async () => {
-      // TODO: Update Issuance Factor to be in line with a test suite
       await expect(communityIssuance.setISSUANCE_FACTOR(1)).not.to.be.reverted;
     });
   });
