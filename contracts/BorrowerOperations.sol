@@ -53,7 +53,10 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     // A doubly linked list of Troves, sorted by their collateral ratios
     ISortedTroves public sortedTroves;
 
-    uint256 lastWithdrawlTimestamp;
+    // HEDGEHOG UPDATES: Added two new public variables
+    // Two variables that are used to track and calculate collateral withdrawl limits
+    uint256 public lastWithdrawlTimestamp;
+    uint256 public unusedWithdrawlLimit;
 
     /* --- Variable container structs  ---
 
@@ -130,6 +133,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * HEDGEHOG UPDATES:
      * ERC20 is used as a collateral instead of native token.
      * Setting erc20 address in the initialisation
+     * Setting initial value for newly added lastWithdrawTimestamp
      */
     function setAddresses(
         address _troveManagerAddress,
@@ -170,6 +174,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         baseFeeLMAToken = IBaseFeeLMAToken(_baseFeeLMATokenAddress);
         WStETHToken = _wStETHTokenAddress;
         feesRouter = _feesRouter;
+
+        // Setting a value of block.timestamp 720 minutes ago to make sure that in any case first withdrawl wouldn't get decreased unfairly
+        lastWithdrawlTimestamp = block.timestamp - (720 minutes);
 
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit ActivePoolAddressChanged(_activePoolAddress);
@@ -1129,24 +1136,28 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     function _checkWithdrawlLimit(uint256 _collWithdrawal) internal {
         if (_collWithdrawal > 0) {
-            console.log("ActivePool Coll: ", activePool.getWStETH());
-            (uint256 maxCollTarget, uint256 withdrable) = LiquityMath
-                ._checkWithdrawlLimit(
-                    activePool.getWStETH(),
-                    lastWithdrawlTimestamp,
-                    EXPAND_DURATION,
-                    0
-                );
+            // If coll in the system is greater then threshold - we check if user may withdraw the desired amount. Otherwise they are free to withdraw whole amount
+            if (activePool.getWStETH() > WITHDRAWL_LIMIT_THRESHOLD) {
+                (uint256 fullLimit, uint256 singleTxWithdrawable) = LiquityMath
+                    ._checkWithdrawlLimit(
+                        lastWithdrawlTimestamp,
+                        EXPAND_DURATION,
+                        unusedWithdrawlLimit,
+                        activePool.getWStETH()
+                    );
 
-            // if (maxCollTarget < _collWithdrawal) {
-            //     revert("BO: Cannot withdraw more then 25% systems coll");
-            // }
-            if ((withdrable * 80) / 100 < _collWithdrawal) {
-                revert(
-                    "BO: Cannot withdraw more then 80% of withdrawble in one tx"
-                );
+                if (singleTxWithdrawable < _collWithdrawal) {
+                    revert(
+                        "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+                    );
+                }
+
+                // Update current unusedWithdrawlLimit
+                unusedWithdrawlLimit = fullLimit - _collWithdrawal;
+            } else {
+                unusedWithdrawlLimit = activePool.getWStETH();
             }
-
+            // Update the withdrawl recorded timestamp
             lastWithdrawlTimestamp = block.timestamp;
         }
     }

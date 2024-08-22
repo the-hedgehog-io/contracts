@@ -159,27 +159,31 @@ library LiquityMath {
         uint256 _expandDuration,
         uint256 _unusedWithdrawlLimit,
         uint256 _currentTotalColl
-    ) internal view returns (uint256 fullyExpandedTarget, uint256 withdrable) {
+    ) internal view returns (uint256 fullLimit, uint256 singleTxWithdrawable) {
         // First, we calculate how much time has passed since the last withdrawl
         uint256 minutesPassed = block.timestamp - _lastWithdrawTimestamp;
 
-        // We calculate the percentage based on the time diff between last withdrawl and now
+        // We calculate the percentage based on the time diff between last withdrawl and current moment
         uint256 percentageToGet = minutesPassed > _expandDuration
             ? 100
             : (minutesPassed * 100) / _expandDuration;
 
+        // TODO: Coll in the system. Is DefaultPool.Coll getting subtracted?
+        // We calculate 75% of the current total coll
+        uint256 totalCollBasedLimit = (_currentTotalColl * 3) / 4;
+
+        // Now we calculate an amount that can be added based on the newest coll value
         uint256 additionFromNewColl;
 
-        if(_currentTotalColl>(100*(10**18))) {
-
-        additionFromNewColl = (_currentTotalColl * 3 / 4 - _unusedWithdrawlLimit)* percentageToGet / 100;
-        fullyExpandedTarget =  _unusedWithdrawlLimit + additionFromNewColl;
-        withdrable = (fullyExpandedTarget * 80) / 100;
-    
-        } else { 
-            withdrable = _currentTotalColl;
+        if (totalCollBasedLimit > _unusedWithdrawlLimit) {
+            additionFromNewColl =
+                ((totalCollBasedLimit - _unusedWithdrawlLimit) *
+                    percentageToGet) /
+                100;
         }
 
-         console.log("Withdrawable: ", withdrable);
+        // Ultimately we get two values: Full withdrawl limit and an instant withdrawl limit which is 80% of the full one
+        fullLimit = _unusedWithdrawlLimit + additionFromNewColl;
+        singleTxWithdrawable = (fullLimit * 80) / 100;
     }
 }

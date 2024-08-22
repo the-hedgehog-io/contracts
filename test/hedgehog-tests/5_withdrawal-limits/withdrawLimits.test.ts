@@ -141,7 +141,9 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     it("should revert if user tries to withdraw more then 80% withdrawable: step3", async () => {
       await increase(timestring("1 minutes"));
-      await expect(decreaseColl({ amount: secondWithdraw })).to.be.revertedWith("BO: Cannot withdraw more then 80% of withdrawble in one tx");
+      await expect(decreaseColl({ amount: secondWithdraw })).to.be.revertedWith(
+        "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+      );
     });
 
     it("should not revert after enough time has passed: step4", async () => {
@@ -152,7 +154,9 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     it("should revert step 5", async () => {
       await increase(timestring("10 minutes"));
-      await expect(decreaseColl({ amount: fourthWithdraw })).to.be.revertedWith("BO: Cannot withdraw more then 80% of withdrawble in one tx");
+      await expect(decreaseColl({ amount: fourthWithdraw })).to.be.revertedWith(
+        "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+      );
     });
 
     it("should not revert after increasing the time by 12 hours: step 6", async () => {
@@ -187,7 +191,9 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     it("should revert step 12", async () => {
       await increase(timestring("1 minute"));
-      await expect(decreaseColl({ amount: eighthWithdraw })).to.be.revertedWith("BO: Cannot withdraw more then 80% of withdrawble in one tx");
+      await expect(decreaseColl({ amount: eighthWithdraw })).to.be.revertedWith(
+        "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+      );
     });
 
     it("should not revert step 13", async () => {
@@ -197,9 +203,13 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     it("should not revert step 14", async () => {
       await decreaseColl({ amount: tenthWithdraw });
     });
-   
+
     it("should revert step 15", async () => {
-      await expect(decreaseColl({ amount: eleventhWithdraw })).to.be.revertedWith("BO: Cannot withdraw more then 80% of withdrawble in one tx");
+      await expect(
+        decreaseColl({ amount: eleventhWithdraw })
+      ).to.be.revertedWith(
+        "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+      );
     });
   });
 });

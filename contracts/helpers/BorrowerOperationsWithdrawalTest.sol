@@ -1,14 +1,13 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 import {HedgehogBase} from "../dependencies/HedgehogBase.sol";
 import {IActivePool} from "../interfaces/IActivePool.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "../dependencies/LiquityMath.sol";
 
-
 contract BorrowerOperationsWithdrawalTest is HedgehogBase {
     uint256 lastWithdrawlTimestamp;
     IERC20 collToken;
-    uint256 collAddedSinceWithdraw;
     uint256 unusedWithdrawlLimit;
 
     constructor(address _activePool, IERC20 _collToken) {
@@ -45,11 +44,13 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
         collToken.transferFrom(msg.sender, address(activePool), _collAmount);
         activePool.increaseBalance(_collAmount);
         uint256 newLimit = unusedWithdrawlLimit + _collAmount;
-        
-        if (newLimit > (unusedWithdrawlLimit* 3) / 4  ) {
+
+        if (newLimit >= (unusedWithdrawlLimit * 3) / 4) {
             unusedWithdrawlLimit = (activePool.getWStETH() * 3) / 4;
             lastWithdrawlTimestamp = block.timestamp - 720 minutes;
-        } 
+        } else {
+            unusedWithdrawlLimit = newLimit;
+        }
     }
 
     function addColl(
@@ -113,41 +114,41 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
                 _collIncrease
             );
             activePool.increaseBalance(_collIncrease);
-            uint256 newLimit = unusedWithdrawlLimit + _collIncrease;
-
-            if (newLimit > (unusedWithdrawlLimit * 3) / 4) {
-                unusedWithdrawlLimit = (activePool.getWStETH() * 3) / 4;
-                lastWithdrawlTimestamp = block.timestamp - 720 minutes;
-            } else {
-                unusedWithdrawlLimit = newLimit;
-                }
+            uint256 newColl = activePool.getWStETH() + _collIncrease;
+            uint256 newLimit = unusedWithdrawlLimit + ((_collIncrease * 3) / 4);
+            if (newLimit > activePool.getWStETH()) {
+                newLimit = (newColl * 3) / 4;
             }
-        }    
+
+            unusedWithdrawlLimit = newLimit;
+        }
+    }
 
     function _checkWithdrawlLimit(uint256 _collWithdrawal) internal {
         if (_collWithdrawal > 0) {
-            // TODO: If activePool.getWStETH() is less then baseLimit - do not perform the check
-            (uint256 maxCollTarget, uint256 withdrable) = LiquityMath
-                ._checkWithdrawlLimit(
-                    lastWithdrawlTimestamp,
-                    EXPAND_DURATION,
-                    unusedWithdrawlLimit,
-                    activePool.getWStETH()
-                );
-            //     console .log("activepool",activePool.getWStETH());
-            if (activePool.getWStETH()> 100*(10**18)) {
-            if (withdrable < _collWithdrawal) {
-                revert(
-                    "BO: Cannot withdraw more then 80% of withdrawble in one tx"
-                );
+            // If coll in the system is greater then threshold - we check if user may withdraw the desired amount. Otherwise they are free to withdraw whole amount
+            if (activePool.getWStETH() > WITHDRAWL_LIMIT_THRESHOLD) {
+                (uint256 fullLimit, uint256 singleTxWithdrawable) = LiquityMath
+                    ._checkWithdrawlLimit(
+                        lastWithdrawlTimestamp,
+                        EXPAND_DURATION,
+                        unusedWithdrawlLimit,
+                        activePool.getWStETH()
+                    );
+
+                if (singleTxWithdrawable < _collWithdrawal) {
+                    revert(
+                        "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+                    );
+                }
+
+                // Update current unusedWithdrawlLimit
+                unusedWithdrawlLimit = fullLimit - _collWithdrawal;
+            } else {
+                unusedWithdrawlLimit = activePool.getWStETH();
             }
-            unusedWithdrawlLimit = maxCollTarget - _collWithdrawal;
-            
-        } else { 
-            unusedWithdrawlLimit = activePool.getWStETH();
+            // Update the withdrawl recorded timestamp
+            lastWithdrawlTimestamp = block.timestamp;
         }
-        lastWithdrawlTimestamp = block.timestamp;
-            collAddedSinceWithdraw = 0;
     }
-}
 }
