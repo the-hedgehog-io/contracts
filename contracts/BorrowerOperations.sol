@@ -531,7 +531,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
          * HEDGEHOG UPDATES: Perform withdrawl limit check if adjustTrove intent is coll withdraw
          */
         if (_collWithdrawal > 0) {
-            _checkWithdrawlLimit(_collWithdrawal);
+            _handleWithdrawlLimit(_collWithdrawal);
         }
 
         vars.netDebtChange = _BaseFeeLMAChange;
@@ -1159,7 +1159,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         unusedWithdrawlLimit = newLimit;
     }
 
-    function _checkWithdrawlLimit(uint256 _collWithdrawal) internal {
+    function _handleWithdrawlLimit(uint256 _collWithdrawal) internal {
         // If coll in the system is greater then threshold - we check if user may withdraw the desired amount. Otherwise they are free to withdraw whole amount
         if (activePool.getWStETH() > WITHDRAWL_LIMIT_THRESHOLD) {
             (uint256 fullLimit, uint256 singleTxWithdrawable) = LiquityMath
