@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
-import "hardhat/console.sol";
 
 interface IIFeesRouter {
     function distributeDebtFee(uint256 _debt, uint256 _fee) external;

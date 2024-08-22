@@ -12,6 +12,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "../dependencies/LiquitySafeMath128.sol";
 import "../dependencies/CheckContract.sol";
 
+
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -421,7 +422,9 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
     function _triggerHOGIssuance(
         ICommunityIssuance _communityIssuance
     ) internal {
+      
         uint HOGIssuance = _communityIssuance.issueHOG();
+
         _updateG(HOGIssuance);
     }
 

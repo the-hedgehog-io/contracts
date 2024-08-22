@@ -17,6 +17,6 @@ interface ICommunityIssuance {
     ) external;
 
     function issueHOG() external returns (uint);
-
+    
     function sendHOG(address _account, uint _HOGamount) external;
 }

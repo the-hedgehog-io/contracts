@@ -6,8 +6,7 @@
     "@openzeppelin/contracts": "^4.9.0",
     "@openzeppelin/test-helpers": "^0.5.10",
     "dotenv": "^16.1.1",
-    "ethers": "^6.7.1",
-    "hardhat": "^2.17.2",
+    "hardhat": "^2.22.8",
     "hardhat-abi-exporter": "^2.10.1",
     "hardhat-deploy": "^0.11.30"
   },

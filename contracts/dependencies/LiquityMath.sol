@@ -154,21 +154,35 @@ library LiquityMath {
     }
 
     function _checkWithdrawlLimit(
-        uint256 _collInSystem,
         uint256 _lastWithdrawTimestamp,
         uint256 _expandDuration,
-        uint256 _withdrawAmount
-    ) internal view returns (uint256 minCollTarget, uint256 withdrable) {
-        // F: Totall Coll === _collInSystem
-        // K: Expand to (after) === minCollTarget
-        // B in previous cell === _lastWithdrawTimestamp
-        minCollTarget = _collInSystem - (_collInSystem / 4);
-
+        uint256 _unusedWithdrawlLimit,
+        uint256 _currentTotalColl
+    ) internal view returns (uint256 fullLimit, uint256 singleTxWithdrawable) {
+        uint256 DENOMINATOR = 100000;
+        // First, we calculate how much time has passed since the last withdrawl
         uint256 minutesPassed = block.timestamp - _lastWithdrawTimestamp;
-        uint256 collDifference = _collInSystem - _withdrawAmount;
-        withdrable =
-            _withdrawAmount +
-            (collDifference * minutesPassed) /
-            _expandDuration;
+
+        // We calculate the percentage based on the time diff between last withdrawl and current moment
+        uint256 percentageToGet = minutesPassed > _expandDuration
+            ? DENOMINATOR
+            : (minutesPassed * DENOMINATOR) / _expandDuration;
+
+        // We calculate 75% of the current total coll
+        uint256 totalCollBasedLimit = (_currentTotalColl * 3) / 4;
+
+        // Now we calculate an amount that can be added based on the newest coll value
+        uint256 additionFromNewColl;
+
+        if (totalCollBasedLimit > _unusedWithdrawlLimit) {
+            additionFromNewColl =
+                ((totalCollBasedLimit - _unusedWithdrawlLimit) *
+                    percentageToGet) /
+                DENOMINATOR;
+        }
+
+        // Ultimately we get two values: Full withdrawl limit and an instant withdrawl limit which is 80% of the full one
+        fullLimit = _unusedWithdrawlLimit + additionFromNewColl;
+        singleTxWithdrawable = (fullLimit * 80) / 100;
     }
 }

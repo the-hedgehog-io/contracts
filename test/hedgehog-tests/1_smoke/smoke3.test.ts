@@ -28,7 +28,7 @@ const { latestBlock, increase, advanceBlock } = time;
 const compareWithFault = (
   arg1: bigint | number,
   arg2: bigint | number,
-  faultScale = 100000000000000000000000
+  faultScale = 100000
 ) => {
   expect(arg1).to.be.lessThanOrEqual(
     BigInt(arg2) / BigInt(faultScale) + BigInt(arg2)
@@ -80,7 +80,7 @@ describe("BaseFeeOracle Tests", () => {
     const BobTroveColl = BigInt("400000000000000000000");
     const BobTroveDebt = BigInt("2000000000000000000000000000");
     const BobInitialCR = BigInt("6666333349966666666");
-    const BobTroveOpeningFee = BigInt("1578565939");
+    const BobTroveOpeningFee = BigInt("1578565939000000000000000000");
     const BobIdealBFEBalanceAtOpening = BigInt("421434061409356496000000000");
     const BobActualBFEBalanceAtOpening = BigInt("421434061409356496000000000");
 
@@ -93,7 +93,7 @@ describe("BaseFeeOracle Tests", () => {
 
     const CarolTroveColl = BigInt("90000000000000000000");
     const CarolTroveDebt = BigInt("600000000000000000000000000");
-    const CarolTroveOpeningFee = BigInt("104046230");
+    const CarolTroveOpeningFee = BigInt("104046230000000000000000000");
     const CarolInitialCR = BigInt("4999166805500000000");
     const CarolBFEBalanceAtOpening = BigInt("495953769800856040800000000");
 

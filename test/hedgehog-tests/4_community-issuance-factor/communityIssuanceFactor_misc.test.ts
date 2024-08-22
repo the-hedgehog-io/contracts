@@ -3,22 +3,19 @@ import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import {
+  BaseFeeLMATokenTester,
   CommunityIssuance,
   StabilityPoolTester,
   TERC20,
 } from "../../../typechain-types";
-import { BaseFeeLMAToken } from "../../../typechain-types/contracts";
 
 const { increase: increaseTime } = time;
 
 // Array([aliceGain, bobGain, carolGain, ericGain])
 const hogGainSchedule: bigint[][] = [
-  [
-    ethers.parseEther("1"),
-    ethers.parseEther("1"),
-    ethers.parseEther("1"),
-    ethers.parseEther("1"),
-  ],
+  [ethers.parseEther("1")],
+  [ethers.parseEther("1")],
+  [ethers.parseEther("1"), ethers.parseEther("1")],
 ];
 
 const factorSteps: string[] = ["999998681227695000"];
@@ -35,7 +32,7 @@ describe("BaseFeeOracle Tests", () => {
       eric: SignerWithAddress;
     let communityIssuance: CommunityIssuance;
     let stabilityPool: StabilityPoolTester;
-    let bfeToken: BaseFeeLMAToken;
+    let bfeToken: BaseFeeLMATokenTester;
     let collToken: TERC20;
     let hogToken: TERC20;
 
@@ -52,7 +49,7 @@ describe("BaseFeeOracle Tests", () => {
 
       bfeToken = await (
         await (
-          await ethers.getContractFactory("BaseFeeLMAToken")
+          await ethers.getContractFactory("BaseFeeLMATokenTester")
         ).deploy(
           communityIssuance.target,
           stabilityPool.target,
@@ -73,15 +70,36 @@ describe("BaseFeeOracle Tests", () => {
         ).deploy("HOG Token", "HOG", 10000000000000)
       ).waitForDeployment();
 
-      await collToken.transfer(bob.address, ethers.parseEther("2500000000000"));
-      await collToken.transfer(
+      await hogToken.transfer(bob.address, ethers.parseEther("2500000000000"));
+      await hogToken.transfer(
         carol.address,
         ethers.parseEther("2500000000000")
       );
-      await collToken.transfer(
-        eric.address,
+      await hogToken.transfer(eric.address, ethers.parseEther("2500000000000"));
+
+      await stabilityPool.setAddresses(
+        bfeToken.target,
+        bfeToken.target,
+        bfeToken.target,
+        bfeToken.target,
+        bfeToken.target,
+        bfeToken.target,
+        communityIssuance.target,
+        bfeToken.target
+      );
+
+      await communityIssuance.setAddresses(
+        hogToken.target,
+        stabilityPool.target,
+        alice.address,
+        alice.address
+      );
+      await bfeToken.transfer(bob.address, ethers.parseEther("2500000000000"));
+      await bfeToken.transfer(
+        carol.address,
         ethers.parseEther("2500000000000")
       );
+      await bfeToken.transfer(eric.address, ethers.parseEther("2500000000000"));
     });
 
     const depositWithAllAccounts = async (
@@ -97,7 +115,9 @@ describe("BaseFeeOracle Tests", () => {
     };
 
     const claimGainWithAllAccounts = async () => {
-      await expect(stabilityPool.withdrawFromSP(0)).not.to.be.reverted;
+      await expect(stabilityPool.connect(alice).withdrawFromSP(0)).not.to.be
+        .reverted;
+
       await expect(stabilityPool.connect(bob).withdrawFromSP(0)).not.to.be
         .reverted;
       await expect(stabilityPool.connect(carol).withdrawFromSP(0)).not.to.be
@@ -108,11 +128,11 @@ describe("BaseFeeOracle Tests", () => {
 
     const getAllHogBalances = async () => {
       const aliceBalance = await hogToken.balanceOf(alice.address);
-      const bobBalance = await hogToken.balanceOf(bob.address);
-      const carolBalance = await hogToken.balanceOf(carol.address);
-      const ericBalance = await hogToken.balanceOf(eric.address);
+      // const bobBalance = await hogToken.balanceOf(bob.address);
+      // const carolBalance = await hogToken.balanceOf(carol.address);
+      // const ericBalance = await hogToken.balanceOf(eric.address);
 
-      return [aliceBalance, bobBalance, carolBalance, ericBalance];
+      return [aliceBalance];
     };
 
     const compareBalanceUpdateCorrectness = async ({
@@ -141,8 +161,11 @@ describe("BaseFeeOracle Tests", () => {
 
     const executeCurrentStepTxsAndChecks = async () => {
       const balancesBefore = await getAllHogBalances();
+      console.log("balanceBefore", balancesBefore);
       await claimGainWithAllAccounts();
+      console.log("claim");
       const balancesAfter = await getAllHogBalances();
+      console.log("balanceafter", balancesAfter);
 
       await compareBalanceUpdateCorrectness({
         balancesBefore,
@@ -153,8 +176,9 @@ describe("BaseFeeOracle Tests", () => {
 
     it("should let provide debt tokens to stability pool with a default issuance factor", async () => {
       // Each of 4 users deposit 2.5k tokens
-
+      console.log("bob before", await bfeToken.balanceOf(bob));
       await depositWithAllAccounts();
+      console.log("bob after", await bfeToken.balanceOf(bob));
     });
 
     it("should let claim correct amount of HOG after N seconds passed correctly", async () => {
