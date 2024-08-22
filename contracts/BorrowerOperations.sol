@@ -285,7 +285,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             msg.sender
         );
         emit TroveCreated(msg.sender, vars.arrayIndex);
-        uint256 oldColl = activePool.getWStETH();
         // Move the wStETH to the Active Pool, and mint the BaseFeeLMAAmount to the borrower
         _activePoolAddColl(contractsCache.activePool, _collAmount);
 
