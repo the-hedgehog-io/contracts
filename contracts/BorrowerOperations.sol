@@ -285,7 +285,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             msg.sender
         );
         emit TroveCreated(msg.sender, vars.arrayIndex);
-
+        uint256 oldColl = activePool.getWStETH();
         // Move the wStETH to the Active Pool, and mint the BaseFeeLMAAmount to the borrower
         _activePoolAddColl(contractsCache.activePool, _collAmount);
 
@@ -560,6 +560,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             vars.price
         );
         assert(_collWithdrawal <= vars.coll);
+        _checkWithdrawlLimit(_collWithdrawal);
 
         // Check the adjustment satisfies all conditions for the current system mode
         _requireValidAdjustmentInCurrentMode(
@@ -797,14 +798,20 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * HEDGEHOG UPDATES: use SafeERC20 safe transfer instead of native token transfer
      * Send funds from User's account instead of relaying native token through address(this)
      * Manualy increase balance in Active Pool, since it used to be done in the native token fallback
+     *
+     * Now also update the contract's withdrawl limit along with the changes to the coll balance in the active pool
      */
     // Send WStETH to Active Pool and increase its recorded WStETH balance
     function _activePoolAddColl(
         IActivePool _activePool,
         uint _amount
     ) internal {
+        uint256 oldColl = _activePool.getWStETH();
+
         WStETHToken.safeTransferFrom(msg.sender, address(_activePool), _amount);
         activePool.increaseBalance(_amount);
+
+        _updateWithdrawlLimitFromCollIncrease(oldColl, _amount);
     }
 
     // Issue the specified amount of BaseFeeLMA to _account and increases the total active debt (_netDebtIncrease potentially includes a BaseFeeLMAFee)
@@ -1132,6 +1139,21 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint price = priceFeed.lastGoodPrice();
 
         return LiquityMath._computeCR(_coll, _debt, price);
+    }
+
+    function _updateWithdrawlLimitFromCollIncrease(
+        uint256 _previousColl,
+        uint256 _collIncrease
+    ) internal {
+        uint256 newColl = _previousColl + _collIncrease;
+
+        uint256 newLimit = (_previousColl * 3) / 4 + ((_collIncrease * 3) / 4);
+        if (newLimit >= _previousColl) {
+            newLimit = (newColl * 3) / 4;
+            lastWithdrawlTimestamp = block.timestamp - 720 minutes;
+        }
+
+        unusedWithdrawlLimit = newLimit;
     }
 
     function _checkWithdrawlLimit(uint256 _collWithdrawal) internal {

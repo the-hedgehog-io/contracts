@@ -41,16 +41,11 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
         address _upperHint,
         address _lowerHint
     ) external {
+        uint256 oldColl = activePool.getWStETH();
         collToken.transferFrom(msg.sender, address(activePool), _collAmount);
         activePool.increaseBalance(_collAmount);
-        uint256 newLimit = unusedWithdrawlLimit + _collAmount;
 
-        if (newLimit >= (unusedWithdrawlLimit * 3) / 4) {
-            unusedWithdrawlLimit = (activePool.getWStETH() * 3) / 4;
-            lastWithdrawlTimestamp = block.timestamp - 720 minutes;
-        } else {
-            unusedWithdrawlLimit = newLimit;
-        }
+        _updateWithdrawlLimitFromCollIncrease(oldColl, _collAmount);
     }
 
     function addColl(
@@ -103,6 +98,7 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
         address _lowerHint,
         uint _maxFeePercentage
     ) internal {
+        uint256 previousColl = activePool.getWStETH();
         if (_collWithdrawal > 0) {
             _checkWithdrawlLimit(_collWithdrawal);
             activePool.sendWStETH(msg.sender, _collWithdrawal);
@@ -114,14 +110,24 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
                 _collIncrease
             );
             activePool.increaseBalance(_collIncrease);
-            uint256 newColl = activePool.getWStETH() + _collIncrease;
-            uint256 newLimit = unusedWithdrawlLimit + ((_collIncrease * 3) / 4);
-            if (newLimit > activePool.getWStETH()) {
-                newLimit = (newColl * 3) / 4;
-            }
 
-            unusedWithdrawlLimit = newLimit;
+            _updateWithdrawlLimitFromCollIncrease(previousColl, _collIncrease);
         }
+    }
+
+    function _updateWithdrawlLimitFromCollIncrease(
+        uint256 _previousColl,
+        uint256 _collIncrease
+    ) internal {
+        uint256 newColl = _previousColl + _collIncrease;
+
+        uint256 newLimit = (_previousColl * 3) / 4 + ((_collIncrease * 3) / 4);
+        if (newLimit >= _previousColl) {
+            newLimit = (newColl * 3) / 4;
+            lastWithdrawlTimestamp = block.timestamp - 720 minutes;
+        }
+
+        unusedWithdrawlLimit = newLimit;
     }
 
     function _checkWithdrawlLimit(uint256 _collWithdrawal) internal {
@@ -135,7 +141,6 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
                         unusedWithdrawlLimit,
                         activePool.getWStETH()
                     );
-
                 if (singleTxWithdrawable < _collWithdrawal) {
                     revert(
                         "BO: Cannot withdraw more then 80% of withdrawble in one tx"

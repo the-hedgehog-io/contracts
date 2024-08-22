@@ -3,7 +3,6 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "hardhat/console.sol";
 
 /**
  * @notice A fork of Liquity Math library with an upgraded pragma
@@ -160,13 +159,14 @@ library LiquityMath {
         uint256 _unusedWithdrawlLimit,
         uint256 _currentTotalColl
     ) internal view returns (uint256 fullLimit, uint256 singleTxWithdrawable) {
+        uint256 DENOMINATOR = 100000;
         // First, we calculate how much time has passed since the last withdrawl
         uint256 minutesPassed = block.timestamp - _lastWithdrawTimestamp;
 
         // We calculate the percentage based on the time diff between last withdrawl and current moment
         uint256 percentageToGet = minutesPassed > _expandDuration
-            ? 100
-            : (minutesPassed * 100) / _expandDuration;
+            ? DENOMINATOR
+            : (minutesPassed * DENOMINATOR) / _expandDuration;
 
         // TODO: Coll in the system. Is DefaultPool.Coll getting subtracted?
         // We calculate 75% of the current total coll
@@ -179,7 +179,7 @@ library LiquityMath {
             additionFromNewColl =
                 ((totalCollBasedLimit - _unusedWithdrawlLimit) *
                     percentageToGet) /
-                100;
+                DENOMINATOR;
         }
 
         // Ultimately we get two values: Full withdrawl limit and an instant withdrawl limit which is 80% of the full one
