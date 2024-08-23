@@ -43,6 +43,32 @@ const compareWithFault = (
   );
 };
 
+const DO_NOT_DO_LIKE_THIS = () => {
+  const a = (param: bigint) => {
+    // do something
+  };
+
+  const PARAM: string = "150";
+
+  // Do not do like this
+  a(BigInt(PARAM));
+};
+
+const DO_LIKE_THIS = () => {
+  const a = (param: bigint | string) => {
+    let localParam: bigint;
+    if (typeof param === "string") {
+      localParam = BigInt(param);
+    }
+    // do something with localParam
+  };
+
+  const PARAM: string = "150";
+
+  // Do not do like this
+  a(BigInt(PARAM));
+};
+
 describe("Hedgehog Core Contracts Smoke tests", () => {
   context("Base functionality and Access Control. Flow #1", () => {
     let alice: SignerWithAddress,
@@ -184,8 +210,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     type OpenTroveParams = {
       caller: SignerWithAddress;
       maxFeePercentage: number;
-      baseFeeLMAAmount: string | BigNumberish;
-      collAmount: string | BigNumberish;
+      baseFeeLMAAmount: string | bigint;
+      collAmount: string | bigint;
       upperHint: string;
       lowerHint: string;
     };
@@ -502,6 +528,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     it("should let open another position in the system (carol position)", async () => {
       await increase(17970);
 
+      // TODO: check with expect
       await openTrove({
         caller: carol,
         collAmount: CarolTroveColl,
