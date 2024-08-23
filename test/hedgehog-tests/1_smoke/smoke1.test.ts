@@ -1,73 +1,33 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { mine, time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
-import { BigNumberish } from "ethers";
 import { ethers } from "hardhat";
+import { TERC20, TestPriceFeed } from "../../../typechain-types";
 import {
-  CommunityIssuance,
-  HOGToken,
-  TERC20,
-  TestPriceFeed,
-} from "../../../typechain-types";
-import {
-  ActivePool,
   BaseFeeLMAToken,
   BaseFeeOracle,
   BorrowerOperations,
-  CollSurplusPool,
-  DefaultPool,
   HintHelpers,
-  SortedTroves,
   StabilityPool,
   TroveManager,
 } from "../../../typechain-types/contracts";
 import { getSigners, setupContracts } from "../../utils";
 import {
   ProvideToStabilityPool,
+  getOpenTrove,
   getStabilityPoolMethods,
+  OpenTroveToBorrowerOperations,
+  AdjustTroveParamsToBorrowerOperations,
+  getAdjustTroveParams,
+  getCollRatioParams,
+  CollateralRatioParams,
+  GetEntireCollAndDebtParams,
+  checkCorrectness,
+  validateCollDebtMatch,
+  setNewParamsToBaseFee,
 } from "../../utils/shared";
 
-const { latestBlock, increase, advanceBlock } = time;
-
-const compareWithFault = (
-  arg1: bigint | number,
-  arg2: bigint | number,
-  faultScale = 100000
-) => {
-  expect(arg1).to.be.lessThanOrEqual(
-    BigInt(arg2) / BigInt(faultScale) + BigInt(arg2)
-  );
-
-  expect(arg1).to.be.greaterThanOrEqual(
-    BigInt(arg2) / BigInt(faultScale) - BigInt(arg2)
-  );
-};
-
-const DO_NOT_DO_LIKE_THIS = () => {
-  const a = (param: bigint) => {
-    // do something
-  };
-
-  const PARAM: string = "150";
-
-  // Do not do like this
-  a(BigInt(PARAM));
-};
-
-const DO_LIKE_THIS = () => {
-  const a = (param: bigint | string) => {
-    let localParam: bigint;
-    if (typeof param === "string") {
-      localParam = BigInt(param);
-    }
-    // do something with localParam
-  };
-
-  const PARAM: string = "150";
-
-  // Do not do like this
-  a(BigInt(PARAM));
-};
+const { latestBlock, increase } = time;
 
 describe("Hedgehog Core Contracts Smoke tests", () => {
   context("Base functionality and Access Control. Flow #1", () => {
@@ -75,24 +35,24 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       bob: SignerWithAddress,
       carol: SignerWithAddress;
 
-    let oracle: BaseFeeOracle;
     let priceFeed: TestPriceFeed;
-    let sortedTroves: SortedTroves;
     let troveManager: TroveManager;
-    let activePool: ActivePool;
     let stabilityPool: StabilityPool;
-    let defaultPool: DefaultPool;
-    let gasPool: any;
-    let collSurplusPool: CollSurplusPool;
     let borrowerOperations: BorrowerOperations;
     let hintHelpers: HintHelpers;
     let baseFeeLMAToken: BaseFeeLMAToken;
-    let communityIssuance: CommunityIssuance;
-    let hogToken: HOGToken;
     let payToken: TERC20;
     let mainOracle: BaseFeeOracle, secondaryOracle: BaseFeeOracle;
+    let checkCollDebtCorrectness: any;
+    let compareWithFault: any;
+    let setNewBaseFeePrice: any;
 
     let provideToStabilityPool: ProvideToStabilityPool;
+    let openTroveToBorrowerOperations: OpenTroveToBorrowerOperations;
+    let troveDebtIncrease: AdjustTroveParamsToBorrowerOperations;
+    let troveCollIncrease: AdjustTroveParamsToBorrowerOperations;
+    let unreliableTroveCR: CollateralRatioParams;
+    let entireCollAndDebt: GetEntireCollAndDebtParams;
 
     const gasCompensationReserve = BigInt("100000000000000000000000");
     const gasPrice010 = "30000000000";
@@ -118,6 +78,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const AliceRedemptionFirst = BigInt("79607518");
     const AliceCRAtLiquidation = BigInt("1442997368766666666");
 
+    // Bob:
     const BobTroveColl = BigInt("3000000000000000000000");
     const BobTroveDebt = BigInt("2000000000000000000000000000");
     const BobInitialCR = BigInt("49997500124966666666");
@@ -184,18 +145,18 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
       [
         priceFeed,
-        sortedTroves,
+        ,
         troveManager,
-        activePool,
+        ,
         stabilityPool,
-        defaultPool,
-        gasPool,
-        collSurplusPool,
+        ,
+        ,
+        ,
         borrowerOperations,
         hintHelpers,
         baseFeeLMAToken,
-        communityIssuance,
-        hogToken,
+        ,
+        ,
         payToken,
         mainOracle,
         secondaryOracle,
@@ -205,132 +166,48 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         await getStabilityPoolMethods({ baseFeeLMAToken, stabilityPool });
 
       provideToStabilityPool = provideToStabilityPoolInit;
+
+      const {
+        openTroveToBorrowerOperations: openTroveToBorrowerOperationsInit,
+      } = await getOpenTrove({ borrowerOperations, payToken });
+
+      openTroveToBorrowerOperations = openTroveToBorrowerOperationsInit;
+
+      const {
+        troveDebtIncrease: troveDebtIncreaseInit,
+        troveCollIncrease: troveCollIncreaseInit,
+      } = await getAdjustTroveParams({ borrowerOperations, payToken });
+
+      troveDebtIncrease = troveDebtIncreaseInit;
+      troveCollIncrease = troveCollIncreaseInit;
+
+      const {
+        getUnreliableTroveCollateralRatio:
+          getUnreliableTroveCollateralRatioInit,
+        getEntireCollAndDebt: entireCollAndDebtInit,
+      } = await getCollRatioParams({ troveManager });
+
+      unreliableTroveCR = getUnreliableTroveCollateralRatioInit;
+      entireCollAndDebt = entireCollAndDebtInit;
+
+      const { checkCollDebtCorrectness: checkCollDebtCorrectnessInit } =
+        await checkCorrectness({ troveManager });
+      checkCollDebtCorrectness = checkCollDebtCorrectnessInit;
+
+      const { compareWithFault: compareWithFaultInit } =
+        await validateCollDebtMatch();
+      compareWithFault = compareWithFaultInit;
+
+      const { setNewBaseFeePrice: setNewBaseFeePriceInit } =
+        await setNewParamsToBaseFee({ mainOracle, secondaryOracle, priceFeed });
+      setNewBaseFeePrice = setNewBaseFeePriceInit;
     });
-
-    type OpenTroveParams = {
-      caller: SignerWithAddress;
-      maxFeePercentage: number;
-      baseFeeLMAAmount: string | bigint;
-      collAmount: string | bigint;
-      upperHint: string;
-      lowerHint: string;
-    };
-    const openTrove = async ({
-      caller = bob,
-      maxFeePercentage = 1,
-      baseFeeLMAAmount = "0",
-      collAmount = "0",
-      upperHint = ethers.ZeroAddress,
-      lowerHint = ethers.ZeroAddress,
-    }: Partial<OpenTroveParams> = {}) => {
-      await payToken
-        .connect(caller)
-        .approve(await borrowerOperations.getAddress(), collAmount);
-      await borrowerOperations
-        .connect(caller)
-        .openTrove(
-          ethers.parseEther(maxFeePercentage.toString()),
-          baseFeeLMAAmount,
-          collAmount,
-          upperHint,
-          lowerHint
-        );
-    };
-
-    type GetCRParams = {
-      owner: SignerWithAddress;
-    };
-    const getCR = async ({ owner = bob }: Partial<GetCRParams> = {}) => {
-      return await troveManager.getUnreliableTroveICR(owner.address);
-    };
-
-    const getTrove = async (caller = bob) => {
-      const { debt, coll, pendingBaseFeeLMADebtReward, pendingWStETHReward } =
-        await troveManager.getEntireDebtAndColl(caller.address);
-
-      return {
-        debt,
-        coll,
-        pendingBaseFeeLMADebtReward,
-        pendingWStETHReward,
-      };
-    };
-
-    // type ProvideParams = {
-    //   caller: SignerWithAddress;
-    //   amount: string | BigNumberish;
-    // };
-    // const provide = async ({
-    //   caller = bob,
-    //   amount = BigInt(0),
-    // }: Partial<ProvideParams> = {}) => {
-    //   await baseFeeLMAToken.approve(await stabilityPool.getAddress(), amount);
-
-    //   await stabilityPool.connect(caller).provideToSP(amount);
-    // };
-
-    type AdjustTroveParams = {
-      caller: SignerWithAddress;
-      amount: string | BigNumberish;
-      maxFeePercentage: string | BigNumberish;
-      upperHint: string;
-      lowerHint: string;
-    };
-
-    const increaseDebt = async ({
-      caller = bob,
-      amount = 0,
-      maxFeePercentage = ethers.parseEther("1"),
-    }: Partial<AdjustTroveParams> = {}) => {
-      await borrowerOperations
-        .connect(caller)
-        .adjustTrove(
-          maxFeePercentage,
-          0,
-          0,
-          amount,
-          true,
-          ethers.ZeroAddress,
-          ethers.ZeroAddress
-        );
-    };
-
-    const increaseColl = async ({
-      caller = bob,
-      amount = 0,
-    }: Partial<AdjustTroveParams> = {}) => {
-      await payToken
-        .connect(caller)
-        .approve(await borrowerOperations.getAddress(), amount);
-      await borrowerOperations
-        .connect(caller)
-        .addColl(ethers.ZeroAddress, ethers.ZeroAddress, amount);
-    };
-
-    const setNewBaseFeePrice = async (_amount: number) => {
-      const amount = ethers.parseUnits(_amount.toString(), "gwei");
-      const block = await latestBlock();
-      await mainOracle.feedBaseFeeValue(amount, block);
-      await secondaryOracle.feedBaseFeeValue(amount, block);
-      await priceFeed.fetchPrice();
-    };
-
-    const checkCollDebtCorrectness = async (
-      expectedColl: bigint,
-      expectedDebt: bigint
-    ) => {
-      const coll = await troveManager.getEntireSystemColl();
-      const debt = await troveManager.getEntireSystemDebt();
-
-      expect(coll).to.be.equal(expectedColl);
-      expect(debt).to.be.equal(expectedDebt);
-    };
 
     it("should not let open trove if CR is below minimum", async () => {
       await priceFeed.setLastGoodPrice(gasPrice010);
 
       await expect(
-        openTrove({
+        openTroveToBorrowerOperations({
           caller: alice,
           baseFeeLMAAmount: AliceTroveDebt * BigInt(10),
           collAmount: AliceTroveColl,
@@ -344,7 +221,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await priceFeed.setLastGoodPrice(gasPrice010);
 
       await expect(
-        openTrove({
+        openTroveToBorrowerOperations({
           caller: alice,
           baseFeeLMAAmount: AliceTroveDebtWithError,
           collAmount: AliceTroveColl,
@@ -364,26 +241,30 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should let open trove to Alice with correct params", async () => {
-      await openTrove({
-        caller: alice,
-        baseFeeLMAAmount: AliceTroveDebt,
-        collAmount: AliceTroveColl,
-      });
+      await expect(
+        openTroveToBorrowerOperations({
+          caller: alice,
+          baseFeeLMAAmount: AliceTroveDebt,
+          collAmount: AliceTroveColl,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should have a correct entire system debt", async () => {
-      await checkCollDebtCorrectness(
-        totalCollateralAliceOpening,
-        totalDebtAliceOpening
-      );
+      await checkCollDebtCorrectness({
+        expectedColl: totalCollateralAliceOpening,
+        expectedDebt: totalDebtAliceOpening,
+      });
     });
 
     it("should calculate and return correct CR for alice's position", async () => {
-      expect(await getCR({ owner: alice })).to.be.equal(AliceInitialCR);
+      expect(await unreliableTroveCR({ owner: alice })).to.be.equal(
+        AliceInitialCR
+      );
     });
 
     it("should have a correct amount of collateral and debt in position record (alice position)", async () => {
-      const { debt, coll } = await getTrove(alice);
+      const { debt, coll } = await entireCollAndDebt({ owner: alice });
 
       expect(debt).to.be.equal(AliceTroveDebt + gasCompensationReserve);
       expect(coll).to.be.equal(AliceTroveColl);
@@ -400,12 +281,12 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should let alice stake into stability pool", async () => {
-      await provideToStabilityPool({
-        caller: alice,
-        amount: AliceBFEBalanceAtOpening,
-      });
-      // await expect(provide({ caller: alice, amount: AliceBFEBalanceAtOpening }))
-      //   .not.to.be.reverted;
+      await expect(
+        provideToStabilityPool({
+          caller: alice,
+          amount: AliceBFEBalanceAtOpening,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should have correct total supply before bob opens position", async () => {
@@ -417,26 +298,28 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     it("should let another user(bob) open a position", async () => {
       await increase(15);
 
-      await openTrove({
-        caller: bob,
-        baseFeeLMAAmount: BobTroveDebt,
-        collAmount: BobTroveColl,
-      });
+      await expect(
+        openTroveToBorrowerOperations({
+          caller: bob,
+          baseFeeLMAAmount: BobTroveDebt,
+          collAmount: BobTroveColl,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should have a correct CR in a new position (bob position)", async () => {
-      expect(await getCR({ owner: bob })).to.be.equal(BobInitialCR);
+      expect(await unreliableTroveCR({ owner: bob })).to.be.equal(BobInitialCR);
     });
 
     it("should have a correct entire system debt (after bob opens position)", async () => {
-      await checkCollDebtCorrectness(
-        totalCollateralBobOpening,
-        totalDebtBobOpening
-      );
+      await checkCollDebtCorrectness({
+        expectedColl: totalCollateralBobOpening,
+        expectedDebt: totalDebtBobOpening,
+      });
     });
 
     it("should have a correct amount of collateral and debt in position record (bob position)", async () => {
-      const { debt, coll } = await getTrove(bob);
+      const { debt, coll } = await entireCollAndDebt({ owner: bob });
 
       expect(debt).to.be.equal(BobTroveDebt + gasCompensationReserve);
       expect(coll).to.be.equal(BobTroveColl);
@@ -457,12 +340,17 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should have a correct CR in a new position (bob position)", async () => {
-      expect(await getCR()).to.be.equal(BobInitialCR);
+      expect(await unreliableTroveCR({ owner: bob })).to.be.equal(BobInitialCR);
     });
 
     it("should let stake BFE to staking", async () => {
       // Provide 100%
-      // await provide({ amount: BobActualBFEBalanceAtOpening });
+      await expect(
+        provideToStabilityPool({
+          caller: bob,
+          amount: BobActualBFEBalanceAtOpening,
+        })
+      ).not.to.be.reverted;
     });
 
     it("shouldn't have the system in the recovery mode", async () => {
@@ -496,26 +384,29 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     it("should let adjust the position (alice position)", async () => {
       await increase(2000);
       await expect(
-        increaseDebt({ caller: alice, amount: AliceTroveIncreaseDebt })
+        troveDebtIncrease({
+          caller: alice,
+          amount: AliceTroveIncreaseDebt,
+        })
       ).not.to.be.reverted;
     });
 
     it("should have a correct entire system debt (after alice decreases coll in her position)", async () => {
-      await checkCollDebtCorrectness(
-        totalCollAliceIncrease,
-        totalDebtAliceIncrease
-      );
+      await checkCollDebtCorrectness({
+        expectedColl: totalCollAliceIncrease,
+        expectedDebt: totalDebtAliceIncrease,
+      });
     });
 
     it("should result into a correct debt and collateral in a position after decrease", async () => {
-      const { debt, coll } = await getTrove(alice);
+      const { debt, coll } = await entireCollAndDebt({ owner: alice });
 
       expect(debt).to.be.equal(AliceDebtAfterFirstIncrease);
       expect(coll).to.be.equal(AliceCollAfterFirstIncrease);
     });
 
     it("should result into a correct CR in a alice position", async () => {
-      const cr = await getCR({ owner: alice });
+      const cr = await unreliableTroveCR({ owner: alice });
       expect(cr).to.be.equal(AliceCRAfterFirstIncrease);
     });
 
@@ -528,27 +419,30 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     it("should let open another position in the system (carol position)", async () => {
       await increase(17970);
 
-      // TODO: check with expect
-      await openTrove({
-        caller: carol,
-        collAmount: CarolTroveColl,
-        baseFeeLMAAmount: CarolTroveDebt,
-      });
+      await expect(
+        openTroveToBorrowerOperations({
+          caller: carol,
+          collAmount: CarolTroveColl,
+          baseFeeLMAAmount: CarolTroveDebt,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should result into a correct CR in a position(carol position)", async () => {
-      expect(await getCR({ owner: carol })).to.be.equal(CarolInitialCR);
-    });
-
-    it("should have a correct entire system debt (after alice decreases coll in her position)", async () => {
-      await checkCollDebtCorrectness(
-        totalCollCarolOpening,
-        totalDebtCarolOpening
+      expect(await unreliableTroveCR({ owner: carol })).to.be.equal(
+        CarolInitialCR
       );
     });
 
+    it("should have a correct entire system debt (after alice decreases coll in her position)", async () => {
+      await checkCollDebtCorrectness({
+        expectedColl: totalCollCarolOpening,
+        expectedDebt: totalDebtCarolOpening,
+      });
+    });
+
     it("should have a correct amount of collateral and debt in position record (carol position)", async () => {
-      const { debt, coll } = await getTrove(carol);
+      const { debt, coll } = await entireCollAndDebt({ owner: carol });
 
       expect(debt).to.be.equal(CarolTroveDebt + gasCompensationReserve);
       expect(coll).to.be.equal(CarolTroveColl);
@@ -561,7 +455,10 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should let another user provide to stability pool (carol)", async () => {
-      // await provide({ caller: carol, amount: CarolBFEBalanceAtOpening });
+      await provideToStabilityPool({
+        caller: carol,
+        amount: CarolBFEBalanceAtOpening,
+      });
       const deposit = await stabilityPool.getCompoundedBaseFeeLMADeposit(
         carol.address
       );
@@ -620,21 +517,21 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should have a correct entire system debt (after bob redeems coll)", async () => {
-      await checkCollDebtCorrectness(
-        totalCollBobFirstRedemption,
-        totalDebtBobFirstRedemption
-      );
+      await checkCollDebtCorrectness({
+        expectedColl: totalCollBobFirstRedemption,
+        expectedDebt: totalDebtBobFirstRedemption,
+      });
     });
 
     it("should result into correct debt and coll in a redeemed position", async () => {
-      const { debt, coll } = await getTrove(alice);
+      const { debt, coll } = await entireCollAndDebt({ owner: alice });
 
       expect(debt).to.be.equal(AliceTroveDebtAfterBobRedemption);
       expect(coll).to.be.equal(AliceTroveCollAfterBobRedemption);
     });
 
     it("should result into a correct CR in alices position", async () => {
-      expect(await getCR({ owner: alice })).to.be.equal(
+      expect(await unreliableTroveCR({ owner: alice })).to.be.equal(
         AliceCRAfterBobRedemption
       );
     });
@@ -649,36 +546,41 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await setNewBaseFeePrice(56);
       await setNewBaseFeePrice(60);
       await increase(80);
-      await increaseColl({ amount: BobTroveIncreaseCollFirst });
+      await expect(troveCollIncrease({ amount: BobTroveIncreaseCollFirst })).not
+        .to.be.reverted;
     });
 
     it("should have a correct entire system debt (after bob increases coll)", async () => {
-      await checkCollDebtCorrectness(
-        totalCollBobIncrease,
-        totalDebtBobIncrease
-      );
+      await checkCollDebtCorrectness({
+        expectedColl: totalCollBobIncrease,
+        expectedDebt: totalDebtBobIncrease,
+      });
     });
 
     it("should have a correct amount of collateral and debt in position record (bob position)", async () => {
-      const { debt, coll } = await getTrove(bob);
+      const { debt, coll } = await entireCollAndDebt({ owner: bob });
 
       expect(debt).to.be.equal(BobTroveDebtAfterIncrease);
       expect(coll).to.be.equal(BobTroveCollAfterIncrease);
     });
 
     it("should have a correct CR after coll increase in position (bob position)", async () => {
-      expect(await getCR()).to.be.equal(BobCRAfterIncrease);
-    });
-
-    it("should have a correct entire system debt (just before carol liquidates alice)", async () => {
-      await checkCollDebtCorrectness(
-        totalCollJustBeforeAliceLiquidated,
-        totalDebtJustBeforeAliceLiquidated
+      expect(await unreliableTroveCR({ owner: bob })).to.be.equal(
+        BobCRAfterIncrease
       );
     });
 
+    it("should have a correct entire system debt (just before carol liquidates alice)", async () => {
+      await checkCollDebtCorrectness({
+        expectedColl: totalCollJustBeforeAliceLiquidated,
+        expectedDebt: totalDebtJustBeforeAliceLiquidated,
+      });
+    });
+
     it("should let liquidate troves with CR below minimal", async () => {
-      expect(await getCR({ owner: alice })).to.be.equal(AliceCRAtLiquidation);
+      expect(await unreliableTroveCR({ owner: alice })).to.be.equal(
+        AliceCRAtLiquidation
+      );
       expect(await troveManager.MCR()).to.be.greaterThan(AliceCRAtLiquidation);
 
       const balanceETHBefore = await payToken.balanceOf(carol.address);
@@ -710,7 +612,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should be no position after liquidation", async () => {
-      const { debt, coll } = await getTrove(alice);
+      const { debt, coll } = await entireCollAndDebt({ owner: alice });
 
       expect(debt).to.be.equal(0);
       expect(coll).to.be.equal(0);
@@ -723,27 +625,31 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should calculate debt and collateral of other users after liquidation (bob position)", async () => {
-      const { debt, coll } = await getTrove(bob);
+      const { debt, coll } = await entireCollAndDebt({ owner: bob });
 
       expect(debt).to.be.equal(BobTroveDebtAfterLiquid);
       expect(coll).to.be.equal(BobTroveCollAfterLiquid);
     });
 
     it("should calculate cr of other positions correclty after liquidation (bob position)", async () => {
-      expect(await getCR({ owner: bob })).to.be.equal(BobCRAfterLiquid);
+      expect(await unreliableTroveCR({ owner: bob })).to.be.equal(
+        BobCRAfterLiquid
+      );
     });
 
     it("should have correct trove params in carol trove as well (CR)", async () => {
-      expect(await getCR({ owner: carol })).to.be.equal(CarolCRAfterLiquid);
+      expect(await unreliableTroveCR({ owner: carol })).to.be.equal(
+        CarolCRAfterLiquid
+      );
     });
 
     it("should have correct trove params in carol trove as well (coll) ", async () => {
-      const { coll } = await getTrove(carol);
+      const { coll } = await entireCollAndDebt({ owner: carol });
       expect(coll).to.be.equal(CarolTroveCollAfterLiquid);
     });
 
     it("should have correct trove params in carol trove as well (debt) ", async () => {
-      const { debt } = await getTrove(carol);
+      const { debt } = await entireCollAndDebt({ owner: carol });
       expect(debt).to.be.equal(CarolTroveDebtAfterLiquid);
     });
 
@@ -777,7 +683,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should result into correct debt and collateral in a redeemed position", async () => {
-      const { debt, coll } = await getTrove(bob);
+      const { debt, coll } = await entireCollAndDebt({ owner: bob });
 
       expect(debt).to.be.equal(BobTroveDebtAfterRedemption);
       expect(coll).to.be.equal(BobTroveCollAfterRedemption);
@@ -793,18 +699,22 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     it("should allow increasing debt in the position (bob position)", async () => {
       await increase(14250);
-      await increaseDebt({ caller: bob, amount: BobTroveIncreaseDebtSecond });
-      // await expect(
-
-      // ).not.to.be.reverted;
+      await expect(
+        troveDebtIncrease({
+          caller: bob,
+          amount: BobTroveIncreaseDebtSecond,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should calculate bobs CR correctly after the second increase", async () => {
-      expect(BobCRAfterSecondIncrease).to.be.equal(await getCR({ owner: bob }));
+      expect(BobCRAfterSecondIncrease).to.be.equal(
+        await unreliableTroveCR({ owner: bob })
+      );
     });
 
     it("should calculate debt and collateral after position debt increase (bob position)", async () => {
-      const { debt, coll } = await getTrove(bob);
+      const { debt, coll } = await entireCollAndDebt({ owner: bob });
 
       expect(debt).to.be.equal(BobTroveDebtAfterSecondIncrease);
       expect(coll).to.be.equal(BobTroveCollAfterSecondIncrease);
@@ -853,12 +763,18 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should let provide to stability pool in recovery mode", async () => {
-      // await expect(provide({ caller: carol, amount: "100000" })).to.not.be
-      //   .reverted;
+      await expect(
+        provideToStabilityPool({
+          caller: carol,
+          amount: "100000",
+        })
+      ).not.to.be.reverted;
     });
 
     it("should let alice liquidate bob", async () => {
-      expect(await getCR({ owner: bob })).to.be.equal(BobCRAtLiquidation);
+      expect(await unreliableTroveCR({ owner: bob })).to.be.equal(
+        BobCRAtLiquidation
+      );
       expect(await troveManager.MCR()).to.be.greaterThan(BobCRAtLiquidation);
 
       const balanceETHBefore = await payToken.balanceOf(carol.address);
@@ -876,28 +792,29 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     it("should let carol completely repay and close her debt correctly", async () => {
       const collBalanceBefore = await payToken.balanceOf(carol.address);
       await increase(10000);
-      await openTrove({
+      await openTroveToBorrowerOperations({
         caller: bob,
         collAmount: await payToken.balanceOf(bob),
-        baseFeeLMAAmount: (await getTrove(carol)).debt / BigInt(4),
+        baseFeeLMAAmount:
+          (await entireCollAndDebt({ owner: carol })).debt / BigInt(4),
       });
       await increase(20000);
 
-      await increaseDebt({
+      await troveDebtIncrease({
         caller: bob,
-        amount: (await getTrove(carol)).debt / BigInt(2),
+        amount: (await entireCollAndDebt({ owner: carol })).debt / BigInt(2),
       });
 
       await increase(40000);
 
-      await increaseDebt({
+      await troveDebtIncrease({
         caller: bob,
-        amount: (await getTrove(carol)).debt / BigInt(2),
+        amount: (await entireCollAndDebt({ owner: carol })).debt / BigInt(2),
       });
       await increase(40000);
-      await increaseDebt({
+      await troveDebtIncrease({
         caller: bob,
-        amount: (await getTrove(carol)).debt / BigInt(2),
+        amount: (await entireCollAndDebt({ owner: carol })).debt / BigInt(2),
       });
       await baseFeeLMAToken
         .connect(alice)

@@ -9,18 +9,7 @@ export type ProvideParams = {
   amount: BigNumberish;
 };
 
-const a = () => {
-  const c = 0;
-
-  return { c };
-};
-
-const b = () => {
-  const c = 1;
-  return { c };
-};
-
-const getDefaultSigners = async () => {
+export const getDefaultSigners = async () => {
   ["", ""];
   const signers = await getSigners({
     fork: false,
@@ -30,9 +19,6 @@ const getDefaultSigners = async () => {
 
   return { signers, deployer, hacker, bla, alice, bob };
 };
-
-{
-}
 
 export type ProvideToStabilityPool =
   ({}: Partial<ProvideParams>) => Promise<void>;
@@ -50,8 +36,6 @@ export const getStabilityPoolMethods = async ({
     caller = bob,
     amount = ethers.parseEther("0"),
   }: Partial<ProvideParams> = {}) => {
-    console.log("balance caller", await baseFeeLMAToken.balanceOf(caller));
-    console.log("amount", amount);
     await baseFeeLMAToken.connect(caller).approve(stabilityPool.target, amount);
     await stabilityPool.connect(caller).provideToSP(amount);
   };
