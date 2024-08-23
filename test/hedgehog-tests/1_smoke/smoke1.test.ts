@@ -22,7 +22,10 @@ import {
   TroveManager,
 } from "../../../typechain-types/contracts";
 import { getSigners, setupContracts } from "../../utils";
-import { correct } from "../../utils/correct";
+import {
+  ProvideToStabilityPool,
+  getStabilityPoolMethods,
+} from "../../utils/shared";
 
 const { latestBlock, increase, advanceBlock } = time;
 
@@ -62,6 +65,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     let hogToken: HOGToken;
     let payToken: TERC20;
     let mainOracle: BaseFeeOracle, secondaryOracle: BaseFeeOracle;
+
+    let provideToStabilityPool: ProvideToStabilityPool;
 
     const gasCompensationReserve = BigInt("100000000000000000000000");
     const gasPrice010 = "30000000000";
@@ -169,6 +174,11 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         mainOracle,
         secondaryOracle,
       ] = await setupContracts();
+
+      const { provideToStabilityPool: provideToStabilityPoolInit } =
+        await getStabilityPoolMethods({ baseFeeLMAToken, stabilityPool });
+
+      provideToStabilityPool = provideToStabilityPoolInit;
     });
 
     type OpenTroveParams = {
@@ -364,11 +374,10 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should let alice stake into stability pool", async () => {
-      const { approve, provide } = await correct(baseFeeLMAToken);
-
-      await approve({ caller: alice, amount: AliceBFEBalanceAtOpening });
-
-      await provide({ caller: alice, amount: AliceBFEBalanceAtOpening });
+      await provideToStabilityPool({
+        caller: alice,
+        amount: AliceBFEBalanceAtOpening,
+      });
       // await expect(provide({ caller: alice, amount: AliceBFEBalanceAtOpening }))
       //   .not.to.be.reverted;
     });
