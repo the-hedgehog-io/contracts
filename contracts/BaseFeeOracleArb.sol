@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "./interfaces/IBaseFeeOracle.sol";
 
 interface ArbSys {
     function arbBlockNumber() external view returns (uint256);
@@ -9,7 +10,7 @@ interface ArbSys {
 
 error OutdatedRequest();
 
-contract BaseFeeOracleArb is AccessControl {
+contract BaseFeeOracleArb is AccessControl, IBaseFeeOracle {
     struct Response {
         int256 answer;
         uint256 blockNumber;
@@ -23,7 +24,8 @@ contract BaseFeeOracleArb is AccessControl {
     bytes32 internal constant SETTER = keccak256("SETTER");
     bytes32 internal constant ULTIMATE_ADMIN = keccak256("ULTIMATE_ADMIN");
 
-    uint256 public constant decimals = 18;
+    uint8 public constant decimals = 18;
+    uint256 public constant version = 1;
 
     event BaseFeeSet(int256 newValue, uint256 roundId, uint256 blockNumber);
 

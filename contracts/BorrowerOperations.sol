@@ -531,7 +531,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
          * HEDGEHOG UPDATES: Perform withdrawl limit check if adjustTrove intent is coll withdraw
          */
         if (_collWithdrawal > 0) {
-            _handleWithdrawlLimit(_collWithdrawal);
+            // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
+            _handleWithdrawlLimit(_collWithdrawal, true);
         }
 
         vars.netDebtChange = _BaseFeeLMAChange;
@@ -813,7 +814,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         WStETHToken.safeTransferFrom(msg.sender, address(_activePool), _amount);
         activePool.increaseBalance(_amount);
-
+        // Update withdrawal Limit from collateral addition.
         _updateWithdrawlLimitFromCollIncrease(oldColl, _amount);
     }
 
@@ -859,6 +860,13 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         require(
             msg.sender == _borrower,
             "BorrowerOps: Caller must be the borrower for a withdrawal"
+        );
+    }
+
+    function _requireCallerIsTroveManager() internal view {
+        require(
+            msg.sender == address(troveManager),
+            "BorrowerOps: Caller must be the TroveManager"
         );
     }
 
@@ -1175,7 +1183,10 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * 2) The system subtracts the withdrawn amount from the current withdrawal limit to determine the new limit. This new limit will be considered as the old limit for the next withdrawal.
      * 3) The system records the time of the withdrawal and starts a new 12-hour countdown for the dynamic adjustment of the withdrawal limit.
      */
-    function _handleWithdrawlLimit(uint256 _collWithdrawal) internal {
+    function _handleWithdrawlLimit(
+        uint256 _collWithdrawal,
+        bool _withSingleTxLimit
+    ) internal {
         // If coll in the system is greater then threshold - we check if user may withdraw the desired amount. Otherwise they are free to withdraw whole amount
         if (activePool.getWStETH() > WITHDRAWL_LIMIT_THRESHOLD) {
             (uint256 fullLimit, uint256 singleTxWithdrawable) = LiquityMath
@@ -1186,7 +1197,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
                     activePool.getWStETH()
                 );
 
-            if (singleTxWithdrawable < _collWithdrawal) {
+            if (_withSingleTxLimit && singleTxWithdrawable < _collWithdrawal) {
                 revert(
                     "BO: Cannot withdraw more then 80% of withdrawble in one tx"
                 );
@@ -1220,5 +1231,13 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         }
 
         unusedWithdrawlLimit = newLimit;
+    }
+
+    function handleWithdrawlLimit(
+        uint256 _collWithdrawal,
+        bool _withSingleTxLimit
+    ) external {
+        _requireCallerIsTroveManager();
+        _handleWithdrawlLimit(_collWithdrawal, _withSingleTxLimit);
     }
 }
