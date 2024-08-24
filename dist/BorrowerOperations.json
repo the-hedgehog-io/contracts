@@ -591,6 +591,11 @@
         "internalType": "uint256",
         "name": "_collWithdrawal",
         "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_withSingleTxLimit",
+        "type": "bool"
       }
     ],
     "name": "handleWithdrawlLimit",
