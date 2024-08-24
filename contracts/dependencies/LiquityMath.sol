@@ -168,7 +168,7 @@ library LiquityMath {
             ? DENOMINATOR
             : (minutesPassed * DENOMINATOR) / _expandDuration;
 
-        // We calculate 75% of the current total coll
+        // We calculate 50% of the current total coll
         uint256 totalCollBasedLimit = _currentTotalColl / 2;
 
         // Now we calculate an amount that can be added based on the newest coll value
