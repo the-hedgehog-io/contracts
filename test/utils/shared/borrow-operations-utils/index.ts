@@ -1,2 +1,2 @@
 export * from "./openTrove";
-export * from "./adjust-trove-params";
+export * from "./adjustTroveParams";

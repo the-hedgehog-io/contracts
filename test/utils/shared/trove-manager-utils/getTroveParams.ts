@@ -23,15 +23,13 @@ export const getCollRatioParams = async ({
 }) => {
   const { bob } = await getDefaultSigners();
 
-  const getUnreliableTroveCollateralRatio: CollateralRatioParams = async ({
+  const getCR: CollateralRatioParams = async ({
     owner = bob,
   }: Partial<GetCRParams> = {}) => {
     return await troveManager.getUnreliableTroveICR(owner.address);
   };
 
-  const getEntireCollAndDebt: GetEntireCollAndDebtParams = async ({
-    owner = bob,
-  }) => {
+  const getTrove: GetEntireCollAndDebtParams = async ({ owner = bob }) => {
     const { debt, coll, pendingBaseFeeLMADebtReward, pendingWStETHReward } =
       await troveManager.getEntireDebtAndColl(owner.address);
 
@@ -42,5 +40,5 @@ export const getCollRatioParams = async ({
       pendingWStETHReward,
     };
   };
-  return { getUnreliableTroveCollateralRatio, getEntireCollAndDebt };
+  return { getCR, getTrove };
 };

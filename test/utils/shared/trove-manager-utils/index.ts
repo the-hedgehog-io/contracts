@@ -1,2 +1,2 @@
-export * from "./get-trove-params";
+export * from "./getTroveParams";
 export * from "./checkCorrectness";
