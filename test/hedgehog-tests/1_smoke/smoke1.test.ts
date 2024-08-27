@@ -258,10 +258,12 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should have a correct entire system debt", async () => {
-      await checkCollDebtCorrectness({
-        expectedColl: totalCollateralAliceOpening,
-        expectedDebt: totalDebtAliceOpening,
-      });
+      await expect(
+        checkCollDebtCorrectness({
+          expectedColl: totalCollateralAliceOpening,
+          expectedDebt: totalDebtAliceOpening,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should calculate and return correct CR for alice's position", async () => {
@@ -317,10 +319,12 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should have a correct entire system debt (after bob opens position)", async () => {
-      await checkCollDebtCorrectness({
-        expectedColl: totalCollateralBobOpening,
-        expectedDebt: totalDebtBobOpening,
-      });
+      await expect(
+        checkCollDebtCorrectness({
+          expectedColl: totalCollateralBobOpening,
+          expectedDebt: totalDebtBobOpening,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should have a correct amount of collateral and debt in position record (bob position)", async () => {
@@ -397,10 +401,12 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should have a correct entire system debt (after alice decreases coll in her position)", async () => {
-      await checkCollDebtCorrectness({
-        expectedColl: totalCollAliceIncrease,
-        expectedDebt: totalDebtAliceIncrease,
-      });
+      await expect(
+        checkCollDebtCorrectness({
+          expectedColl: totalCollAliceIncrease,
+          expectedDebt: totalDebtAliceIncrease,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should result into a correct debt and collateral in a position after decrease", async () => {
@@ -438,10 +444,12 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should have a correct entire system debt (after alice decreases coll in her position)", async () => {
-      await checkCollDebtCorrectness({
-        expectedColl: totalCollCarolOpening,
-        expectedDebt: totalDebtCarolOpening,
-      });
+      await expect(
+        checkCollDebtCorrectness({
+          expectedColl: totalCollCarolOpening,
+          expectedDebt: totalDebtCarolOpening,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should have a correct amount of collateral and debt in position record (carol position)", async () => {
@@ -478,7 +486,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     it("should let withdraw provided funds", async () => {
       await increase(615);
-      await stabilityPool.connect(bob).withdrawFromSP(BobUnstakeFirst);
+      await expect(stabilityPool.connect(bob).withdrawFromSP(BobUnstakeFirst))
+        .not.to.be.reverted;
     });
 
     it("Withdrawn funds should result in a correct balance", async () => {
@@ -520,10 +529,12 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should have a correct entire system debt (after bob redeems coll)", async () => {
-      await checkCollDebtCorrectness({
-        expectedColl: totalCollBobFirstRedemption,
-        expectedDebt: totalDebtBobFirstRedemption,
-      });
+      await expect(
+        checkCollDebtCorrectness({
+          expectedColl: totalCollBobFirstRedemption,
+          expectedDebt: totalDebtBobFirstRedemption,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should result into correct debt and coll in a redeemed position", async () => {
@@ -554,10 +565,12 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should have a correct entire system debt (after bob increases coll)", async () => {
-      await checkCollDebtCorrectness({
-        expectedColl: totalCollBobIncrease,
-        expectedDebt: totalDebtBobIncrease,
-      });
+      await expect(
+        checkCollDebtCorrectness({
+          expectedColl: totalCollBobIncrease,
+          expectedDebt: totalDebtBobIncrease,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should have a correct amount of collateral and debt in position record (bob position)", async () => {
@@ -572,10 +585,12 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should have a correct entire system debt (just before carol liquidates alice)", async () => {
-      await checkCollDebtCorrectness({
-        expectedColl: totalCollJustBeforeAliceLiquidated,
-        expectedDebt: totalDebtJustBeforeAliceLiquidated,
-      });
+      await expect(
+        checkCollDebtCorrectness({
+          expectedColl: totalCollJustBeforeAliceLiquidated,
+          expectedDebt: totalDebtJustBeforeAliceLiquidated,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should let liquidate troves with CR below minimal", async () => {
@@ -747,9 +762,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
       const fee = BigInt("22000000000");
 
-      // expect(carolBFEBalanceBefore + CarolIncreaseDebt - fee).to.be.equal(
-      //   await baseFeeLMAToken.balanceOf(carol.address)
-      // );
       expect(CarolIncreaseColl).to.be.equal(
         carolCollBalanceBefore - (await payToken.balanceOf(carol.address))
       );
@@ -823,15 +835,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     // TODO: Get into a separate file
 
     it("should not mark oracles as broken if price was increased by more then 12.5%", async () => {
-      const amount = ethers.parseUnits("100000", "gwei");
-      const block = await latestBlock();
-      await mainOracle.feedBaseFeeValue(amount, block);
-      await priceFeed.fetchPrice();
-      expect(await priceFeed.status()).to.be.equal(1);
-      await secondaryOracle.feedBaseFeeValue(
-        ethers.parseUnits("100000", "gwei"),
-        block
-      );
+      await setNewBaseFeePrice(100000);
+
       await priceFeed.fetchPrice();
       expect(await priceFeed.status()).to.be.equal(0);
     });
