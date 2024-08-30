@@ -8,6 +8,7 @@ export type AdjustTroveParams = {
   caller: SignerWithAddress;
   amount: string | BigNumberish;
   maxFeePercentage: BigNumberish;
+  collIncrease?: string | BigNumberish;
   upperHint: string;
   lowerHint: string;
 };
@@ -27,13 +28,17 @@ export const getAdjustTroveParams = async ({
     caller = bob,
     amount = 0,
     maxFeePercentage = ethers.parseEther("1"),
+    collIncrease = 0,
   }: Partial<AdjustTroveParams> = {}) => {
+    await payToken
+      .connect(caller)
+      .approve(await borrowerOperations.getAddress(), collIncrease);
     await borrowerOperations
       .connect(caller)
       .adjustTrove(
         maxFeePercentage,
         0,
-        0,
+        collIncrease,
         amount,
         true,
         ethers.ZeroAddress,
@@ -53,5 +58,23 @@ export const getAdjustTroveParams = async ({
       .addColl(ethers.ZeroAddress, ethers.ZeroAddress, amount);
   };
 
-  return { troveDebtIncrease, troveCollIncrease };
+  const decreaseDebt: AdjustTroveParamsToBorrowerOperations = async ({
+    caller = bob,
+    amount = 0,
+    maxFeePercentage = ethers.parseEther("1"),
+  }: Partial<AdjustTroveParams> = {}) => {
+    await borrowerOperations
+      .connect(caller)
+      .adjustTrove(
+        maxFeePercentage,
+        0,
+        0,
+        amount,
+        false,
+        ethers.ZeroAddress,
+        ethers.ZeroAddress
+      );
+  };
+
+  return { troveDebtIncrease, troveCollIncrease, decreaseDebt };
 };

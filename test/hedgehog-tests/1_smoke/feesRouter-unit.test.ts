@@ -52,14 +52,8 @@ export type FixedSizeArray<T, N extends number> = N extends 0
   ? []
   : MapItemType<GrowExp<[0], N, []>, T>;
 
-type ReceiverConfig = {
-  addressA: string;
-  addressB: string;
-  addressC: string;
-};
-
 describe("Hedgehog Core Contracts Smoke tests", async () => {
-  context("Fees Router Unis Tests", async () => {
+  context("Fees Router Unit Tests", async () => {
     let deployer: SignerWithAddress,
       alice: SignerWithAddress,
       bob: SignerWithAddress,
@@ -71,26 +65,6 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
     let debtToken: TERC20;
     let collToken: TERC20;
     let activePoolTestSetter: ActivePoolTestSetter;
-
-    /**
-     * Write complete documentation on how ALL functions work
-     * Fees Router contract intends to route fees according to TxDebt / Fee ratio. Fee Router has a config for each 5% range: 0-5, 5-10 and so on. Config stores routes that lead certain percentage of FEE to a consecutive address.
-     * Example: Config has a setup to transfer 90% of Fees to Alice and 10% to transfer to bob. If incoming TxDebt is 1000 and fee is 10 - then it is expect that alice receives 9 and bob receives 1 of the token (might be collateral, might be debt depending on the route)
-     *
-     * SOLIDITY:
-     * 1) FIX THE SOLIDITY FORMULA IN CONTRACT THAT LEADS TO INCORRECT OUTCOME YOURSELF
-
-     * 2) WRITE A REVERTING CHECK, THAT WOULD REVERT WHOLE TX IF THERE IS A CONFIG MISSING FOR A CERTAIN RANGE (if range mapping returns address 0 - revert  )
-     * How to fix 5.31?
-     *
-     * 0) Write a typescript Debt & Fee routings. They must be each unique for each range from 0 to 100 (step is 5).
-     * 1) Write a function that conveniently sets up range configs for both Debt & Coll function
-     * 1) Set up configs for each range from 0 to 100 (step is 5).
-     * 2) Write a function that conveniently triggers fees for the given range and performs expects with comparing that balances received correct amounts according to their config. Check config programmatically
-     * 3) Trigger all fees for al set ranges. Trigger 2 sets of each debt & coll of fees manually just to be sure
-     * 4) Reach 100% coverage in the whole test. Write meaningful tests that would fail correctly for each revert functions
-     *
-     */
 
     type AmountConfigs = FixedSizeArray<SingleAmountConfig, 21>;
     const collAmountConfigs: AmountConfigs = [
@@ -236,9 +210,9 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
           config.amountB,
           config.amountC
         );
-        // expect(config.amountA).to.be.equal(
-        //   (await feesRouter.debtFeeConfigs(config.percentage)).amountA
-        // );
+        expect(config.amountA).to.be.equal(
+          (await feesRouter.debtFeeConfigs(config.percentage)).amountA
+        );
       }
     });
 
@@ -262,7 +236,7 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
     it("should allow to distribute fees to BO addressed account case: 5%", async () => {
       const DEBT = 100000;
       const FEE = 5000;
-      const [first, second] = collAmountConfigs;
+      const [, second] = collAmountConfigs;
       const checkingBalance = await triggerConfig(DEBT, FEE);
       expect(checkingBalance).to.not.be.reverted;
 
@@ -273,7 +247,7 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
     it("should allow the 1% and 2% debts and fees to be allocated to the 5% configuration correctly", async () => {
       const DEBT = 100000;
       const FEE = 2000;
-      const [first, second] = collAmountConfigs;
+      const [, second] = collAmountConfigs;
       const balanceAliceBefore = await collToken.balanceOf(alice.address);
 
       const configuration = await triggerConfig(DEBT, FEE);
@@ -293,7 +267,6 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
 
       const DEBT = 100000;
       const FEE = 34000;
-      const [first, second] = collAmountConfigs;
       const checkDebt = await triggerDebtConfig(DEBT, FEE);
 
       expect(checkDebt.balanceBob - balanceBobBefore).to.be.equal(
@@ -302,9 +275,68 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
     });
 
     it("Check: sanity check", async () => {
+      await expect(feesRouter.connect(alice).distributeDebtFee(100000, 34000))
+        .to.be.reverted;
+    });
+
+    it("should reject a call to setAddresses by a non-owner", async () => {
       await expect(
-        feesRouter.connect(borrowersOp).distributeDebtFee(100000, 34000)
+        feesRouter
+          .connect(alice)
+          .setAddresses(
+            activePool.target,
+            debtToken.target,
+            feesRouterTester.target,
+            activePoolTestSetter.target
+          )
       ).to.be.reverted;
+    });
+    it("should reject a call to setConfigs by a non-owner", async () => {
+      await expect(
+        feesRouter
+          .connect(alice)
+          .setFeeConfigs(
+            ethers.parseEther("95"),
+            ethers.parseEther("70"),
+            ethers.parseEther("20"),
+            ethers.parseEther("10"),
+            alice.address,
+            bob.address,
+            carol.address
+          )
+      ).to.be.reverted;
+
+      await expect(
+        feesRouter
+          .connect(alice)
+          .setCollFeeConfig(
+            ethers.parseEther("95"),
+            ethers.parseEther("70"),
+            ethers.parseEther("20"),
+            ethers.parseEther("10"),
+            alice.address,
+            bob.address,
+            carol.address
+          )
+      ).to.be.reverted;
+
+      await expect(
+        feesRouter
+          .connect(alice)
+          .setDebtFeeConfig(
+            ethers.parseEther("95"),
+            ethers.parseEther("70"),
+            ethers.parseEther("20"),
+            ethers.parseEther("10"),
+            alice.address,
+            bob.address,
+            carol.address
+          )
+      ).to.be.reverted;
+    });
+
+    it("should reject a call to setConfigs by a non-owner", async () => {
+      await expect(feesRouter.distributeDebtFee(100000, 34000));
     });
   });
 });

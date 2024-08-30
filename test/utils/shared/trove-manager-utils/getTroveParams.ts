@@ -1,9 +1,13 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { TroveManager } from "../../../../typechain-types";
 import { getDefaultSigners } from "../stability-pool-utils";
+import { expect } from "chai";
+import { ethers } from "hardhat";
 
 export type GetCRParams = {
   owner: SignerWithAddress;
+  expectedColl: bigint | string;
+  expectedDebt: bigint | string;
 };
 
 export type CollateralRatioParams =
@@ -29,10 +33,22 @@ export const getCollRatioParams = async ({
     return await troveManager.getUnreliableTroveICR(owner.address);
   };
 
+  const getTroveAndCheck = async ({
+    owner = bob,
+    expectedColl = ethers.parseEther("0"),
+    expectedDebt = ethers.parseEther("0"),
+  }) => {
+    const { debt, coll } = await troveManager.getEntireDebtAndColl(
+      owner.address
+    );
+
+    expect(debt).to.be.equal(expectedDebt);
+    expect(coll).to.be.equal(expectedColl);
+  };
+
   const getTrove: GetEntireCollAndDebtParams = async ({ owner = bob }) => {
     const { debt, coll, pendingBaseFeeLMADebtReward, pendingWStETHReward } =
       await troveManager.getEntireDebtAndColl(owner.address);
-
     return {
       debt,
       coll,
@@ -40,5 +56,5 @@ export const getCollRatioParams = async ({
       pendingWStETHReward,
     };
   };
-  return { getCR, getTrove };
+  return { getCR, getTroveAndCheck, getTrove };
 };

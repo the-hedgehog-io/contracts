@@ -3,6 +3,7 @@ import { mine, time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { TERC20, TestPriceFeed } from "../../../typechain-types";
+import { ABCConfig } from "./config";
 import {
   BaseFeeLMAToken,
   BaseFeeOracle,
@@ -25,6 +26,9 @@ import {
   checkCorrectness,
   validateCollDebtMatch,
   setNewParamsToBaseFee,
+  redeemCollateral,
+  RedeemAllCollateral,
+  RedeemCollateral,
 } from "../../utils/shared";
 
 const { latestBlock, increase } = time;
@@ -49,7 +53,17 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     let troveDebtIncrease: AdjustTroveParamsToBorrowerOperations;
     let troveCollIncrease: AdjustTroveParamsToBorrowerOperations;
     let getCR: CollateralRatioParams;
+    let getTroveAndCheck: ({
+      owner,
+      expectedColl,
+      expectedDebt,
+    }: {
+      owner?: SignerWithAddress | undefined;
+      expectedColl?: bigint | undefined;
+      expectedDebt?: bigint | undefined;
+    }) => Promise<void>;
     let getTrove: GetEntireCollAndDebtParams;
+
     let setNewBaseFeePrice: (_amount: number) => Promise<void>;
     let compareWithFault: (
       arg1: bigint | number,
@@ -63,6 +77,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       expectedColl: bigint;
       expectedDebt: bigint;
     }) => Promise<void>;
+    let redeemAllCollateral: RedeemCollateral;
 
     const gasCompensationReserve = BigInt("100000000000000000000000");
     const gasPrice010 = "30000000000";
@@ -191,10 +206,14 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       troveDebtIncrease = troveDebtIncreaseInit;
       troveCollIncrease = troveCollIncreaseInit;
 
-      const { getCR: getCRInit, getTrove: getTroveInit } =
-        await getCollRatioParams({ troveManager });
+      const {
+        getCR: getCRInit,
+        getTroveAndCheck: getTroveAndCheckInit,
+        getTrove: getTroveInit,
+      } = await getCollRatioParams({ troveManager });
 
       getCR = getCRInit;
+      getTroveAndCheck = getTroveAndCheckInit;
       getTrove = getTroveInit;
 
       const { checkCollDebtCorrectness: checkCollDebtCorrectnessInit } =
@@ -208,6 +227,11 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       const { setNewBaseFeePrice: setNewBaseFeePriceInit } =
         await setNewParamsToBaseFee({ mainOracle, secondaryOracle, priceFeed });
       setNewBaseFeePrice = setNewBaseFeePriceInit;
+
+      const { redeemAllCollateral: redeemAllCollateralInit } =
+        await redeemCollateral({ hintHelpers, troveManager });
+
+      redeemAllCollateral = redeemAllCollateralInit;
     });
 
     it("should not let open trove if CR is below minimum", async () => {
@@ -271,10 +295,13 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should have a correct amount of collateral and debt in position record (alice position)", async () => {
-      const { debt, coll } = await getTrove({ owner: alice });
-
-      expect(debt).to.be.equal(AliceTroveDebt + gasCompensationReserve);
-      expect(coll).to.be.equal(AliceTroveColl);
+      await expect(
+        getTroveAndCheck({
+          owner: alice,
+          expectedColl: AliceTroveColl,
+          expectedDebt: AliceTroveDebt + gasCompensationReserve,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should have transferred the correct amount BFE token during position opening (alice position)", async () => {
@@ -328,24 +355,29 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should have a correct amount of collateral and debt in position record (bob position)", async () => {
-      const { debt, coll } = await getTrove({ owner: bob });
-
-      expect(debt).to.be.equal(BobTroveDebt + gasCompensationReserve);
-      expect(coll).to.be.equal(BobTroveColl);
+      await getTroveAndCheck({
+        owner: bob,
+        expectedColl: BobTroveColl,
+        expectedDebt: BobTroveDebt + gasCompensationReserve,
+      });
     });
 
     it("should have transferred the correct amount BFE token during position opening (bob position)", async () => {
       const balance = await baseFeeLMAToken.balanceOf(bob.address);
 
-      compareWithFault(
-        BobIdealBFEBalanceAtOpening,
-        BobTroveDebt - BobTroveOpeningFee
-      );
+      expect(
+        compareWithFault(
+          BobIdealBFEBalanceAtOpening,
+          BobTroveDebt - BobTroveOpeningFee
+        )
+      ).not.to.be.reverted;
 
-      compareWithFault(
-        balance,
-        BobIdealBFEBalanceAtOpening + gasCompensationReserve
-      );
+      expect(
+        compareWithFault(
+          balance,
+          BobIdealBFEBalanceAtOpening + gasCompensationReserve
+        )
+      ).not.to.be.reverted;
     });
 
     it("should have a correct CR in a new position (bob position)", async () => {
@@ -410,15 +442,19 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should result into a correct debt and collateral in a position after decrease", async () => {
-      const { debt, coll } = await getTrove({ owner: alice });
-
-      expect(debt).to.be.equal(AliceDebtAfterFirstIncrease);
-      expect(coll).to.be.equal(AliceCollAfterFirstIncrease);
+      await expect(
+        getTroveAndCheck({
+          owner: alice,
+          expectedColl: AliceCollAfterFirstIncrease,
+          expectedDebt: AliceDebtAfterFirstIncrease,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should result into a correct CR in a alice position", async () => {
-      const cr = await getCR({ owner: alice });
-      expect(cr).to.be.equal(AliceCRAfterFirstIncrease);
+      expect(await getCR({ owner: alice })).to.be.equal(
+        AliceCRAfterFirstIncrease
+      );
     });
 
     it("should have correct total supply before carol mint", async () => {
@@ -453,10 +489,13 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should have a correct amount of collateral and debt in position record (carol position)", async () => {
-      const { debt, coll } = await getTrove({ owner: carol });
-
-      expect(debt).to.be.equal(CarolTroveDebt + gasCompensationReserve);
-      expect(coll).to.be.equal(CarolTroveColl);
+      await expect(
+        getTroveAndCheck({
+          owner: carol,
+          expectedColl: CarolTroveColl,
+          expectedDebt: CarolTroveDebt + gasCompensationReserve,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should have transferred the correct amount BFE token during position opening (carol position)", async () => {
@@ -499,24 +538,12 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     it("should let redeem collateral, retrieve correct amount of bfe from account and transfer back correct amount of collateral", async () => {
       const balanceCollBefore = await payToken.balanceOf(bob.address);
-      const hint = await hintHelpers.getRedemptionHints(
-        BobRedemptionFirst,
-        gasPrice010,
-        0
-      );
-      await expect(
-        troveManager
-          .connect(bob)
-          .redeemCollateral(
-            BobRedemptionFirst,
-            hint[0],
-            ethers.ZeroAddress,
-            ethers.ZeroAddress,
-            hint[1],
-            0,
-            ethers.parseEther("1")
-          )
-      ).not.to.be.reverted;
+      await redeemAllCollateral({
+        caller: bob,
+        baseFeeLMAamount: BobRedemptionFirst,
+        gasPrice: gasPrice010,
+      });
+
       const balanceCollAfter = await payToken.balanceOf(bob.address);
 
       compareWithFault(
@@ -538,13 +565,16 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should result into correct debt and coll in a redeemed position", async () => {
-      const { debt, coll } = await getTrove({ owner: alice });
-
-      expect(debt).to.be.equal(AliceTroveDebtAfterBobRedemption);
-      expect(coll).to.be.equal(AliceTroveCollAfterBobRedemption);
+      await expect(
+        getTroveAndCheck({
+          owner: alice,
+          expectedColl: AliceTroveCollAfterBobRedemption,
+          expectedDebt: AliceTroveDebtAfterBobRedemption,
+        })
+      ).not.to.be.reverted;
     });
 
-    it("should result into a correct CR in alices position", async () => {
+    it("should result into a correct CR in alice's position", async () => {
       expect(await getCR({ owner: alice })).to.be.equal(
         AliceCRAfterBobRedemption
       );
@@ -574,10 +604,13 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should have a correct amount of collateral and debt in position record (bob position)", async () => {
-      const { debt, coll } = await getTrove({ owner: bob });
-
-      expect(debt).to.be.equal(BobTroveDebtAfterIncrease);
-      expect(coll).to.be.equal(BobTroveCollAfterIncrease);
+      await expect(
+        getTroveAndCheck({
+          owner: bob,
+          expectedColl: BobTroveCollAfterIncrease,
+          expectedDebt: BobTroveDebtAfterIncrease,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should have a correct CR after coll increase in position (bob position)", async () => {
@@ -610,11 +643,12 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should have a correct entire system debt (bob liquidates alice)", async () => {
-      const coll = await troveManager.getEntireSystemColl();
-      const debt = await troveManager.getEntireSystemDebt();
-
-      expect(coll).to.be.equal(totalCollAliceLiquidated);
-      expect(debt).to.be.equal(totalDebtAliceLiquidated);
+      await expect(
+        checkCollDebtCorrectness({
+          expectedColl: totalCollAliceLiquidated,
+          expectedDebt: totalDebtAliceLiquidated,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should result into empty stability pool", async () => {
@@ -626,10 +660,13 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should be no position after liquidation", async () => {
-      const { debt, coll } = await getTrove({ owner: alice });
-
-      expect(debt).to.be.equal(0);
-      expect(coll).to.be.equal(0);
+      await expect(
+        getTroveAndCheck({
+          owner: alice,
+          expectedColl: BigInt(0),
+          expectedDebt: BigInt(0),
+        })
+      ).not.to.be.reverted;
     });
 
     it("should leave bfe tokens on liquidated user's address", async () => {
@@ -639,13 +676,16 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should calculate debt and collateral of other users after liquidation (bob position)", async () => {
-      const { debt, coll } = await getTrove({ owner: bob });
-
-      expect(debt).to.be.equal(BobTroveDebtAfterLiquid);
-      expect(coll).to.be.equal(BobTroveCollAfterLiquid);
+      await expect(
+        getTroveAndCheck({
+          owner: bob,
+          expectedColl: BobTroveCollAfterLiquid,
+          expectedDebt: BobTroveDebtAfterLiquid,
+        })
+      ).not.to.be.reverted;
     });
 
-    it("should calculate cr of other positions correclty after liquidation (bob position)", async () => {
+    it("should calculate cr of other positions correctly after liquidation (bob position)", async () => {
       expect(await getCR({ owner: bob })).to.be.equal(BobCRAfterLiquid);
     });
 
@@ -653,38 +693,27 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       expect(await getCR({ owner: carol })).to.be.equal(CarolCRAfterLiquid);
     });
 
-    it("should have correct trove params in carol trove as well (coll) ", async () => {
-      const { coll } = await getTrove({ owner: carol });
-      expect(coll).to.be.equal(CarolTroveCollAfterLiquid);
-    });
-
-    it("should have correct trove params in carol trove as well (debt) ", async () => {
-      const { debt } = await getTrove({ owner: carol });
-      expect(debt).to.be.equal(CarolTroveDebtAfterLiquid);
+    it("should have correct trove params in carol trove as well (coll and debt) ", async () => {
+      await expect(
+        getTroveAndCheck({
+          owner: carol,
+          expectedColl: CarolTroveCollAfterLiquid,
+          expectedDebt: CarolTroveDebtAfterLiquid,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should let redeem tokens if there is no position opened in the system", async () => {
       await increase(13285);
 
       const balanceBefore = await payToken.balanceOf(alice.address);
-      const hint = await hintHelpers.getRedemptionHints(
-        AliceRedemptionFirst,
-        gasPrice1114,
-        0
-      );
 
       await expect(
-        troveManager
-          .connect(alice)
-          .redeemCollateral(
-            AliceRedemptionFirst,
-            hint[0],
-            ethers.ZeroAddress,
-            ethers.ZeroAddress,
-            hint[1],
-            0,
-            ethers.parseEther("1")
-          )
+        redeemAllCollateral({
+          caller: alice,
+          baseFeeLMAamount: AliceRedemptionFirst,
+          gasPrice: gasPrice1114,
+        })
       ).not.to.be.reverted;
 
       const balanceAfter = await payToken.balanceOf(alice.address);
@@ -693,18 +722,22 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should result into correct debt and collateral in a redeemed position", async () => {
-      const { debt, coll } = await getTrove({ owner: bob });
-
-      expect(debt).to.be.equal(BobTroveDebtAfterRedemption);
-      expect(coll).to.be.equal(BobTroveCollAfterRedemption);
+      await expect(
+        getTroveAndCheck({
+          owner: bob,
+          expectedColl: BobTroveCollAfterRedemption,
+          expectedDebt: BobTroveDebtAfterRedemption,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should have a correct entire system debt (alice redeems bob)", async () => {
-      const coll = await troveManager.getEntireSystemColl();
-      const debt = await troveManager.getEntireSystemDebt();
-
-      expect(coll).to.be.equal(totalCollAliceRedeemsBob);
-      expect(debt).to.be.equal(totalDebtAliceRedeemsBob);
+      await expect(
+        checkCollDebtCorrectness({
+          expectedColl: totalCollAliceRedeemsBob,
+          expectedDebt: totalDebtAliceRedeemsBob,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should allow increasing debt in the position (bob position)", async () => {
@@ -722,10 +755,13 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should calculate debt and collateral after position debt increase (bob position)", async () => {
-      const { debt, coll } = await getTrove({ owner: bob });
-
-      expect(debt).to.be.equal(BobTroveDebtAfterSecondIncrease);
-      expect(coll).to.be.equal(BobTroveCollAfterSecondIncrease);
+      await expect(
+        getTroveAndCheck({
+          owner: bob,
+          expectedColl: BobTroveCollAfterSecondIncrease,
+          expectedDebt: BobTroveDebtAfterSecondIncrease,
+        })
+      ).not.to.be.reverted;
     });
 
     it("should correctly system shouldn't get into recovery mode wrongly", async () => {
@@ -739,28 +775,16 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     it("should let borrow more tokens during the recovery mode and transfer tokens correctly", async () => {
       await increase(3990);
-      const carolBFEBalanceBefore = await baseFeeLMAToken.balanceOf(
-        carol.address
-      );
-      const carolCollBalanceBefore = await payToken.balanceOf(carol.address);
-      await payToken
-        .connect(carol)
-        .approve(await borrowerOperations.getAddress(), CarolIncreaseColl);
-      await expect(
-        borrowerOperations
-          .connect(carol)
-          .adjustTrove(
-            ethers.parseEther("1"),
-            0,
-            CarolIncreaseColl,
-            CarolIncreaseDebt,
-            true,
-            ethers.ZeroAddress,
-            ethers.ZeroAddress
-          )
-      ).not.to.be.reverted;
 
-      const fee = BigInt("22000000000");
+      const carolCollBalanceBefore = await payToken.balanceOf(carol.address);
+
+      await expect(
+        troveDebtIncrease({
+          caller: carol,
+          amount: CarolIncreaseDebt,
+          collIncrease: CarolIncreaseColl,
+        })
+      ).not.to.be.reverted;
 
       expect(CarolIncreaseColl).to.be.equal(
         carolCollBalanceBefore - (await payToken.balanceOf(carol.address))
