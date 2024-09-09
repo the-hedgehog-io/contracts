@@ -1,7 +1,8 @@
 import { ethers } from "hardhat";
 import { BigNumberish } from "ethers";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import { getDefaultSigners } from "../stability-pool-utils";
+
+import { getSigners } from "../../index";
 import { BorrowerOperations, TERC20 } from "../../../../typechain-types";
 
 export type OpenTroveParams = {
@@ -13,8 +14,7 @@ export type OpenTroveParams = {
   lowerHint: string;
 };
 
-export type OpenTroveToBorrowerOperations =
-  ({}: Partial<OpenTroveParams>) => Promise<void>;
+export type OpenTrove = ({}: Partial<OpenTroveParams>) => Promise<void>;
 
 export const getOpenTrove = async ({
   payToken,
@@ -23,9 +23,11 @@ export const getOpenTrove = async ({
   payToken: TERC20;
   borrowerOperations: BorrowerOperations;
 }) => {
-  const { bob } = await getDefaultSigners();
+  const [, , , , bob] = await getSigners({
+    fork: false,
+  });
 
-  const openTroveToBorrowerOperations: OpenTroveToBorrowerOperations = async ({
+  const openTrove: OpenTrove = async ({
     caller = bob,
     maxFeePercentage = 1,
     baseFeeLMAAmount = "0",
@@ -46,5 +48,5 @@ export const getOpenTrove = async ({
         lowerHint
       );
   };
-  return { openTroveToBorrowerOperations };
+  return { openTrove };
 };

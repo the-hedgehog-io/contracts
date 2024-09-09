@@ -16,12 +16,11 @@ import {
   ProvideToStabilityPool,
   getOpenTrove,
   getStabilityPoolMethods,
-  OpenTroveToBorrowerOperations,
+  OpenTrove,
   AdjustTroveParamsToBorrowerOperations,
   getAdjustTroveParams,
   getCollRatioParams,
   CollateralRatioParams,
-  GetEntireCollAndDebtParams,
   checkCorrectness,
   validateCollDebtMatch,
   setNewParamsToBaseFee,
@@ -49,7 +48,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       arg2: bigint | number,
       faultScale?: number
     ) => void;
-    let openTroveToBorrowerOperations: OpenTroveToBorrowerOperations;
+    let openTrove: OpenTrove;
     let getCR: CollateralRatioParams;
     let getTroveAndCheck: ({
       owner,
@@ -60,7 +59,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       expectedColl?: bigint | undefined;
       expectedDebt?: bigint | undefined;
     }) => Promise<void>;
-    let getTrove: GetEntireCollAndDebtParams;
     let provideToStabilityPool: ProvideToStabilityPool;
     let troveDebtIncrease: AdjustTroveParamsToBorrowerOperations;
     let setNewBaseFeePrice: (_amount: number) => Promise<void>;
@@ -74,6 +72,9 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     const gasCompensationReserve = BigInt("100000000000000000000000");
     const gasPrice010 = "30000000000";
+    const expectedStakedBalance = "4970024999000000000000000000";
+    const expectedStabilityPoolAfterDeposit = "6780592430748703568000000000";
+    const transferAmount = "9000000000000000000000";
 
     // Alice:
     const AliceTroveColl = BigInt("602000000000000000000");
@@ -82,6 +83,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const AliceTroveOpeningFee = BigInt("20000000000000000000000000");
     const AliceBFEBalanceAtOpening = BigInt("3980000000000000000000000000");
     const AliceInitialCR = BigInt("5016541253133333333");
+    const expectedTotalSupplyBeforeAliceIncrease =
+      "6000200000000000000000000000";
 
     const AliceTroveIncreaseDebt = BigInt("3600000000000000000000000000");
     const AliceDebtAfterFirstIncrease = BigInt("7600100000000000000000000000");
@@ -96,6 +99,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const BobActualBFEBalanceAtOpening = BigInt("990024999000000000000000000");
     const BobUnstakeFirst = BigInt("990024999000000000000000000");
     const BobRedemptionFirst = BigInt("990024999000000000000000000");
+    const BobCollWithdraw = "225000000000000000";
 
     // Carol:
     const CarolTroveColl = BigInt("4000000000000000000000");
@@ -103,6 +107,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const CarolTroveOpeningFee = BigInt("4189432568");
     const CarolInitialCR = BigInt("22221851858000000000");
     const CarolBFEBalanceAtOpening = BigInt("1810567431748703568000000000");
+    const expectedTotalSupplyBeforeCarolMint = "9600200000000000000000000000";
 
     const totalCollateralAliceOpening = BigInt("602000000000000000000");
     const totalDebtAliceOpening = BigInt("4000100000000000000000000000");
@@ -118,44 +123,43 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         fork: false,
       });
 
-      [
-        priceFeed,
-        ,
-        troveManager,
-        ,
-        stabilityPool,
-        ,
-        ,
-        ,
-        borrowerOperations,
-        hintHelpers,
-        baseFeeLMAToken,
-        ,
-        ,
-        payToken,
-        mainOracle,
-        secondaryOracle,
-      ] = await setupContracts();
+      const {
+        priceFeed: priceFeedInit,
+        troveManager: troveManagerInit,
+        stabilityPool: stabilityPoolInit,
+        borrowerOperations: borrowerOperationsInit,
+        hintHelpers: hintHelpersInit,
+        baseFeeLMAToken: BaseFeeLMATokenInit,
+        payToken: payTokenInit,
+        mainOracle: mainOracleInit,
+        secondaryOracle: secondaryOracleInit,
+      } = await setupContracts();
+
+      priceFeed = priceFeedInit;
+      troveManager = troveManagerInit;
+      stabilityPool = stabilityPoolInit;
+      borrowerOperations = borrowerOperationsInit;
+      hintHelpers = hintHelpersInit;
+      (baseFeeLMAToken = BaseFeeLMATokenInit), (payToken = payTokenInit);
+      mainOracle = mainOracleInit;
+      secondaryOracle = secondaryOracleInit;
 
       const { compareWithFault: compareWithFaultInit } =
         await validateCollDebtMatch();
       compareWithFault = compareWithFaultInit;
 
-      const {
-        openTroveToBorrowerOperations: openTroveToBorrowerOperationsInit,
-      } = await getOpenTrove({ borrowerOperations, payToken });
+      const { openTrove: openTroveInit } = await getOpenTrove({
+        borrowerOperations,
+        payToken,
+      });
 
-      openTroveToBorrowerOperations = openTroveToBorrowerOperationsInit;
+      openTrove = openTroveInit;
 
-      const {
-        getCR: getCRInit,
-        getTroveAndCheck: getTroveAndCheckInit,
-        getTrove: getTroveInit,
-      } = await getCollRatioParams({ troveManager });
+      const { getCR: getCRInit, getTroveAndCheck: getTroveAndCheckInit } =
+        await getCollRatioParams({ troveManager });
 
       getCR = getCRInit;
       getTroveAndCheck = getTroveAndCheckInit;
-      getTrove = getTroveInit;
 
       const { provideToStabilityPool: provideToStabilityPoolInit } =
         await getStabilityPoolMethods({ baseFeeLMAToken, stabilityPool });
@@ -180,7 +184,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await priceFeed.setLastGoodPrice(gasPrice010);
 
       await expect(
-        openTroveToBorrowerOperations({
+        openTrove({
           caller: alice,
           baseFeeLMAAmount: AliceTroveDebt * BigInt(10),
           collAmount: AliceTroveColl,
@@ -194,7 +198,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await priceFeed.setLastGoodPrice(gasPrice010);
 
       await expect(
-        openTroveToBorrowerOperations({
+        openTrove({
           caller: alice,
           baseFeeLMAAmount: AliceTroveDebtWithError,
           collAmount: AliceTroveColl,
@@ -215,7 +219,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     it("should let open trove to Alice with correct params", async () => {
       await expect(
-        openTroveToBorrowerOperations({
+        openTrove({
           caller: alice,
           baseFeeLMAAmount: AliceTroveDebt,
           collAmount: AliceTroveColl,
@@ -275,7 +279,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await increase(15);
 
       await expect(
-        openTroveToBorrowerOperations({
+        openTrove({
           caller: bob,
           baseFeeLMAAmount: BobTroveDebt,
           collAmount: BobTroveColl,
@@ -354,13 +358,13 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         await stabilityPool.getAddress()
       );
 
-      expect(balance).to.be.equal("4970024999000000000000000000");
+      expect(balance).to.be.equal(expectedStakedBalance);
     });
 
     it("should have correct total supply before alice increase", async () => {
       const totalSupply = await baseFeeLMAToken.totalSupply();
 
-      expect(totalSupply).to.be.equal("6000200000000000000000000000");
+      expect(totalSupply).to.be.equal(expectedTotalSupplyBeforeAliceIncrease);
     });
 
     it("should let adjust the position (alice position)", async () => {
@@ -398,14 +402,14 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     it("should have correct total supply before carol mint", async () => {
       const totalSupply = await baseFeeLMAToken.totalSupply();
 
-      expect(totalSupply).to.be.equal("9600200000000000000000000000");
+      expect(totalSupply).to.be.equal(expectedTotalSupplyBeforeCarolMint);
     });
 
     it("should let open another position in the system (carol position)", async () => {
       await increase(17970);
 
       await expect(
-        openTroveToBorrowerOperations({
+        openTrove({
           caller: carol,
           collAmount: CarolTroveColl,
           baseFeeLMAAmount: CarolTroveDebt,
@@ -463,7 +467,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       const balance = await baseFeeLMAToken.balanceOf(
         await stabilityPool.getAddress()
       );
-      expect(balance).to.be.equal("6780592430748703568000000000");
+      expect(balance).to.be.equal(expectedStabilityPoolAfterDeposit);
     });
 
     it("should let withdraw provided funds", async () => {
@@ -483,19 +487,15 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     it("Should not let perform multiple trove adjustments in a single block, but should revert", async () => {
       await increase(90000);
-
+      const price = ethers.parseEther("475");
       const hint = await hintHelpers.getRedemptionHints(
         BobRedemptionFirst,
-        ethers.parseEther("475"),
+        price,
         0
       );
       await borrowerOperations
         .connect(bob)
-        .withdrawColl(
-          "225000000000000000",
-          ethers.ZeroAddress,
-          ethers.ZeroAddress
-        );
+        .withdrawColl(BobCollWithdraw, ethers.ZeroAddress, ethers.ZeroAddress);
 
       await setNewBaseFeePrice(475);
 
@@ -504,7 +504,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       ).deploy();
       await payToken
         .connect(carol)
-        .transfer(singleTxCaller.target, "9000000000000000000000");
+        .transfer(singleTxCaller.target, transferAmount);
 
       await expect(
         singleTxCaller.singleTx(

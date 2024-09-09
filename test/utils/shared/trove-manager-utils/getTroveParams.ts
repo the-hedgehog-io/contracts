@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { TroveManager } from "../../../../typechain-types";
-import { getDefaultSigners } from "../stability-pool-utils";
+import { getSigners } from "../../index";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
@@ -25,7 +25,9 @@ export const getCollRatioParams = async ({
 }: {
   troveManager: TroveManager;
 }) => {
-  const { bob } = await getDefaultSigners();
+  const [, , , , bob] = await getSigners({
+    fork: false,
+  });
 
   const getCR: CollateralRatioParams = async ({
     owner = bob,

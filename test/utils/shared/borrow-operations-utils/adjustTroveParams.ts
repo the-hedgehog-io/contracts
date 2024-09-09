@@ -1,7 +1,7 @@
 import { BigNumberish } from "ethers";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { BorrowerOperations, TERC20 } from "../../../../typechain-types";
-import { getDefaultSigners } from "../stability-pool-utils";
+import { getSigners } from "../../index";
 import { ethers } from "hardhat";
 
 export type AdjustTroveParams = {
@@ -22,7 +22,9 @@ export const getAdjustTroveParams = async ({
   borrowerOperations: BorrowerOperations;
   payToken: TERC20;
 }) => {
-  const { bob } = await getDefaultSigners();
+  const [, , , , bob] = await getSigners({
+    fork: false,
+  });
 
   const troveDebtIncrease: AdjustTroveParamsToBorrowerOperations = async ({
     caller = bob,

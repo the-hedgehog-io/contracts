@@ -9,17 +9,6 @@ export type ProvideParams = {
   amount: BigNumberish;
 };
 
-export const getDefaultSigners = async () => {
-  ["", ""];
-  const signers = await getSigners({
-    fork: false,
-  });
-
-  const [deployer, hacker, bla, alice, bob] = signers;
-
-  return { signers, deployer, hacker, bla, alice, bob };
-};
-
 export type ProvideToStabilityPool =
   ({}: Partial<ProvideParams>) => Promise<void>;
 
@@ -30,7 +19,9 @@ export const getStabilityPoolMethods = async ({
   baseFeeLMAToken: BaseFeeLMAToken;
   stabilityPool: StabilityPool;
 }) => {
-  const { bob } = await getDefaultSigners();
+  const [, , , , bob] = await getSigners({
+    fork: false,
+  });
 
   const provideToStabilityPool: ProvideToStabilityPool = async ({
     caller = bob,

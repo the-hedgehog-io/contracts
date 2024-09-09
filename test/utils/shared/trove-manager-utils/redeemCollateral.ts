@@ -3,7 +3,7 @@ import {
   HintHelpers,
   TroveManager,
 } from "../../../../typechain-types/contracts";
-import { getDefaultSigners } from "../stability-pool-utils";
+import { getSigners } from "../../index";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { BigNumberish } from "ethers";
 
@@ -20,14 +20,16 @@ export type RedeemAllCollateral = {
 export type RedeemCollateral =
   ({}: Partial<RedeemAllCollateral>) => Promise<void>;
 
-export const redeemCollateral = async ({
+export const redeem = async ({
   hintHelpers,
   troveManager,
 }: {
   hintHelpers: HintHelpers;
   troveManager: TroveManager;
 }) => {
-  const { bob } = await getDefaultSigners();
+  const [, , , , bob] = await getSigners({
+    fork: false,
+  });
 
   const getRedemptionHints = async ({
     baseFeeLMAamount = 0,
@@ -49,7 +51,7 @@ export const redeemCollateral = async ({
       truncatedBaseFeeLMAamount,
     };
   };
-  const redeemAllCollateral: RedeemCollateral = async ({
+  const redeemCollateral: RedeemCollateral = async ({
     caller = bob,
     baseFeeLMAamount = ethers.parseEther("0"),
     upperPartialRedemptionHint = ethers.ZeroAddress,
@@ -77,5 +79,5 @@ export const redeemCollateral = async ({
         maxFeePercentage
       );
   };
-  return { getRedemptionHints, redeemAllCollateral };
+  return { getRedemptionHints, redeemCollateral };
 };

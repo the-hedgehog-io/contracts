@@ -292,7 +292,7 @@ export const setupContracts = async () => {
       await troveManager.getAddress()
     );
 
-  return [
+  return {
     priceFeed,
     sortedTroves,
     troveManager,
@@ -310,7 +310,7 @@ export const setupContracts = async () => {
     mainOracle,
     secondaryOracle,
     feesRouter,
-  ] as const;
+  } as const;
 };
 
 export const etheredValue = (value: string | number) => {
