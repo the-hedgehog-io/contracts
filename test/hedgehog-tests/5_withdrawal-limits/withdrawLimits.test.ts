@@ -11,7 +11,7 @@ import { getSigners } from "../../utils";
 import { expect } from "chai";
 import timestring from "timestring";
 
-const { latestBlock, increase } = time;
+const { increase } = time;
 
 describe("Hedgehog Core Contracts Smoke tests", () => {
   context("Base functionality and Access Control. Flow #1", () => {
