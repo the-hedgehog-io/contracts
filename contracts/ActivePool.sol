@@ -15,13 +15,13 @@ import "./interfaces/IPool.sol";
  * Changes to the contract:
  * - Raised pragma version
  * - Removed an import of ActivePool Interface
- * - Updated variable names and docs to refer to BaseFeeLMA token and wwstETH as a collateral
+ * - Updated variable names and docs to refer to BaseFeeLMA token and WStETH as a collateral
  * - Collateral is now an ERC20 token instead of a native one
  * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  *
- * The Active Pool holds the WstETH collateral and BaseFeeLMA debt (but not BaseFeeLMA tokens) for all active troves.
+ * The Active Pool holds the WStETH collateral and BaseFeeLMA debt (but not BaseFeeLMA tokens) for all active troves.
  *
- * When a trove is liquidated, it's WstETH and BaseFeeLMA debt are transferred from the Active Pool, to either the
+ * When a trove is liquidated, it's WStETH and BaseFeeLMA debt are transferred from the Active Pool, to either the
  * Stability Pool, the Default Pool, or both, depending on the liquidation conditions.
  *
  */
@@ -37,7 +37,7 @@ contract ActivePool is Ownable, CheckContract, IPool {
     address public defaultPoolAddress;
     address public feesRouter;
     IERC20 public WStETHToken;
-    uint256 internal WStETH; // deposited wstETH tracker
+    uint256 internal WStETH; // deposited WStETH tracker
     uint256 internal BaseFeeLMADebt;
 
     // --- Events ---
@@ -47,8 +47,8 @@ contract ActivePool is Ownable, CheckContract, IPool {
     );
     event TroveManagerAddressChanged(address _newTroveManagerAddress);
     event ActivePoolBaseFeeLMADebtUpdated(uint _BaseFeeLMADebt);
-    event ActivePoolWStETHBalanceUpdated(uint _WstETH);
-    event WStETHTokenAddressUpdated(IERC20 _WStEthAddress);
+    event ActivePoolWStETHBalanceUpdated(uint _WStETH);
+    event WStETHTokenAddressUpdated(IERC20 _WStETHAddress);
     event FeesRouterAddressUpdated(address _feesRouter);
 
     // --- Contract setters ---
@@ -63,28 +63,28 @@ contract ActivePool is Ownable, CheckContract, IPool {
         address _troveManagerAddress,
         address _stabilityPoolAddress,
         address _defaultPoolAddress,
-        IERC20 _wStETHTokenAddress,
+        IERC20 _WStETHTokenAddress,
         address _feesRouter
     ) external onlyOwner {
         checkContract(_borrowerOperationsAddress);
         checkContract(_troveManagerAddress);
         checkContract(_stabilityPoolAddress);
         checkContract(_defaultPoolAddress);
-        checkContract(address(_wStETHTokenAddress));
+        checkContract(address(_WStETHTokenAddress));
         checkContract(_feesRouter);
 
         borrowerOperationsAddress = _borrowerOperationsAddress;
         troveManagerAddress = _troveManagerAddress;
         stabilityPoolAddress = _stabilityPoolAddress;
         defaultPoolAddress = _defaultPoolAddress;
-        WStETHToken = _wStETHTokenAddress;
+        WStETHToken = _WStETHTokenAddress;
         feesRouter = _feesRouter;
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit StabilityPoolAddressChanged(_stabilityPoolAddress);
         emit DefaultPoolAddressChanged(_defaultPoolAddress);
-        emit WStETHTokenAddressUpdated(_wStETHTokenAddress);
+        emit WStETHTokenAddressUpdated(_WStETHTokenAddress);
         emit FeesRouterAddressUpdated(_feesRouter);
 
         renounceOwnership();
@@ -95,9 +95,9 @@ contract ActivePool is Ownable, CheckContract, IPool {
     /*
      * Hedgehog Updates:
      * In case WStETH is 0 return 1 to avoid division by zero in base rate calculations
-     * Returns the WstETH state variable.
+     * Returns the WStETH state variable.
      *
-     * Not necessarily equal to the the contract's raw WStETH balance - wStETH can be forcibly sent to contracts.
+     * Not necessarily equal to the the contract's raw WStETH balance - WStETH can be forcibly sent to contracts.
      */
     function getWStETH() external view override returns (uint) {
         return WStETH > 0 ? WStETH : 1;

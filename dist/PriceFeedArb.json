@@ -1,6 +1,11 @@
 [
   {
     "inputs": [],
+    "name": "InvalidAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "MainOracleDisabled",
     "type": "error"
   },

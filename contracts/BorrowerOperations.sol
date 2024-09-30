@@ -133,7 +133,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * HEDGEHOG UPDATES:
      * ERC20 is used as a collateral instead of native token.
      * Setting erc20 address in the initialisation
-     * Setting initial value for newly added lastWithdrawTimestamp
+     * Setting initial value for newly added lastWithdrawlTimestamp
      */
     function setAddresses(
         address _troveManagerAddress,
@@ -176,7 +176,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         feesRouter = _feesRouter;
 
         // Setting a value of block.timestamp 720 minutes ago to make sure that in any case first withdrawl wouldn't get decreased unfairly
-        lastWithdrawlTimestamp = block.timestamp - (720 minutes);
+        lastWithdrawlTimestamp = block.timestamp - EXPAND_DURATION;
 
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit ActivePoolAddressChanged(_activePoolAddress);
@@ -1164,7 +1164,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      *
      * When Collateral is Withdrawn from the System:
      * 1) Calculate the Current Withdrawal Limit: The system calculates the current withdrawal limit as:
-     * Current Limit = Old Limit + (75% + Current Collateral - Old Limit) * ( Time Elapsed(minutes) / 720 )
+     * Current Limit = Old Limit + (75% *( Current Collateral - Old Limit) * ( Time Elapsed(minutes) / 720 )
      * This formula accounts for the time elapsed since the last withdrawal, with the withdrawal limit gradually increasing towards the target limit over a 12-hour period.
      *
      * 2) Determine User's Withdrawal Limit for the Transaction:

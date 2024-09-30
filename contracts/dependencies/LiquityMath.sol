@@ -3,6 +3,7 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "hardhat/console.sol";
 
 /**
  * @notice A fork of Liquity Math library with an upgraded pragma
@@ -180,9 +181,9 @@ library LiquityMath {
                     percentageToGet) /
                 DENOMINATOR;
         }
-
         // Ultimately we get two values: Full withdrawl limit and an instant withdrawl limit which is 80% of the full one
         fullLimit = _unusedWithdrawlLimit + additionFromNewColl;
+
         singleTxWithdrawable = (fullLimit * 80) / 100;
     }
 }

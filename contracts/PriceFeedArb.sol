@@ -484,6 +484,10 @@ contract PriceFeedArb is Ownable, BaseMath {
         Response memory _response
     ) internal view returns (bool) {
         // Hedgehog Updates: In case of a deployment to Arbitrum we gather current block.number via ArbSys method
+        // Check for an invalid roundId that is 0
+        if (_response.roundId == 0) {
+            return true;
+        }
         // Check for an invalid timeStamp that is 0, or in the future
         if (
             _response.blockNumber == 0 ||
@@ -492,7 +496,7 @@ contract PriceFeedArb is Ownable, BaseMath {
             return true;
         }
         // Check for zero price
-        if (_response.answer == 0) {
+        if (_response.answer <= 0) {
             return true;
         }
 

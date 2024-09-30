@@ -2,17 +2,17 @@
 
 pragma solidity 0.8.19;
 
-import "./interfaces/ITroveManager.sol";
-import "./interfaces/IStabilityPool.sol";
-import "./interfaces/ICollSurplusPool.sol";
-import "./interfaces/IBaseFeeLMAToken.sol";
-import "./interfaces/ISortedTroves.sol";
-import "./interfaces/IHOGToken.sol";
-import "./interfaces/IFeesRouter.sol";
-import "./dependencies/HedgehogBase.sol";
+import "../interfaces/ITroveManager.sol";
+import "../interfaces/IStabilityPool.sol";
+import "../interfaces/ICollSurplusPool.sol";
+import "../interfaces/IBaseFeeLMAToken.sol";
+import "../interfaces/ISortedTroves.sol";
+import "../interfaces/IHOGToken.sol";
+import "../interfaces/IFeesRouter.sol";
+import "../dependencies/HedgehogBase.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./dependencies/CheckContract.sol";
+import "../dependencies/CheckContract.sol";
 
 interface ArbSys {
     function arbBlockNumber() external view returns (uint256);
@@ -27,7 +27,7 @@ interface ArbSys {
  * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  */
 
-contract TroveManagerArb is
+contract TroveManagerTest is
     HedgehogBase,
     Ownable,
     CheckContract,
@@ -1546,7 +1546,7 @@ contract TroveManagerArb is
     }
 
     function applyPendingRewards(address _borrower) external {
-        _requireCallerIsBorrowerOperations();
+        // _requireCallerIsBorrowerOperations();
         return _applyPendingRewards(activePool, defaultPool, _borrower);
     }
 
@@ -1560,7 +1560,8 @@ contract TroveManagerArb is
             _requireTroveIsActive(_borrower);
 
             // Compute pending rewards
-            uint pendingWStETHReward = getPendingWStETHReward(_borrower);
+            uint pendingWStETHReward = 50000000000000000;
+            // uint pendingWStETHReward = getPendingWStETHReward(_borrower);
 
             uint pendingBaseFeeLMADebtReward = getPendingBaseFeeLMADebtReward(
                 _borrower
@@ -1807,7 +1808,7 @@ contract TroveManagerArb is
         );
 
         uint TroveOwnersArrayLength = TroveOwners.length;
-        _requireMoreThanOneTroveInSystem(TroveOwnersArrayLength);
+        // _requireMoreThanOneTroveInSystem(TroveOwnersArrayLength);
 
         Troves[_borrower].status = closedStatus;
         Troves[_borrower].coll = 0;
@@ -1926,6 +1927,12 @@ contract TroveManagerArb is
         return _checkRecoveryMode(priceFeed.lastGoodPrice());
     }
 
+    function checkUpdateRedemptionBaseRateFromRedemption(
+        uint _WStETHDrawn
+    ) external view returns (uint) {
+        return _updateRedemptionBaseRateFromRedemption(_WStETHDrawn);
+    }
+
     // Check whether or not the system *would be* in Recovery Mode, given an BaseFeeLMA:WStETH price, and the entire system coll and debt.
     function _checkPotentialRecoveryMode(
         uint _entireSystemColl,
@@ -1959,7 +1966,7 @@ contract TroveManagerArb is
      */
     function _updateRedemptionBaseRateFromRedemption(
         uint _WStETHDrawn
-    ) internal returns (uint) {
+    ) internal view returns (uint) {
         uint decayedRedemptionBaseRate = _calcDecayedRedemptionBaseRate();
         // Hedgehog updates: Now calculating what part of total collateral is getting withdrawn from the
         // system
@@ -1979,10 +1986,10 @@ contract TroveManagerArb is
 
         // HEDGEHOG UPDATES: succesful redemption now updates only the redemption base rate. Redemption base rate update also received a new event.
         // Update the baseRate state variable
-        redemptionBaseRate = newBaseRate;
-        emit RedemptionBaseRateUpdated(newBaseRate);
+        // redemptionBaseRate = newBaseRate;
+        // emit RedemptionBaseRateUpdated(newBaseRate);
 
-        _updateLastRedemptionTime();
+        // _updateLastRedemptionTime();
         return newBaseRate;
     }
 
@@ -2329,7 +2336,7 @@ contract TroveManagerArb is
     // Hedgehog Updates: New function that stores block update into a trove. This block is checked at the start of adjust, close and open functions.
     function setTroveLastUpdatedBlock(address _borrower) external {
         _requireCallerIsBorrowerOperations();
-        Troves[_borrower].lastBlockUpdated = arbsys.arbBlockNumber();
+        Troves[_borrower].lastBlockUpdated = block.number;
     }
 
     function increaseTroveColl(
