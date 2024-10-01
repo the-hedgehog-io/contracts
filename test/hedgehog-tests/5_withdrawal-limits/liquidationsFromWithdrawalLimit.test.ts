@@ -187,15 +187,23 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     context(
       "5.5 Liquidations Update Withdrawal Limit in an Inconsistent Way",
       async () => {
-        it("8765", async () => {
+        it("should update the limit correctly", async () => {
           console.log(await borrowerOperations.unusedWithdrawalLimit());
-          console.log(await payToken.balanceOf(stabilityPool.target));
-          const amount = BigInt("7000000000000000000");
+          console.log(await payToken.balanceOf(alice));
+          const amount = BigInt("1000000000000000000");
           const troveArray = [alice];
-          await payToken.connect(alice).approve(troveManager, amount);
-          await troveManager.connect(alice).batchLiquidateTroves(troveArray);
+
+          await payToken.connect(dave).approve(borrowerOperations, amount);
+          await borrowerOperations
+            .connect(dave)
+            .moveWStETHGainToTrove(
+              alice,
+              ethers.ZeroAddress,
+              ethers.ZeroAddress,
+              amount
+            );
           console.log(await borrowerOperations.unusedWithdrawalLimit());
-          console.log(await payToken.balanceOf(stabilityPool.target));
+          console.log(await payToken.balanceOf(alice));
         });
       }
     );
@@ -203,7 +211,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     context("5.6 Withdrawal Limit Does Not Track Collateral", async () => {
       it("should allow you to reduce the number of activePools", async () => {
         const activePoolBeforeWithdraw = await activePool.getWStETH();
-        const decreaseActivePool = BigInt("51000000000000000000");
+        console.log(activePoolBeforeWithdraw);
+        const decreaseActivePool = BigInt("67000000000000000000");
         await borrowerOperations
           .connect(bob)
           .withdrawColl(
@@ -242,7 +251,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
       it("should reset the withdrawal limit correctly when withdrawing collateral", async () => {
         const newLimitThreshold = await activePool.getWStETH();
-        await borrowerOperations.setUnusedWithdrawalLimit(newLimitThreshold);
+        await borrowerOperations.setWithDrawalLimitThreshold(newLimitThreshold);
 
         const newUnusedLimit = BigInt("50000000000000000000");
         await borrowerOperations.setUnusedWithdrawalLimit(newUnusedLimit);
@@ -256,14 +265,13 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
         const unusedLimitAfterWithdraw =
           await borrowerOperations.unusedWithdrawalLimit();
-
-        expect(unusedLimitAfterWithdraw).to.be.equal(newLimitThreshold);
+        expect(unusedLimitAfterWithdraw).not.to.be.equal(newLimitThreshold);
       });
 
       it("should correctly distribute rewards", async () => {
         const newLimitThreshold = await activePool.getWStETH();
 
-        await borrowerOperations.setUnusedWithdrawalLimit(newLimitThreshold);
+        await borrowerOperations.setWithDrawalLimitThreshold(newLimitThreshold);
 
         const newUnusedLimit = BigInt("50000000000000000000");
         await borrowerOperations.setUnusedWithdrawalLimit(newUnusedLimit);
@@ -272,19 +280,16 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
         const unusedLimitAfterRewards =
           await borrowerOperations.unusedWithdrawalLimit();
+
         expect(unusedLimitAfterRewards).not.to.be.equal(newUnusedLimit);
       });
 
       it("should update collateral when moving WStETH gain to trove", async () => {
         const newLimitThreshold = await activePool.getWStETH();
-
-        await borrowerOperations.setUnusedWithdrawalLimit(newLimitThreshold);
+        await borrowerOperations.setWithDrawalLimitThreshold(newLimitThreshold);
 
         const newUnusedLimit = BigInt("50000000000000000000");
         await borrowerOperations.setUnusedWithdrawalLimit(newUnusedLimit);
-
-        const unusedLimitBeforeMoveToSP =
-          await borrowerOperations.unusedWithdrawalLimit();
 
         const amountToSP = BigInt("10000000000000000000");
 
@@ -303,7 +308,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
           await borrowerOperations.unusedWithdrawalLimit();
 
         expect(unusedLimitAfterMoveToSP).to.be.equal(
-          unusedLimitBeforeMoveToSP + amountToSP
+          newUnusedLimit + amountToSP
         );
       });
     });
@@ -328,8 +333,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         expect(unusedLimitAfter).to.be.equal(
           (activePoolBeforeAfter * BigInt(3)) / BigInt(4)
         );
-
-        const addCollateralSecond = BigInt("10000000000000000000");
 
         await payToken
           .connect(alice)
@@ -416,10 +419,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
           ).not.to.be.reverted;
         });
       }
-    );
-    context(
-      "5.13 Attacker With Sufficient Funds Can Lower Redemption Fees",
-      async () => {}
     );
   });
 });

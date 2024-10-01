@@ -1216,7 +1216,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint256 newLimit = (_previousColl * 3) / 4 + ((_collIncrease * 3) / 4);
         if (newLimit >= _previousColl) {
             newLimit = (newColl * 3) / 4;
-            lastWithdrawlTimestamp = block.timestamp - 720 minutes;
+            lastWithdrawlTimestamp = block.timestamp - EXPAND_DURATION;
         }
 
         unusedWithdrawlLimit = newLimit;

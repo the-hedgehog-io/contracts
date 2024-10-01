@@ -14,7 +14,7 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
         activePool = IActivePool(_activePool);
         collToken = _collToken;
 
-        lastWithdrawlTimestamp = block.timestamp - (720 minutes);
+        lastWithdrawlTimestamp = block.timestamp - (EXPAND_DURATION);
     }
 
     function withdrawColl(
@@ -124,7 +124,7 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
         uint256 newLimit = (_previousColl * 3) / 4 + ((_collIncrease * 3) / 4);
         if (newLimit >= _previousColl) {
             newLimit = (newColl * 3) / 4;
-            lastWithdrawlTimestamp = block.timestamp - 720 minutes;
+            lastWithdrawlTimestamp = block.timestamp - EXPAND_DURATION;
         }
 
         unusedWithdrawlLimit = newLimit;

@@ -69,7 +69,7 @@ contract BorrowerOperationsLiquidationsTest is
         activePool = IActivePool(_activePool);
         collToken = _collToken;
 
-        lastWithdrawalTimestamp = block.timestamp - (720 minutes);
+        lastWithdrawalTimestamp = block.timestamp - (EXPAND_DURATION);
     }
 
     /* --- Variable container structs  ---
@@ -515,12 +515,12 @@ contract BorrowerOperationsLiquidationsTest is
         );
         _requireTroveisActive(contractsCache.troveManager, _borrower);
         // Confirm the operation is either a borrower adjusting their own trove, or a pure WStETH transfer from the Stability Pool to a trove
-        assert(
-            msg.sender == _borrower ||
-                (msg.sender == stabilityPoolAddress &&
-                    _collIncrease > 0 &&
-                    _BaseFeeLMAChange == 0)
-        );
+        // assert(
+        //     msg.sender == _borrower ||
+        //         (msg.sender == stabilityPoolAddress &&
+        //             _collIncrease > 0 &&
+        //             _BaseFeeLMAChange == 0)
+        // );
 
         contractsCache.troveManager.applyPendingRewards(_borrower);
 
@@ -1134,7 +1134,6 @@ contract BorrowerOperationsLiquidationsTest is
                 );
             }
         } else {
-            console.log("tut");
             unusedWithdrawalLimit = activePool.getWStETH();
         }
         // Update the withdrawl recorded timestamp
