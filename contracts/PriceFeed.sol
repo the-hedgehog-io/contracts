@@ -29,7 +29,7 @@ contract PriceFeed is Ownable, BaseMath {
     uint public constant TARGET_DIGITS = 18;
 
     // Maximum time period allowed since Main Oracle's latest round data blockNumber, beyond which Main Oracle is considered frozen.
-    uint public constant TIMEOUT = 69;
+    uint public constant TIMEOUT = 39;
 
     // HEDGEHOG UPDATES: decrease to 176
     // Maximum deviation allowed between two consecutive Main oracle prices. Hedgehog oracles are getting updated in case there is a 5% diviation price

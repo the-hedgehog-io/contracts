@@ -9,6 +9,7 @@ import "./interfaces/IBaseFeeLMAToken.sol";
 import "./interfaces/ISortedTroves.sol";
 import "./interfaces/IHOGToken.sol";
 import "./interfaces/IFeesRouter.sol";
+import "./interfaces/IBorrowerOperations.sol";
 import "./dependencies/HedgehogBase.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -27,7 +28,12 @@ interface ArbSys {
  * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  */
 
-contract TroveManagerArb is HedgehogBase, Ownable, CheckContract, ITroveManager {
+contract TroveManagerArb is
+    HedgehogBase,
+    Ownable,
+    CheckContract,
+    ITroveManager
+{
     using SafeMath for uint256;
     string public constant NAME = "TroveManager";
 
@@ -50,6 +56,7 @@ contract TroveManagerArb is HedgehogBase, Ownable, CheckContract, ITroveManager 
     // A doubly linked list of Troves, sorted by their sorted by their collateral ratios
     ISortedTroves public sortedTroves;
 
+    // HEDGEHOG UPDATES: New constant interface ArbSys - enabling retrieval of block number
     ArbSys constant arbsys = ArbSys(address(100));
 
     // --- Data structures ---
@@ -1137,6 +1144,11 @@ contract TroveManagerArb is HedgehogBase, Ownable, CheckContract, ITroveManager 
         }
 
         if (_WStETH > 0) {
+            // Hedgehog Updates: Update Dynamic Withdrawl Limits but do not revert tx if exceeds 80% single tx limit
+            IBorrowerOperations(borrowerOperationsAddress).handleWithdrawlLimit(
+                    _WStETH,
+                    false
+                );
             _activePool.sendWStETH(_liquidator, _WStETH);
         }
     }
@@ -1262,6 +1274,11 @@ contract TroveManagerArb is HedgehogBase, Ownable, CheckContract, ITroveManager 
         // send WStETH from Active Pool to CollSurplus Pool
         collSurplusPool.increaseBalance(_WStETH);
         _contractsCache.collSurplusPool.accountSurplus(_borrower, _WStETH);
+        // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
+        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawlLimit(
+            _WStETH,
+            true
+        );
         _contractsCache.activePool.sendWStETH(
             address(_contractsCache.collSurplusPool),
             _WStETH
@@ -1458,7 +1475,11 @@ contract TroveManagerArb is HedgehogBase, Ownable, CheckContract, ITroveManager 
         contractsCache.activePool.decreaseBaseFeeLMADebt(
             totals.totalBaseFeeLMAToRedeem
         );
-
+        // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
+        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawlLimit(
+            totals.totalWStETHDrawn,
+            true
+        );
         contractsCache.activePool.sendWStETH(
             msg.sender,
             totals.WStETHToSendToRedeemer
@@ -1926,7 +1947,7 @@ contract TroveManagerArb is HedgehogBase, Ownable, CheckContract, ITroveManager 
         uint _entireSystemColl,
         uint _entireSystemDebt,
         uint _price
-    ) internal view returns (bool) {
+    ) internal pure returns (bool) {
         uint TCR = LiquityMath._computeCR(
             _entireSystemColl,
             _entireSystemDebt,
@@ -2005,7 +2026,7 @@ contract TroveManagerArb is HedgehogBase, Ownable, CheckContract, ITroveManager 
      */
     function _calcRedemptionRate(
         uint _redemptionBaseRate
-    ) internal view returns (uint) {
+    ) internal pure returns (uint) {
         return
             LiquityMath._min(
                 REDEMPTION_FEE_FLOOR.add(_redemptionBaseRate),
