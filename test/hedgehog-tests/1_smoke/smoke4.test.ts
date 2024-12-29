@@ -70,7 +70,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       expectedDebt: bigint;
     }) => Promise<void>;
 
-    const gasCompensationReserve = BigInt("100000000000000000000000");
+    const gasCompensationReserve = BigInt("300000000000000000000000");
     const gasPrice010 = "30000000000";
     const expectedStakedBalance = "4970024999000000000000000000";
     const expectedStabilityPoolAfterDeposit = "6780592430748703568000000000";
@@ -84,10 +84,10 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const AliceBFEBalanceAtOpening = BigInt("3980000000000000000000000000");
     const AliceInitialCR = BigInt("5016541253133333333");
     const expectedTotalSupplyBeforeAliceIncrease =
-      "6000200000000000000000000000";
+      BigInt("6000000000000000000000000000");
 
     const AliceTroveIncreaseDebt = BigInt("3600000000000000000000000000");
-    const AliceDebtAfterFirstIncrease = BigInt("7600100000000000000000000000");
+    const AliceDebtAfterFirstIncrease = BigInt("7600000000000000000000000000");
     const AliceCollAfterFirstIncrease = BigInt("602000000000000000000");
     const AliceCRAfterFirstIncrease = BigInt("2640316136166666666");
 
@@ -107,16 +107,16 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const CarolTroveOpeningFee = BigInt("4189432568");
     const CarolInitialCR = BigInt("22221851858000000000");
     const CarolBFEBalanceAtOpening = BigInt("1810567431748703568000000000");
-    const expectedTotalSupplyBeforeCarolMint = "9600200000000000000000000000";
+    const expectedTotalSupplyBeforeCarolMint = BigInt("9600000000000000000000000000");
 
     const totalCollateralAliceOpening = BigInt("602000000000000000000");
-    const totalDebtAliceOpening = BigInt("4000100000000000000000000000");
+    const totalDebtAliceOpening = BigInt("4000000000000000000000000000");
     const totalCollateralBobOpening = BigInt("3602000000000000000000");
-    const totalDebtBobOpening = BigInt("6000200000000000000000000000");
-    const totalDebtAliceIncrease = BigInt("9600200000000000000000000000");
+    const totalDebtBobOpening = BigInt("6000000000000000000000000000");
+    const totalDebtAliceIncrease = BigInt("9600000000000000000000000000");
     const totalCollAliceIncrease = BigInt("3602000000000000000000");
     const totalCollCarolOpening = BigInt("7602000000000000000000");
-    const totalDebtCarolOpening = BigInt("15600300000000000000000000000");
+    const totalDebtCarolOpening = BigInt("15600000000000000000000000000");
 
     before(async () => {
       [, , , alice, bob, carol] = await getSigners({
@@ -213,7 +213,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await expect(
         checkCollDebtCorrectness({
           expectedColl: totalCollateralAliceOpening,
-          expectedDebt: totalDebtAliceOpening,
+          expectedDebt: totalDebtAliceOpening + gasCompensationReserve,
         })
       ).not.to.be.reverted;
     });
@@ -277,7 +277,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await expect(
         checkCollDebtCorrectness({
           expectedColl: totalCollateralBobOpening,
-          expectedDebt: totalDebtBobOpening,
+          expectedDebt: totalDebtBobOpening + gasCompensationReserve * BigInt(2),
         })
       ).not.to.be.reverted;
     });
@@ -346,7 +346,9 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     it("should have correct total supply before alice increase", async () => {
       const totalSupply = await baseFeeLMAToken.totalSupply();
 
-      expect(totalSupply).to.be.equal(expectedTotalSupplyBeforeAliceIncrease);
+      expect(totalSupply).to.be.equal(
+        expectedTotalSupplyBeforeAliceIncrease + gasCompensationReserve * BigInt(2)
+      );
     });
 
     it("should let adjust the position (alice position)", async () => {
@@ -360,7 +362,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await expect(
         checkCollDebtCorrectness({
           expectedColl: totalCollAliceIncrease,
-          expectedDebt: totalDebtAliceIncrease,
+          expectedDebt: totalDebtAliceIncrease + gasCompensationReserve * BigInt(2),
         })
       ).not.to.be.reverted;
     });
@@ -370,7 +372,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         getTroveAndCheck({
           owner: alice,
           expectedColl: AliceCollAfterFirstIncrease,
-          expectedDebt: AliceDebtAfterFirstIncrease,
+          expectedDebt: AliceDebtAfterFirstIncrease + gasCompensationReserve,
         })
       ).not.to.be.reverted;
     });
@@ -384,7 +386,9 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     it("should have correct total supply before carol mint", async () => {
       const totalSupply = await baseFeeLMAToken.totalSupply();
 
-      expect(totalSupply).to.be.equal(expectedTotalSupplyBeforeCarolMint);
+      expect(totalSupply).to.be.equal(
+        expectedTotalSupplyBeforeCarolMint + gasCompensationReserve * BigInt(2)
+      );
     });
 
     it("should let open another position in the system (carol position)", async () => {
@@ -407,7 +411,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await expect(
         checkCollDebtCorrectness({
           expectedColl: totalCollCarolOpening,
-          expectedDebt: totalDebtCarolOpening,
+          expectedDebt: totalDebtCarolOpening + gasCompensationReserve * BigInt(3),
         })
       ).not.to.be.reverted;
     });
