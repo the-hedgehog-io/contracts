@@ -80,11 +80,11 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const gasCompensationReserve = BigInt("300000000000000000000000");
     const gasPrice010 = "30000000000";
     const gasPrice1114 = "60000000000";
-    const expectedStakedBalance = "4970024999000000000000000000";
-    const expectedStabilityPoolAfterDeposit = "6780592430748703568000000000";
-    const expectedLiquidationReward = "25196105754964725575";
-    const expectedLiquidationProfit = "2861496250150000000";
-    const remainingBFEAfterLiquidation = "79607517769802142000000000";
+    const expectedStakedBalance = "4970074994000000000000000000";
+    const expectedStabilityPoolAfterDeposit = "6780823345083667292000000000";
+    const expectedLiquidationReward = "25196093393307934725";
+    const expectedLiquidationProfit = "2861488750900000000";
+    const remainingBFEAfterLiquidation = "79818616762009185600000000";
 
     // Alice:
     const AliceTroveColl = BigInt("602000000000000000000");
@@ -92,60 +92,63 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const AliceTroveDebt = BigInt("4000000000000000000000000000");
     const AliceTroveOpeningFee = BigInt("20000000000000000000000000");
     const AliceBFEBalanceAtOpening = BigInt("3980000000000000000000000000");
-    const AliceInitialCR = BigInt("5016541253133333333");
-    const expectedTotalSupplyBeforeAliceIncrease =
-      BigInt("6000000000000000000000000000");
+    const AliceInitialCR = BigInt("5016290444866666666");
+    const expectedTotalSupplyBeforeAliceIncrease = BigInt(
+      "6000000000000000000000000000"
+    );
     const AliceTroveIncreaseDebt = BigInt("3600000000000000000000000000");
     const AliceDebtAfterFirstIncrease = BigInt("7600000000000000000000000000");
     const AliceCollAfterFirstIncrease = BigInt("602000000000000000000");
-    const AliceCRAfterFirstIncrease = BigInt("2640316136166666666");
-    const AliceTroveCollAfterBobRedemption = BigInt("572299250030000000000");
+    const AliceCRAfterFirstIncrease = BigInt("2640246656900000000");
+    const AliceTroveCollAfterBobRedemption = BigInt("572297750180000000000");
     const AliceTroveDebtAfterBobRedemption = BigInt(
-      "6610075001000000000000000000"
+      "6610225006000000000000000000"
     );
-    const AliceCRAfterBobRedemption = BigInt("2885994737533333333");
+    const AliceCRAfterBobRedemption = BigInt("2885921682733333333");
     const AliceRedemptionFirst = BigInt("79607518");
-    const AliceCRAtLiquidation = BigInt("1442997368766666666");
+    const AliceCRAtLiquidation = BigInt("1442960841366666666");
 
     // Bob:
     const BobTroveColl = BigInt("3000000000000000000000");
     const BobTroveDebt = BigInt("2000000000000000000000000000");
-    const BobInitialCR = BigInt("49997500124966666666");
-    const BobTroveOpeningFee = BigInt("1009975001");
-    const BobIdealBFEBalanceAtOpening = BigInt("990024999000000000000000000");
-    const BobActualBFEBalanceAtOpening = BigInt("990024999000000000000000000");
-    const BobUnstakeFirst = BigInt("990024999000000000000000000");
-    const BobRedemptionFirst = BigInt("990024999000000000000000000");
-    const BobCollBalanceAfterRedemption = BigInt("29436206421573249806");
+    const BobInitialCR = BigInt("49992501124800000000");
+    const BobTroveOpeningFee = BigInt("1009925006000000000000000000");
+    const BobIdealBFEBalanceAtOpening = BigInt("990074994000000000000000000");
+    const BobActualBFEBalanceAtOpening = BigInt("990074994000000000000000000");
+    const BobUnstakeFirst = BigInt("990074994000000000000000000");
+    const BobRedemptionFirst = BigInt("990074994000000000000000000");
+    const BobCollBalanceAfterRedemption = BigInt("29437687052303618798");
     const BobTroveIncreaseCollFirst = BigInt("2000000000000000000000");
     const BobTroveCollAfterIncrease = BigInt("5000000000000000000000");
     const BobTroveDebtAfterIncrease = BigInt("2000000000000000000000000000");
-    const BobCRAfterIncrease = BigInt("41664583437483333333");
-    const BobTroveCollAfterLiquid = BigInt("5039221150992945115000");
-    const BobTroveDebtAfterLiquid = BigInt("2455381982917386906666665000");
-    const BobCRAfterLiquid = BigInt("34205276314450000000");
+    const BobCRAfterIncrease = BigInt("41660417604016666666");
+    const BobTroveCollAfterLiquid = BigInt("5039218678661586945000");
+    const BobTroveDebtAfterLiquid = BigInt("2455564808286851504444440000");
+    const BobCRAfterLiquid = BigInt("34202712831783333333");
 
     const BobTroveIncreaseDebtSecond = BigInt("40000000000000000000000000000");
-    const BobTroveCollAfterRedemption = BigInt("5039221150992945115000");
-    const BobTroveDebtAfterRedemption = BigInt("2455381982917386906666665000");
+    const BobTroveCollAfterRedemption = BigInt("5039218678661586945000");
+    const BobTroveDebtAfterRedemption = BigInt("2455564808286851504444440000");
     const BobTroveDebtAfterSecondIncrease = BigInt(
-      "42455381982917386906666665000"
+      "42455564808286851504444440000"
     );
-    const BobTroveCollAfterSecondIncrease = BigInt("5039221150992945115000");
-    const BobCRAfterSecondIncrease = BigInt("1978241986300000000");
-    const BobCRAtLiquidation = BigInt("1483681489725000000");
+    const BobTroveCollAfterSecondIncrease = BigInt("5039218678661586945000");
+    const BobCRAfterSecondIncrease = BigInt("1978232496883333333");
+    const BobCRAtLiquidation = BigInt("1483674372662500000");
 
     // Carol:
     const CarolTroveColl = BigInt("4000000000000000000000");
     const CarolTroveDebt = BigInt("6000000000000000000000000000");
-    const CarolInitialCR = BigInt("22221851858000000000");
-    const CarolBFEBalanceAtOpening = BigInt("1810567431748703568000000000");
-    const CarolTroveCollAfterLiquid = BigInt("4031376920794356092000");
-    const CarolTroveDebtAfterLiquid = BigInt("6364325586333909525333332000");
-    const CarolCRAfterLiquid = BigInt("10557224710633333333");
+    const CarolInitialCR = BigInt("22221111166633333333");
+    const CarolBFEBalanceAtOpening = BigInt("1810748351083667292000000000");
+    const CarolTroveCollAfterLiquid = BigInt("4031374942929269556000");
+    const CarolTroveDebtAfterLiquid = BigInt("6364511846629481203555552000");
+    const CarolCRAfterLiquid = BigInt("10556910569300000000");
     const CarolIncreaseDebt = BigInt("22000000000");
     const CarolIncreaseColl = BigInt("7040000000000000000000");
-    const expectedTotalSupplyBeforeCarolMint = BigInt("9600000000000000000000000000");
+    const expectedTotalSupplyBeforeCarolMint = BigInt(
+      "9600000000000000000000000000"
+    );
     const totalCollateralAliceOpening = BigInt("602000000000000000000");
     const totalDebtAliceOpening = BigInt("4000000000000000000000000000");
     const totalCollateralBobOpening = BigInt("3602000000000000000000");
@@ -154,18 +157,18 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const totalCollAliceIncrease = BigInt("3602000000000000000000");
     const totalCollCarolOpening = BigInt("7602000000000000000000");
     const totalDebtCarolOpening = BigInt("15600000000000000000000000000");
-    const totalCollBobFirstRedemption = BigInt("7572299250030000000000");
-    const totalDebtBobFirstRedemption = BigInt("14610275001000000000000000000");
-    const totalCollBobIncrease = BigInt("9572299250030000000000");
-    const totalDebtBobIncrease = BigInt("14610275001000000000000000000");
-    const totalCollJustBeforeAliceLiquidated = BigInt("9572299250030000000000");
+    const totalCollBobFirstRedemption = BigInt("7572297750180000000000");
+    const totalDebtBobFirstRedemption = BigInt("14610825006000000000000000000");
+    const totalCollBobIncrease = BigInt("9572297750180000000000");
+    const totalDebtBobIncrease = BigInt("14610825006000000000000000000");
+    const totalCollJustBeforeAliceLiquidated = BigInt("9572297750180000000000");
     const totalDebtJustBeforeAliceLiquidated = BigInt(
-      "14610275001000000000000000000"
+      "14610825006000000000000000000"
     );
-    const totalCollAliceLiquidated = BigInt("9070598071787301208938");
-    const totalDebtAliceLiquidated = BigInt("8819707569251296432000000000");
-    const totalCollAliceRedeemsBob = BigInt("9070598071787301208934");
-    const totalDebtAliceRedeemsBob = BigInt("8819707569251296431920392482");
+    const totalCollAliceLiquidated = BigInt("9070593621590856509144");
+    const totalDebtAliceLiquidated = BigInt("8820076654916332708000000000");
+    const totalCollAliceRedeemsBob = BigInt("9070593621590856509140");
+    const totalDebtAliceRedeemsBob = BigInt("8820076654916332707920392482");
 
     before(async () => {
       [, , , alice, bob, carol] = await getSigners({
@@ -331,7 +334,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await expect(
         checkCollDebtCorrectness({
           expectedColl: totalCollateralBobOpening,
-          expectedDebt: totalDebtBobOpening + gasCompensationReserve * BigInt(2),
+          expectedDebt:
+            totalDebtBobOpening + gasCompensationReserve * BigInt(2),
         })
       ).not.to.be.reverted;
     });
@@ -402,7 +406,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       const totalSupply = await baseFeeLMAToken.totalSupply();
 
       expect(totalSupply).to.be.equal(
-        expectedTotalSupplyBeforeAliceIncrease + gasCompensationReserve * BigInt(2)
+        expectedTotalSupplyBeforeAliceIncrease +
+          gasCompensationReserve * BigInt(2)
       );
     });
 
@@ -420,7 +425,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await expect(
         checkCollDebtCorrectness({
           expectedColl: totalCollAliceIncrease,
-          expectedDebt: totalDebtAliceIncrease + gasCompensationReserve * BigInt(2),
+          expectedDebt:
+            totalDebtAliceIncrease + gasCompensationReserve * BigInt(2),
         })
       ).not.to.be.reverted;
     });
@@ -445,8 +451,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       const totalSupply = await baseFeeLMAToken.totalSupply();
 
       expect(totalSupply).to.be.equal(
-        expectedTotalSupplyBeforeCarolMint + 
-        gasCompensationReserve * BigInt(2)
+        expectedTotalSupplyBeforeCarolMint + gasCompensationReserve * BigInt(2)
       );
     });
 
@@ -470,7 +475,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await expect(
         checkCollDebtCorrectness({
           expectedColl: totalCollCarolOpening,
-          expectedDebt: totalDebtCarolOpening + gasCompensationReserve * BigInt(3),
+          expectedDebt:
+            totalDebtCarolOpening + gasCompensationReserve * BigInt(3),
         })
       ).not.to.be.reverted;
     });
