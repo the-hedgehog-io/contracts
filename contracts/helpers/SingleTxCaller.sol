@@ -53,16 +53,6 @@ contract SingleTxCaller {
             address(0)
         );
 
-        TM(_tm).redeemCollateral(
-            44000000000000000000000,
-            _firstRedemptionHint,
-            _upperPartialRedemptionHint,
-            _lowerPartialRedemptionHint,
-            149983505461847,
-            0,
-            1e18
-        );
-
         BOps(_bo).withdrawColl(1, address(0), address(0));
     }
 
