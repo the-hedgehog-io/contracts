@@ -531,7 +531,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
          * HEDGEHOG UPDATES: Perform withdrawl limit check if adjustTrove intent is coll withdraw
          */
         if (_collWithdrawal > 0) {
-            _handleWithdrawlLimit(_collWithdrawal);
+            // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
+            _handleWithdrawlLimit(_collWithdrawal, true);
         }
 
         vars.netDebtChange = _BaseFeeLMAChange;
@@ -813,7 +814,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         WStETHToken.safeTransferFrom(msg.sender, address(_activePool), _amount);
         activePool.increaseBalance(_amount);
-
+        // Update withdrawal Limit from collateral addition.
         _updateWithdrawlLimitFromCollIncrease(oldColl, _amount);
     }
 
@@ -859,6 +860,13 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         require(
             msg.sender == _borrower,
             "BorrowerOps: Caller must be the borrower for a withdrawal"
+        );
+    }
+
+    function _requireCallerIsTroveManager() internal view {
+        require(
+            msg.sender == address(troveManager),
+            "BorrowerOps: Caller must be the TroveManager"
         );
     }
 
@@ -961,7 +969,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
     }
 
-    function _requireICRisAboveCCR(uint _newICR) internal view {
+    function _requireICRisAboveCCR(uint _newICR) internal pure {
         require(
             _newICR >= CCR,
             "BorrowerOps: Operation must leave trove with ICR >= CCR"
@@ -1155,16 +1163,16 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * When Collateral is Added to the System:
      * 1) When a user adds collateral, the new collateral amount is calculated by adding the deposit to the existing collateral.
      * 2) Calculate New Withdrawal Limit:
-     * The system calculates the new withdrawal limit as the sum of the old limit plus 75% of the deposit.
+     * The system calculates the new withdrawal limit as the sum of the old limit plus 50% of the deposit.
      * Condition Check:
-     * If this new limit is greater than or equal to 75% of the new total collateral, the withdrawal limit is immediately set to 75% of the new collateral,
+     * If this new limit is greater than or equal to 50% of the new total collateral, the withdrawal limit is immediately set to 50% of the new collateral,
      * and the time counter is reset until the next withdrawal.
-     * If the new limit is less than 75% of the new total collateral, the withdrawal limit is set to the calculated value (old limit + 75% of the deposit).
-     * The target limit is set to 75% of the new total collateral, and the time counter continues from the last withdrawal.
+     * If the new limit is less than 50% of the new total collateral, the withdrawal limit is set to the calculated value (old limit + 50% of the deposit).
+     * The target limit is set to 50% of the new total collateral, and the time counter continues from the last withdrawal.
      *
      * When Collateral is Withdrawn from the System:
      * 1) Calculate the Current Withdrawal Limit: The system calculates the current withdrawal limit as:
-     * Current Limit = Old Limit + (75% *( Current Collateral - Old Limit) * ( Time Elapsed(minutes) / 720 )
+     * Current Limit = Old Limit + (50% + Current Collateral - Old Limit) * ( Time Elapsed(minutes) / 720 )
      * This formula accounts for the time elapsed since the last withdrawal, with the withdrawal limit gradually increasing towards the target limit over a 12-hour period.
      *
      * 2) Determine User's Withdrawal Limit for the Transaction:
@@ -1175,7 +1183,10 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * 2) The system subtracts the withdrawn amount from the current withdrawal limit to determine the new limit. This new limit will be considered as the old limit for the next withdrawal.
      * 3) The system records the time of the withdrawal and starts a new 12-hour countdown for the dynamic adjustment of the withdrawal limit.
      */
-    function _handleWithdrawlLimit(uint256 _collWithdrawal) internal {
+    function _handleWithdrawlLimit(
+        uint256 _collWithdrawal,
+        bool _withSingleTxLimit
+    ) internal {
         // If coll in the system is greater then threshold - we check if user may withdraw the desired amount. Otherwise they are free to withdraw whole amount
         if (activePool.getWStETH() > WITHDRAWL_LIMIT_THRESHOLD) {
             (uint256 fullLimit, uint256 singleTxWithdrawable) = LiquityMath
@@ -1186,7 +1197,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
                     activePool.getWStETH()
                 );
 
-            if (singleTxWithdrawable < _collWithdrawal) {
+            if (_withSingleTxLimit && singleTxWithdrawable < _collWithdrawal) {
                 revert(
                     "BO: Cannot withdraw more then 80% of withdrawble in one tx"
                 );
@@ -1213,12 +1224,20 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     ) internal {
         uint256 newColl = _previousColl + _collIncrease;
 
-        uint256 newLimit = (_previousColl * 3) / 4 + ((_collIncrease * 3) / 4);
+        uint256 newLimit = (_previousColl / 2) + (_collIncrease / 2);
         if (newLimit >= _previousColl) {
-            newLimit = (newColl * 3) / 4;
+            newLimit = newColl / 2;
             lastWithdrawlTimestamp = block.timestamp - EXPAND_DURATION;
         }
 
         unusedWithdrawlLimit = newLimit;
+    }
+
+    function handleWithdrawlLimit(
+        uint256 _collWithdrawal,
+        bool _withSingleTxLimit
+    ) external {
+        _requireCallerIsTroveManager();
+        _handleWithdrawlLimit(_collWithdrawal, _withSingleTxLimit);
     }
 }

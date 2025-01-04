@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "./interfaces/IBaseFeeOracle.sol";
 
 error OutdatedRequest();
 
@@ -14,7 +15,7 @@ error OutdatedRequest();
  * A user with ULTIMATE_ADMIN rights may update SETTER users
  */
 
-contract BaseFeeOracle is AccessControl {
+contract BaseFeeOracle is AccessControl, IBaseFeeOracle {
     struct Response {
         int256 answer; // LogMA50(BaseFeePerGas) * WstETH / ETH ratio in wei
         uint256 blockNumber; // L1 block number from which the last BaseFeePerGas value was retrieved
@@ -28,7 +29,8 @@ contract BaseFeeOracle is AccessControl {
     bytes32 internal constant SETTER = keccak256("SETTER");
     bytes32 internal constant ULTIMATE_ADMIN = keccak256("ULTIMATE_ADMIN");
 
-    uint256 public constant decimals = 18;
+    uint256 public constant version = 1;
+    uint8 public constant decimals = 18;
 
     event BaseFeeSet(int256 newValue, uint256 roundId, uint256 blockNumber);
 

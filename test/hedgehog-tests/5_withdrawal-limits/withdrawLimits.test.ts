@@ -31,15 +31,15 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     const firstWithdraw = BigInt("100000000000000000000");
     const secondWithdraw = BigInt("521000000000000000000");
-    const thirdWithdraw = BigInt("521000000000000000000");
+    const thirdWithdraw = BigInt("520000000000000000000");
     const fourthWithdraw = BigInt("110000000000000000000");
-    const fifthWithdraw = BigInt("227400000000000000000");
+    const fifthWithdraw = BigInt("152000000000000000000");
     const sixthWithdraw = BigInt("144960000000000000000");
-    const seventhWithdraw = BigInt("96640000000000000000");
-    const eighthWithdraw = BigInt("650000000000000000000");
+    const seventhWithdraw = BigInt("74832000000000000000");
+    const eighthWithdraw = BigInt("658929000000000000000");
     const ninthWithdraw = BigInt("600000000000000000000");
     const tenthWithdraw = BigInt("50000000000000000000");
-    const eleventhWithdraw = BigInt("90000000000000000000");
+    const eleventhWithdraw = BigInt("138926014327856650000");
 
     before(async () => {
       [bob, , , alice, bill, carol] = await getSigners({
@@ -149,7 +149,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     it("should not revert after enough time has passed: step4", async () => {
       await increase(timestring("60 minutes"));
 
-      await decreaseColl({ amount: thirdWithdraw });
+      await decreaseColl({ amount: thirdWithdraw }); //521000000000000000000
     });
 
     it("should revert step 5", async () => {

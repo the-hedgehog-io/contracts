@@ -71,61 +71,66 @@ describe("BaseFeeOracle Tests", () => {
       expectedDebt: bigint;
     }) => Promise<void>;
 
-    const gasCompensationReserve = BigInt("100000000000000000000000");
-    const expectedStakedBalance = "4970024999375015626000000000";
-    const expectedStabilityPoolAfterDeposit = "6678477563129355120400000000";
-    const expectedPayTokenGainFromLiquidation = "10930120000000000000";
-    const expectedBFEGainFromLiquidation = "200000000000000000000000";
+    const gasCompensationReserve = BigInt("300000000000000000000000");
+    const expectedStakedBalance = "4970074994375421844000000000";
+    const expectedStabilityPoolAfterDeposit = "6678629531981767781600000000";
+    const expectedPayTokenGainFromLiquidation = "10930360000000000000";
+    const expectedBFEGainFromLiquidation = "600000000000000000000000";
     const expectedStabilityPoolBFEBalance = BigInt(
-      "345610984537692010000000000"
+      "345571039413690033200000000"
     );
-    const expectedCollateralInSurplusPool = "315976000000000000000";
-    const expectedTokenTransferAmount = "267233421408336889600000000";
+    const expectedCollateralInSurplusPool = "315928000000000000000";
+    const expectedTokenTransferAmount = "267241507431922251600000000";
 
     const AliceTroveColl = BigInt("602000000000000000000");
     const AliceTroveCollSecond = "25000000000000000000";
     const AliceTroveDebt = BigInt("4000000000000000000000000000");
-    const AliceTroveDebtSecond = "50000000000000000000000000";
+    const AliceTroveDebtSecond = "100000000000000000000000000";
     const AliceTroveOpeningFee = BigInt("20000000000000000000000000");
     const AliceBFEBalanceAtOpening = BigInt("3980000000000000000000000000");
-    const AliceInitialCR = BigInt("5016541253133333333");
-    const expectedTotalSupplyBeforeAliceIncrease =
-      "6000200000000000000000000000";
+    const AliceInitialCR = BigInt("5016290444866666666");
+    const expectedTotalSupplyBeforeAliceIncrease = BigInt(
+      "6000000000000000000000000000"
+    );
     const AliceTroveIncreaseDebt = BigInt("400000000000000000000000000");
-    const AliceDebtAfterFirstIncrease = BigInt("4400100000000000000000000000");
+    const AliceDebtAfterFirstIncrease = BigInt("4400000000000000000000000000");
     const AliceCollAfterFirstIncrease = BigInt("602000000000000000000");
-    const AliceCRAfterFirstIncrease = BigInt("4560502412800000000");
+    const AliceCRAfterFirstIncrease = BigInt("4560295131366666666");
 
-    const totalSupplyBeforeBobOpensPosition = "4000100000000000000000000000";
+    const totalSupplyBeforeBobOpensPosition = BigInt(
+      "4000000000000000000000000000"
+    );
     const BobTroveColl = BigInt("300000000000000000000");
     const BobTroveDebt = BigInt("2000000000000000000000000000");
-    const BobInitialCR = BigInt("4999750012466666666");
-    const BobTroveOpeningFee = BigInt("1009975001");
-    const BobIdealBFEBalanceAtOpening = BigInt("990024999375015626000000000");
-    const balanceChangeAfterDebtIncrease = "2109852008004331866000000000";
+    const BobInitialCR = BigInt("4999250112466666666");
+    const BobTroveOpeningFee = BigInt("1009925006000000000000000000");
+    const BobIdealBFEBalanceAtOpening = BigInt("990074994375421844000000000");
+    const balanceChangeAfterDebtIncrease = "2110009050034714961200000000";
     const BobTroveIncreaseCollFirst = BigInt("1600000000000000000000");
     const BobTroveCollAfterIncrease = BigInt("1900000000000000000000");
     const BobTroveDebtAfterIncrease = BigInt("2000100000000000000000000000");
-    const BobCRAfterIncrease = BigInt("15832541706233333333");
+    const BobCRAfterIncrease = BigInt("15830958689516666666");
     const BobTroveIncreaseDebtSecond = BigInt("4600000000000000000000000000");
 
     const CarolTroveColl = BigInt("630000000000000000000");
     const CarolTroveDebt = BigInt("3000000000000000000000000000");
     const CarolTroveOpeningFee = BigInt("1513718938");
-    const CarolInitialCR = BigInt("6999766674433333333");
-    const CarolBFEBalanceAtOpening = BigInt("1486281061542887898000000000");
-    const expectedTotalSupplyBeforeCarolMint = "6400200000000000000000000000";
+    const CarolInitialCR = BigInt("6999300069966666666");
+    const CarolBFEBalanceAtOpening = BigInt("1486373800277447118000000000");
+    const expectedTotalSupplyBeforeCarolMint = BigInt(
+      "6400000000000000000000000000"
+    );
     const totalCollateralAliceOpening = BigInt("602000000000000000000");
-    const totalDebtAliceOpening = BigInt("4000100000000000000000000000");
+    const totalDebtAliceOpening = BigInt("4000000000000000000000000000");
     const totalCollateralBobOpening = BigInt("902000000000000000000");
-    const totalDebtBobOpening = BigInt("6000200000000000000000000000");
-    const totalDebtAliceIncrease = BigInt("6400200000000000000000000000");
+    const totalDebtBobOpening = BigInt("6000000000000000000000000000");
+    const totalDebtAliceIncrease = BigInt("6400000000000000000000000000");
     const totalCollAliceIncrease = BigInt("902000000000000000000");
     const totalCollCarolOpening = BigInt("1532000000000000000000");
-    const totalDebtCarolOpening = BigInt("9400300000000000000000000000");
+    const totalDebtCarolOpening = BigInt("9400000000000000000000000000");
 
     const totalCollBobIncrease = BigInt("3132000000000000000000");
-    const totalDebtBobIncrease = BigInt("9400300000000000000000000000");
+    const totalDebtBobIncrease = BigInt("9400000000000000000000000000");
 
     before(async () => {
       [, , , alice, bob, carol] = await getSigners({
@@ -219,7 +224,7 @@ describe("BaseFeeOracle Tests", () => {
       await expect(
         checkCollDebtCorrectness({
           expectedColl: totalCollateralAliceOpening,
-          expectedDebt: totalDebtAliceOpening,
+          expectedDebt: totalDebtAliceOpening + gasCompensationReserve,
         })
       ).not.to.be.reverted;
     });
@@ -260,7 +265,9 @@ describe("BaseFeeOracle Tests", () => {
     it("should have correct total supply before bob opens position", async () => {
       const totalSupply = await baseFeeLMAToken.totalSupply();
 
-      expect(totalSupply).to.be.equal(totalSupplyBeforeBobOpensPosition);
+      expect(totalSupply).to.be.equal(
+        totalSupplyBeforeBobOpensPosition + gasCompensationReserve
+      );
     });
 
     it("should let another user(bob) open a position", async () => {
@@ -282,7 +289,8 @@ describe("BaseFeeOracle Tests", () => {
       await expect(
         checkCollDebtCorrectness({
           expectedColl: totalCollateralBobOpening,
-          expectedDebt: totalDebtBobOpening,
+          expectedDebt:
+            totalDebtBobOpening + gasCompensationReserve * BigInt(2),
         })
       ).not.to.be.reverted;
     });
@@ -345,7 +353,10 @@ describe("BaseFeeOracle Tests", () => {
     it("should have correct total supply before alice increase", async () => {
       const totalSupply = await baseFeeLMAToken.totalSupply();
 
-      expect(totalSupply).to.be.equal(expectedTotalSupplyBeforeAliceIncrease);
+      expect(totalSupply).to.be.equal(
+        expectedTotalSupplyBeforeAliceIncrease +
+          gasCompensationReserve * BigInt(2)
+      );
     });
 
     it("should let adjust the position (alice position)", async () => {
@@ -366,7 +377,8 @@ describe("BaseFeeOracle Tests", () => {
       await expect(
         checkCollDebtCorrectness({
           expectedColl: totalCollAliceIncrease,
-          expectedDebt: totalDebtAliceIncrease,
+          expectedDebt:
+            totalDebtAliceIncrease + gasCompensationReserve * BigInt(2),
         })
       ).not.to.be.reverted;
     });
@@ -375,7 +387,7 @@ describe("BaseFeeOracle Tests", () => {
       await getTroveAndCheck({
         owner: alice,
         expectedColl: AliceCollAfterFirstIncrease,
-        expectedDebt: AliceDebtAfterFirstIncrease,
+        expectedDebt: AliceDebtAfterFirstIncrease + gasCompensationReserve,
       });
     });
 
@@ -387,7 +399,9 @@ describe("BaseFeeOracle Tests", () => {
     it("should have correct total supply before carol mint", async () => {
       const totalSupply = await baseFeeLMAToken.totalSupply();
 
-      expect(totalSupply).to.be.equal(expectedTotalSupplyBeforeCarolMint);
+      expect(totalSupply).to.be.equal(
+        expectedTotalSupplyBeforeCarolMint + gasCompensationReserve * BigInt(2)
+      );
     });
 
     it("should let open another position in the system (carol position)", async () => {
@@ -410,7 +424,8 @@ describe("BaseFeeOracle Tests", () => {
       await expect(
         checkCollDebtCorrectness({
           expectedColl: totalCollCarolOpening,
-          expectedDebt: totalDebtCarolOpening,
+          expectedDebt:
+            totalDebtCarolOpening + gasCompensationReserve * BigInt(3),
         })
       ).not.to.be.reverted;
     });
@@ -472,7 +487,8 @@ describe("BaseFeeOracle Tests", () => {
       await expect(
         checkCollDebtCorrectness({
           expectedColl: totalCollBobIncrease,
-          expectedDebt: totalDebtBobIncrease,
+          expectedDebt:
+            totalDebtBobIncrease + gasCompensationReserve * BigInt(3),
         })
       ).not.to.be.reverted;
     });

@@ -9,6 +9,7 @@ import "./interfaces/IBaseFeeLMAToken.sol";
 import "./interfaces/ISortedTroves.sol";
 import "./interfaces/IHOGToken.sol";
 import "./interfaces/IFeesRouter.sol";
+import "./interfaces/IBorrowerOperations.sol";
 import "./dependencies/HedgehogBase.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -1131,6 +1132,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         }
 
         if (_WStETH > 0) {
+            // Hedgehog Updates: Update Dynamic Withdrawl Limits but do not revert tx if exceeds 80% single tx limit
+            IBorrowerOperations(borrowerOperationsAddress).handleWithdrawlLimit(
+                    _WStETH,
+                    false
+                );
             _activePool.sendWStETH(_liquidator, _WStETH);
         }
     }
@@ -1256,6 +1262,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         // send WStETH from Active Pool to CollSurplus Pool
         collSurplusPool.increaseBalance(_WStETH);
         _contractsCache.collSurplusPool.accountSurplus(_borrower, _WStETH);
+        // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
+        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawlLimit(
+            _WStETH,
+            true
+        );
         _contractsCache.activePool.sendWStETH(
             address(_contractsCache.collSurplusPool),
             _WStETH
@@ -1452,7 +1463,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         contractsCache.activePool.decreaseBaseFeeLMADebt(
             totals.totalBaseFeeLMAToRedeem
         );
-
+        // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
+        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawlLimit(
+            totals.totalWStETHDrawn,
+            true
+        );
         contractsCache.activePool.sendWStETH(
             msg.sender,
             totals.WStETHToSendToRedeemer
@@ -1920,7 +1935,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         uint _entireSystemColl,
         uint _entireSystemDebt,
         uint _price
-    ) internal view returns (bool) {
+    ) internal pure returns (bool) {
         uint TCR = LiquityMath._computeCR(
             _entireSystemColl,
             _entireSystemDebt,
@@ -1999,7 +2014,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
      */
     function _calcRedemptionRate(
         uint _redemptionBaseRate
-    ) internal view returns (uint) {
+    ) internal pure returns (uint) {
         return
             LiquityMath._min(
                 REDEMPTION_FEE_FLOOR.add(_redemptionBaseRate),
