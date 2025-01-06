@@ -30,14 +30,14 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const fourthDeposit = BigInt("1000000000000000000000");
 
     const firstWithdraw = BigInt("100000000000000000000");
-    const secondWithdraw = BigInt("521000000000000000000");
-    const thirdWithdraw = BigInt("520000000000000000000");
+    const secondWithdraw = BigInt("322000000000000000000");
+    const thirdWithdraw = BigInt("322000000000000000000");
     const fourthWithdraw = BigInt("110000000000000000000");
     const fifthWithdraw = BigInt("152000000000000000000");
     const sixthWithdraw = BigInt("144960000000000000000");
     const seventhWithdraw = BigInt("74832000000000000000");
-    const eighthWithdraw = BigInt("658929000000000000000");
-    const ninthWithdraw = BigInt("600000000000000000000");
+    const eighthWithdraw = BigInt("600000000000000000000");
+    const ninthWithdraw = BigInt("518000000000000000000");
     const tenthWithdraw = BigInt("50000000000000000000");
     const eleventhWithdraw = BigInt("138926014327856650000");
 
@@ -130,23 +130,23 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       );
     };
 
-    it("should let open the trove: step 1", async () => {
+    it("should let open the trove (1000): step 1", async () => {
       await expect(openTrove({ collAmount: firstDeposit })).not.to.be.reverted;
     });
 
-    it("should let withdraw: step2", async () => {
+    it("should let withdraw (100): step2", async () => {
       await expect(await decreaseColl({ amount: firstWithdraw })).not.to.be
         .reverted;
     });
 
-    it("should revert if user tries to withdraw more then 80% withdrawable: step3", async () => {
+    it("should revert if user tries to withdraw more then 80% withdrawable (322): step3", async () => {
       await increase(timestring("1 minutes"));
       await expect(decreaseColl({ amount: secondWithdraw })).to.be.revertedWith(
         "BO: Cannot withdraw more then 80% of withdrawble in one tx"
       );
     });
 
-    it("should not revert after enough time has passed: step4", async () => {
+    it("should not revert after enough time has passed (322): step4", async () => {
       await increase(timestring("60 minutes"));
 
       await decreaseColl({ amount: thirdWithdraw }); //521000000000000000000
