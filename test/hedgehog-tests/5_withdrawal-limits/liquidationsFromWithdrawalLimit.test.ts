@@ -37,13 +37,11 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     let carol: SignerWithAddress;
     let dave: SignerWithAddress;
     let activePool: ActivePool;
-    let stabilityPool: StabilityPool;
     let troveManager: TroveManagerTest;
     let hintHelpers: HintHelpers;
     let borrowerOperations: BorrowerOperationsLiquidationsTest;
     let baseFeeLMAToken: BaseFeeLMAToken;
     let payToken: TERC20;
-    let defaultPool: DefaultPool;
     let openTrove: OpenTrove;
     let redeemCollateral: RedeemCollateral;
     let troveCollIncrease: AdjustTroveParamsToBorrowerOperations;
@@ -59,8 +57,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         borrowerOperations,
         hintHelpers,
         payToken,
-        stabilityPool,
-        defaultPool,
       } = await setupContracts());
 
       ({ openTrove } = await getOpenTrove({

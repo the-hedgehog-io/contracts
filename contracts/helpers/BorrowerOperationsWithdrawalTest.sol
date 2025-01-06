@@ -121,10 +121,10 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
     ) internal {
         uint256 newColl = _previousColl + _collIncrease;
 
-        uint256 newLimit = (_previousColl * 3) / 4 + ((_collIncrease * 3) / 4);
+        uint256 newLimit = (_previousColl / 2) + (_collIncrease / 2);
         if (newLimit >= _previousColl) {
-            newLimit = (newColl * 3) / 4;
-            lastWithdrawlTimestamp = block.timestamp - EXPAND_DURATION;
+            newLimit = (newColl / 2);
+            lastWithdrawlTimestamp = block.timestamp - 720 minutes;
         }
 
         unusedWithdrawlLimit = newLimit;
@@ -141,6 +141,8 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
                         unusedWithdrawlLimit,
                         activePool.getWStETH()
                     );
+                console.log("single", singleTxWithdrawable);
+                console.log("fullL", fullLimit);
                 if (singleTxWithdrawable < _collWithdrawal) {
                     revert(
                         "BO: Cannot withdraw more then 80% of withdrawble in one tx"
