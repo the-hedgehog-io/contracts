@@ -141,8 +141,7 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
                         unusedWithdrawlLimit,
                         activePool.getWStETH()
                     );
-                console.log("single", singleTxWithdrawable);
-                console.log("fullL", fullLimit);
+
                 if (singleTxWithdrawable < _collWithdrawal) {
                     revert(
                         "BO: Cannot withdraw more then 80% of withdrawble in one tx"

@@ -1,9 +1,7 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { ethers } from "hardhat";
 import {
   BorrowerOperationsLiquidationsTest,
-  StabilityPoolTester__factory,
   TERC20,
   TroveManagerTest,
 } from "../../../typechain-types";
@@ -13,22 +11,14 @@ import {
   setupContracts,
 } from "../../utils/shared/helpers-liquidations-utils/index";
 
-import {
-  ActivePool,
-  BaseFeeLMAToken,
-  DefaultPool,
-  HintHelpers,
-  StabilityPool,
-} from "../../../typechain-types/contracts";
+import { ActivePool, HintHelpers } from "../../../typechain-types/contracts";
 
 import {
-  AdjustTroveParamsToBorrowerOperations,
   OpenTrove,
   RedeemCollateral,
   getOpenTrove,
   redeem,
 } from "../../utils/shared";
-import { baseFeeLmaTokenTestSol } from "../../../typechain-types/contracts/helpers";
 
 describe("Hedgehog Core Contracts Smoke tests", () => {
   context("Base functionality and Access Control. Flow #1", () => {
@@ -40,24 +30,16 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     let troveManager: TroveManagerTest;
     let hintHelpers: HintHelpers;
     let borrowerOperations: BorrowerOperationsLiquidationsTest;
-    let baseFeeLMAToken: BaseFeeLMAToken;
     let payToken: TERC20;
     let openTrove: OpenTrove;
     let redeemCollateral: RedeemCollateral;
-    let troveCollIncrease: AdjustTroveParamsToBorrowerOperations;
 
     before(async () => {
       [alice, , , dave, bob, carol] = await getSigners({
         fork: false,
       });
-      ({
-        troveManager,
-        activePool,
-        baseFeeLMAToken,
-        borrowerOperations,
-        hintHelpers,
-        payToken,
-      } = await setupContracts());
+      ({ troveManager, activePool, borrowerOperations, hintHelpers, payToken } =
+        await setupContracts());
 
       ({ openTrove } = await getOpenTrove({
         payToken,
@@ -136,13 +118,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         });
 
         it("should allow dave to redeem collateral", async () => {
-          console.log("actPool", await activePool.getWStETH());
-          console.log("fee", await baseFeeLMAToken.balanceOf(dave));
-          console.log("unus", await borrowerOperations.unusedWithdrawalLimit());
           await redeemCollateral({ caller: dave });
-          console.log("actPool", await activePool.getWStETH());
-          console.log("fee", await baseFeeLMAToken.balanceOf(dave));
-          console.log("unus", await borrowerOperations.unusedWithdrawalLimit());
         });
       }
     );
@@ -184,10 +160,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       "5.5 Liquidations Update Withdrawal Limit in an Inconsistent Way",
       async () => {
         it("should update the limit correctly", async () => {
-          console.log(await borrowerOperations.unusedWithdrawalLimit());
-          console.log(await payToken.balanceOf(alice));
           const amount = BigInt("1000000000000000000");
-          const troveArray = [alice];
 
           await payToken.connect(dave).approve(borrowerOperations, amount);
           await borrowerOperations
@@ -198,8 +171,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
               ethers.ZeroAddress,
               amount
             );
-          console.log(await borrowerOperations.unusedWithdrawalLimit());
-          console.log(await payToken.balanceOf(alice));
         });
       }
     );
@@ -207,7 +178,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     context("5.6 Withdrawal Limit Does Not Track Collateral", async () => {
       it("should allow you to reduce the number of activePools", async () => {
         const activePoolBeforeWithdraw = await activePool.getWStETH();
-        console.log(activePoolBeforeWithdraw);
+
         const decreaseActivePool = BigInt("67000000000000000000");
         await borrowerOperations
           .connect(bob)
@@ -326,21 +297,18 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
           await borrowerOperations.unusedWithdrawalLimit();
         const activePoolBeforeAfter = await activePool.getWStETH();
 
-        expect(unusedLimitAfter).to.be.equal(
-          (activePoolBeforeAfter * BigInt(3)) / BigInt(4)
-        );
+        expect(unusedLimitAfter).to.be.equal(activePoolBeforeAfter / BigInt(2));
 
         await payToken
           .connect(alice)
           .approve(borrowerOperations.target, addCollateral);
-        await borrowerOperations.addColl(
-          ethers.ZeroAddress,
-          ethers.ZeroAddress,
-          addCollateral
-        );
-        const unusedLimitAfterSecondAdd =
-          await borrowerOperations.unusedWithdrawalLimit();
-        const activePoolBeforeAfterSecondAdd = await activePool.getWStETH();
+        await expect(
+          borrowerOperations.addColl(
+            ethers.ZeroAddress,
+            ethers.ZeroAddress,
+            addCollateral
+          )
+        ).not.to.be.reverted;
       });
     });
 
