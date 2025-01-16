@@ -9,7 +9,7 @@ const BorrowerOperationsTester = artifacts.require(
 contract("All Liquity functions with onlyOwner modifier", async (accounts) => {
   const [owner, alice, bob] = accounts;
 
-  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000);
+  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(-3)
 
   let contracts;
   let baseFeeLMAToken;

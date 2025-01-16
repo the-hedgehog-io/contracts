@@ -34,7 +34,7 @@ contract("Gas compensation tests", async (accounts) => {
     whale,
   ] = accounts;
 
-  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000);
+  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(-3)
 
   let priceFeed;
   let baseFeeLMAToken;

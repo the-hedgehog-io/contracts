@@ -28,7 +28,7 @@ contract("During the initial lockup period", async (accounts) => {
     I,
   ] = accounts;
 
-  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000);
+  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(-3)
 
   const SECONDS_IN_ONE_MONTH = timeValues.SECONDS_IN_ONE_MONTH;
   const SECONDS_IN_364_DAYS = timeValues.SECONDS_IN_ONE_DAY * 364;

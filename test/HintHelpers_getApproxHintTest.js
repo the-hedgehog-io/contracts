@@ -13,7 +13,7 @@ const BaseFeeLMAToken = artifacts.require("BaseFeeLMAToken");
 contract("HintHelpers", async (accounts) => {
   const [owner] = accounts;
 
-  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000);
+  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(-3)
 
   let sortedTroves;
   let troveManager;

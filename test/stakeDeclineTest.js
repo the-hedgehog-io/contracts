@@ -21,7 +21,7 @@ contract("TroveManager", async (accounts) => {
   const ZERO_ADDRESS = th.ZERO_ADDRESS;
   const [owner, A, B, C, D, E, F] = accounts.slice(0, 7);
 
-  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000);
+  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(-3)
 
   let priceFeed;
   let baseFeeLMAToken;

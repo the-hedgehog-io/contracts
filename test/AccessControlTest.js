@@ -1,5 +1,8 @@
-const deploymentHelper = require("../utils/deploymentHelpers.js");
+const ethers  = require("hardhat");
 const testHelpers = require("../utils/testHelpers.js");
+const deploymentHelper = require("../utils/deploymentHelpers.js");
+const { network } = require("hardhat");
+
 const TroveManagerTester = artifacts.require("TroveManagerTester");
 
 const th = testHelpers.TestHelper;
@@ -18,11 +21,8 @@ contract(
   "Access Control: Liquity functions with the caller restricted to Liquity contract(s)",
   async (accounts) => {
     const [owner, alice, bob, carol] = accounts;
-    const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(
-      997,
-      1000
-    );
-
+    const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(-3)
+     
     let coreContracts;
 
     let priceFeed;
@@ -47,6 +47,8 @@ contract(
       coreContracts = await deploymentHelper.deployBaseFeeLMATokenTester(
         coreContracts
       );
+      
+
       const HOGContracts =
         await deploymentHelper.deployHOGTesterContractsHardhat(
           bountyAddress,
@@ -78,8 +80,11 @@ contract(
       );
 
       for (account of accounts.slice(0, 10)) {
+
+       console.log( "check",toBN(dec(20000, 18)).toString());
+
         await th.openTrove(coreContracts, {
-          extraBaseFeeLMAAmount: toBN(dec(20000, 18)),
+          extraBaseFeeLMAAmount: BigInt("20000000000000000000000"),
           ICR: toBN(dec(2, 18)),
           extraParams: { from: account },
         });

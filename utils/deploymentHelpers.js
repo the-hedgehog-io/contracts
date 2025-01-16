@@ -84,7 +84,7 @@ class DeploymentHelper {
     const cmdLineArgs = process.argv;
     const frameworkPath = cmdLineArgs[1];
     // console.log(`Framework used:  ${frameworkPath}`)
-
+console.log("tut");
     if (frameworkPath.includes("hardhat")) {
       return this.deployHOGContractsHardhat(
         bountyAddress,

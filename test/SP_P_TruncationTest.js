@@ -16,7 +16,7 @@ const GAS_PRICE = 10000000;
 contract("StabilityPool Scale Factor issue tests", async (accounts) => {
   const [owner, whale, A, B, C, D, E, F, F1, F2, F3] = accounts;
 
-  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000);
+  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(-3)
 
   let contracts;
 

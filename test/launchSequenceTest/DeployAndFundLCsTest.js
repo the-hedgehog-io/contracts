@@ -12,10 +12,8 @@ contract(
   async (accounts) => {
     const [liquityAG, A, B, C, D, E, F, G, H, I, J] = accounts;
 
-    const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(
-      997,
-      1000
-    );
+    const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(-3)
+
 
     const SECONDS_IN_ONE_MONTH = timeValues.SECONDS_IN_ONE_MONTH;
 

@@ -89,7 +89,7 @@ const config: HardhatUserConfig = {
       initialBaseFeePerGas: 0,
     },
     mumbai: {
-      accounts: [process.env.PK_DEPLOYER || ""],
+      accounts: accountsNew,
       url: "https://rpc.ankr.com/polygon_mumbai",
     },
   },

@@ -14,7 +14,7 @@ const BaseFeeLMAToken = artifacts.require("BaseFeeLMAToken");
 contract("CollSurplusPool", async (accounts) => {
   const [owner, A, B, C, D, E] = accounts;
 
-  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000);
+  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(-3)
 
   let borrowerOperations;
   let priceFeed;

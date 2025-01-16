@@ -27,7 +27,7 @@ const GAS_PRICE = 10000000;
  */
 
 contract("HOGStaking revenue share tests", async (accounts) => {
-  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000);
+  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(-3)
 
   const [owner, A, B, C, D, E, F, G, whale] = accounts;
 

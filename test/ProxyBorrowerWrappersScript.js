@@ -45,7 +45,7 @@ contract("BorrowerWrappers", async (accounts) => {
     // frontEnd_1, frontEnd_2, frontEnd_3
   ] = accounts;
 
-  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000);
+  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(-3)
 
   let priceFeed;
   let baseFeeLMAToken;
@@ -131,15 +131,19 @@ contract("BorrowerWrappers", async (accounts) => {
 
   it("proxy owner can recover StETH", async () => {
     const amount = toBN(dec(1, 18));
+    console.log("tut")
     const proxyAddress = borrowerWrappers.getProxyAddressFromUser(alice);
+    console.log(proxyAddress)
 
     // send some StETH to proxy
     await web3.eth.sendTransaction({
       from: owner,
       to: proxyAddress,
-      value: amount,
+      value: 1000000000000000000,
       gasPrice: GAS_PRICE,
     });
+    console.log("tut")
+
     assert.equal(await web3.eth.getBalance(proxyAddress), amount.toString());
 
     const balanceBefore = toBN(await web3.eth.getBalance(alice));

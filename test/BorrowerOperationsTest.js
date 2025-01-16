@@ -49,7 +49,7 @@ contract("BorrowerOperations", async (accounts) => {
     frontEnd_3,
   ] = accounts;
 
-  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000);
+  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(-3)
 
   // const frontEnds = [frontEnd_1, frontEnd_2, frontEnd_3]
 

@@ -79,7 +79,7 @@ const getPermitDigest = (
 contract("BaseFeeLMAToken", async (accounts) => {
   const [owner, alice, bob, carol, dennis] = accounts;
 
-  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000);
+  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(-3)
 
   // the second account our hardhatenv creates (for Alice)
   // from https://github.com/liquity/dev/blob/main/packages/contracts/hardhatAccountsList2k.js#L3

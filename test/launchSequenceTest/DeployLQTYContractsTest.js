@@ -12,10 +12,8 @@ contract(
   "Deploying the HOG contracts: LCF, CI, HOGStaking, and HOGToken ",
   async (accounts) => {
     const [liquityAG, A, B] = accounts;
-    const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(
-      997,
-      1000
-    );
+    const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(-3)
+
 
     let HOGContracts;
 
