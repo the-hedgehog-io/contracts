@@ -131,7 +131,6 @@ contract("BorrowerWrappers", async (accounts) => {
 
   it("proxy owner can recover StETH", async () => {
     const amount = toBN(dec(1, 18));
-    console.log("tut")
     const proxyAddress = borrowerWrappers.getProxyAddressFromUser(alice);
     console.log(proxyAddress)
 
@@ -142,7 +141,6 @@ contract("BorrowerWrappers", async (accounts) => {
       value: 1000000000000000000,
       gasPrice: GAS_PRICE,
     });
-    console.log("tut")
 
     assert.equal(await web3.eth.getBalance(proxyAddress), amount.toString());
 

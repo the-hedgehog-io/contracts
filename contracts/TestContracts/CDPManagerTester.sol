@@ -29,25 +29,23 @@ contract TroveManagerTester is TroveManager {
     }
 
     function unprotectedDecayBaseRateFromBorrowing() external returns (uint) {
-        redemptionBaseRate = _calcDecayedRedemptionBaseRate();
-        assert(
-            redemptionBaseRate >= 0 && redemptionBaseRate <= DECIMAL_PRECISION
-        );
+        baseRate = _calcDecayedBaseRate();
+        assert(baseRate >= 0 && baseRate <= DECIMAL_PRECISION);
 
-        _updateLastRedemptionTime();
-        return redemptionBaseRate;
+        _updateLastFeeOpTime();
+        return baseRate;
     }
 
     function minutesPassedSinceLastFeeOp() external view returns (uint) {
-        return _minutesPassedSinceLastRedemption();
+        return _minutesPassedSinceLastFeeOp();
     }
 
     function setLastFeeOpTimeToNow() external {
-        lastRedemptionTime = block.timestamp;
+        lastFeeOperationTime = block.timestamp;
     }
 
     function setBaseRate(uint _baseRate) external {
-        redemptionBaseRate = _baseRate;
+        baseRate = _baseRate;
     }
 
     function callGetRedemptionFee(uint _ETHDrawn) external view returns (uint) {

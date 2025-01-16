@@ -81,10 +81,9 @@ contract(
 
       for (account of accounts.slice(0, 10)) {
 
-       console.log( "check",toBN(dec(20000, 18)).toString());
 
         await th.openTrove(coreContracts, {
-          extraBaseFeeLMAAmount: BigInt("20000000000000000000000"),
+          extraBaseFeeLMAAmount: toBN(dec(20000, 18)),
           ICR: toBN(dec(2, 18)),
           extraParams: { from: account },
         });
