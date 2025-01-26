@@ -6,7 +6,7 @@ import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "../dependencies/LiquityMath.sol";
 
 contract BorrowerOperationsWithdrawalTest is HedgehogBase {
-    uint256 lastWithdrawlTimestamp;
+    uint256 lastWithdrawalTimestamp;
     IERC20 collToken;
     uint256 unusedWithdrawlLimit;
 
@@ -14,7 +14,7 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
         activePool = IActivePool(_activePool);
         collToken = _collToken;
 
-        lastWithdrawlTimestamp = block.timestamp - (EXPAND_DURATION);
+        lastWithdrawalTimestamp = block.timestamp - (EXPAND_DURATION);
     }
 
     function withdrawColl(
@@ -124,7 +124,7 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
         uint256 newLimit = (_previousColl / 2) + (_collIncrease / 2);
         if (newLimit >= _previousColl) {
             newLimit = (newColl / 2);
-            lastWithdrawlTimestamp = block.timestamp - 720 minutes;
+            lastWithdrawalTimestamp = block.timestamp - 720 minutes;
         }
 
         unusedWithdrawlLimit = newLimit;
@@ -136,7 +136,7 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
             if (activePool.getWStETH() > WITHDRAWL_LIMIT_THRESHOLD) {
                 (uint256 fullLimit, uint256 singleTxWithdrawable) = LiquityMath
                     ._checkWithdrawlLimit(
-                        lastWithdrawlTimestamp,
+                        lastWithdrawalTimestamp,
                         EXPAND_DURATION,
                         unusedWithdrawlLimit,
                         activePool.getWStETH()
@@ -154,7 +154,7 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
                 unusedWithdrawlLimit = activePool.getWStETH();
             }
             // Update the withdrawl recorded timestamp
-            lastWithdrawlTimestamp = block.timestamp;
+            lastWithdrawalTimestamp = block.timestamp;
         }
     }
 }

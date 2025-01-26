@@ -61,7 +61,7 @@ contract BorrowerOperationsArb is HedgehogBase, Ownable, CheckContract {
     ArbSys constant arbsys = ArbSys(address(100));
     // HEDGEHOG UPDATES: Added two new public variables
     // Two variables that are used to track and calculate collateral withdrawl limits
-    uint256 public lastWithdrawlTimestamp;
+    uint256 public lastWithdrawalTimestamp;
     uint256 public unusedWithdrawlLimit;
 
     /* --- Variable container structs  ---
@@ -182,7 +182,7 @@ contract BorrowerOperationsArb is HedgehogBase, Ownable, CheckContract {
         feesRouter = _feesRouter;
 
         // Setting a value of block.timestamp 720 minutes ago to make sure that in any case first withdrawl wouldn't get decreased unfairly
-        lastWithdrawlTimestamp = block.timestamp - (720 minutes);
+        lastWithdrawalTimestamp = block.timestamp - (720 minutes);
 
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit ActivePoolAddressChanged(_activePoolAddress);
@@ -538,7 +538,7 @@ contract BorrowerOperationsArb is HedgehogBase, Ownable, CheckContract {
          */
         if (_collWithdrawal > 0) {
             // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
-            _handleWithdrawlLimit(_collWithdrawal, true);
+            _handleWithdrawalLimit(_collWithdrawal, true);
         }
 
         vars.netDebtChange = _BaseFeeLMAChange;
@@ -1192,7 +1192,7 @@ contract BorrowerOperationsArb is HedgehogBase, Ownable, CheckContract {
      * 2) The system subtracts the withdrawn amount from the current withdrawal limit to determine the new limit. This new limit will be considered as the old limit for the next withdrawal.
      * 3) The system records the time of the withdrawal and starts a new 12-hour countdown for the dynamic adjustment of the withdrawal limit.
      */
-    function _handleWithdrawlLimit(
+    function _handleWithdrawalLimit(
         uint256 _collWithdrawal,
         bool _withSingleTxLimit
     ) internal {
@@ -1200,7 +1200,7 @@ contract BorrowerOperationsArb is HedgehogBase, Ownable, CheckContract {
         if (activePool.getWStETH() > WITHDRAWL_LIMIT_THRESHOLD) {
             (uint256 fullLimit, uint256 singleTxWithdrawable) = LiquityMath
                 ._checkWithdrawlLimit(
-                    lastWithdrawlTimestamp,
+                    lastWithdrawalTimestamp,
                     EXPAND_DURATION,
                     unusedWithdrawlLimit,
                     activePool.getWStETH()
@@ -1218,7 +1218,7 @@ contract BorrowerOperationsArb is HedgehogBase, Ownable, CheckContract {
             unusedWithdrawlLimit = activePool.getWStETH();
         }
         // Update the withdrawl recorded timestamp
-        lastWithdrawlTimestamp = block.timestamp;
+        lastWithdrawalTimestamp = block.timestamp;
     }
 
     /**
@@ -1236,17 +1236,17 @@ contract BorrowerOperationsArb is HedgehogBase, Ownable, CheckContract {
         uint256 newLimit = (_previousColl / 2) + (_collIncrease / 2);
         if (newLimit >= _previousColl) {
             newLimit = (newColl / 2);
-            lastWithdrawlTimestamp = block.timestamp - 720 minutes;
+            lastWithdrawalTimestamp = block.timestamp - 720 minutes;
         }
 
         unusedWithdrawlLimit = newLimit;
     }
 
-    function handleWithdrawlLimit(
+    function handleWithdrawalLimit(
         uint256 _collWithdrawal,
         bool _withSingleTxLimit
     ) external {
         _requireCallerIsTroveManager();
-        _handleWithdrawlLimit(_collWithdrawal, _withSingleTxLimit);
+        _handleWithdrawalLimit(_collWithdrawal, _withSingleTxLimit);
     }
 }

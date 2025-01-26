@@ -99,7 +99,7 @@ interface IBorrowerOperations {
 
     function getCompositeDebt(uint _debt) external pure returns (uint);
 
-    function handleWithdrawlLimit(
+    function handleWithdrawalLimit(
         uint256 _collWithdrawal,
         bool _withSingleTxLimit
     ) external;

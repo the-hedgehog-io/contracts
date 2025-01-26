@@ -1145,7 +1145,7 @@ contract TroveManagerArb is
 
         if (_WStETH > 0) {
             // Hedgehog Updates: Update Dynamic Withdrawl Limits but do not revert tx if exceeds 80% single tx limit
-            IBorrowerOperations(borrowerOperationsAddress).handleWithdrawlLimit(
+            IBorrowerOperations(borrowerOperationsAddress).handleWithdrawalLimit(
                     _WStETH,
                     false
                 );
@@ -1275,7 +1275,7 @@ contract TroveManagerArb is
         collSurplusPool.increaseBalance(_WStETH);
         _contractsCache.collSurplusPool.accountSurplus(_borrower, _WStETH);
         // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
-        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawlLimit(
+        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawalLimit(
             _WStETH,
             true
         );
@@ -1476,7 +1476,7 @@ contract TroveManagerArb is
             totals.totalBaseFeeLMAToRedeem
         );
         // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
-        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawlLimit(
+        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawalLimit(
             totals.totalWStETHDrawn,
             true
         );

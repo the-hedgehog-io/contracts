@@ -324,7 +324,7 @@ contract BorrowerOperationsLiquidationsTest is
         );
 
         if (_collWithdrawal > 0) {
-            _handleWithdrawlLimit(_collWithdrawal);
+            _handleWithdrawalLimit(_collWithdrawal);
         }
 
         vars.netDebtChange = _BaseFeeLMAChange;
@@ -590,7 +590,7 @@ contract BorrowerOperationsLiquidationsTest is
         withdrawalLimitThreshould = _newLimit;
     }
 
-    function _handleWithdrawlLimit(uint256 _collWithdrawal) public {
+    function _handleWithdrawalLimit(uint256 _collWithdrawal) public {
         if (activePool.getWStETH() > withdrawalLimitThreshould) {
             (uint256 fullLimit, uint256 singleTxWithdrawable) = LiquityMath
                 ._checkWithdrawlLimit(
