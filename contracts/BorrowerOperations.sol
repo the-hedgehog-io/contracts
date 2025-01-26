@@ -208,7 +208,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint _collAmount,
         address _upperHint,
         address _lowerHint
-    ) external {
+    ) external virtual {
         // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
         {
             _checkAndSetUpdateBlock(msg.sender);
@@ -356,7 +356,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _upperHint,
         address _lowerHint,
         uint _amount
-    ) external {
+    ) external virtual {
         require(_amount > 0, "Borrower Operations: Invalid amount");
         _requireCallerIsStabilityPool();
         _adjustTrove(
@@ -485,7 +485,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _upperHint,
         address _lowerHint,
         uint _maxFeePercentage
-    ) internal {
+    ) internal virtual {
         {
             // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
             _checkAndSetUpdateBlock(msg.sender);
@@ -632,7 +632,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     }
 
     // Hedgehog Updates: Do not deduct gas fee compensation from trove Debt as user just received less tokens during position opening
-    function closeTrove() external {
+    function closeTrove() external virtual {
         // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
         {
             _checkAndSetUpdateBlock(msg.sender);
