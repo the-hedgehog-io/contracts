@@ -201,6 +201,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * now passing a new param _collAmount
      * checking if _amount is greater then 0
      * Function is no longer payable
+     * virtual added for testing purposes, might be removed
      */
     function openTrove(
         uint _maxFeePercentage,
@@ -349,6 +350,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * now passing a new param _collIncrease in _adjustTrove function - in this particular case it is a passed param _amount
      * checking if _amount is greater then 0
      * Function is no longer payable
+     * virtual added for testing purposes, might be removed
      */
     // Send WStETH as collateral to a trove. Called by only the Stability Pool.
     function moveWStETHGainToTrove(
@@ -475,6 +477,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * It therefore expects either a positive _collIncrease, or a positive _collWithdrawal argument.
      *
      * If both are positive, it will revert.
+     *
+     * virtual added for testing purposes, might be removed
      */
     function _adjustTrove(
         address _borrower,
@@ -632,6 +636,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     }
 
     // Hedgehog Updates: Do not deduct gas fee compensation from trove Debt as user just received less tokens during position opening
+    // virtual added for testing purposes, might be removed
     function closeTrove() external virtual {
         // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
         {
@@ -699,7 +704,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     // --- Helper functions ---
 
     // HedgehogUpdates: new private function, that checks if there was a transaction with a trove in the current block
-    function _checkAndSetUpdateBlock(address _borrower) private {
+    // virtual added for changes in Arbitrum deployment through inheritance
+    function _checkAndSetUpdateBlock(address _borrower) internal virtual {
         if (troveManager.getTroveUpdateBlock(_borrower) == block.number) {
             revert TroveAdjustedThisBlock();
         }
