@@ -1133,7 +1133,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
 
         if (_WStETH > 0) {
             // Hedgehog Updates: Update Dynamic Withdrawl Limits but do not revert tx if exceeds 80% single tx limit
-            IBorrowerOperations(borrowerOperationsAddress).handleWithdrawlLimit(
+            IBorrowerOperations(borrowerOperationsAddress).handleWithdrawalLimit(
                     _WStETH,
                     false
                 );
@@ -1263,7 +1263,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         collSurplusPool.increaseBalance(_WStETH);
         _contractsCache.collSurplusPool.accountSurplus(_borrower, _WStETH);
         // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
-        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawlLimit(
+        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawalLimit(
             _WStETH,
             true
         );
@@ -1464,7 +1464,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             totals.totalBaseFeeLMAToRedeem
         );
         // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
-        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawlLimit(
+        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawalLimit(
             totals.totalWStETHDrawn,
             true
         );
@@ -2331,7 +2331,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
     }
 
     // Hedgehog Updates: New function that stores block update into a trove. This block is checked at the start of adjust, close and open functions.
-    function setTroveLastUpdatedBlock(address _borrower) external {
+    // virtual added for changes in Arbitrum deployment through inheritance
+    function setTroveLastUpdatedBlock(address _borrower) external virtual {
         _requireCallerIsBorrowerOperations();
         Troves[_borrower].lastBlockUpdated = block.number;
     }
