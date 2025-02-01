@@ -29,7 +29,7 @@ Repo was used with node@20.11.1
 If you use volta, it is already pinned in the package.json
 
 ```bash
-npm i
+pnpm i
 npx hardhat compile
 ```
 
@@ -42,7 +42,7 @@ There is no need to update hardhat config with your own API keys - forked tests 
 There is no need to update .env file to run tests
 
 ```bash
-npm i
+pnpm i
 npx hardhat test
 ```
 
