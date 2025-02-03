@@ -420,7 +420,7 @@ contract PriceFeed is Ownable, BaseMath {
 
     function _badMainOracleResponse(
         Response memory _response
-    ) internal virtual view returns (bool) {
+    ) internal view virtual returns (bool) {
         // Check for an invalid roundId that is 0
         if (_response.roundId == 0) {
             return true;
@@ -441,7 +441,7 @@ contract PriceFeed is Ownable, BaseMath {
 
     function _mainOracleIsFrozen(
         Response memory _response
-    ) internal virtual view returns (bool) {
+    ) internal view virtual returns (bool) {
         return (block.number - _response.blockNumber) > TIMEOUT;
     }
 
@@ -477,7 +477,7 @@ contract PriceFeed is Ownable, BaseMath {
 
     function _backupOracleIsBroken(
         Response memory _response
-    ) internal virtual view returns (bool) {
+    ) internal view virtual returns (bool) {
         // Check for an invalid roundId that is 0
         if (_response.roundId == 0) {
             return true;
@@ -498,7 +498,7 @@ contract PriceFeed is Ownable, BaseMath {
 
     function _backupIsFrozen(
         Response memory _backupResponse
-    ) internal virtual view returns (bool) {
+    ) internal view virtual returns (bool) {
         return block.number - _backupResponse.blockNumber > TIMEOUT;
     }
 

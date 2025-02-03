@@ -10,16 +10,18 @@ import {
 import { getSigners } from "../../utils";
 import { expect } from "chai";
 import timestring from "timestring";
+import { getOpenTrove, OpenTrove } from "../../utils/shared";
 
 const { increase } = time;
 
 describe("Hedgehog Core Contracts Smoke tests", () => {
   context("Withdrawal functionality. Flow #1", () => {
-    let bob: SignerWithAddress;
+    let alice: SignerWithAddress;
 
     let activePool: ActivePool;
     let borrowerOperations: BorrowerOperationsWithdrawalTest;
     let payToken: TERC20;
+    let openTrove: OpenTrove;
 
     const firstDeposit = BigInt("1000000000000000000000");
     const secondDeposit = BigInt("10000000000000000000");
@@ -39,7 +41,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const eleventhWithdraw = BigInt("138926014327856650000");
 
     before(async () => {
-      [bob] = await getSigners({
+      [alice] = await getSigners({
         fork: false,
       });
 
@@ -63,37 +65,9 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         payToken.target,
         borrowerOperations.target
       );
-    });
 
-    type OpenTroveParams = {
-      caller: SignerWithAddress;
-      maxFeePercentage: number;
-      baseFeeLMAAmount: string | BigNumberish;
-      collAmount: string | BigNumberish;
-      upperHint: string;
-      lowerHint: string;
-    };
-    const openTrove = async ({
-      caller = bob,
-      maxFeePercentage = 1,
-      baseFeeLMAAmount = "0",
-      collAmount = "0",
-      upperHint = ethers.ZeroAddress,
-      lowerHint = ethers.ZeroAddress,
-    }: Partial<OpenTroveParams> = {}) => {
-      await payToken
-        .connect(caller)
-        .approve(await borrowerOperations.getAddress(), collAmount);
-      await borrowerOperations
-        .connect(caller)
-        .openTrove(
-          ethers.parseEther(maxFeePercentage.toString()),
-          baseFeeLMAAmount,
-          collAmount,
-          upperHint,
-          lowerHint
-        );
-    };
+      ({ openTrove } = await getOpenTrove({ payToken, borrowerOperations }));
+    });
 
     type AdjustTroveParams = {
       caller: SignerWithAddress;
@@ -104,7 +78,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     };
 
     const increaseColl = async ({
-      caller = bob,
+      caller = alice,
       amount = 0,
     }: Partial<AdjustTroveParams> = {}) => {
       await payToken
@@ -124,7 +98,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     };
 
     it("should let open the trove (1000): step 1", async () => {
-      await expect(openTrove({ collAmount: firstDeposit })).not.to.be.reverted;
+      console.log(alice.address);
+      await openTrove({ collAmount: firstDeposit });
     });
 
     it("should let withdraw (100): step2", async () => {

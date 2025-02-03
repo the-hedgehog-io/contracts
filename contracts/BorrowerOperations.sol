@@ -249,6 +249,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             vars.compositeDebt,
             vars.price
         );
+        console.log("ICR", vars.ICR);
         vars.NICR = LiquityMath._computeNominalCR(
             _collAmount,
             vars.compositeDebt
@@ -265,6 +266,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
                 true,
                 vars.price
             ); // bools: coll increase, debt increase
+            console.log("new tcr", newTCR);
             _requireNewTCRisAboveCCR(newTCR);
         }
 
@@ -503,6 +505,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         vars.price = priceFeed.fetchPrice();
         bool isRecoveryMode = _checkRecoveryMode(vars.price);
+        console.log("is Recovery Mode", isRecoveryMode);
 
         if (_isDebtIncrease) {
             _requireValidMaxFeePercentage(_maxFeePercentage, isRecoveryMode);
@@ -725,7 +728,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
 
         troveManager.updateBaseRateFromBorrowing(baseRate);
-
+        console.log("BaseFeeLMAFee", BaseFeeLMAFee);
+        console.log("BaseFeeLMAAMount", _BaseFeeLMAAmount);
         _requireUserAcceptsFee(
             BaseFeeLMAFee,
             _BaseFeeLMAAmount,
@@ -897,6 +901,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _borrower
     ) internal view {
         uint status = _troveManager.getTroveStatus(_borrower);
+        console.log(status);
         require(status == 1, "BorrowerOps: Trove does not exist or is closed");
     }
 

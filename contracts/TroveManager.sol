@@ -752,7 +752,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                 ) {
                     break;
                 }
-
                 uint TCR = LiquityMath._computeCR(
                     vars.entireSystemColl,
                     vars.entireSystemDebt,
@@ -874,7 +873,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         vars.BaseFeeLMAInStabPool = stabilityPoolCached
             .getTotalBaseFeeLMADeposits();
         vars.recoveryModeAtStart = _checkRecoveryMode(vars.price);
-
         // Perform the appropriate liquidation sequence - tally values and obtain their totals.
         if (vars.recoveryModeAtStart) {
             totals = _getTotalFromBatchLiquidate_RecoveryMode(
@@ -894,7 +892,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                 _troveArray
             );
         }
-
         require(
             totals.totalDebtInSequence > 0,
             "TroveManager: nothing to liquidate"
@@ -931,7 +928,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             .totalCollInSequence
             .sub(totals.totalCollGasCompensation)
             .sub(totals.totalCollSurplus);
-
         emit Liquidation(
             vars.liquidatedDebt,
             vars.liquidatedColl,
@@ -981,7 +977,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                 ) {
                     continue;
                 }
-
                 uint TCR = LiquityMath._computeCR(
                     vars.entireSystemColl,
                     vars.entireSystemDebt,
@@ -1005,6 +1000,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                 vars.entireSystemDebt = vars.entireSystemDebt.sub(
                     singleLiquidation.debtToOffset
                 );
+
                 vars.entireSystemColl = vars
                     .entireSystemColl
                     .sub(singleLiquidation.collToSendToSP)
@@ -1133,10 +1129,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
 
         if (_WStETH > 0) {
             // Hedgehog Updates: Update Dynamic Withdrawl Limits but do not revert tx if exceeds 80% single tx limit
-            IBorrowerOperations(borrowerOperationsAddress).handleWithdrawalLimit(
-                    _WStETH,
-                    false
-                );
+            IBorrowerOperations(borrowerOperationsAddress)
+                .handleWithdrawalLimit(_WStETH, false);
             _activePool.sendWStETH(_liquidator, _WStETH);
         }
     }
@@ -1503,7 +1497,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             uint currentWStETH,
             uint currentBaseFeeLMADebt
         ) = _getCurrentTroveAmounts(_borrower);
-
         uint ICR = LiquityMath._computeCR(
             currentWStETH,
             currentBaseFeeLMADebt,

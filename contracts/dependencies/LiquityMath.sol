@@ -127,11 +127,15 @@ library LiquityMath {
         uint _price
     ) internal pure returns (uint) {
         if (_debt > 0) {
+            console.log("price", _price);
+            console.log("coll", _coll);
+            console.log("debt", _debt);
             uint newCollRatio = _coll
                 .mul(DECIMAL_PRECISION)
                 .div(_debt)
                 .mul(DECIMAL_PRECISION)
                 .div(_price);
+            console.log("new coll ratio", newCollRatio);
 
             return newCollRatio;
         }

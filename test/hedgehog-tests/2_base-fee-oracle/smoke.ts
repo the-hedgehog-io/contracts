@@ -35,12 +35,6 @@ describe("BaseFeeOracle Tests", () => {
       currentRoundAndValue++;
     };
 
-    const round = async (roundId: number) => {
-      const [round, answer, block] = await oracle.getRoundData(roundId);
-
-      return { answer, block, round };
-    };
-
     const latestRound = async () => {
       const [round, answer, block] = await oracle.latestRoundData();
 
