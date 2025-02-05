@@ -1208,14 +1208,15 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
                     activePool.getWStETH()
                 );
 
-            if (!_isLiquidation && singleTxWithdrawable < _collWithdrawal) {
-                revert(
-                    "BO: Cannot withdraw more then 80% of withdrawble in one tx"
-                );
+            if (!_isLiquidation) {
+                if (singleTxWithdrawable < _collWithdrawal) {
+                    revert(
+                        "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+                    );
+                }
+                // Update current unusedWithdrawlLimit
+                unusedWithdrawlLimit = fullLimit - _collWithdrawal;
             }
-
-            // Update current unusedWithdrawlLimit
-            unusedWithdrawlLimit = fullLimit - _collWithdrawal;
         } else {
             unusedWithdrawlLimit = activePool.getWStETH();
         }
