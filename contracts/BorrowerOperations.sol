@@ -539,7 +539,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
          */
         if (_collWithdrawal > 0) {
             // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
-            _handleWithdrawalLimit(_collWithdrawal, true);
+            _handleWithdrawalLimit(_collWithdrawal, false);
         }
 
         vars.netDebtChange = _BaseFeeLMAChange;
@@ -1196,7 +1196,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      */
     function _handleWithdrawalLimit(
         uint256 _collWithdrawal,
-        bool _withSingleTxLimit
+        bool _isLiquidation
     ) internal {
         // If coll in the system is greater then threshold - we check if user may withdraw the desired amount. Otherwise they are free to withdraw whole amount
         if (activePool.getWStETH() > WITHDRAWL_LIMIT_THRESHOLD) {
@@ -1208,7 +1208,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
                     activePool.getWStETH()
                 );
 
-            if (_withSingleTxLimit && singleTxWithdrawable < _collWithdrawal) {
+            if (!_isLiquidation && singleTxWithdrawable < _collWithdrawal) {
                 revert(
                     "BO: Cannot withdraw more then 80% of withdrawble in one tx"
                 );
@@ -1246,9 +1246,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     function handleWithdrawalLimit(
         uint256 _collWithdrawal,
-        bool _withSingleTxLimit
+        bool _isLiquidation
     ) external {
         _requireCallerIsTroveManager();
-        _handleWithdrawalLimit(_collWithdrawal, _withSingleTxLimit);
+        _handleWithdrawalLimit(_collWithdrawal, _isLiquidation);
     }
 }

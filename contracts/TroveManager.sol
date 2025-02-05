@@ -1130,7 +1130,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         if (_WStETH > 0) {
             // Hedgehog Updates: Update Dynamic Withdrawl Limits but do not revert tx if exceeds 80% single tx limit
             IBorrowerOperations(borrowerOperationsAddress)
-                .handleWithdrawalLimit(_WStETH, false);
+                .handleWithdrawalLimit(_WStETH, true);
             _activePool.sendWStETH(_liquidator, _WStETH);
         }
     }

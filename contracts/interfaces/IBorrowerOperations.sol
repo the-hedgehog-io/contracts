@@ -101,6 +101,6 @@ interface IBorrowerOperations {
 
     function handleWithdrawalLimit(
         uint256 _collWithdrawal,
-        bool _withSingleTxLimit
+        bool _isLiquidation
     ) external;
 }
