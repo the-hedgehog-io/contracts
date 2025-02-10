@@ -109,6 +109,8 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
         uint _maxFeePercentage
     ) internal pure {
         uint feePercentage = _fee.mul(DECIMAL_PRECISION).div(_amount);
+        console.log("fee perc", feePercentage);
+        console.log("max fee perc", _maxFeePercentage);
         require(
             feePercentage <= _maxFeePercentage,
             "Fee exceeded provided maximum"

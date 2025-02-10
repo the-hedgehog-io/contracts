@@ -266,7 +266,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
                 true,
                 vars.price
             ); // bools: coll increase, debt increase
-            console.log("new tcr", newTCR);
+            console.log("new TCR", newTCR);
             _requireNewTCRisAboveCCR(newTCR);
         }
 
@@ -571,6 +571,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             _isDebtIncrease,
             vars.price
         );
+        console.log("oldOCR", vars.oldICR);
+        console.log("new OCR", vars.newICR);
+
         assert(_collWithdrawal <= vars.coll);
 
         // Check the adjustment satisfies all conditions for the current system mode
@@ -583,6 +586,10 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         // When the adjustment is a debt repayment, check it's a valid amount and that the caller has enough BaseFeeLMA
         if (!_isDebtIncrease && _BaseFeeLMAChange > 0) {
+            console.log(
+                "_getNetDebt(vars.debt).sub(vars.netDebtChange)",
+                _getNetDebt(vars.debt).sub(vars.netDebtChange)
+            );
             _requireAtLeastMinNetDebt(
                 _getNetDebt(vars.debt).sub(vars.netDebtChange)
             );
@@ -901,7 +908,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _borrower
     ) internal view {
         uint status = _troveManager.getTroveStatus(_borrower);
-        console.log(status);
         require(status == 1, "BorrowerOps: Trove does not exist or is closed");
     }
 
@@ -981,6 +987,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     }
 
     function _requireICRisAboveCCR(uint _newICR) internal pure {
+        console.log("newICR f", _newICR);
         require(
             _newICR >= CCR,
             "BorrowerOps: Operation must leave trove with ICR >= CCR"

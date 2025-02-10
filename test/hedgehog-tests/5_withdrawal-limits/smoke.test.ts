@@ -1,6 +1,5 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
-import { BigNumberish, ZeroAddress, zeroPadBytes } from "ethers";
 import { ethers } from "hardhat";
 const { latestBlock } = time;
 import {
@@ -8,7 +7,6 @@ import {
   BaseFeeLMAToken,
   BaseFeeOracle,
   BorrowerOperationsLiquidationsTest,
-  DefaultPool,
   FeesRouter,
   SortedTroves,
   TERC20,
@@ -122,6 +120,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should let to open the trove with check if the list contains a node", async () => {
+      expect(await sortedTroves.contains(alice)).to.be.false;
+
       await openTrove({
         caller: alice,
         collAmount: collAmountAlice,
@@ -544,10 +544,12 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         .transfer(bob.address, ethers.parseEther("900000000"));
 
       expect(await troveManager.getTroveStatus(bob.address)).to.be.equal(1);
+      expect(await sortedTroves.contains(bob.address)).to.be.true;
 
       await borrowerOperations.connect(bob).closeTrove();
 
       expect(await troveManager.getTroveStatus(bob.address)).not.to.be.equal(1);
+      expect(await sortedTroves.contains(bob.address)).to.be.false;
 
       const newDebtBob = BigInt("128000000000000000000000000");
       const newCollBob = BigInt("20000000000000000000");
@@ -558,6 +560,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         baseFeeLMAAmount: newDebtBob,
       });
 
+      expect(await sortedTroves.contains(bob.address)).to.be.true;
       expect(await troveManager.getTroveStatus(bob.address)).to.be.equal(1);
     });
 
@@ -607,6 +610,23 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         debtAmountAlice -
           (debtAmountAlice * BORROWING_FEE_FLOOR) / ethers.parseEther("1")
       );
+    });
+
+    it("should not alow to open trove if fee exceeds gain", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+
+      const newDebtBob = BigInt("2000000000000000000000000000");
+      await expect(
+        openTrove({
+          caller: bob,
+          collAmount: collAmountBob,
+          baseFeeLMAAmount: newDebtBob,
+        })
+      ).to.be.revertedWith("BO: Fee exceeds gain");
     });
   });
 
@@ -790,6 +810,588 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await borrowerOperations
         .connect(alice)
         .addColl(ethers.ZeroAddress, ethers.ZeroAddress, amountForAddColl);
+    });
+
+    it("should not allow add coll if value equal 0", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+
+      const amountForAddColl = 0;
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .addColl(ethers.ZeroAddress, ethers.ZeroAddress, amountForAddColl)
+      ).to.be.revertedWith("Borrower Operations: Invalid amount");
+    });
+  });
+
+  context("Adjust trove functionality", () => {
+    it("should not allow to adjust trove  when adjustment would leave trove with ICR < MCR", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+
+      const newDebt = BigInt("128000000000000000000000000");
+
+      await openTrove({
+        caller: bob,
+        collAmount: BigInt("90000000000000000000"),
+        baseFeeLMAAmount: newDebt,
+      });
+
+      await secondaryOracle
+        .connect(deployer)
+        .feedBaseFeeValue("50000000000", await latestBlock());
+
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .adjustTrove(
+            ethers.parseEther("1"),
+            0,
+            0,
+            BigInt("700000000000000000000000000"),
+            true,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).to.be.revertedWith(
+        "BorrowerOps: An operation that would result in ICR < MCR is not permitted"
+      );
+    });
+
+    it("should not let to adjust the trove  if the max percentage less than 0.5", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      const maxFeePercentage = ethers.parseEther("0.001");
+
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .adjustTrove(
+            maxFeePercentage,
+            0,
+            collAmountBob,
+            debtAmountBob,
+            true,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).to.be.revertedWith("Max fee percentage must be between 0.5% and 100%");
+    });
+
+    it("should not let to adjust the trove if fee exceeds max fee percentage", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: ethers.parseEther("3200000000"),
+      });
+
+      await openTrove({
+        caller: bob,
+        collAmount: collAmountBob,
+        baseFeeLMAAmount: debtAmountBob,
+      });
+
+      await secondaryOracle
+        .connect(deployer)
+        .feedBaseFeeValue("90000000000", await latestBlock());
+
+      const addCollAlice = BigInt("530000000000000000000");
+      const addDebtAlice = BigInt("810000000000000000000000000");
+
+      await payToken
+        .connect(alice)
+        .approve(borrowerOperations.target, addCollAlice);
+
+      const maxFeePercentage = ethers.parseEther("0.049");
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .adjustTrove(
+            maxFeePercentage,
+            0,
+            addCollAlice,
+            addDebtAlice,
+            true,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).to.be.revertedWith("Fee exceeded provided maximum");
+    });
+  });
+  context("withdraw Base FeeLMA :", async () => {
+    it("should not allow to withdraw BaseFeeLMA if top-up would leave trove with ICR < MCR", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      const newCollBob = BigInt("1800000000000000000000");
+      await openTrove({
+        caller: bob,
+        collAmount: newCollBob,
+        baseFeeLMAAmount: debtAmountBob,
+      });
+
+      await secondaryOracle
+        .connect(deployer)
+        .feedBaseFeeValue("70000000000", await latestBlock());
+
+      const amountForWithdraw = BigInt("10000000000000000000");
+      const maxFeePercentage = ethers.parseEther("1");
+
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .withdrawBaseFeeLMA(
+            maxFeePercentage,
+            amountForWithdraw,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).to.be.revertedWith(
+        "BorrowerOps: An operation that would result in ICR < MCR is not permitted"
+      );
+    });
+
+    it("should not let to withdraw BaseFee if the max percentage more than 100%", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      const maxFeePercentage = ethers.parseEther("1.1");
+      const amountForWithdraw = BigInt("10000000000000000000");
+
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .withdrawBaseFeeLMA(
+            maxFeePercentage,
+            amountForWithdraw,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).to.be.revertedWith("Max fee percentage must be between 0.5% and 100%");
+    });
+
+    it("should not let to withdraw BaseFee if the max percentage less than 0,5%", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      const maxFeePercentage = ethers.parseEther("0.001");
+      const amountForWithdraw = BigInt("10000000000000000000");
+
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .withdrawBaseFeeLMA(
+            maxFeePercentage,
+            amountForWithdraw,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).to.be.revertedWith("Max fee percentage must be between 0.5% and 100%");
+    });
+
+    it("should not let to withdraw BaseFee if fee exceeds max fee percentage", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      const maxFeePercentage = ethers.parseEther("0.005");
+      const amountForWithdraw = BigInt("1000000000000000000000");
+
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .withdrawBaseFeeLMA(
+            maxFeePercentage,
+            amountForWithdraw,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).to.be.revertedWith("Fee exceeded provided maximum");
+    });
+
+    it("should let to withdraw BaseFee", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      const maxFeePercentage = ethers.parseEther("0.2");
+      const amountForWithdraw = BigInt("1000000000000000000000");
+
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .withdrawBaseFeeLMA(
+            maxFeePercentage,
+            amountForWithdraw,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).not.to.be.reverted;
+    });
+
+    it("should not let to withdraw BaseFee if calling address doesn't have active trove", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      const maxFeePercentage = ethers.parseEther("0.2");
+      const amountForWithdraw = BigInt("1000000000000000000000");
+
+      await expect(
+        borrowerOperations
+          .connect(bob)
+          .withdrawBaseFeeLMA(
+            maxFeePercentage,
+            amountForWithdraw,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).to.be.revertedWith("BorrowerOps: Trove does not exist or is closed");
+    });
+
+    it("should not let to withdraw BaseFee if when requested withdrawal amount is zero BaseFeeLMA", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      const maxFeePercentage = ethers.parseEther("0.2");
+      const amountForWithdraw = 0;
+
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .withdrawBaseFeeLMA(
+            maxFeePercentage,
+            amountForWithdraw,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).to.be.revertedWith(
+        "BorrowerOps: Debt increase requires non-zero debtChange"
+      );
+    });
+
+    it("should not let to withdraw baseFee when system is in Recovery Mode and ICR < CCR", async () => {
+      const newCollAlice = BigInt("1500000000000000000000");
+      const newDebtAlice = BigInt("1800000000000000000000000000");
+
+      await openTrove({
+        caller: alice,
+        collAmount: newCollAlice,
+        baseFeeLMAAmount: newDebtAlice,
+      });
+
+      const newCollBob = BigInt("1800000000000000000000");
+
+      await openTrove({
+        caller: bob,
+        collAmount: newCollBob,
+        baseFeeLMAAmount: debtAmountBob,
+      });
+
+      await secondaryOracle
+        .connect(deployer)
+        .feedBaseFeeValue("540000000000", await latestBlock());
+
+      const amountForWithdraw = BigInt("30000000000000000000000000");
+      const maxFeePercentage = ethers.parseEther("1");
+
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .withdrawBaseFeeLMA(
+            maxFeePercentage,
+            amountForWithdraw,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).to.be.revertedWith(
+        "BorrowerOps: Operation must leave trove with ICR >= CCR"
+      );
+    });
+
+    it("should not let to withdraw baseFee when a withdrawal would cause the TCR of the system to fall below the CCR", async () => {
+      const newCollAlice = BigInt("1500000000000000000000");
+      const newDebtAlice = BigInt("1800000000000000000000000000");
+
+      await openTrove({
+        caller: alice,
+        collAmount: newCollAlice,
+        baseFeeLMAAmount: newDebtAlice,
+      });
+
+      const newCollBob = BigInt("1800000000000000000000");
+
+      await openTrove({
+        caller: bob,
+        collAmount: newCollBob,
+        baseFeeLMAAmount: debtAmountBob,
+      });
+
+      await secondaryOracle
+        .connect(deployer)
+        .feedBaseFeeValue("532000000000", await latestBlock());
+
+      const amountForWithdraw = BigInt("30000000000000000000000000");
+      const maxFeePercentage = ethers.parseEther("1");
+
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .withdrawBaseFeeLMA(
+            maxFeePercentage,
+            amountForWithdraw,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).to.be.revertedWith(
+        "BorrowerOps: An operation that would result in TCR < CCR is not permitted"
+      );
+    });
+
+    it("should let to increase the Trove's BaseFeeLMA debt by the correct amount", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      const maxFeePercentage = ethers.parseEther("1");
+      const amountForWithdraw = BigInt("1000000000000000000000");
+
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .withdrawBaseFeeLMA(
+            maxFeePercentage,
+            amountForWithdraw,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).not.to.be.reverted;
+
+      expect(await borrowerOperations.getEntireSystemDebt()).to.be.equal(
+        debtAmountAlice + amountForWithdraw + BaseFeeLMA_GAS_COMPENSATION
+      );
+    });
+
+    it("should let to increase BaseFeeLMA debt in ActivePool by correct amount ", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      const maxFeePercentage = ethers.parseEther("1");
+      const amountForWithdraw = BigInt("1000000000000000000000");
+
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .withdrawBaseFeeLMA(
+            maxFeePercentage,
+            amountForWithdraw,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).not.to.be.reverted;
+
+      expect(await activePool.getBaseFeeLMADebt()).to.be.equal(
+        debtAmountAlice + amountForWithdraw + BaseFeeLMA_GAS_COMPENSATION
+      );
+    });
+
+    it("should let to repay BaseFeeLMA when it would leave trove with net debt >= minimum net debt", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      const amountForRepay = BigInt("1000000000000000000000");
+
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .repayBaseFeeLMA(
+            amountForRepay,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).not.to.be.reverted;
+    });
+
+    it("should not let to repay BaseFeeLM when it would leave trove with net debt < minimum net debt", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      const amountForRepay = BigInt("1990000000000000000000000000");
+
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .repayBaseFeeLMA(
+            amountForRepay,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).to.be.revertedWith(
+        "BorrowerOps: Trove's net debt must be greater than minimum"
+      );
+    });
+
+    it("should not let to repay BaseFeeLM if repaid amount is greater than current debt ", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      const amountForRepay = debtAmountAlice + BigInt("1");
+
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .repayBaseFeeLMA(
+            amountForRepay,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).to.be.revertedWithPanic(0x11);
+    });
+
+    it("should not let to repay BaseFeeLMA when calling address does not have active trove", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      const amountForRepay = BigInt("1000000000000000000000");
+
+      await expect(
+        borrowerOperations
+          .connect(bob)
+          .repayBaseFeeLMA(
+            amountForRepay,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).to.be.revertedWith("BorrowerOps: Trove does not exist or is closed");
+    });
+
+    it("should not let to reduce the Trove's BaseFeeLMA debt by the correct amount", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      const amountForRepay = BigInt("1000000000000000000000");
+
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .repayBaseFeeLMA(
+            amountForRepay,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).not.to.be.reverted;
+
+      expect(await borrowerOperations.getEntireSystemDebt()).to.be.equal(
+        debtAmountAlice + BaseFeeLMA_GAS_COMPENSATION - amountForRepay
+      );
+    });
+
+    it("should not let to reduce the BaseFeeLMA debt in ActivePool by correct amount", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      const amountForRepay = BigInt("1000000000000000000000");
+
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .repayBaseFeeLMA(
+            amountForRepay,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).not.to.be.reverted;
+
+      expect(await activePool.getBaseFeeLMADebt()).to.be.equal(
+        debtAmountAlice + BaseFeeLMA_GAS_COMPENSATION - amountForRepay
+      );
+    });
+
+    it("should let to repay debt in Recovery Mode", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      const amountForRepay = BigInt("1000000000000000000000");
+
+      await secondaryOracle
+        .connect(deployer)
+        .feedBaseFeeValue("100000000000", await latestBlock());
+
+      await expect(
+        borrowerOperations
+          .connect(alice)
+          .repayBaseFeeLMA(
+            amountForRepay,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).not.to.be.reverted;
+    });
+
+    it("should not let to repay debt if borrower has insufficient BaseFeeLMA balance to cover his debt repayment", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      await openTrove({
+        caller: bob,
+        collAmount: collAmountBob,
+        baseFeeLMAAmount: debtAmountBob,
+      });
+
+      const amountForRepay =
+        (await baseFeeLMAToken.balanceOf(bob.address)) + BigInt("1");
+
+      await expect(
+        borrowerOperations
+          .connect(bob)
+          .repayBaseFeeLMA(
+            amountForRepay,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).to.be.revertedWith(
+        "BorrowerOps: Caller doesnt have enough BaseFeeLMA to make repayment"
+      );
     });
   });
 });
