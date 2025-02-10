@@ -1254,13 +1254,9 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         _contractsCache.activePool.decreaseBaseFeeLMADebt(_BaseFeeLMA);
 
         // send WStETH from Active Pool to CollSurplus Pool
-        collSurplusPool.increaseBalance(_WStETH);
+        _contractsCache.collSurplusPool.increaseBalance(_WStETH);
         _contractsCache.collSurplusPool.accountSurplus(_borrower, _WStETH);
-        // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
-        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawalLimit(
-            _WStETH,
-            true
-        );
+
         _contractsCache.activePool.sendWStETH(
             address(_contractsCache.collSurplusPool),
             _WStETH
