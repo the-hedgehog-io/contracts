@@ -67,6 +67,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
   });
 
   const collAmountAlice = BigInt("200000000000000000000");
+  const collAmountAliceExtended = BigInt("2000000000000000000000");
   const debtAmountAlice = BigInt("2000000000000000000000000000");
   const collAmountBob = BigInt("200000000000000000000");
   const debtAmountBob = BigInt("1280000000000000000000000000");
@@ -414,10 +415,10 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       );
     });
 
-    it("should let to open trove and close trove in Normal Mode", async () => {
+    it("should let to open trove and close trove in Normal Mode with sufficent collateral in system", async () => {
       await openTrove({
         caller: alice,
-        collAmount: collAmountAlice,
+        collAmount: collAmountAliceExtended,
         baseFeeLMAAmount: debtAmountAlice,
       });
 
@@ -526,10 +527,10 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       console.log(await troveManager.L_BaseFeeLMADebt());
     });
 
-    it("should allows a user to open a Trove, then close it, then re-open it", async () => {
+    it("should allows a user to open a Trove, then close it, then re-open it with sufficent collateral in system", async () => {
       await openTrove({
         caller: alice,
-        collAmount: collAmountAlice,
+        collAmount: collAmountAliceExtended,
         baseFeeLMAAmount: debtAmountAlice,
       });
 

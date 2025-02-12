@@ -673,6 +673,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
         _requireNewTCRisAboveCCR(newTCR);
 
+        // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
+        _handleWithdrawalLimit(coll, false);
+
         troveManagerCached.removeStake(msg.sender);
         troveManagerCached.closeTrove(msg.sender);
 
