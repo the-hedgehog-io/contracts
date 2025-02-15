@@ -9,7 +9,6 @@ contract BorrowerOperationsLiquidationsTest is BorrowerOperations {
     using SafeMath for uint256;
 
     IERC20 collToken;
-    uint256 public unusedWithdrawalLimit;
     uint public withdrawalLimitThreshould = 100000000000000000000;
 
     constructor(address _activePool, IERC20 _collToken) {

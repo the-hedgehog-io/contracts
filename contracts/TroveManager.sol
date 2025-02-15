@@ -1128,7 +1128,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         }
 
         if (_WStETH > 0) {
-            // Hedgehog Updates: Update Dynamic Withdrawl Limits but do not revert tx if exceeds 80% single tx limit
+            // Hedgehog Updates: Update Dynamic Withdrawal Limits but do not revert tx if exceeds 80% single tx limit
             IBorrowerOperations(borrowerOperationsAddress)
                 .handleWithdrawalLimit(_WStETH, true);
             _activePool.sendWStETH(_liquidator, _WStETH);
@@ -1453,14 +1453,14 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         contractsCache.activePool.decreaseBaseFeeLMADebt(
             totals.totalBaseFeeLMAToRedeem
         );
+        contractsCache.activePool.sendWStETH(
+            msg.sender,
+            totals.WStETHToSendToRedeemer
+        );
         // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
         IBorrowerOperations(borrowerOperationsAddress).handleWithdrawalLimit(
             totals.totalWStETHDrawn,
             true
-        );
-        contractsCache.activePool.sendWStETH(
-            msg.sender,
-            totals.WStETHToSendToRedeemer
         );
     }
 

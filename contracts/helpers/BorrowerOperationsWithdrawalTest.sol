@@ -8,7 +8,7 @@ import "../dependencies/LiquityMath.sol";
 contract BorrowerOperationsWithdrawalTest is HedgehogBase {
     uint256 lastWithdrawalTimestamp;
     IERC20 collToken;
-    uint256 unusedWithdrawlLimit;
+    uint256 unusedWithdrawalLimit;
 
     constructor(address _activePool, IERC20 _collToken) {
         activePool = IActivePool(_activePool);
@@ -45,7 +45,7 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
         collToken.transferFrom(msg.sender, address(activePool), _collAmount);
         activePool.increaseBalance(_collAmount);
 
-        _updateWithdrawlLimitFromCollIncrease(oldColl, _collAmount);
+        _updateWithdrawalLimitFromCollIncrease(oldColl, _collAmount);
     }
 
     function addColl(
@@ -100,7 +100,7 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
     ) internal {
         uint256 previousColl = activePool.getWStETH();
         if (_collWithdrawal > 0) {
-            _checkWithdrawlLimit(_collWithdrawal);
+            _checkWithdrawalLimit(_collWithdrawal);
             activePool.sendWStETH(msg.sender, _collWithdrawal);
         }
         if (_collIncrease > 0) {
@@ -111,11 +111,11 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
             );
             activePool.increaseBalance(_collIncrease);
 
-            _updateWithdrawlLimitFromCollIncrease(previousColl, _collIncrease);
+            _updateWithdrawalLimitFromCollIncrease(previousColl, _collIncrease);
         }
     }
 
-    function _updateWithdrawlLimitFromCollIncrease(
+    function _updateWithdrawalLimitFromCollIncrease(
         uint256 _previousColl,
         uint256 _collIncrease
     ) internal {
@@ -127,18 +127,18 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
             lastWithdrawalTimestamp = block.timestamp - 720 minutes;
         }
 
-        unusedWithdrawlLimit = newLimit;
+        unusedWithdrawalLimit = newLimit;
     }
 
-    function _checkWithdrawlLimit(uint256 _collWithdrawal) internal {
+    function _checkWithdrawalLimit(uint256 _collWithdrawal) internal {
         if (_collWithdrawal > 0) {
             // If coll in the system is greater then threshold - we check if user may withdraw the desired amount. Otherwise they are free to withdraw whole amount
-            if (activePool.getWStETH() > WITHDRAWL_LIMIT_THRESHOLD) {
+            if (activePool.getWStETH() > WITHDRAWAL_LIMIT_THRESHOLD) {
                 (uint256 fullLimit, uint256 singleTxWithdrawable) = LiquityMath
-                    ._checkWithdrawlLimit(
+                    ._checkWithdrawalLimit(
                         lastWithdrawalTimestamp,
                         EXPAND_DURATION,
-                        unusedWithdrawlLimit,
+                        unusedWithdrawalLimit,
                         activePool.getWStETH()
                     );
 
@@ -148,12 +148,12 @@ contract BorrowerOperationsWithdrawalTest is HedgehogBase {
                     );
                 }
 
-                // Update current unusedWithdrawlLimit
-                unusedWithdrawlLimit = fullLimit - _collWithdrawal;
+                // Update current unusedWithdrawalLimit
+                unusedWithdrawalLimit = fullLimit - _collWithdrawal;
             } else {
-                unusedWithdrawlLimit = activePool.getWStETH();
+                unusedWithdrawalLimit = activePool.getWStETH();
             }
-            // Update the withdrawl recorded timestamp
+            // Update the withdrawal recorded timestamp
             lastWithdrawalTimestamp = block.timestamp;
         }
     }

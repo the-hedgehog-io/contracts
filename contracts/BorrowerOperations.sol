@@ -54,9 +54,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     ISortedTroves public sortedTroves;
 
     // HEDGEHOG UPDATES: Added two new public variables
-    // Two variables that are used to track and calculate collateral withdrawl limits
+    // Two variables that are used to track and calculate collateral withdrawal limits
     uint256 public lastWithdrawalTimestamp;
-    uint256 public unusedWithdrawlLimit;
+    uint256 public unusedWithdrawalLimit;
 
     /* --- Variable container structs  ---
 
@@ -175,7 +175,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         WStETHToken = _wStETHTokenAddress;
         feesRouter = _feesRouter;
 
-        // Setting a value of block.timestamp 720 minutes ago to make sure that in any case first withdrawl wouldn't get decreased unfairly
+        // Setting a value of block.timestamp 720 minutes ago to make sure that in any case first withdrawal wouldn't get decreased unfairly
         lastWithdrawalTimestamp = block.timestamp - EXPAND_DURATION;
 
         emit TroveManagerAddressChanged(_troveManagerAddress);
@@ -534,13 +534,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             _collIncrease,
             _collWithdrawal
         );
-        /**
-         * HEDGEHOG UPDATES: Perform withdrawl limit check if adjustTrove intent is coll withdraw
-         */
-        if (_collWithdrawal > 0) {
-            // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
-            _handleWithdrawalLimit(_collWithdrawal, false);
-        }
 
         vars.netDebtChange = _BaseFeeLMAChange;
 
@@ -636,6 +629,14 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             _isDebtIncrease,
             vars.netDebtChange
         );
+
+        /**
+         * HEDGEHOG UPDATES: Perform withdrawal limit check if adjustTrove intent is coll withdraw
+         */
+        if (_collWithdrawal > 0) {
+            // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
+            _handleWithdrawalLimit(_collWithdrawal, false);
+        }
     }
 
     // Hedgehog Updates: Do not deduct gas fee compensation from trove Debt as user just received less tokens during position opening
@@ -816,7 +817,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * Send funds from User's account instead of relaying native token through address(this)
      * Manualy increase balance in Active Pool, since it used to be done in the native token fallback
      *
-     * Now also update the contract's withdrawl limit along with the changes to the coll balance in the active pool
+     * Now also update the contract's withdrawal limit along with the changes to the coll balance in the active pool
      */
     // Send WStETH to Active Pool and increase its recorded WStETH balance
     function _activePoolAddColl(
@@ -828,7 +829,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         WStETHToken.safeTransferFrom(msg.sender, address(_activePool), _amount);
         activePool.increaseBalance(_amount);
         // Update withdrawal Limit from collateral addition.
-        _updateWithdrawlLimitFromCollIncrease(oldColl, _amount);
+        _updateWithdrawalLimitFromCollIncrease(oldColl, _amount);
     }
 
     // Issue the specified amount of BaseFeeLMA to _account and increases the total active debt (_netDebtIncrease potentially includes a BaseFeeLMAFee)
@@ -1168,12 +1169,12 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     /**
      * HEDGEHOG UPDATES:
-     * New function to handle dynamic Withdrawl Limit.
+     * New function to handle dynamic Withdrawal Limit.
      * the new dynamic collateral withdrawal limit in our smart contract, inspired by a similar mechanism in the Fluid InstaDApp protocol.
      * The purpose of this mechanism is to dynamically adjust the withdrawal limit based on the collateral added or removed from the system,
      * while considering the time elapsed since the last withdrawal.
      *
-     * Basic Withdrawl Dynamic Limits overview:
+     * Basic Withdrawal Dynamic Limits overview:
      * When Collateral is Added to the System:
      * 1) When a user adds collateral, the new collateral amount is calculated by adding the deposit to the existing collateral.
      * 2) Calculate New Withdrawal Limit:
@@ -1202,12 +1203,12 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         bool _isLiquidation
     ) internal {
         // If coll in the system is greater then threshold - we check if user may withdraw the desired amount. Otherwise they are free to withdraw whole amount
-        if (activePool.getWStETH() > WITHDRAWL_LIMIT_THRESHOLD) {
+        if (activePool.getWStETH() > WITHDRAWAL_LIMIT_THRESHOLD) {
             (uint256 fullLimit, uint256 singleTxWithdrawable) = LiquityMath
-                ._checkWithdrawlLimit(
+                ._checkWithdrawalLimit(
                     lastWithdrawalTimestamp,
                     EXPAND_DURATION,
-                    unusedWithdrawlLimit,
+                    unusedWithdrawalLimit,
                     activePool.getWStETH()
                 );
 
@@ -1217,23 +1218,23 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
                         "BO: Cannot withdraw more then 80% of withdrawble in one tx"
                     );
                 }
-                // Update current unusedWithdrawlLimit
-                unusedWithdrawlLimit = fullLimit - _collWithdrawal;
+                // Update current unusedWithdrawalLimit
+                unusedWithdrawalLimit = fullLimit - _collWithdrawal;
             }
         } else {
-            unusedWithdrawlLimit = activePool.getWStETH();
+            unusedWithdrawalLimit = activePool.getWStETH();
         }
-        // Update the withdrawl recorded timestamp
+        // Update the withdrawal recorded timestamp
         lastWithdrawalTimestamp = block.timestamp;
     }
 
     /**
      * HEDGEHOG UPDATES:
-     * New function that updates dynamic withdrawl limit during the coll increase
+     * New function that updates dynamic withdrawal limit during the coll increase
      *
      * Accepts activePool.getWstETH() as _previousColl and _collIncrease as the amount of coll that is about to get added to activePool
      */
-    function _updateWithdrawlLimitFromCollIncrease(
+    function _updateWithdrawalLimitFromCollIncrease(
         uint256 _previousColl,
         uint256 _collIncrease
     ) internal {
@@ -1245,7 +1246,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             lastWithdrawalTimestamp = block.timestamp - EXPAND_DURATION;
         }
 
-        unusedWithdrawlLimit = newLimit;
+        unusedWithdrawalLimit = newLimit;
     }
 
     function handleWithdrawalLimit(
