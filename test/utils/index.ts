@@ -27,6 +27,12 @@ export const setupContracts = async () => {
     deployer.address,
     ethers.parseEther("1000000000000000000000000000")
   );
+
+  await payToken.transfer(
+    setter.address,
+    ethers.parseEther("100000000000000000000000000")
+  );
+
   await payToken.transfer(
     hacker.address,
     ethers.parseEther("100000000000000000000000000")

@@ -3,12 +3,7 @@ import { BigNumberish } from "ethers";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
 import { getSigners } from "../../index";
-import {
-  BorrowerOperations,
-  BorrowerOperationsLiquidationsTest,
-  BorrowerOperationsWithdrawalTest,
-  TERC20,
-} from "../../../../typechain-types";
+import { BorrowerOperations, TERC20 } from "../../../../typechain-types";
 
 export type OpenTroveParams = {
   caller: SignerWithAddress;
@@ -26,10 +21,7 @@ export const getOpenTrove = async ({
   borrowerOperations,
 }: {
   payToken: TERC20;
-  borrowerOperations:
-    | BorrowerOperations
-    | BorrowerOperationsLiquidationsTest
-    | BorrowerOperationsWithdrawalTest;
+  borrowerOperations: BorrowerOperations;
 }) => {
   const [deployer, , , , bob] = await getSigners({
     fork: false,

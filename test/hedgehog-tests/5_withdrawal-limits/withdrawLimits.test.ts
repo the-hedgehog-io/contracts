@@ -4,10 +4,10 @@ import { BigNumberish } from "ethers";
 import { ethers } from "hardhat";
 import {
   ActivePool,
-  BorrowerOperationsWithdrawalTest,
+  BorrowerOperations,
   TERC20,
 } from "../../../typechain-types";
-import { getSigners } from "../../utils";
+import { getSigners, setupContracts } from "../../utils";
 import { expect } from "chai";
 import timestring from "timestring";
 import { getOpenTrove, OpenTrove } from "../../utils/shared";
@@ -18,9 +18,9 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
   context("Withdrawal functionality. Flow #1", () => {
     let alice: SignerWithAddress;
 
-    let activePool: ActivePool;
-    let borrowerOperations: BorrowerOperationsWithdrawalTest;
+    let borrowerOperations: BorrowerOperations;
     let payToken: TERC20;
+
     let openTrove: OpenTrove;
 
     const firstDeposit = BigInt("1000000000000000000000");
@@ -44,30 +44,12 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       [alice] = await getSigners({
         fork: false,
       });
-
-      payToken = await (
-        await ethers.getContractFactory("TERC20")
-      ).deploy("TesToken", "TST", ethers.parseEther("1500000000"));
-
-      activePool = await (
-        await ethers.getContractFactory("ActivePool")
-      ).deploy();
-
-      borrowerOperations = await (
-        await ethers.getContractFactory("BorrowerOperationsWithdrawalTest")
-      ).deploy(activePool.target, payToken.target);
-
-      await activePool.setAddresses(
-        borrowerOperations.target,
-        borrowerOperations.target,
-        borrowerOperations.target,
-        borrowerOperations.target,
-        payToken.target,
-        borrowerOperations.target
-      );
+      ({ borrowerOperations, payToken } = await setupContracts());
 
       ({ openTrove } = await getOpenTrove({ payToken, borrowerOperations }));
     });
+
+    const debtAmountAlice = BigInt("2000000000000000000000000000");
 
     type AdjustTroveParams = {
       caller: SignerWithAddress;
@@ -98,8 +80,10 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     };
 
     it("should let open the trove (1000): step 1", async () => {
-      console.log(alice.address);
-      await openTrove({ collAmount: firstDeposit });
+      await openTrove({
+        collAmount: firstDeposit,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
     });
 
     it("should let withdraw (100): step2", async () => {

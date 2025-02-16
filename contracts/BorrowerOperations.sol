@@ -586,10 +586,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         // When the adjustment is a debt repayment, check it's a valid amount and that the caller has enough BaseFeeLMA
         if (!_isDebtIncrease && _BaseFeeLMAChange > 0) {
-            console.log(
-                "_getNetDebt(vars.debt).sub(vars.netDebtChange)",
-                _getNetDebt(vars.debt).sub(vars.netDebtChange)
-            );
             _requireAtLeastMinNetDebt(
                 _getNetDebt(vars.debt).sub(vars.netDebtChange)
             );
@@ -716,6 +712,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     // HedgehogUpdates: new private function, that checks if there was a transaction with a trove in the current block
     // virtual added for changes in Arbitrum deployment through inheritance
     function _checkAndSetUpdateBlock(address _borrower) internal virtual {
+        console.log(troveManager.getTroveUpdateBlock(_borrower));
+
         if (troveManager.getTroveUpdateBlock(_borrower) == block.number) {
             revert TroveAdjustedThisBlock();
         }
