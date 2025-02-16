@@ -135,7 +135,6 @@ library LiquityMath {
                 .div(_debt)
                 .mul(DECIMAL_PRECISION)
                 .div(_price);
-            console.log("new coll ratio", newCollRatio);
 
             return newCollRatio;
         }

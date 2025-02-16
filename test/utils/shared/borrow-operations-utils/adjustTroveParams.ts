@@ -1,10 +1,6 @@
 import { BigNumberish } from "ethers";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import {
-  BorrowerOperations,
-  BorrowerOperationsWithdrawalTest,
-  TERC20,
-} from "../../../../typechain-types";
+import { BorrowerOperations, TERC20 } from "../../../../typechain-types";
 import { getSigners } from "../../index";
 import { ethers } from "hardhat";
 
@@ -23,7 +19,7 @@ export const getAdjustTroveParams = async ({
   borrowerOperations,
   payToken,
 }: {
-  borrowerOperations: BorrowerOperations | BorrowerOperationsWithdrawalTest;
+  borrowerOperations: BorrowerOperations;
   payToken: TERC20;
 }) => {
   const [deployer, , , , bob] = await getSigners({

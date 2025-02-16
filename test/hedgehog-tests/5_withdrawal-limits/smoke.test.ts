@@ -6,18 +6,14 @@ import {
   ActivePool,
   BaseFeeLMAToken,
   BaseFeeOracle,
-  BorrowerOperationsLiquidationsTest,
+  BorrowerOperations,
   FeesRouter,
   SortedTroves,
   TERC20,
   TroveManager,
 } from "../../../typechain-types";
-import { getSigners } from "../../utils";
-import {
-  getOpenTrove,
-  OpenTrove,
-  setupContractsForLiquid,
-} from "../../utils/shared";
+import { getSigners, setupContracts } from "../../utils";
+import { getOpenTrove, OpenTrove } from "../../utils/shared";
 import { expect } from "chai";
 
 describe("Hedgehog Core Contracts Smoke tests", () => {
@@ -29,7 +25,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     eva: SignerWithAddress; // Fee recipient
   let BaseFeeLMA_GAS_COMPENSATION: bigint;
   let sortedTroves: SortedTroves;
-  let borrowerOperations: BorrowerOperationsLiquidationsTest;
+  let borrowerOperations: BorrowerOperations;
   let payToken: TERC20;
   let troveManager: TroveManager;
   let secondaryOracle: BaseFeeOracle;
@@ -55,7 +51,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       troveManager,
       activePool,
       feesRouter,
-    } = await setupContractsForLiquid());
+    } = await setupContracts());
     BaseFeeLMA_GAS_COMPENSATION =
       await borrowerOperations.BaseFeeLMA_GAS_COMPENSATION();
     MIN_NET_DEBT = await borrowerOperations.MIN_NET_DEBT();
@@ -608,8 +604,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       });
 
       expect(await baseFeeLMAToken.balanceOf(alice.address)).to.be.equal(
-        debtAmountAlice -
-          (debtAmountAlice * BORROWING_FEE_FLOOR) / ethers.parseEther("1")
+        debtAmountAlice
       );
     });
 
