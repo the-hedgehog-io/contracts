@@ -1222,7 +1222,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             if (!_isLiquidation) {
                 if (singleTxWithdrawable < _collWithdrawal) {
                     revert(
-                        "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+                        "BO: Cannot withdraw more than 80% of withdrawble in one tx"
                     );
                 }
                 // Update current unusedWithdrawalLimit

@@ -116,7 +116,7 @@ contract PriceFeed is Ownable, BaseMath {
      * Uses a main oracle and a fallback oracle in case main one fails. If both fail,
      * it uses the last good price seen by Hedgehog.
      *
-     * Hedgehog updates: now both oracles are not allowed to have a price diviation of more then 12.5% between consecutive block
+     * Hedgehog updates: now both oracles are not allowed to have a price diviation of more than 12.5% between consecutive block
      */
     function fetchPrice() external returns (uint256) {
         // Get current and previous price data from Main oracle, and current price data from Backup

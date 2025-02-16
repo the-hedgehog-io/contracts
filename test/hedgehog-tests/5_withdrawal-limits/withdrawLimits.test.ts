@@ -107,10 +107,10 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         .reverted;
     });
 
-    it("should revert if user tries to withdraw more then 80% withdrawable (322): step3", async () => {
+    it("should revert if user tries to withdraw more than 80% withdrawable (322): step3", async () => {
       await increase(timestring("1 minutes"));
       await expect(decreaseColl({ amount: secondWithdraw })).to.be.revertedWith(
-        "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+        "BO: Cannot withdraw more than 80% of withdrawble in one tx"
       );
     });
 
@@ -120,10 +120,10 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await decreaseColl({ amount: thirdWithdraw }); //521000000000000000000
     });
 
-    it("should revert  if user tries to withdraw more then 80% withdrawable (110): step 5", async () => {
+    it("should revert  if user tries to withdraw more than 80% withdrawable (110): step 5", async () => {
       await increase(timestring("10 minutes"));
       await expect(decreaseColl({ amount: fourthWithdraw })).to.be.revertedWith(
-        "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+        "BO: Cannot withdraw more than 80% of withdrawble in one tx"
       );
     });
 
@@ -160,7 +160,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     it("should revert (600): step 12", async () => {
       await increase(timestring("1 minute"));
       await expect(decreaseColl({ amount: eighthWithdraw })).to.be.revertedWith(
-        "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+        "BO: Cannot withdraw more than 80% of withdrawble in one tx"
       );
     });
 
@@ -176,7 +176,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await expect(
         decreaseColl({ amount: eleventhWithdraw })
       ).to.be.revertedWith(
-        "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+        "BO: Cannot withdraw more than 80% of withdrawble in one tx"
       );
     });
   });

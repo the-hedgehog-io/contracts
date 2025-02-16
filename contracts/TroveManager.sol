@@ -1967,7 +1967,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
 
         newBaseRate = LiquityMath._min(newBaseRate, DECIMAL_PRECISION); // cap baseRate at a maximum of 100%
         //assert(newBaseRate <= DECIMAL_PRECISION); // This is already enforced in the line above
-        // Hedgehog Updates: Remove assertion check to make sure first redemption does not revert after the bootstrapping period if more then 10^18 WstETH was transfer into the contract
+        // Hedgehog Updates: Remove assertion check to make sure first redemption does not revert after the bootstrapping period if more than 10^18 WstETH was transfer into the contract
         // assert(newBaseRate > 0); // Base rate is always non-zero after redemption
 
         // HEDGEHOG UPDATES: succesful redemption now updates only the redemption base rate. Redemption base rate update also received a new event.
