@@ -1388,5 +1388,42 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         "BorrowerOps: Caller doesnt have enough BaseFeeLMA to make repayment"
       );
     });
+
+    it("should not let to repay debt if borrower has insufficient BaseFeeLMA balance to cover his debt repayment", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice + BigInt("1"),
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+
+      await openTrove({
+        caller: bob,
+        collAmount: collAmountBob + BigInt("2"),
+        baseFeeLMAAmount: debtAmountBob,
+      });
+
+      await openTrove({
+        caller: carol,
+        collAmount: collAmountAlice + BigInt("3"),
+        baseFeeLMAAmount: BigInt("700000000000000000000000000"),
+      });
+
+      await openTrove({
+        caller: dave,
+        collAmount: collAmountAlice + BigInt(4),
+        baseFeeLMAAmount: BigInt("100000000000000000000000000"),
+      });
+
+      const allTroveCountBefore = await troveManager.getTroveOwnersCount();
+
+      await secondaryOracle
+        .connect(deployer)
+        .feedBaseFeeValue("110000000000", await latestBlock());
+
+      await troveManager.liquidateTroves(2);
+
+      const allTroveCountAfter = await troveManager.getTroveOwnersCount();
+      expect(allTroveCountBefore - allTroveCountAfter).to.be.equal(2);
+    });
   });
 });
