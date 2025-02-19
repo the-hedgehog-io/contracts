@@ -833,8 +833,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         WStETHToken.safeTransferFrom(msg.sender, address(_activePool), _amount);
         activePool.increaseBalance(_amount);
+
         // Update withdrawal Limit from collateral addition.
-        _updateWithdrawalLimitFromCollIncrease(oldColl, _amount);
+        unusedWithdrawalLimit = unusedWithdrawalLimit + _amount / 2;
     }
 
     // Issue the specified amount of BaseFeeLMA to _account and increases the total active debt (_netDebtIncrease potentially includes a BaseFeeLMAFee)
@@ -1207,51 +1208,27 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint256 _collWithdrawal,
         bool _isLiquidation
     ) internal {
-        // If coll in the system is greater then threshold - we check if user may withdraw the desired amount. Otherwise they are free to withdraw whole amount
-        if (activePool.getWStETH() > WITHDRAWAL_LIMIT_THRESHOLD) {
-            (uint256 fullLimit, uint256 singleTxWithdrawable) = LiquityMath
-                ._checkWithdrawalLimit(
-                    lastWithdrawalTimestamp,
-                    EXPAND_DURATION,
-                    unusedWithdrawalLimit,
-                    activePool.getWStETH()
-                );
+        (uint256 fullLimit, uint256 singleTxWithdrawable) = LiquityMath
+            ._checkWithdrawalLimit(
+                lastWithdrawalTimestamp,
+                EXPAND_DURATION,
+                unusedWithdrawalLimit,
+                activePool.getWStETH()
+            );
+        console.log("New fullLimit: ", fullLimit);
+        console.log("New singleTxWithdrawable: ", singleTxWithdrawable);
 
-            if (!_isLiquidation) {
-                if (singleTxWithdrawable < _collWithdrawal) {
-                    revert(
-                        "BO: Cannot withdraw more than 80% of withdrawble in one tx"
-                    );
-                }
-                // Update current unusedWithdrawalLimit
-                unusedWithdrawalLimit = fullLimit - _collWithdrawal;
+        if (!_isLiquidation) {
+            if (singleTxWithdrawable < _collWithdrawal) {
+                revert(
+                    "BO: Cannot withdraw more than 80% of withdrawable in one tx"
+                );
             }
-        } else {
-            unusedWithdrawalLimit = activePool.getWStETH();
+            // Update current unusedWithdrawalLimit
+            unusedWithdrawalLimit = fullLimit - _collWithdrawal;
         }
         // Update the withdrawal recorded timestamp
         lastWithdrawalTimestamp = block.timestamp;
-    }
-
-    /**
-     * HEDGEHOG UPDATES:
-     * New function that updates dynamic withdrawal limit during the coll increase
-     *
-     * Accepts activePool.getWstETH() as _previousColl and _collIncrease as the amount of coll that is about to get added to activePool
-     */
-    function _updateWithdrawalLimitFromCollIncrease(
-        uint256 _previousColl,
-        uint256 _collIncrease
-    ) internal {
-        uint256 newColl = _previousColl + _collIncrease;
-
-        uint256 newLimit = (_previousColl / 2) + (_collIncrease / 2);
-        if (newLimit >= _previousColl) {
-            newLimit = newColl / 2;
-            lastWithdrawalTimestamp = block.timestamp - EXPAND_DURATION;
-        }
-
-        unusedWithdrawalLimit = newLimit;
     }
 
     function handleWithdrawalLimit(

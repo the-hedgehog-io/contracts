@@ -357,7 +357,7 @@
 //               ethers.ZeroAddress
 //             )
 //           ).to.be.revertedWith(
-//             "BO: Cannot withdraw more than 80% of withdrawble in one tx"
+//             "BO: Cannot withdraw more than 80% of withdrawable in one tx"
 //           );
 //         });
 //         it("allows you to withdraw the amount in two small installments ", async () => {

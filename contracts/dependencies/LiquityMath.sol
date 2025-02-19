@@ -16,6 +16,8 @@ library LiquityMath {
 
     uint internal constant DECIMAL_PRECISION = 1e18;
 
+    uint256 public constant WITHDRAWAL_LIMIT_THRESHOLD = 100000000000000000000;
+
     /* Precision for Nominal ICR (independent of price). Rationale for the value:
      *
      * - Making it “too high” could lead to overflows.
@@ -163,26 +165,42 @@ library LiquityMath {
         uint256 _unusedWithdrawalLimit,
         uint256 _currentTotalColl
     ) internal view returns (uint256 fullLimit, uint256 singleTxWithdrawable) {
-        uint256 DENOMINATOR = 100000;
-        // First, we calculate how much time has passed since the last withdrawal
-        uint256 minutesPassed = block.timestamp - _lastWithdrawTimestamp;
-
-        // We calculate the percentage based on the time diff between last withdrawal and current moment
-        uint256 percentageToGet = minutesPassed > _expandDuration
-            ? DENOMINATOR
-            : (minutesPassed * DENOMINATOR) / _expandDuration;
-
+        // If coll in the system is greater than the threshold - we check if user may withdraw the desired amount
+        // Otherwise they are free to withdraw whole amount
+        if (_currentTotalColl <= WITHDRAWAL_LIMIT_THRESHOLD) {
+            return (_currentTotalColl, _currentTotalColl);
+        }
+        
         // We calculate 50% of the current total coll
-        uint256 totalCollBasedLimit = _currentTotalColl / 2;
+        uint256 totalCollBasedLimit = 
+            WITHDRAWAL_LIMIT_THRESHOLD + 
+            (_currentTotalColl - WITHDRAWAL_LIMIT_THRESHOLD) / 2;
+
+        console.log("OLD _unusedWithdrawalLimit", _unusedWithdrawalLimit);
+        console.log("_currentTotalColl", _currentTotalColl);
+        console.log("Updatged totalCollBasedLimit", totalCollBasedLimit);
 
         // Now we calculate an amount that can be added based on the newest coll value
         uint256 additionFromNewColl;
 
         if (totalCollBasedLimit > _unusedWithdrawalLimit) {
+            uint256 DENOMINATOR = 100000;
+
+            // First, we calculate how much time has passed since the last withdrawal
+            uint256 minutesPassed = block.timestamp - _lastWithdrawTimestamp;
+
+            // We calculate the percentage based on the time diff between last withdrawal and current moment
+            uint256 percentageToGet = minutesPassed > _expandDuration
+                ? DENOMINATOR
+                : (minutesPassed * DENOMINATOR) / _expandDuration;
+
             additionFromNewColl =
                 ((totalCollBasedLimit - _unusedWithdrawalLimit) *
                     percentageToGet) /
                 DENOMINATOR;
+
+            console.log("percentageToGet", percentageToGet);
+            console.log("additionFromNewColl", additionFromNewColl);
         }
         // Ultimately we get two values: Full withdrawal limit and an instant withdrawal limit which is 80% of the full one
         fullLimit = _unusedWithdrawalLimit + additionFromNewColl;

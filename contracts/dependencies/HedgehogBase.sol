@@ -42,8 +42,6 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
 
     uint256 public constant EXPAND_DURATION = 720 minutes;
 
-    uint256 public constant WITHDRAWAL_LIMIT_THRESHOLD = 100000000000000000000;
-
     uint public constant PERCENT_DIVISOR = 200; // dividing by 200 yields 0.5%
 
     uint public constant BORROWING_FEE_FLOOR = (DECIMAL_PRECISION / 1000) * 5; // 0.5%
