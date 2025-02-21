@@ -15,7 +15,7 @@ library LiquityMath {
 
     uint internal constant DECIMAL_PRECISION = 1e18;
 
-    uint256 public constant WITHDRAWAL_LIMIT_THRESHOLD = 100000000000000000000;
+    uint256 public constant WITHDRAWAL_LIMIT_THRESHOLD = 10 ether;
 
     /* Precision for Nominal ICR (independent of price). Rationale for the value:
      *
