@@ -1457,10 +1457,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             msg.sender,
             totals.WStETHToSendToRedeemer
         );
+
         // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
         IBorrowerOperations(borrowerOperationsAddress).handleWithdrawalLimit(
             totals.totalWStETHDrawn,
-            true
+            false
         );
     }
 
