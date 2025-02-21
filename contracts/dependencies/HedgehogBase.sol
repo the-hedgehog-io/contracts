@@ -8,6 +8,7 @@ import "../interfaces/IActivePool.sol";
 import "../interfaces/IDefaultPool.sol";
 import "../interfaces/IPriceFeed.sol";
 import "../interfaces/IHedgehogBase.sol";
+import "hardhat/console.sol";
 
 /**
  * @notice Fork of LiquityMath with an upgraded pragma and:
@@ -107,8 +108,6 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
         uint _maxFeePercentage
     ) internal pure {
         uint feePercentage = _fee.mul(DECIMAL_PRECISION).div(_amount);
-        console.log("fee perc", feePercentage);
-        console.log("max fee perc", _maxFeePercentage);
         require(
             feePercentage <= _maxFeePercentage,
             "Fee exceeded provided maximum"

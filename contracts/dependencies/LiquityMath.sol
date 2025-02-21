@@ -3,7 +3,6 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "hardhat/console.sol";
 
 /**
  * @notice A fork of Liquity Math library with an upgraded pragma
@@ -129,9 +128,6 @@ library LiquityMath {
         uint _price
     ) internal pure returns (uint) {
         if (_debt > 0) {
-            console.log("price", _price);
-            console.log("coll", _coll);
-            console.log("debt", _debt);
             uint newCollRatio = _coll
                 .mul(DECIMAL_PRECISION)
                 .div(_debt)
@@ -176,10 +172,6 @@ library LiquityMath {
             WITHDRAWAL_LIMIT_THRESHOLD + 
             (_currentTotalColl - WITHDRAWAL_LIMIT_THRESHOLD) / 2;
 
-        console.log("OLD _unusedWithdrawalLimit", _unusedWithdrawalLimit);
-        console.log("_currentTotalColl", _currentTotalColl);
-        console.log("Updatged totalCollBasedLimit", totalCollBasedLimit);
-
         // Now we calculate an amount that can be added based on the newest coll value
         uint256 additionFromNewColl;
 
@@ -198,9 +190,6 @@ library LiquityMath {
                 ((totalCollBasedLimit - _unusedWithdrawalLimit) *
                     percentageToGet) /
                 DENOMINATOR;
-
-            console.log("percentageToGet", percentageToGet);
-            console.log("additionFromNewColl", additionFromNewColl);
         }
         // Ultimately we get two values: Full withdrawal limit and an instant withdrawal limit which is 80% of the full one
         fullLimit = _unusedWithdrawalLimit + additionFromNewColl;
