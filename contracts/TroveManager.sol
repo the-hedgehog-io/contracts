@@ -717,6 +717,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             totals.totalBaseFeeLMAGasCompensation,
             totals.totalCollGasCompensation
         );
+
+        // Hedgehog Updates: Update Dynamic Withdrawal Limits but do not revert tx if exceeds 80% single tx limit
+        IBorrowerOperations(borrowerOperationsAddress)
+            .handleWithdrawalLimit(totals.totalCollInSequence, true);
     }
 
     /*
@@ -934,6 +938,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             totals.totalCollGasCompensation,
             totals.totalBaseFeeLMAGasCompensation
         );
+
         // Send gas compensation to caller
         _sendGasCompensation(
             activePoolCached,
@@ -941,6 +946,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             totals.totalBaseFeeLMAGasCompensation,
             totals.totalCollGasCompensation
         );
+
+        // Hedgehog Updates: Update Dynamic Withdrawal Limits but do not revert tx if exceeds 80% single tx limit
+        IBorrowerOperations(borrowerOperationsAddress)
+            .handleWithdrawalLimit(totals.totalCollInSequence, true);
     }
 
     /*
@@ -1128,9 +1137,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         }
 
         if (_WStETH > 0) {
-            // Hedgehog Updates: Update Dynamic Withdrawal Limits but do not revert tx if exceeds 80% single tx limit
-            IBorrowerOperations(borrowerOperationsAddress)
-                .handleWithdrawalLimit(_WStETH, true);
             _activePool.sendWStETH(_liquidator, _WStETH);
         }
     }
