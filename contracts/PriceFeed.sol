@@ -29,7 +29,7 @@ contract PriceFeed is Ownable, BaseMath {
     uint public constant TARGET_DIGITS = 18;
 
     // Maximum time period allowed since Main Oracle's latest round data blockNumber, beyond which Main Oracle is considered frozen.
-    uint public constant TIMEOUT = 39;
+    uint public immutable TIMEOUT;
 
     // HEDGEHOG UPDATES: decrease to 176
     // Maximum deviation allowed between two consecutive Main oracle prices. Hedgehog oracles are getting updated in case there is a 5% diviation price
@@ -65,6 +65,10 @@ contract PriceFeed is Ownable, BaseMath {
 
     event LastGoodPriceUpdated(uint _lastGoodPrice);
     event PriceFeedStatusChanged(Status newStatus);
+
+    constructor(uint _TIMEOUT) {
+        TIMEOUT = _TIMEOUT;
+    }
 
     // --- Dependency setters ---
 
@@ -112,7 +116,7 @@ contract PriceFeed is Ownable, BaseMath {
      * Uses a main oracle and a fallback oracle in case main one fails. If both fail,
      * it uses the last good price seen by Hedgehog.
      *
-     * Hedgehog updates: now both oracles are not allowed to have a price diviation of more then 12.5% between consecutive block
+     * Hedgehog updates: now both oracles are not allowed to have a price diviation of more than 12.5% between consecutive block
      */
     function fetchPrice() external returns (uint256) {
         // Get current and previous price data from Main oracle, and current price data from Backup
@@ -416,7 +420,7 @@ contract PriceFeed is Ownable, BaseMath {
 
     function _badMainOracleResponse(
         Response memory _response
-    ) internal view returns (bool) {
+    ) internal view virtual returns (bool) {
         // Check for an invalid roundId that is 0
         if (_response.roundId == 0) {
             return true;
@@ -437,7 +441,7 @@ contract PriceFeed is Ownable, BaseMath {
 
     function _mainOracleIsFrozen(
         Response memory _response
-    ) internal view returns (bool) {
+    ) internal view virtual returns (bool) {
         return (block.number - _response.blockNumber) > TIMEOUT;
     }
 
@@ -473,7 +477,7 @@ contract PriceFeed is Ownable, BaseMath {
 
     function _backupOracleIsBroken(
         Response memory _response
-    ) internal view returns (bool) {
+    ) internal view virtual returns (bool) {
         // Check for an invalid roundId that is 0
         if (_response.roundId == 0) {
             return true;
@@ -494,7 +498,7 @@ contract PriceFeed is Ownable, BaseMath {
 
     function _backupIsFrozen(
         Response memory _backupResponse
-    ) internal view returns (bool) {
+    ) internal view virtual returns (bool) {
         return block.number - _backupResponse.blockNumber > TIMEOUT;
     }
 

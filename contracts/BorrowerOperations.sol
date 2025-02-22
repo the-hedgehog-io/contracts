@@ -54,9 +54,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     ISortedTroves public sortedTroves;
 
     // HEDGEHOG UPDATES: Added two new public variables
-    // Two variables that are used to track and calculate collateral withdrawl limits
-    uint256 public lastWithdrawlTimestamp;
-    uint256 public unusedWithdrawlLimit;
+    // Two variables that are used to track and calculate collateral withdrawal limits
+    uint256 public lastWithdrawalTimestamp;
+    uint256 public unusedWithdrawalLimit;
 
     /* --- Variable container structs  ---
 
@@ -133,7 +133,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * HEDGEHOG UPDATES:
      * ERC20 is used as a collateral instead of native token.
      * Setting erc20 address in the initialisation
-     * Setting initial value for newly added lastWithdrawTimestamp
+     * Setting initial value for newly added lastWithdrawalTimestamp
      */
     function setAddresses(
         address _troveManagerAddress,
@@ -175,8 +175,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         WStETHToken = _wStETHTokenAddress;
         feesRouter = _feesRouter;
 
-        // Setting a value of block.timestamp 720 minutes ago to make sure that in any case first withdrawl wouldn't get decreased unfairly
-        lastWithdrawlTimestamp = block.timestamp - (720 minutes);
+        // Setting a value of block.timestamp 720 minutes ago to make sure that in any case first withdrawal wouldn't get decreased unfairly
+        lastWithdrawalTimestamp = block.timestamp - EXPAND_DURATION;
 
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit ActivePoolAddressChanged(_activePoolAddress);
@@ -201,6 +201,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * now passing a new param _collAmount
      * checking if _amount is greater then 0
      * Function is no longer payable
+     * virtual added for testing purposes, might be removed
      */
     function openTrove(
         uint _maxFeePercentage,
@@ -208,7 +209,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint _collAmount,
         address _upperHint,
         address _lowerHint
-    ) external {
+    ) external virtual {
         // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
         {
             _checkAndSetUpdateBlock(msg.sender);
@@ -349,6 +350,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * now passing a new param _collIncrease in _adjustTrove function - in this particular case it is a passed param _amount
      * checking if _amount is greater then 0
      * Function is no longer payable
+     * virtual added for testing purposes, might be removed
      */
     // Send WStETH as collateral to a trove. Called by only the Stability Pool.
     function moveWStETHGainToTrove(
@@ -356,7 +358,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _upperHint,
         address _lowerHint,
         uint _amount
-    ) external {
+    ) external virtual {
         require(_amount > 0, "Borrower Operations: Invalid amount");
         _requireCallerIsStabilityPool();
         _adjustTrove(
@@ -475,6 +477,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * It therefore expects either a positive _collIncrease, or a positive _collWithdrawal argument.
      *
      * If both are positive, it will revert.
+     *
+     * virtual added for testing purposes, might be removed
      */
     function _adjustTrove(
         address _borrower,
@@ -485,7 +489,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _upperHint,
         address _lowerHint,
         uint _maxFeePercentage
-    ) internal {
+    ) internal virtual {
         {
             // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
             _checkAndSetUpdateBlock(msg.sender);
@@ -527,13 +531,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             _collIncrease,
             _collWithdrawal
         );
-        /**
-         * HEDGEHOG UPDATES: Perform withdrawl limit check if adjustTrove intent is coll withdraw
-         */
-        if (_collWithdrawal > 0) {
-            // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
-            _handleWithdrawlLimit(_collWithdrawal, true);
-        }
 
         vars.netDebtChange = _BaseFeeLMAChange;
 
@@ -564,6 +561,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             _isDebtIncrease,
             vars.price
         );
+
         assert(_collWithdrawal <= vars.coll);
 
         // Check the adjustment satisfies all conditions for the current system mode
@@ -629,10 +627,19 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             _isDebtIncrease,
             vars.netDebtChange
         );
+
+        /**
+         * HEDGEHOG UPDATES: Perform withdrawal limit check if adjustTrove intent is coll withdraw
+         */
+        if (_collWithdrawal > 0) {
+            // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
+            _handleWithdrawalLimit(_collWithdrawal, false);
+        }
     }
 
     // Hedgehog Updates: Do not deduct gas fee compensation from trove Debt as user just received less tokens during position opening
-    function closeTrove() external {
+    // virtual added for testing purposes, might be removed
+    function closeTrove() external virtual {
         // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
         {
             _checkAndSetUpdateBlock(msg.sender);
@@ -664,6 +671,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             price
         );
         _requireNewTCRisAboveCCR(newTCR);
+
+        // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
+        _handleWithdrawalLimit(coll, false);
 
         troveManagerCached.removeStake(msg.sender);
         troveManagerCached.closeTrove(msg.sender);
@@ -699,7 +709,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     // --- Helper functions ---
 
     // HedgehogUpdates: new private function, that checks if there was a transaction with a trove in the current block
-    function _checkAndSetUpdateBlock(address _borrower) private {
+    // virtual added for changes in Arbitrum deployment through inheritance
+    function _checkAndSetUpdateBlock(address _borrower) internal virtual {
         if (troveManager.getTroveUpdateBlock(_borrower) == block.number) {
             revert TroveAdjustedThisBlock();
         }
@@ -719,7 +730,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
 
         troveManager.updateBaseRateFromBorrowing(baseRate);
-
         _requireUserAcceptsFee(
             BaseFeeLMAFee,
             _BaseFeeLMAAmount,
@@ -803,7 +813,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * Send funds from User's account instead of relaying native token through address(this)
      * Manualy increase balance in Active Pool, since it used to be done in the native token fallback
      *
-     * Now also update the contract's withdrawl limit along with the changes to the coll balance in the active pool
+     * Now also update the contract's withdrawal limit along with the changes to the coll balance in the active pool
      */
     // Send WStETH to Active Pool and increase its recorded WStETH balance
     function _activePoolAddColl(
@@ -814,8 +824,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         WStETHToken.safeTransferFrom(msg.sender, address(_activePool), _amount);
         activePool.increaseBalance(_amount);
+
         // Update withdrawal Limit from collateral addition.
-        _updateWithdrawlLimitFromCollIncrease(oldColl, _amount);
+        unusedWithdrawalLimit = unusedWithdrawalLimit + _amount / 2;
     }
 
     // Issue the specified amount of BaseFeeLMA to _account and increases the total active debt (_netDebtIncrease potentially includes a BaseFeeLMAFee)
@@ -1154,12 +1165,12 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     /**
      * HEDGEHOG UPDATES:
-     * New function to handle dynamic Withdrawl Limit.
+     * New function to handle dynamic Withdrawal Limit.
      * the new dynamic collateral withdrawal limit in our smart contract, inspired by a similar mechanism in the Fluid InstaDApp protocol.
      * The purpose of this mechanism is to dynamically adjust the withdrawal limit based on the collateral added or removed from the system,
      * while considering the time elapsed since the last withdrawal.
      *
-     * Basic Withdrawl Dynamic Limits overview:
+     * Basic Withdrawal Dynamic Limits overview:
      * When Collateral is Added to the System:
      * 1) When a user adds collateral, the new collateral amount is calculated by adding the deposit to the existing collateral.
      * 2) Calculate New Withdrawal Limit:
@@ -1183,61 +1194,38 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * 2) The system subtracts the withdrawn amount from the current withdrawal limit to determine the new limit. This new limit will be considered as the old limit for the next withdrawal.
      * 3) The system records the time of the withdrawal and starts a new 12-hour countdown for the dynamic adjustment of the withdrawal limit.
      */
-    function _handleWithdrawlLimit(
+    function _handleWithdrawalLimit(
         uint256 _collWithdrawal,
-        bool _withSingleTxLimit
+        bool _isLiquidation
     ) internal {
-        // If coll in the system is greater then threshold - we check if user may withdraw the desired amount. Otherwise they are free to withdraw whole amount
-        if (activePool.getWStETH() > WITHDRAWL_LIMIT_THRESHOLD) {
-            (uint256 fullLimit, uint256 singleTxWithdrawable) = LiquityMath
-                ._checkWithdrawlLimit(
-                    lastWithdrawlTimestamp,
-                    EXPAND_DURATION,
-                    unusedWithdrawlLimit,
-                    activePool.getWStETH()
-                );
+        (uint256 fullLimit, uint256 singleTxWithdrawable) = LiquityMath
+            ._checkWithdrawalLimit(
+                lastWithdrawalTimestamp,
+                EXPAND_DURATION,
+                unusedWithdrawalLimit,
+                activePool.getWStETH()
+            );
 
-            if (_withSingleTxLimit && singleTxWithdrawable < _collWithdrawal) {
-                revert(
-                    "BO: Cannot withdraw more then 80% of withdrawble in one tx"
-                );
-            }
-
-            // Update current unusedWithdrawlLimit
-            unusedWithdrawlLimit = fullLimit - _collWithdrawal;
-        } else {
-            unusedWithdrawlLimit = activePool.getWStETH();
-        }
-        // Update the withdrawl recorded timestamp
-        lastWithdrawlTimestamp = block.timestamp;
-    }
-
-    /**
-     * HEDGEHOG UPDATES:
-     * New function that updates dynamic withdrawl limit during the coll increase
-     *
-     * Accepts activePool.getWstETH() as _previousColl and _collIncrease as the amount of coll that is about to get added to activePool
-     */
-    function _updateWithdrawlLimitFromCollIncrease(
-        uint256 _previousColl,
-        uint256 _collIncrease
-    ) internal {
-        uint256 newColl = _previousColl + _collIncrease;
-
-        uint256 newLimit = (_previousColl / 2) + (_collIncrease / 2);
-        if (newLimit >= _previousColl) {
-            newLimit = newColl / 2;
-            lastWithdrawlTimestamp = block.timestamp - 720 minutes;
+        if (!_isLiquidation && singleTxWithdrawable < _collWithdrawal) {
+            revert(
+                "BO: Cannot withdraw more than 80% of withdrawable in one tx"
+            );
         }
 
-        unusedWithdrawlLimit = newLimit;
+        // Update current unusedWithdrawalLimit
+        unusedWithdrawalLimit = fullLimit > _collWithdrawal
+            ? fullLimit - _collWithdrawal
+            : 0;
+
+        // Update the withdrawal recorded timestamp
+        lastWithdrawalTimestamp = block.timestamp;
     }
 
-    function handleWithdrawlLimit(
+    function handleWithdrawalLimit(
         uint256 _collWithdrawal,
-        bool _withSingleTxLimit
+        bool _isLiquidation
     ) external {
         _requireCallerIsTroveManager();
-        _handleWithdrawlLimit(_collWithdrawal, _withSingleTxLimit);
+        _handleWithdrawalLimit(_collWithdrawal, _isLiquidation);
     }
 }

@@ -136,6 +136,7 @@ describe("BaseFeeOracle Tests", () => {
       [, , , alice, bob, carol] = await getSigners({
         fork: false,
       });
+
       ({
         priceFeed,
         troveManager,
@@ -149,7 +150,10 @@ describe("BaseFeeOracle Tests", () => {
 
       ({ compareWithFault } = await validateCollDebtMatch());
 
-      ({ openTrove } = await getOpenTrove({ payToken, borrowerOperations }));
+      ({ openTrove } = await getOpenTrove({
+        borrowerOperations,
+        payToken,
+      }));
 
       ({ getCR, getTroveAndCheck, getTrove } = await getCollRatioParams({
         troveManager,

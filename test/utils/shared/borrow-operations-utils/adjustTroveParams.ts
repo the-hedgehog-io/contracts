@@ -22,7 +22,7 @@ export const getAdjustTroveParams = async ({
   borrowerOperations: BorrowerOperations;
   payToken: TERC20;
 }) => {
-  const [, , , , bob] = await getSigners({
+  const [deployer, , , , bob] = await getSigners({
     fork: false,
   });
 

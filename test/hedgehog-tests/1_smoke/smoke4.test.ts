@@ -140,7 +140,10 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
       ({ compareWithFault } = await validateCollDebtMatch());
 
-      ({ openTrove } = await getOpenTrove({ payToken, borrowerOperations }));
+      ({ openTrove } = await getOpenTrove({
+        borrowerOperations,
+        payToken,
+      }));
 
       ({ getCR, getTroveAndCheck } = await getCollRatioParams({
         troveManager,
@@ -156,13 +159,13 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         payToken,
       }));
 
+      ({ checkCollDebtCorrectness } = await checkCorrectness({ troveManager }));
+
       ({ setNewBaseFeePrice } = await setNewParamsToBaseFee({
         mainOracle,
         secondaryOracle,
         priceFeed,
       }));
-
-      ({ checkCollDebtCorrectness } = await checkCorrectness({ troveManager }));
     });
 
     it("should not let open trove if CR is below minimum", async () => {

@@ -104,6 +104,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const AliceTroveDebtAfterBobRedemption = BigInt(
       "6610225006000000000000000000"
     );
+
     const AliceCRAfterBobRedemption = BigInt("2885921682733333333");
     const AliceRedemptionFirst = BigInt("79607518");
     const AliceCRAtLiquidation = BigInt("1442960841366666666");
@@ -192,7 +193,10 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         stabilityPool,
       }));
 
-      ({ openTrove } = await getOpenTrove({ payToken, borrowerOperations }));
+      ({ openTrove } = await getOpenTrove({
+        borrowerOperations,
+        payToken,
+      }));
 
       ({ troveDebtIncrease, troveCollIncrease } = await getAdjustTroveParams({
         borrowerOperations,
@@ -851,7 +855,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     // TODO: Get into a separate file
 
-    it("should not mark oracles as broken if price was increased by more then 12.5%", async () => {
+    it("should not mark oracles as broken if price was increased by more than 12.5%", async () => {
       await setNewBaseFeePrice(100000);
 
       await priceFeed.fetchPrice();
@@ -865,7 +869,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       expect(await priceFeed.status()).to.be.equal(0);
     });
 
-    it("should mark oracle as frozen if no updates happens for more then 69 blocks", async () => {
+    it("should mark oracle as frozen if no updates happens for more than 69 blocks", async () => {
       await mine(70);
       const block = await latestBlock();
 

@@ -49,7 +49,7 @@ contract BaseFeeOracle is AccessControl, IBaseFeeOracle {
     function feedBaseFeeValue(
         int256 _newValue,
         uint64 _blockNumber
-    ) external onlyRole(SETTER) {
+    ) external virtual onlyRole(SETTER) {
         uint256 round = latestRound + 1;
         (, , uint256 blockNumber, , ) = getRoundData(round - 1);
 

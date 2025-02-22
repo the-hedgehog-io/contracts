@@ -6,6 +6,7 @@ import {
 import { getSigners } from "../../index";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { BigNumberish } from "ethers";
+import { TroveManagerTest } from "../../../../typechain-types";
 
 export type RedeemAllCollateral = {
   caller: SignerWithAddress;
@@ -25,7 +26,7 @@ export const redeem = async ({
   troveManager,
 }: {
   hintHelpers: HintHelpers;
-  troveManager: TroveManager;
+  troveManager: TroveManager | TroveManagerTest;
 }) => {
   const [, , , , bob] = await getSigners({
     fork: false,

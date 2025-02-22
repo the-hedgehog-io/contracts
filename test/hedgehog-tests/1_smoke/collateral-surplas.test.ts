@@ -87,6 +87,7 @@ describe("BaseFeeOracle Tests", () => {
     const AliceTroveDebt = BigInt("4000000000000000000000000000");
     const AliceTroveOpeningFee = BigInt("20000000000000000000000000");
     const AliceBFEBalanceAtOpening = BigInt("3980000000000000000000000000");
+
     const AliceInitialCR = BigInt("5016290444866666666");
     const expectedTotalSupplyBeforeAliceIncrease = BigInt(
       "6000000000000000000000000000"
@@ -158,7 +159,10 @@ describe("BaseFeeOracle Tests", () => {
 
       ({ compareWithFault } = await validateCollDebtMatch());
 
-      ({ openTrove } = await getOpenTrove({ payToken, borrowerOperations }));
+      ({ openTrove } = await getOpenTrove({
+        borrowerOperations,
+        payToken,
+      }));
 
       ({ getCR, getTroveAndCheck, getTrove } = await getCollRatioParams({
         troveManager,
@@ -170,10 +174,7 @@ describe("BaseFeeOracle Tests", () => {
       }));
 
       ({ troveDebtIncrease, troveCollIncrease, decreaseDebt } =
-        await getAdjustTroveParams({
-          borrowerOperations,
-          payToken,
-        }));
+        await getAdjustTroveParams({ borrowerOperations, payToken }));
 
       ({ setNewBaseFeePrice } = await setNewParamsToBaseFee({
         mainOracle,

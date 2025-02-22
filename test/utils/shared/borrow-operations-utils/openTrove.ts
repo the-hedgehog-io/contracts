@@ -23,12 +23,12 @@ export const getOpenTrove = async ({
   payToken: TERC20;
   borrowerOperations: BorrowerOperations;
 }) => {
-  const [, , , , bob] = await getSigners({
+  const [deployer, , , , bob] = await getSigners({
     fork: false,
   });
 
   const openTrove: OpenTrove = async ({
-    caller = bob,
+    caller = deployer,
     maxFeePercentage = 1,
     baseFeeLMAAmount = "0",
     collAmount = "0",
