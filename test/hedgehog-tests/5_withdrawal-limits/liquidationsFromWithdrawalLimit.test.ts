@@ -1,388 +1,293 @@
-// import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-// import { ethers } from "hardhat";
-// import {
-//   BorrowerOperationsLiquidationsTest,
-//   TERC20,
-//   TroveManagerTest,
-// } from "../../../typechain-types";
-// import { expect } from "chai";
-// import {
-//   getSigners,
-//   setupContracts,
-// } from "../../utils/shared/helpers-liquidations-utils/index";
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
+import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 
-// import { ActivePool, HintHelpers } from "../../../typechain-types/contracts";
+import { ethers } from "hardhat";
+import { TERC20 } from "../../../typechain-types";
+import { expect } from "chai";
+import { getSigners, setupContracts } from "../../utils";
+const { latestBlock } = time;
 
-// import {
-//   OpenTrove,
-//   RedeemCollateral,
-//   getOpenTrove,
-//   redeem,
-// } from "../../utils/shared";
+import {
+  ActivePool,
+  BaseFeeLMAToken,
+  BaseFeeOracle,
+  BorrowerOperations,
+  HintHelpers,
+  TroveManager,
+} from "../../../typechain-types/contracts";
 
-// describe("Hedgehog Core Contracts Smoke tests", () => {
-//   context("Base functionality and Access Control. Flow #1", () => {
-//     let alice: SignerWithAddress;
-//     let bob: SignerWithAddress;
-//     let carol: SignerWithAddress;
-//     let dave: SignerWithAddress;
-//     let activePool: ActivePool;
-//     let troveManager: TroveManagerTest;
-//     let hintHelpers: HintHelpers;
-//     let borrowerOperations: BorrowerOperationsLiquidationsTest;
-//     let payToken: TERC20;
-//     let openTrove: OpenTrove;
-//     let redeemCollateral: RedeemCollateral;
+import {
+  OpenTrove,
+  RedeemCollateral,
+  getOpenTrove,
+  redeem,
+} from "../../utils/shared";
 
-//     before(async () => {
-//       [alice, , , dave, bob, carol] = await getSigners({
-//         fork: false,
-//       });
-//       ({ troveManager, activePool, borrowerOperations, hintHelpers, payToken } =
-//         await setupContracts());
+describe("Hedgehog Core Contracts Smoke tests", () => {
+  context("Base functionality and Access Control. Flow #1", () => {
+    let deployer: SignerWithAddress,
+      alice: SignerWithAddress,
+      bob: SignerWithAddress,
+      carol: SignerWithAddress;
+    let dave: SignerWithAddress;
+    let activePool: ActivePool;
+    let troveManager: TroveManager;
+    let hintHelpers: HintHelpers;
 
-//       ({ openTrove } = await getOpenTrove({
-//         payToken,
-//         borrowerOperations,
-//       }));
+    let secondaryOracle: BaseFeeOracle;
+    let baseFeeLMAToken: BaseFeeLMAToken;
+    let borrowerOperations: BorrowerOperations;
+    let payToken: TERC20;
+    let openTrove: OpenTrove;
+    let redeemCollateral: RedeemCollateral;
 
-//       ({ redeemCollateral } = await redeem({ hintHelpers, troveManager }));
-//     });
+    beforeEach(async () => {
+      [deployer, alice, bob, carol, dave, bob, carol] = await getSigners({
+        fork: false,
+      });
+      ({
+        troveManager,
+        activePool,
+        borrowerOperations,
+        hintHelpers,
+        payToken,
+        secondaryOracle,
+        baseFeeLMAToken,
+      } = await setupContracts());
 
-//     context("5.1 Liquidations Are Blocked From Withdrawal Limit", async () => {
-//       it("should let open the trove for Alice", async () => {
-//         const collAmount = BigInt("400000000000000000000");
+      ({ openTrove } = await getOpenTrove({
+        payToken,
+        borrowerOperations,
+      }));
 
-//         expect(await openTrove({ caller: alice, collAmount: collAmount })).not
-//           .to.be.reverted;
-//       });
+      ({ redeemCollateral } = await redeem({ hintHelpers, troveManager }));
+    });
+    const collAmountAlice = BigInt("200000000000000000000");
+    const collAmountAliceExtended = BigInt("2000000000000000000000");
+    const debtAmountAlice = BigInt("2000000000000000000000000000");
+    const collAmountBob = BigInt("200000000000000000000");
+    const debtAmountBob = BigInt("1280000000000000000000000000");
 
-//       it("the test should allow the unused withdrawal limit to be set correctly", async () => {
-//         const newUnusedLimit = BigInt("350000000000000000000");
-//         await borrowerOperations.setUnusedWithdrawalLimit(newUnusedLimit);
-//         expect(await borrowerOperations.unusedWithdrawalLimit()).to.be.equal(
-//           newUnusedLimit
-//         );
-//       });
+    it("should not let to repay debt if borrower has insufficient BaseFeeLMA balance to cover his debt repayment", async () => {
+      await payToken.transfer(carol.address, ethers.parseEther("10000000000"));
 
-//       it("should prevent the withdrawal of more tokens than FullLimit", async () => {
-//         const amountWithdrawal = BigInt("400000000000000000000");
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
 
-//         await borrowerOperations.withdrawColl(
-//           amountWithdrawal,
-//           ethers.ZeroAddress,
-//           ethers.ZeroAddress
-//         );
-//       });
-//     });
+      await openTrove({
+        caller: bob,
+        collAmount: collAmountBob,
+        baseFeeLMAAmount: debtAmountBob,
+      });
 
-//     context(
-//       "5.2 Closing a Trove Does Not Update the Withdrawal Limit",
-//       async () => {
-//         it("should let another user(bob) open a position", async () => {
-//           const collAmount = BigInt("300000000000000000000");
+      await openTrove({
+        caller: carol,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: BigInt("700000000000000000000000000"),
+      });
 
-//           expect(await openTrove({ caller: bob, collAmount: collAmount })).not
-//             .to.be.reverted;
-//         });
+      await openTrove({
+        caller: dave,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: BigInt("100000000000000000000000000"),
+      });
 
-//         it("should update the withdrawal limit after closing a position for Bob", async () => {
-//           const withdrawalLimitBeforeCloseTrove =
-//             await borrowerOperations.unusedWithdrawalLimit();
+      const systemCollBeforeLiquidate =
+        await borrowerOperations.getEntireSystemColl();
 
-//           await borrowerOperations.connect(bob).closeTrove();
+      expect(await troveManager.getTroveOwnersCount()).to.be.equal(4);
 
-//           const withdrawalLimitAfterCloseTrove =
-//             await borrowerOperations.unusedWithdrawalLimit();
+      await secondaryOracle
+        .connect(deployer)
+        .feedBaseFeeValue("110000000000", await latestBlock());
 
-//           expect(withdrawalLimitBeforeCloseTrove).not.to.be.equal(
-//             withdrawalLimitAfterCloseTrove
-//           );
-//         });
-//       }
-//     );
+      const unusedLimitBeforeLiquidate =
+        await borrowerOperations.unusedWithdrawalLimit();
 
-//     context(
-//       "5.3 Double Counting of Full Redemptions in Withdrawal Limit Calculation",
-//       async () => {
-//         it("should allow you to open a trove for Dave", async () => {
-//           const baseFeeLMAAmountForDave = BigInt("10000000000000000000");
-//           const collAmountForDave = BigInt("15000000000000000000");
-//           expect(
-//             await openTrove({
-//               caller: dave,
-//               baseFeeLMAAmount: baseFeeLMAAmountForDave,
-//               collAmount: collAmountForDave,
-//             })
-//           ).not.to.be.reverted;
-//         });
+      await troveManager.liquidateTroves(2);
 
-//         it("should allow dave to redeem collateral", async () => {
-//           await redeemCollateral({ caller: dave });
-//         });
-//       }
-//     );
+      const systemCollAfterLiquidate =
+        await borrowerOperations.getEntireSystemColl();
 
-//     context("5.4 Limit Can Exceed Active Collateral", async () => {
-//       it("should allow to reopen the position for Bob", async () => {
-//         const collAmount = BigInt("100000000000000000000");
+      const unusedLimitAfterLiquidate =
+        await borrowerOperations.unusedWithdrawalLimit();
+    });
 
-//         expect(await openTrove({ caller: bob, collAmount: collAmount })).not.to
-//           .be.reverted;
-//         const unusedLimit = await borrowerOperations.unusedWithdrawalLimit();
-//       });
+    it("should allow to update limits after close troves correctly", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      await openTrove({
+        caller: bob,
+        collAmount: collAmountBob + collAmountAlice / BigInt("2"),
+        baseFeeLMAAmount: debtAmountBob,
+      });
 
-//       it("should correctly update unused withdrawal limit after collateral withdrawal", async () => {
-//         const unusedLimitBeforeWithdrawColl =
-//           await borrowerOperations.unusedWithdrawalLimit();
+      const systemCollBeforeClose =
+        await borrowerOperations.getEntireSystemColl();
 
-//         await borrowerOperations.setWithDrawalLimitThreshold(
-//           BigInt("800000000000000000000")
-//         );
+      const unusedLimitBeforeClose =
+        await borrowerOperations.unusedWithdrawalLimit();
 
-//         await borrowerOperations
-//           .connect(alice)
-//           .withdrawColl(
-//             BigInt("350000000000000000000"),
-//             ethers.ZeroAddress,
-//             ethers.ZeroAddress
-//           );
-//         const unusedLimitAfterWithdrawColl =
-//           await borrowerOperations.unusedWithdrawalLimit();
+      await borrowerOperations.connect(alice).closeTrove();
 
-//         expect(unusedLimitBeforeWithdrawColl).to.be.greaterThan(
-//           unusedLimitAfterWithdrawColl
-//         );
-//       });
-//     });
+      const systemCollAfterClose =
+        await borrowerOperations.getEntireSystemColl();
 
-//     context(
-//       "5.5 Liquidations Update Withdrawal Limit in an Inconsistent Way",
-//       async () => {
-//         it("should update the limit correctly", async () => {
-//           const amount = BigInt("1000000000000000000");
+      const unusedLimitAfterClose =
+        await borrowerOperations.unusedWithdrawalLimit();
 
-//           await payToken.connect(dave).approve(borrowerOperations, amount);
-//           await borrowerOperations
-//             .connect(dave)
-//             .moveWStETHGainToTrove(
-//               alice,
-//               ethers.ZeroAddress,
-//               ethers.ZeroAddress,
-//               amount
-//             );
-//         });
-//       }
-//     );
+      expect(systemCollBeforeClose - systemCollAfterClose).to.be.equal(
+        collAmountAlice
+      );
+    });
 
-//     context("5.6 Withdrawal Limit Does Not Track Collateral", async () => {
-//       it("should allow you to reduce the number of activePools", async () => {
-//         const activePoolBeforeWithdraw = await activePool.getWStETH();
+    it("should allow to redeem collateral correctly", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
+      await openTrove({
+        caller: bob,
+        collAmount: collAmountBob + collAmountAlice / BigInt("2"),
+        baseFeeLMAAmount: debtAmountBob,
+      });
 
-//         const decreaseActivePool = BigInt("67000000000000000000");
-//         await borrowerOperations
-//           .connect(bob)
-//           .withdrawColl(
-//             decreaseActivePool,
-//             ethers.ZeroAddress,
-//             ethers.ZeroAddress
-//           );
-//         const activePoolAfterWithdraw = await activePool.getWStETH();
-//         expect(activePoolAfterWithdraw).to.be.equal(
-//           activePoolBeforeWithdraw - decreaseActivePool
-//         );
-//       });
+      expect(await activePool.getWStETH()).to.be.equal(
+        collAmountAlice + collAmountBob + collAmountAlice / BigInt("2")
+      );
+      await redeemCollateral({
+        caller: alice,
+        baseFeeLMAamount: ethers.parseEther("12"),
+        gasPrice: "30000000000",
+      });
+      expect(await activePool.getWStETH()).to.be.equal("499999999640000000000");
+    });
 
-//       it("should correctly set the withdrawal limit when adding collateral", async () => {
-//         const amountActivePool = await activePool.getWStETH();
+    it("should allow to update limit after liquidate correctly", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAlice,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
 
-//         await borrowerOperations.setUnusedWithdrawalLimit(amountActivePool);
-//         await borrowerOperations.setWithDrawalLimitThreshold(amountActivePool);
+      await openTrove({
+        caller: bob,
+        collAmount: collAmountBob,
+        baseFeeLMAAmount: debtAmountBob,
+      });
 
-//         const collIncrease = BigInt("2000000000000000000");
+      await secondaryOracle
+        .connect(deployer)
+        .feedBaseFeeValue("110000000000", await latestBlock());
 
-//         await payToken
-//           .connect(alice)
-//           .approve(await borrowerOperations.getAddress(), collIncrease);
+      expect(await troveManager.Troves(bob.address)).not.to.be.reverted;
 
-//         await borrowerOperations
-//           .connect(alice)
-//           .addColl(ethers.ZeroAddress, ethers.ZeroAddress, collIncrease);
+      expect(
+        await troveManager.liquidate(bob.address, {
+          from: deployer,
+        })
+      ).not.to.be.reverted;
+    });
 
-//         const unusedLimitAfterIncrease =
-//           await borrowerOperations.unusedWithdrawalLimit(); // (99)*75% + (2)*75% = 75.75
-//         expect(unusedLimitAfterIncrease).to.be.equal(
-//           BigInt("50500000000000000000")
-//         );
-//       });
+    it("should allows a user to open a Trove, then close it, then re-open it with sufficent collateral in system", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: collAmountAliceExtended,
+        baseFeeLMAAmount: debtAmountAlice,
+      });
 
-//       it("should reset the withdrawal limit correctly when withdrawing collateral", async () => {
-//         const newLimitThreshold = await activePool.getWStETH();
-//         await borrowerOperations.setWithDrawalLimitThreshold(newLimitThreshold);
+      await openTrove({
+        caller: bob,
+        collAmount: collAmountBob,
+        baseFeeLMAAmount: debtAmountBob,
+      });
 
-//         const newUnusedLimit = BigInt("50000000000000000000");
-//         await borrowerOperations.setUnusedWithdrawalLimit(newUnusedLimit);
+      expect(await borrowerOperations.unusedWithdrawalLimit()).to.be.equal(
+        (collAmountAliceExtended + collAmountBob) / BigInt(2)
+      );
 
-//         const amountWithdrawal = BigInt("30000000000000000000");
-//         await borrowerOperations.withdrawColl(
-//           amountWithdrawal,
-//           ethers.ZeroAddress,
-//           ethers.ZeroAddress
-//         );
+      await baseFeeLMAToken
+        .connect(alice)
+        .transfer(bob.address, ethers.parseEther("900000000"));
 
-//         const unusedLimitAfterWithdraw =
-//           await borrowerOperations.unusedWithdrawalLimit();
-//         expect(unusedLimitAfterWithdraw).not.to.be.equal(newLimitThreshold);
-//       });
+      expect(await troveManager.getTroveStatus(bob.address)).to.be.equal(1);
 
-//       it("should correctly distribute rewards", async () => {
-//         const newLimitThreshold = await activePool.getWStETH();
+      await borrowerOperations.connect(bob).closeTrove();
 
-//         await borrowerOperations.setWithDrawalLimitThreshold(newLimitThreshold);
+      const unusedLimitAfterClose = BigInt("905000000000000000000");
+      expect(await borrowerOperations.unusedWithdrawalLimit()).to.be.equal(
+        unusedLimitAfterClose
+      );
 
-//         const newUnusedLimit = BigInt("50000000000000000000");
-//         await borrowerOperations.setUnusedWithdrawalLimit(newUnusedLimit);
+      expect(await troveManager.getTroveStatus(bob.address)).not.to.be.equal(1);
 
-//         await troveManager.applyPendingRewards(alice.address);
+      const newDebtBob = BigInt("128000000000000000000000000");
+      const newCollBob = BigInt("20000000000000000000");
 
-//         const unusedLimitAfterRewards =
-//           await borrowerOperations.unusedWithdrawalLimit();
+      await openTrove({
+        caller: bob,
+        collAmount: newCollBob,
+        baseFeeLMAAmount: newDebtBob,
+      });
 
-//         expect(unusedLimitAfterRewards).not.to.be.equal(newUnusedLimit);
-//       });
+      expect(await borrowerOperations.unusedWithdrawalLimit()).to.be.equal(
+        unusedLimitAfterClose + newCollBob / BigInt("2")
+      );
 
-//       it("should update collateral when moving WStETH gain to trove", async () => {
-//         const newLimitThreshold = await activePool.getWStETH();
-//         await borrowerOperations.setWithDrawalLimitThreshold(newLimitThreshold);
+      expect(await troveManager.getTroveStatus(bob.address)).to.be.equal(1);
+    });
 
-//         const newUnusedLimit = BigInt("50000000000000000000");
-//         await borrowerOperations.setUnusedWithdrawalLimit(newUnusedLimit);
+    it("should allow to update limit after liquidate correctly", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: BigInt("150000000000000000000"), //150
+        baseFeeLMAAmount: debtAmountAlice,
+      });
 
-//         const amountToSP = BigInt("10000000000000000000");
+      await openTrove({
+        caller: bob,
+        collAmount: collAmountBob,
+        baseFeeLMAAmount: debtAmountBob, //200
+      });
 
-//         await payToken
-//           .connect(alice)
-//           .approve(borrowerOperations.target, amountToSP);
-//         await borrowerOperations
-//           .connect(alice)
-//           .moveWStETHGainToTrove(
-//             alice.address,
-//             ethers.ZeroAddress,
-//             ethers.ZeroAddress,
-//             amountToSP
-//           );
-//         const unusedLimitAfterMoveToSP =
-//           await borrowerOperations.unusedWithdrawalLimit();
+      await secondaryOracle
+        .connect(deployer)
+        .feedBaseFeeValue("110000000000", await latestBlock());
 
-//         expect(unusedLimitAfterMoveToSP).to.be.equal(
-//           newUnusedLimit + amountToSP
-//         );
-//       });
-//     });
-//     context("5.7 Withdrawal Limit Reset on Collateral Deposits", async () => {
-//       it("should increase the withdrawal limit after the deposit has been made", async () => {
-//         await borrowerOperations.setUnusedWithdrawalLimit(0);
+      expect(await troveManager.Troves(bob.address)).not.to.be.reverted;
 
-//         const addCollateral = BigInt("10000000000000000000");
+      expect(
+        await troveManager.liquidate(bob.address, {
+          from: deployer,
+        })
+      ).not.to.be.reverted;
+    });
 
-//         await payToken
-//           .connect(alice)
-//           .approve(borrowerOperations.target, addCollateral);
-//         await borrowerOperations.addColl(
-//           ethers.ZeroAddress,
-//           ethers.ZeroAddress,
-//           addCollateral
-//         );
-//         const unusedLimitAfter =
-//           await borrowerOperations.unusedWithdrawalLimit();
-//         const activePoolBeforeAfter = await activePool.getWStETH();
+    it("should not allow to  liquidate if nothing to liquidate", async () => {
+      await openTrove({
+        caller: alice,
+        collAmount: BigInt("300000000000000000000"), //300
+        baseFeeLMAAmount: debtAmountAlice,
+      });
 
-//         expect(unusedLimitAfter).to.be.equal(activePoolBeforeAfter / BigInt(2));
+      await openTrove({
+        caller: bob,
+        collAmount: BigInt("200000000000000000000"), //200
+        baseFeeLMAAmount: debtAmountBob,
+      });
 
-//         await payToken
-//           .connect(alice)
-//           .approve(borrowerOperations.target, addCollateral);
-//         await expect(
-//           borrowerOperations.addColl(
-//             ethers.ZeroAddress,
-//             ethers.ZeroAddress,
-//             addCollateral
-//           )
-//         ).not.to.be.reverted;
-//       });
-//     });
-
-//     context("5.8 Reducing Fees by Splitting Transactions", async () => {
-//       it("should allow to split redeemCollateral into small parts with the correct rate", async () => {
-//         const checkFirstPartRate =
-//           await troveManager.checkUpdateRedemptionBaseRateFromRedemption(
-//             BigInt("30000000000000000000")
-//           );
-//         const checkSecondPartRate =
-//           await troveManager.checkUpdateRedemptionBaseRateFromRedemption(
-//             BigInt("50000000000000000000")
-//           );
-//         const checkThirdPartRate =
-//           await troveManager.checkUpdateRedemptionBaseRateFromRedemption(
-//             BigInt("20000000000000000000")
-//           );
-//         const allRate =
-//           await troveManager.checkUpdateRedemptionBaseRateFromRedemption(
-//             BigInt("100000000000000000000")
-//           );
-//         expect(allRate).to.be.equal(
-//           checkFirstPartRate + checkSecondPartRate + checkThirdPartRate
-//         );
-//       });
-//     });
-//     context(
-//       "5.12 Withdrawal Threshold Can Be Circumvented by Splitting Transactions",
-//       async () => {
-//         it("should not allow to withdraw more than 80% of the limit at a time", async () => {
-//           const activePoolNow = await activePool.getWStETH();
-//           await borrowerOperations.setWithDrawalLimitThreshold(
-//             activePoolNow - BigInt("10000000")
-//           );
-//           const singleTxWithdrawable = BigInt("100000000000000000000");
-//           const withdrawableAmount =
-//             (singleTxWithdrawable * BigInt(4)) / BigInt(5) + BigInt("1");
-//           await borrowerOperations.setUnusedWithdrawalLimit(
-//             singleTxWithdrawable
-//           );
-
-//           await expect(
-//             borrowerOperations.withdrawColl(
-//               withdrawableAmount,
-//               ethers.ZeroAddress,
-//               ethers.ZeroAddress
-//             )
-//           ).to.be.revertedWith(
-//             "BO: Cannot withdraw more than 80% of withdrawable in one tx"
-//           );
-//         });
-//         it("allows you to withdraw the amount in two small installments ", async () => {
-//           const singleTxWithdrawable = BigInt("100000000000000000000");
-//           const quarterWithdrawableAmount =
-//             ((singleTxWithdrawable * BigInt(4)) / BigInt(5) + BigInt("1")) /
-//             BigInt(4);
-
-//           await expect(
-//             borrowerOperations.withdrawColl(
-//               quarterWithdrawableAmount,
-//               ethers.ZeroAddress,
-//               ethers.ZeroAddress
-//             )
-//           ).not.to.be.reverted;
-
-//           await expect(
-//             borrowerOperations.withdrawColl(
-//               quarterWithdrawableAmount,
-//               ethers.ZeroAddress,
-//               ethers.ZeroAddress
-//             )
-//           ).not.to.be.reverted;
-//         });
-//       }
-//     );
-//   });
-// });
+      await expect(
+        troveManager.liquidate(bob.address, {
+          from: deployer,
+        })
+      ).to.be.revertedWith("TroveManager: nothing to liquidate");
+    });
+  });
+});

@@ -249,7 +249,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             vars.compositeDebt,
             vars.price
         );
-        console.log("ICR", vars.ICR);
         vars.NICR = LiquityMath._computeNominalCR(
             _collAmount,
             vars.compositeDebt
@@ -266,7 +265,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
                 true,
                 vars.price
             ); // bools: coll increase, debt increase
-            console.log("new TCR", newTCR);
             _requireNewTCRisAboveCCR(newTCR);
         }
 
@@ -505,7 +503,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         vars.price = priceFeed.fetchPrice();
         bool isRecoveryMode = _checkRecoveryMode(vars.price);
-        console.log("is Recovery Mode", isRecoveryMode);
 
         if (_isDebtIncrease) {
             _requireValidMaxFeePercentage(_maxFeePercentage, isRecoveryMode);
@@ -564,8 +561,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             _isDebtIncrease,
             vars.price
         );
-        console.log("oldOCR", vars.oldICR);
-        console.log("new OCR", vars.newICR);
 
         assert(_collWithdrawal <= vars.coll);
 
@@ -716,8 +711,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     // HedgehogUpdates: new private function, that checks if there was a transaction with a trove in the current block
     // virtual added for changes in Arbitrum deployment through inheritance
     function _checkAndSetUpdateBlock(address _borrower) internal virtual {
-        console.log(troveManager.getTroveUpdateBlock(_borrower));
-
         if (troveManager.getTroveUpdateBlock(_borrower) == block.number) {
             revert TroveAdjustedThisBlock();
         }
@@ -737,8 +730,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
 
         troveManager.updateBaseRateFromBorrowing(baseRate);
-        console.log("BaseFeeLMAFee", BaseFeeLMAFee);
-        console.log("BaseFeeLMAAMount", _BaseFeeLMAAmount);
         _requireUserAcceptsFee(
             BaseFeeLMAFee,
             _BaseFeeLMAAmount,
@@ -990,7 +981,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     }
 
     function _requireICRisAboveCCR(uint _newICR) internal pure {
-        console.log("newICR f", _newICR);
         require(
             _newICR >= CCR,
             "BorrowerOps: Operation must leave trove with ICR >= CCR"
@@ -1216,17 +1206,16 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
                 activePool.getWStETH()
             );
 
-        if (!_isLiquidation &&
-            singleTxWithdrawable < _collWithdrawal) {
+        if (!_isLiquidation && singleTxWithdrawable < _collWithdrawal) {
             revert(
                 "BO: Cannot withdraw more than 80% of withdrawable in one tx"
             );
         }
 
         // Update current unusedWithdrawalLimit
-        unusedWithdrawalLimit = fullLimit > _collWithdrawal ?
-            fullLimit - _collWithdrawal :
-            0;
+        unusedWithdrawalLimit = fullLimit > _collWithdrawal
+            ? fullLimit - _collWithdrawal
+            : 0;
 
         // Update the withdrawal recorded timestamp
         lastWithdrawalTimestamp = block.timestamp;

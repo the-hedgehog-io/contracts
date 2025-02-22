@@ -466,61 +466,14 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
       expect(await troveManager.Troves(carol.address)).not.to.be.reverted;
 
-      console.log(
-        "system coll before liquidate",
-        await borrowerOperations.getEntireSystemColl()
-      );
-      console.log(
-        "system debt before liquidate",
-        await borrowerOperations.getEntireSystemDebt()
-      );
-
-      console.log(
-        "active pool bef pay tok",
-        await payToken.balanceOf(activePool.target)
-      );
-
-      console.log(
-        "balance BFEE carol before liquidate ",
-        await baseFeeLMAToken.balanceOf(carol.address)
-      );
-
-      console.log(
-        "balance pay token carol before liquidate ",
-        await payToken.balanceOf(carol.address)
-      );
-
-      await troveManager.liquidate(carol.address, {
-        from: deployer,
-      });
-
-      console.log(
-        "balance BFEE carol after liquidate ",
-        await baseFeeLMAToken.balanceOf(carol.address)
-      );
-      console.log(
-        "balance pay token carol after liquidate ",
-        await payToken.balanceOf(carol.address)
-      );
+      expect(
+        await troveManager.liquidate(carol.address, {
+          from: deployer,
+        })
+      ).not.to.be.reverted;
 
       expect(await troveManager.Troves(carol.address)).to.be
         .revertedWithoutReason;
-
-      console.log(
-        "system coll after liquidate",
-        await borrowerOperations.getEntireSystemColl()
-      );
-      console.log(
-        "system debt after liquidate",
-        await borrowerOperations.getEntireSystemDebt()
-      );
-      console.log(
-        "active pool aft pay tok",
-        await payToken.balanceOf(activePool.target)
-      );
-
-      console.log(await troveManager.L_WStETH());
-      console.log(await troveManager.L_BaseFeeLMADebt());
     });
 
     it("should allows a user to open a Trove, then close it, then re-open it with sufficent collateral in system", async () => {

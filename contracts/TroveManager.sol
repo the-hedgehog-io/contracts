@@ -719,8 +719,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         );
 
         // Hedgehog Updates: Update Dynamic Withdrawal Limits but do not revert tx if exceeds 80% single tx limit
-        IBorrowerOperations(borrowerOperationsAddress)
-            .handleWithdrawalLimit(totals.totalCollInSequence, true);
+        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawalLimit(
+            totals.totalCollInSequence,
+            true
+        );
     }
 
     /*
@@ -912,7 +914,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             totals.totalDebtToRedistribute,
             totals.totalCollToRedistribute
         );
-
         if (totals.totalCollSurplus > 0) {
             collSurplusPool.increaseBalance(totals.totalCollSurplus);
             activePoolCached.sendWStETH(
@@ -948,8 +949,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         );
 
         // Hedgehog Updates: Update Dynamic Withdrawal Limits but do not revert tx if exceeds 80% single tx limit
-        IBorrowerOperations(borrowerOperationsAddress)
-            .handleWithdrawalLimit(totals.totalCollInSequence, true);
+        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawalLimit(
+            totals.totalCollInSequence,
+            true
+        );
     }
 
     /*

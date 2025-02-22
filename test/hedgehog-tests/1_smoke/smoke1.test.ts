@@ -224,9 +224,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should not let open trove if CR is below minimum", async () => {
-      console.log(await payToken.balanceOf(alice.address));
-      console.log(await baseFeeLMAToken.balanceOf(alice.address));
-
       await priceFeed.setLastGoodPrice(gasPrice010);
 
       await expect(

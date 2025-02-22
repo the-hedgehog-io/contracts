@@ -2,11 +2,7 @@ import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { BigNumberish } from "ethers";
 import { ethers } from "hardhat";
-import {
-  ActivePool,
-  BorrowerOperations,
-  TERC20,
-} from "../../../typechain-types";
+import { BorrowerOperations, TERC20 } from "../../../typechain-types";
 import { getSigners, setupContracts } from "../../utils";
 import { expect } from "chai";
 import timestring from "timestring";
@@ -42,14 +38,14 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const fourthWithdraw = BigInt("110000000000000000000");
     // 152
     const fifthWithdraw = BigInt("152000000000000000000");
-    // 125.58
-    const sixthWithdraw = BigInt("125872276480000000000");
-    // 25.4
-    const seventhWithdraw = BigInt("25406946208526600601");
+    // 89.9
+    const sixthWithdraw = BigInt("89900000000000000000");
+    // 18.25
+    const seventhWithdraw = BigInt("18250000000000000000");
     // 600
     const eighthWithdraw = BigInt("600000000000000000000");
-    // 405.1
-    const ninthWithdraw = BigInt("405109264972043711117");
+    // 403.6
+    const ninthWithdraw = BigInt("403600000000000000000");
     // 50
     const tenthWithdraw = BigInt("50000000000000000000");
     // 138.92
@@ -96,15 +92,36 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     };
 
     it("should let open the trove (1000): step 1", async () => {
+      const unusedLimitBeforeOpenTrove =
+        await borrowerOperations.unusedWithdrawalLimit();
+
       await openTrove({
         collAmount: firstDeposit,
         baseFeeLMAAmount: debtAmountAlice,
       });
+
+      const unusedLimitAfterOpenTrove =
+        await borrowerOperations.unusedWithdrawalLimit();
+
+      expect(
+        unusedLimitAfterOpenTrove - unusedLimitBeforeOpenTrove
+      ).to.be.equal(firstDeposit / BigInt("2"));
     });
 
     it("should let withdraw (100): step2", async () => {
+      await increase(60);
+      const unusedLimitBeforeWithdrawal =
+        await borrowerOperations.unusedWithdrawalLimit();
+
       await expect(await decreaseColl({ amount: firstWithdraw })).not.to.be
         .reverted;
+
+      const unusedLimitAfterDecrease =
+        await borrowerOperations.unusedWithdrawalLimit();
+
+      expect(
+        unusedLimitBeforeWithdrawal - unusedLimitAfterDecrease
+      ).to.be.equal(firstWithdraw);
     });
 
     it("should revert if user tries to withdraw more than 80% withdrawable (322): step3", async () => {
@@ -118,7 +135,17 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     it("should not revert after enough time has passed (322): step4", async () => {
       await increase(timestring("60 minutes"));
 
+      const unusedLimitBeforeWithdrawal =
+        await borrowerOperations.unusedWithdrawalLimit();
+
       await decreaseColl({ amount: thirdWithdraw });
+
+      const unusedLimitAfterDecrease =
+        await borrowerOperations.unusedWithdrawalLimit();
+
+      expect(
+        unusedLimitBeforeWithdrawal - unusedLimitAfterDecrease
+      ).to.be.equal(thirdWithdraw);
     });
 
     it("should revert  if user tries to withdraw more than 80% withdrawable (110): step 5", async () => {
@@ -130,32 +157,95 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     it("should not revert after increasing the time by 12 hours(152): step 6", async () => {
       await increase(timestring("12 hours"));
+
+      const unusedLimitBeforeWithdrawal =
+        await borrowerOperations.unusedWithdrawalLimit();
+
       await expect(decreaseColl({ amount: fifthWithdraw })).not.to.be.reverted;
+
+      const unusedLimitAfterDecrease =
+        await borrowerOperations.unusedWithdrawalLimit();
+
+      expect(
+        unusedLimitBeforeWithdrawal - unusedLimitAfterDecrease
+      ).to.be.equal(BigInt("13000000000000000000"));
     });
 
     it("should not be reverted when the deposit is increased (10): step 7", async () => {
+      const unusedLimitBeforeIncrease =
+        await borrowerOperations.unusedWithdrawalLimit();
+
       await increase(timestring("1 minute"));
       await expect(increaseColl({ amount: secondDeposit })).not.to.be.reverted;
+
+      const unusedLimitAfterIncrease =
+        await borrowerOperations.unusedWithdrawalLimit();
+
+      expect(
+        unusedLimitAfterIncrease - unusedLimitBeforeIncrease
+      ).that.be.equal(secondDeposit / BigInt("2"));
     });
 
     it("should not be reverted when the deposit is increased again(80): step 8", async () => {
+      const unusedLimitBeforeIncrease =
+        await borrowerOperations.unusedWithdrawalLimit();
+
       await increase(timestring("1 minute"));
       await expect(increaseColl({ amount: thirdDeposit })).not.to.be.reverted;
+
+      const unusedLimitAfterIncrease =
+        await borrowerOperations.unusedWithdrawalLimit();
+
+      expect(
+        unusedLimitAfterIncrease - unusedLimitBeforeIncrease
+      ).that.be.equal(thirdDeposit / BigInt("2"));
     });
 
     it("should not revert after increasing the deposit (144,96): step 9", async () => {
       await increase(timestring("1 minute"));
+
+      const unusedLimitBeforeWithdrawal =
+        await borrowerOperations.unusedWithdrawalLimit();
+
       await expect(decreaseColl({ amount: sixthWithdraw })).not.to.be.reverted;
+
+      const unusedLimitAfterDecrease =
+        await borrowerOperations.unusedWithdrawalLimit();
+
+      expect(
+        unusedLimitBeforeWithdrawal - unusedLimitAfterDecrease
+      ).to.be.equal(BigInt("89441826000000000000"));
     });
 
     it("should not revert (74,8): step 10", async () => {
       await increase(timestring("1 minute"));
+
+      const unusedLimitBeforeWithdrawal =
+        await borrowerOperations.unusedWithdrawalLimit();
+
       await decreaseColl({ amount: seventhWithdraw });
+
+      const unusedLimitAfterDecrease =
+        await borrowerOperations.unusedWithdrawalLimit();
+
+      expect(
+        unusedLimitBeforeWithdrawal - unusedLimitAfterDecrease
+      ).to.be.equal(BigInt(BigInt("17985812775340000000")));
     });
 
     it("should not be reverted when the deposit is increased (1000): step 11", async () => {
+      const unusedLimitBeforeIncrease =
+        await borrowerOperations.unusedWithdrawalLimit();
+
       await increase(timestring("1 minute"));
       await expect(increaseColl({ amount: fourthDeposit })).not.to.be.reverted;
+
+      const unusedLimitAfterIncrease =
+        await borrowerOperations.unusedWithdrawalLimit();
+
+      expect(
+        unusedLimitAfterIncrease - unusedLimitBeforeIncrease
+      ).that.be.equal(fourthDeposit / BigInt("2"));
     });
 
     it("should revert (600): step 12", async () => {
@@ -166,11 +256,31 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should not revert (518):  step 13", async () => {
+      const unusedLimitBeforeWithdrawal =
+        await borrowerOperations.unusedWithdrawalLimit();
+
       await decreaseColl({ amount: ninthWithdraw });
+
+      const unusedLimitAfterDecrease =
+        await borrowerOperations.unusedWithdrawalLimit();
+
+      expect(
+        unusedLimitBeforeWithdrawal - unusedLimitAfterDecrease
+      ).to.be.equal(BigInt("403589803926714774200"));
     });
 
     it("should not revert (50): step 14", async () => {
+      const unusedLimitBeforeWithdrawal =
+        await borrowerOperations.unusedWithdrawalLimit();
+
       await decreaseColl({ amount: tenthWithdraw });
+
+      const unusedLimitAfterDecrease =
+        await borrowerOperations.unusedWithdrawalLimit();
+
+      expect(
+        unusedLimitBeforeWithdrawal - unusedLimitAfterDecrease
+      ).to.be.equal(BigInt(BigInt("49992357151145958905")));
     });
 
     it("should revert (138,9):  step 15", async () => {

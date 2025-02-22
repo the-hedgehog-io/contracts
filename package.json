@@ -2,6 +2,7 @@
   "name": "@the-hedgehog-io/contracts",
   "version": "0.4.0",
   "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@openzeppelin/contracts": "^4.9.6",
     "dotenv": "^16.4.7",
