@@ -144,79 +144,50 @@ describe("BaseFeeOracle Tests", () => {
         fork: false,
       });
 
-      const {
-        priceFeed: priceFeedInit,
-        troveManager: troveManagerInit,
-        stabilityPool: stabilityPoolInit,
-        collSurplusPool: collSurplusPoolInit,
-        borrowerOperations: borrowerOperationsInit,
-        hintHelpers: hintHelpersInit,
-        baseFeeLMAToken: BaseFeeLMATokenInit,
-        payToken: payTokenInit,
-        mainOracle: mainOracleInit,
-        secondaryOracle: secondaryOracleInit,
-      } = await setupContracts();
+      ({
+        priceFeed,
+        troveManager,
+        stabilityPool,
+        collSurplusPool,
+        borrowerOperations,
+        hintHelpers,
+        baseFeeLMAToken,
+        payToken,
+        mainOracle,
+        secondaryOracle,
+      } = await setupContracts());
 
-      priceFeed = priceFeedInit;
-      troveManager = troveManagerInit;
-      stabilityPool = stabilityPoolInit;
-      collSurplusPool = collSurplusPoolInit;
-      borrowerOperations = borrowerOperationsInit;
-      hintHelpers = hintHelpersInit;
-      (baseFeeLMAToken = BaseFeeLMATokenInit), (payToken = payTokenInit);
-      mainOracle = mainOracleInit;
-      secondaryOracle = secondaryOracleInit;
+      ({ compareWithFault } = await validateCollDebtMatch());
 
-      const { compareWithFault: compareWithFaultInit } =
-        await validateCollDebtMatch();
-      compareWithFault = compareWithFaultInit;
-
-      const { openTrove: openTroveInit } = await getOpenTrove({
+      ({ openTrove } = await getOpenTrove({
         borrowerOperations,
         payToken,
-      });
+      }));
 
-      openTrove = openTroveInit;
+      ({ getCR, getTroveAndCheck, getTrove } = await getCollRatioParams({
+        troveManager,
+      }));
 
-      const {
-        getCR: getCRInit,
-        getTroveAndCheck: getTroveAndCheckInit,
-        getTrove: getTroveInit,
-      } = await getCollRatioParams({ troveManager });
+      ({ provideToStabilityPool } = await getStabilityPoolMethods({
+        baseFeeLMAToken,
+        stabilityPool,
+      }));
 
-      getCR = getCRInit;
-      getTroveAndCheck = getTroveAndCheckInit;
-      getTrove = getTroveInit;
+      ({ troveDebtIncrease, troveCollIncrease, decreaseDebt } =
+        await getAdjustTroveParams({ borrowerOperations, payToken }));
 
-      const { provideToStabilityPool: provideToStabilityPoolInit } =
-        await getStabilityPoolMethods({ baseFeeLMAToken, stabilityPool });
+      ({ setNewBaseFeePrice } = await setNewParamsToBaseFee({
+        mainOracle,
+        secondaryOracle,
+        priceFeed,
+      }));
 
-      provideToStabilityPool = provideToStabilityPoolInit;
+      ({ checkCollDebtCorrectness } = await checkCorrectness({ troveManager }));
 
-      const {
-        troveDebtIncrease: troveDebtIncreaseInit,
-        troveCollIncrease: troveCollIncreaseInit,
-        decreaseDebt: decreaseDebtInit,
-      } = await getAdjustTroveParams({ borrowerOperations, payToken });
-
-      troveDebtIncrease = troveDebtIncreaseInit;
-      troveCollIncrease = troveCollIncreaseInit;
-      decreaseDebt = decreaseDebtInit;
-
-      const { setNewBaseFeePrice: setNewBaseFeePriceInit } =
-        await setNewParamsToBaseFee({ mainOracle, secondaryOracle, priceFeed });
-      setNewBaseFeePrice = setNewBaseFeePriceInit;
-
-      const { checkCollDebtCorrectness: checkCollDebtCorrectnessInit } =
-        await checkCorrectness({ troveManager });
-      checkCollDebtCorrectness = checkCollDebtCorrectnessInit;
-
-      const { redeemCollateral: redeemCollateralInit } = await redeem({
+      ({ redeemCollateral } = await redeem({
         hintHelpers,
         troveManager,
-      });
-
-      redeemCollateral = redeemCollateralInit;
+      }));
     });
 
     it("should correctly calculate estimated cr", async () => {

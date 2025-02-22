@@ -57,8 +57,7 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
     let deployer: SignerWithAddress,
       alice: SignerWithAddress,
       bob: SignerWithAddress,
-      carol: SignerWithAddress,
-      borrowersOp: SignerWithAddress;
+      carol: SignerWithAddress;
     let feesRouterTester: FeesRouterTester;
     let feesRouter: FeesRouter;
     let activePool: ActivePool;
@@ -147,7 +146,7 @@ describe("Hedgehog Core Contracts Smoke tests", async () => {
     };
 
     before(async () => {
-      [deployer, alice, bob, carol, borrowersOp] = await ethers.getSigners();
+      [deployer, alice, bob, carol] = await ethers.getSigners();
 
       activePool = await (
         await ethers.getContractFactory("ActivePool")

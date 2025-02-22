@@ -176,75 +176,51 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         fork: false,
       });
 
-      const {
-        priceFeed: priceFeedInit,
-        troveManager: troveManagerInit,
-        stabilityPool: stabilityPoolInit,
-        borrowerOperations: borrowerOperationsInit,
-        hintHelpers: hintHelpersInit,
-        baseFeeLMAToken: BaseFeeLMATokenInit,
-        payToken: payTokenInit,
-        mainOracle: mainOracleInit,
-        secondaryOracle: secondaryOracleInit,
-      } = await setupContracts();
+      ({
+        priceFeed,
+        troveManager,
+        stabilityPool,
+        borrowerOperations,
+        hintHelpers,
+        baseFeeLMAToken,
+        payToken,
+        mainOracle,
+        secondaryOracle,
+      } = await setupContracts());
 
-      priceFeed = priceFeedInit;
-      troveManager = troveManagerInit;
-      stabilityPool = stabilityPoolInit;
-      borrowerOperations = borrowerOperationsInit;
-      hintHelpers = hintHelpersInit;
-      (baseFeeLMAToken = BaseFeeLMATokenInit), (payToken = payTokenInit);
-      mainOracle = mainOracleInit;
-      secondaryOracle = secondaryOracleInit;
+      ({ provideToStabilityPool } = await getStabilityPoolMethods({
+        baseFeeLMAToken,
+        stabilityPool,
+      }));
 
-      const { provideToStabilityPool: provideToStabilityPoolInit } =
-        await getStabilityPoolMethods({ baseFeeLMAToken, stabilityPool });
-
-      provideToStabilityPool = provideToStabilityPoolInit;
-
-      const { openTrove: openTroveInit } = await getOpenTrove({
+      ({ openTrove } = await getOpenTrove({
         borrowerOperations,
         payToken,
-      });
+      }));
 
-      openTrove = openTroveInit;
+      ({ troveDebtIncrease, troveCollIncrease } = await getAdjustTroveParams({
+        borrowerOperations,
+        payToken,
+      }));
 
-      const {
-        troveDebtIncrease: troveDebtIncreaseInit,
-        troveCollIncrease: troveCollIncreaseInit,
-      } = await getAdjustTroveParams({ borrowerOperations, payToken });
+      ({ getCR, getTroveAndCheck, getTrove } = await getCollRatioParams({
+        troveManager,
+      }));
 
-      troveDebtIncrease = troveDebtIncreaseInit;
-      troveCollIncrease = troveCollIncreaseInit;
+      ({ checkCollDebtCorrectness } = await checkCorrectness({ troveManager }));
 
-      const {
-        getCR: getCRInit,
-        getTroveAndCheck: getTroveAndCheckInit,
-        getTrove: getTroveInit,
-      } = await getCollRatioParams({ troveManager });
+      ({ compareWithFault } = await validateCollDebtMatch());
 
-      getCR = getCRInit;
-      getTroveAndCheck = getTroveAndCheckInit;
-      getTrove = getTroveInit;
+      ({ setNewBaseFeePrice } = await setNewParamsToBaseFee({
+        mainOracle,
+        secondaryOracle,
+        priceFeed,
+      }));
 
-      const { checkCollDebtCorrectness: checkCollDebtCorrectnessInit } =
-        await checkCorrectness({ troveManager });
-      checkCollDebtCorrectness = checkCollDebtCorrectnessInit;
-
-      const { compareWithFault: compareWithFaultInit } =
-        await validateCollDebtMatch();
-      compareWithFault = compareWithFaultInit;
-
-      const { setNewBaseFeePrice: setNewBaseFeePriceInit } =
-        await setNewParamsToBaseFee({ mainOracle, secondaryOracle, priceFeed });
-      setNewBaseFeePrice = setNewBaseFeePriceInit;
-
-      const { redeemCollateral: redeemCollateralInit } = await redeem({
+      ({ redeemCollateral } = await redeem({
         hintHelpers,
         troveManager,
-      });
-
-      redeemCollateral = redeemCollateralInit;
+      }));
     });
 
     it("should not let open trove if CR is below minimum", async () => {
@@ -879,7 +855,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     // TODO: Get into a separate file
 
-    it("should not mark oracles as broken if price was increased by more then 12.5%", async () => {
+    it("should not mark oracles as broken if price was increased by more than 12.5%", async () => {
       await setNewBaseFeePrice(100000);
 
       await priceFeed.fetchPrice();
@@ -893,7 +869,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       expect(await priceFeed.status()).to.be.equal(0);
     });
 
-    it("should mark oracle as frozen if no updates happens for more then 69 blocks", async () => {
+    it("should mark oracle as frozen if no updates happens for more than 69 blocks", async () => {
       await mine(70);
       const block = await latestBlock();
 
