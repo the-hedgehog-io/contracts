@@ -167,7 +167,8 @@ library LiquityMath {
             return (_currentTotalColl, _currentTotalColl);
         }
         
-        // We calculate 50% of the current total coll
+        // We calculate 50% of the current collateral over WITHDRAWAL_LIMIT_THRESHOLD
+        // so max limit is half of the collateral plus 50% of the threshold (5 ether)
         uint256 totalCollBasedLimit = 
             WITHDRAWAL_LIMIT_THRESHOLD + 
             (_currentTotalColl - WITHDRAWAL_LIMIT_THRESHOLD) / 2;
