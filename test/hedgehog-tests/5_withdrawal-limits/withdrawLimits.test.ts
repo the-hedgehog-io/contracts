@@ -23,21 +23,36 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     let openTrove: OpenTrove;
 
+    // 1000
     const firstDeposit = BigInt("1000000000000000000000");
+    // 10
     const secondDeposit = BigInt("10000000000000000000");
+    // 80
     const thirdDeposit = BigInt("80000000000000000000");
+    // 1000
     const fourthDeposit = BigInt("1000000000000000000000");
 
+    // 100
     const firstWithdraw = BigInt("100000000000000000000");
-    const secondWithdraw = BigInt("322000000000000000000");
-    const thirdWithdraw = BigInt("322000000000000000000");
+    // 320
+    const secondWithdraw = BigInt("320000000000000000001");
+    // 320
+    const thirdWithdraw = BigInt("320000000000000000000");
+    // 110
     const fourthWithdraw = BigInt("110000000000000000000");
+    // 152
     const fifthWithdraw = BigInt("152000000000000000000");
-    const sixthWithdraw = BigInt("144960000000000000000");
-    const seventhWithdraw = BigInt("74832000000000000000");
+    // 125.58
+    const sixthWithdraw = BigInt("125872276480000000000");
+    // 25.4
+    const seventhWithdraw = BigInt("25406946208526600601");
+    // 600
     const eighthWithdraw = BigInt("600000000000000000000");
-    const ninthWithdraw = BigInt("518000000000000000000");
+    // 405.1
+    const ninthWithdraw = BigInt("405109264972043711117");
+    // 50
     const tenthWithdraw = BigInt("50000000000000000000");
+    // 138.92
     const eleventhWithdraw = BigInt("138926014327856650000");
 
     before(async () => {
@@ -49,6 +64,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       ({ openTrove } = await getOpenTrove({ payToken, borrowerOperations }));
     });
 
+    // 2.000.000.000
     const debtAmountAlice = BigInt("2000000000000000000000000000");
 
     type AdjustTroveParams = {
@@ -91,23 +107,24 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         .reverted;
     });
 
-    it("should revert if user tries to withdraw more then 80% withdrawable (322): step3", async () => {
+    it("should revert if user tries to withdraw more than 80% withdrawable (322): step3", async () => {
       await increase(timestring("1 minutes"));
       await expect(decreaseColl({ amount: secondWithdraw })).to.be.revertedWith(
-        "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+        "BO: Cannot withdraw more than 80% of withdrawable in one tx"
       );
     });
 
+    // actually here nothing changes - waiting doesn't increase the limit
     it("should not revert after enough time has passed (322): step4", async () => {
       await increase(timestring("60 minutes"));
 
-      await decreaseColl({ amount: thirdWithdraw }); //521000000000000000000
+      await decreaseColl({ amount: thirdWithdraw });
     });
 
-    it("should revert  if user tries to withdraw more then 80% withdrawable (110): step 5", async () => {
+    it("should revert  if user tries to withdraw more than 80% withdrawable (110): step 5", async () => {
       await increase(timestring("10 minutes"));
       await expect(decreaseColl({ amount: fourthWithdraw })).to.be.revertedWith(
-        "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+        "BO: Cannot withdraw more than 80% of withdrawable in one tx"
       );
     });
 
@@ -144,7 +161,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     it("should revert (600): step 12", async () => {
       await increase(timestring("1 minute"));
       await expect(decreaseColl({ amount: eighthWithdraw })).to.be.revertedWith(
-        "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+        "BO: Cannot withdraw more than 80% of withdrawable in one tx"
       );
     });
 
@@ -160,7 +177,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await expect(
         decreaseColl({ amount: eleventhWithdraw })
       ).to.be.revertedWith(
-        "BO: Cannot withdraw more then 80% of withdrawble in one tx"
+        "BO: Cannot withdraw more than 80% of withdrawable in one tx"
       );
     });
   });

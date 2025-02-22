@@ -9,7 +9,6 @@ import "./dependencies/CheckContract.sol";
 
 /*
  * Hedgehog Updates:
- *  - Decrease Decimals from 18 to 6 for better visibility
  *  - Remove transfer protection described later in the contract
  *
  *

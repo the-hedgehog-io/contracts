@@ -717,6 +717,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             totals.totalBaseFeeLMAGasCompensation,
             totals.totalCollGasCompensation
         );
+
+        // Hedgehog Updates: Update Dynamic Withdrawal Limits but do not revert tx if exceeds 80% single tx limit
+        IBorrowerOperations(borrowerOperationsAddress)
+            .handleWithdrawalLimit(totals.totalCollInSequence, true);
     }
 
     /*
@@ -934,6 +938,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             totals.totalCollGasCompensation,
             totals.totalBaseFeeLMAGasCompensation
         );
+
         // Send gas compensation to caller
         _sendGasCompensation(
             activePoolCached,
@@ -941,6 +946,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             totals.totalBaseFeeLMAGasCompensation,
             totals.totalCollGasCompensation
         );
+
+        // Hedgehog Updates: Update Dynamic Withdrawal Limits but do not revert tx if exceeds 80% single tx limit
+        IBorrowerOperations(borrowerOperationsAddress)
+            .handleWithdrawalLimit(totals.totalCollInSequence, true);
     }
 
     /*
@@ -1128,9 +1137,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         }
 
         if (_WStETH > 0) {
-            // Hedgehog Updates: Update Dynamic Withdrawl Limits but do not revert tx if exceeds 80% single tx limit
-            IBorrowerOperations(borrowerOperationsAddress)
-                .handleWithdrawalLimit(_WStETH, false);
             _activePool.sendWStETH(_liquidator, _WStETH);
         }
     }
@@ -1254,13 +1260,9 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         _contractsCache.activePool.decreaseBaseFeeLMADebt(_BaseFeeLMA);
 
         // send WStETH from Active Pool to CollSurplus Pool
-        collSurplusPool.increaseBalance(_WStETH);
+        _contractsCache.collSurplusPool.increaseBalance(_WStETH);
         _contractsCache.collSurplusPool.accountSurplus(_borrower, _WStETH);
-        // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
-        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawalLimit(
-            _WStETH,
-            true
-        );
+
         _contractsCache.activePool.sendWStETH(
             address(_contractsCache.collSurplusPool),
             _WStETH
@@ -1457,14 +1459,15 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         contractsCache.activePool.decreaseBaseFeeLMADebt(
             totals.totalBaseFeeLMAToRedeem
         );
-        // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
-        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawalLimit(
-            totals.totalWStETHDrawn,
-            true
-        );
         contractsCache.activePool.sendWStETH(
             msg.sender,
             totals.WStETHToSendToRedeemer
+        );
+
+        // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
+        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawalLimit(
+            totals.totalWStETHDrawn,
+            false
         );
     }
 
@@ -1971,7 +1974,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
 
         newBaseRate = LiquityMath._min(newBaseRate, DECIMAL_PRECISION); // cap baseRate at a maximum of 100%
         //assert(newBaseRate <= DECIMAL_PRECISION); // This is already enforced in the line above
-        // Hedgehog Updates: Remove assertion check to make sure first redemption does not revert after the bootstrapping period if more then 10^18 WstETH was transfer into the contract
+        // Hedgehog Updates: Remove assertion check to make sure first redemption does not revert after the bootstrapping period if more than 10^18 WstETH was transfer into the contract
         // assert(newBaseRate > 0); // Base rate is always non-zero after redemption
 
         // HEDGEHOG UPDATES: succesful redemption now updates only the redemption base rate. Redemption base rate update also received a new event.
