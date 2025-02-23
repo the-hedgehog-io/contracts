@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-
+/*
 pragma solidity 0.8.19;
 
 import "./BorrowerOperations.sol";
@@ -7,6 +7,7 @@ import "./BorrowerOperations.sol";
 interface ArbSys {
     function arbBlockNumber() external view returns (uint256);
 }
+/*
 
 /**
  * @notice Fork of Liquity's BorrowerOperations. . Most of the Logic remains unchanged..
@@ -21,6 +22,7 @@ interface ArbSys {
  * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  */
 
+/*
 contract BorrowerOperationsArb is BorrowerOperations {
 
     // HEDGEHOG UPDATES: New constant interface ArbSys - enabling retrieval of block number
@@ -37,3 +39,4 @@ contract BorrowerOperationsArb is BorrowerOperations {
         troveManager.setTroveLastUpdatedBlock(_borrower);
     }
 }
+*/

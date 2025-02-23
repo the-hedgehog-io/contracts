@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.19;
 
-import "./interfaces/IBorrowerOperations.sol";
 import "./interfaces/IStabilityPool.sol";
 import "./interfaces/IBorrowerOperations.sol";
 import "./interfaces/ITroveManager.sol";
@@ -953,13 +952,6 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
 
     // --- 'require' functions ---
 
-    function _requireCallerIsActivePool() internal view {
-        require(
-            msg.sender == address(activePool),
-            "StabilityPool: Caller is not ActivePool"
-        );
-    }
-
     function _requireCallerIsTroveManager() internal view {
         require(
             msg.sender == address(troveManager),
@@ -984,14 +976,6 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
         );
     }
 
-    function _requireUserHasNoDeposit(address _address) internal view {
-        uint initialDeposit = deposits[_address].initialValue;
-        require(
-            initialDeposit == 0,
-            "StabilityPool: User must have no deposit"
-        );
-    }
-
     function _requireNonZeroAmount(uint _amount) internal pure {
         require(_amount > 0, "StabilityPool: Amount must be non-zero");
     }
@@ -1008,13 +992,6 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
         require(
             WStETHGain > 0,
             "StabilityPool: caller must have non-zero WStETH Gain"
-        );
-    }
-
-    function _requireValidKickbackRate(uint _kickbackRate) internal pure {
-        require(
-            _kickbackRate <= DECIMAL_PRECISION,
-            "StabilityPool: Kickback rate must be in range [0,1]"
         );
     }
 

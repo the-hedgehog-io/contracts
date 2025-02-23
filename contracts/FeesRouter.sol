@@ -2,15 +2,12 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IBaseFeeLMAToken.sol";
 import "./interfaces/IActivePool.sol";
 
 error InvalidIndex();
 error InvalidAddress();
-error InvalidLength();
 error InvalidInput();
-error TooManyConfigValues();
 error CallerIsNotHDGProtocol();
 error ConfigNotFound();
 

@@ -3,7 +3,6 @@
 pragma solidity 0.8.19;
 
 import "../interfaces/IHOGToken.sol";
-import "../interfaces/ICommunityIssuance.sol";
 import "../dependencies/BaseMath.sol";
 import "../dependencies/LiquityMath.sol";
 import "../dependencies/CheckContract.sol";

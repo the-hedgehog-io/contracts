@@ -121,13 +121,6 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
         );
     }
 
-    function _requireCallerIsActivePool() internal view {
-        require(
-            msg.sender == activePoolAddress,
-            "CollSurplusPool: Caller is not Active Pool"
-        );
-    }
-
     // Hedgehog Updates:
     // New function, that increases balance tracker instead of a native token fallback
     function increaseBalance(uint256 _amount) external {
