@@ -6,7 +6,7 @@ import "../../PriceFeed.sol";
 
 contract TestPriceFeed is PriceFeed {
 
-    constructor() PriceFeed(39) {
+    constructor(uint _TIMEOUT) PriceFeed(_TIMEOUT) {
     }
 
     function setLastGoodPrice(uint _lastGoodPrice) external {

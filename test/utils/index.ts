@@ -84,7 +84,9 @@ export const setupContracts = async () => {
   const priceFeed = await (
     await (await ethers.getContractFactory("TestPriceFeed"))
       .connect(deployer)
-      .deploy()
+      // Use the number of blocks to get roughly 400s
+      // In case of Base it's 200, Arbitrum - 1600
+      .deploy(39)
   ).waitForDeployment();
 
   const sortedTroves = await (

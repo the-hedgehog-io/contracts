@@ -25,7 +25,7 @@ It can be verified that function renames and pragma raise didn't break the contr
 
 ## Setup Environment
 
-Repo was used with node@20.11.1
+Repo was used with pnpm v10
 If you use volta, it is already pinned in the package.json
 
 ```bash
