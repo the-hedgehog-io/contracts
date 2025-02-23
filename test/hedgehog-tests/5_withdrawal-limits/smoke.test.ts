@@ -1052,7 +1052,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         baseFeeLMAAmount: debtAmountBob,
       });
 
-      await setNewBaseFeePrice(54);
+      await setNewBaseFeePrice(540);
 
       const amountForWithdraw = BigInt("30000000000000000000000000");
       const maxFeePercentage = ethers.parseEther("1");

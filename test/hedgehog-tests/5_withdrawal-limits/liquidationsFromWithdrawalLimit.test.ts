@@ -161,7 +161,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       );
 
       expect(unusedLimitBeforeClose - unusedLimitAfterClose).to.be.equal(
-        BigInt("195000000000000000000")
+        BigInt("200000000000000000000")
       );
     });
 
@@ -237,7 +237,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
       await borrowerOperations.connect(bob).closeTrove();
 
-      const unusedLimitAfterClose = BigInt("905000000000000000000");
+      const unusedLimitAfterClose = BigInt("900000000000000000000");
       expect(await borrowerOperations.unusedWithdrawalLimit()).to.be.equal(
         unusedLimitAfterClose
       );
