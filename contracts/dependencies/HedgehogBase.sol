@@ -33,7 +33,7 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
     // Critical system collateral ratio. If the system's total collateral ratio (TCR) falls below the CCR, Recovery Mode is triggered.
     uint public constant CCR = 2000000000000000000; // 200%
 
-    // HEDGEHOG UPDATES: Updated to 150000000000000000000000
+    // HEDGEHOG UPDATES: Updated to 300000000000000000000000
     // Amount of BaseFeeLMA to be locked in gas pool on opening troves
     uint public constant BaseFeeLMA_GAS_COMPENSATION = 300000000000000000000000;
 

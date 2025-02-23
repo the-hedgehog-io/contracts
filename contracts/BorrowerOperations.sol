@@ -1171,7 +1171,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      *
      * When Collateral is Withdrawn from the System:
      * 1) Calculate the Current Withdrawal Limit: The system calculates the current withdrawal limit as:
-     * Current Limit = Old Limit + (50% + Current Collateral - Old Limit) * ( Time Elapsed(minutes) / 720 )
+     * Current Limit = Old Limit + (threshold + 50% * (Current Collateral over threshold) - Old Limit) * ( Time Elapsed(minutes) / 720 )
      * This formula accounts for the time elapsed since the last withdrawal, with the withdrawal limit gradually increasing towards the target limit over a 12-hour period.
      *
      * 2) Determine User's Withdrawal Limit for the Transaction:
