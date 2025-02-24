@@ -82,6 +82,10 @@ const config: HardhatUserConfig = {
       accounts: newAccounts,
       url: "https://arbitrum-one.publicnode.com",
     },
+    base: {
+      accounts: newAccounts,
+      url: "https://base-rpc.publicnode.com",
+    },
     ethereum: {
       accounts: newAccounts,
       url: "https://ethereum-rpc.publicnode.com",

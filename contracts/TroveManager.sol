@@ -1249,7 +1249,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
      * Called when a full redemption occurs, and closes the trove.
      * The redeemer swaps (debt - liquidation reserve) BaseFeeLMA for (debt - liquidation reserve) worth of WStETH, so the BaseFeeLMA liquidation reserve left corresponds to the remaining debt.
      * In order to close the trove, the BaseFeeLMA liquidation reserve is burned, and the corresponding debt is removed from the active pool.
-     * The debt recorded on the trove's struct is zero'd elswhere, in _closeTrove.
+     * The debt recorded on the trove's struct is zero'd elsewhere, in _closeTrove.
      * Any surplus WStETH left in the trove, is sent to the Coll surplus pool, and can be later claimed by the borrower.
      */
     function _redeemCloseTrove(
@@ -2330,8 +2330,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
     }
 
     // Hedgehog Updates: New function that stores block update into a trove. This block is checked at the start of adjust, close and open functions.
-    // virtual added for changes in Arbitrum deployment through inheritance
-    function setTroveLastUpdatedBlock(address _borrower) external virtual {
+    function setTroveLastUpdatedBlock(address _borrower) external {
         _requireCallerIsBorrowerOperations();
         Troves[_borrower].lastBlockUpdated = block.number;
     }

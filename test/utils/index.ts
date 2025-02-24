@@ -77,14 +77,19 @@ export const setupContracts = async () => {
   await mainOracle
     .connect(deployer)
     .feedBaseFeeValue("30000000000", await latestBlock());
+
   await secondaryOracle
     .connect(deployer)
     .feedBaseFeeValue("30000000000", await latestBlock());
 
   const priceFeed = await (
-    await (await ethers.getContractFactory("TestPriceFeed"))
+    await (
+      await ethers.getContractFactory("TestPriceFeed")
+    )
       .connect(deployer)
-      .deploy()
+      // Use the number of blocks to get roughly 400s
+      // In case of Base it's 200, Arbitrum - 1600
+      .deploy(200)
   ).waitForDeployment();
 
   const sortedTroves = await (

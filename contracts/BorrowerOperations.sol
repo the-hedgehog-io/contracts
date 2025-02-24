@@ -126,6 +126,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address indexed _borrower,
         uint _BaseFeeLMAFee
     );
+    event WithdrawalLimitUpdated(uint256 _limit);
 
     // --- Dependency setters ---
 
@@ -201,7 +202,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * now passing a new param _collAmount
      * checking if _amount is greater then 0
      * Function is no longer payable
-     * virtual added for testing purposes, might be removed
      */
     function openTrove(
         uint _maxFeePercentage,
@@ -209,7 +209,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint _collAmount,
         address _upperHint,
         address _lowerHint
-    ) external virtual {
+    ) external {
         // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
         {
             _checkAndSetUpdateBlock(msg.sender);
@@ -350,7 +350,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * now passing a new param _collIncrease in _adjustTrove function - in this particular case it is a passed param _amount
      * checking if _amount is greater then 0
      * Function is no longer payable
-     * virtual added for testing purposes, might be removed
      */
     // Send WStETH as collateral to a trove. Called by only the Stability Pool.
     function moveWStETHGainToTrove(
@@ -358,7 +357,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _upperHint,
         address _lowerHint,
         uint _amount
-    ) external virtual {
+    ) external {
         require(_amount > 0, "Borrower Operations: Invalid amount");
         _requireCallerIsStabilityPool();
         _adjustTrove(
@@ -477,8 +476,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * It therefore expects either a positive _collIncrease, or a positive _collWithdrawal argument.
      *
      * If both are positive, it will revert.
-     *
-     * virtual added for testing purposes, might be removed
      */
     function _adjustTrove(
         address _borrower,
@@ -489,7 +486,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _upperHint,
         address _lowerHint,
         uint _maxFeePercentage
-    ) internal virtual {
+    ) internal {
         {
             // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
             _checkAndSetUpdateBlock(msg.sender);
@@ -638,8 +635,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     }
 
     // Hedgehog Updates: Do not deduct gas fee compensation from trove Debt as user just received less tokens during position opening
-    // virtual added for testing purposes, might be removed
-    function closeTrove() external virtual {
+    function closeTrove() external {
         // Hedgehog Updates: Check that trove[msg.sender] did not perform adjustTrove transactions in the current block
         {
             _checkAndSetUpdateBlock(msg.sender);
@@ -672,9 +668,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         );
         _requireNewTCRisAboveCCR(newTCR);
 
-        // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
-        _handleWithdrawalLimit(coll, false);
-
         troveManagerCached.removeStake(msg.sender);
         troveManagerCached.closeTrove(msg.sender);
 
@@ -696,6 +689,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         // Send the collateral back to the user
         activePoolCached.sendWStETH(msg.sender, coll);
+
+        // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
+        _handleWithdrawalLimit(coll, false);
     }
 
     /**
@@ -709,8 +705,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     // --- Helper functions ---
 
     // HedgehogUpdates: new private function, that checks if there was a transaction with a trove in the current block
-    // virtual added for changes in Arbitrum deployment through inheritance
-    function _checkAndSetUpdateBlock(address _borrower) internal virtual {
+    function _checkAndSetUpdateBlock(address _borrower) internal {
         if (troveManager.getTroveUpdateBlock(_borrower) == block.number) {
             revert TroveAdjustedThisBlock();
         }
@@ -820,13 +815,13 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         IActivePool _activePool,
         uint _amount
     ) internal {
-        uint256 oldColl = _activePool.getWStETH();
-
         WStETHToken.safeTransferFrom(msg.sender, address(_activePool), _amount);
         activePool.increaseBalance(_amount);
 
         // Update withdrawal Limit from collateral addition.
         unusedWithdrawalLimit = unusedWithdrawalLimit + _amount / 2;
+
+        emit WithdrawalLimitUpdated(unusedWithdrawalLimit);
     }
 
     // Issue the specified amount of BaseFeeLMA to _account and increases the total active debt (_netDebtIncrease potentially includes a BaseFeeLMAFee)
@@ -864,13 +859,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         require(
             _collIncrease == 0 || _collWithdrawal == 0,
             "BorrowerOperations: Cannot withdraw and add coll"
-        );
-    }
-
-    function _requireCallerIsBorrower(address _borrower) internal view {
-        require(
-            msg.sender == _borrower,
-            "BorrowerOps: Caller must be the borrower for a withdrawal"
         );
     }
 
@@ -1183,7 +1171,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      *
      * When Collateral is Withdrawn from the System:
      * 1) Calculate the Current Withdrawal Limit: The system calculates the current withdrawal limit as:
-     * Current Limit = Old Limit + (50% + Current Collateral - Old Limit) * ( Time Elapsed(minutes) / 720 )
+     * Current Limit = Old Limit + (threshold + 50% * (Current Collateral over threshold) - Old Limit) * ( Time Elapsed(minutes) / 720 )
      * This formula accounts for the time elapsed since the last withdrawal, with the withdrawal limit gradually increasing towards the target limit over a 12-hour period.
      *
      * 2) Determine User's Withdrawal Limit for the Transaction:
@@ -1219,6 +1207,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
         // Update the withdrawal recorded timestamp
         lastWithdrawalTimestamp = block.timestamp;
+
+        emit WithdrawalLimitUpdated(unusedWithdrawalLimit);
     }
 
     function handleWithdrawalLimit(

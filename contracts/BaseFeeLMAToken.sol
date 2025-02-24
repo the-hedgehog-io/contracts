@@ -353,13 +353,6 @@ contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
         );
     }
 
-    function _requireCallerIsBorrowerOperations() internal view {
-        require(
-            msg.sender == borrowerOperationsAddress,
-            "BaseFeeLMAToken: Caller is not BorrowerOperations"
-        );
-    }
-
     function _requireCallerIsBOorFRoute() internal view {
         require(
             msg.sender == borrowerOperationsAddress || msg.sender == feesRouter,

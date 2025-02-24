@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-
+/*
 pragma solidity 0.8.19;
 
 import "./TroveManager.sol";
@@ -22,3 +22,4 @@ contract TroveManagerArb is TroveManager {
         Troves[_borrower].lastBlockUpdated = arbsys.arbBlockNumber();
     }
 }
+*/

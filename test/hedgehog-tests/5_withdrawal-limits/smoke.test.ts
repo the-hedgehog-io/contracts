@@ -10,10 +10,15 @@ import {
   FeesRouter,
   SortedTroves,
   TERC20,
+  TestPriceFeed,
   TroveManager,
 } from "../../../typechain-types";
 import { getSigners, setupContracts } from "../../utils";
-import { getOpenTrove, OpenTrove } from "../../utils/shared";
+import {
+  getOpenTrove,
+  OpenTrove,
+  setNewParamsToBaseFee,
+} from "../../utils/shared";
 import { expect } from "chai";
 
 describe("Hedgehog Core Contracts Smoke tests", () => {
@@ -29,10 +34,13 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
   let payToken: TERC20;
   let troveManager: TroveManager;
   let secondaryOracle: BaseFeeOracle;
+  let mainOracle: BaseFeeOracle;
   let baseFeeLMAToken: BaseFeeLMAToken;
   let activePool: ActivePool;
   let feesRouter: FeesRouter;
+  let priceFeed: TestPriceFeed;
   let openTrove: OpenTrove;
+  let setNewBaseFeePrice: (_amount: number) => Promise<void>;
 
   let MIN_NET_DEBT: bigint;
   let BORROWING_FEE_FLOOR: bigint;
@@ -51,6 +59,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       troveManager,
       activePool,
       feesRouter,
+      mainOracle,
+      priceFeed,
     } = await setupContracts());
     BaseFeeLMA_GAS_COMPENSATION =
       await borrowerOperations.BaseFeeLMA_GAS_COMPENSATION();
@@ -58,6 +68,12 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     BORROWING_FEE_FLOOR = await borrowerOperations.BORROWING_FEE_FLOOR();
     ({ openTrove } = await getOpenTrove({ payToken, borrowerOperations }));
+
+    ({ setNewBaseFeePrice } = await setNewParamsToBaseFee({
+      mainOracle,
+      secondaryOracle,
+      priceFeed,
+    }));
   });
 
   const collAmountAlice = BigInt("200000000000000000000");
@@ -184,9 +200,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         baseFeeLMAAmount: debtAmountAlice,
       });
 
-      await secondaryOracle
-        .connect(deployer)
-        .feedBaseFeeValue("100000000000", await latestBlock());
+      await setNewBaseFeePrice(100);
 
       await expect(
         openTrove({
@@ -241,9 +255,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         baseFeeLMAAmount: debtAmountAlice,
       });
 
-      await secondaryOracle
-        .connect(deployer)
-        .feedBaseFeeValue("100000000000", await latestBlock());
+      await setNewBaseFeePrice(100);
 
       await expect(
         openTrove({
@@ -300,9 +312,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         baseFeeLMAAmount: debtAmountAlice,
       });
 
-      await secondaryOracle
-        .connect(deployer)
-        .feedBaseFeeValue("100000000000", await latestBlock());
+      await setNewBaseFeePrice(100);
 
       const newDebtBob = BigInt("900000000000000000000000000");
 
@@ -322,9 +332,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         baseFeeLMAAmount: debtAmountAlice,
       });
 
-      await secondaryOracle
-        .connect(deployer)
-        .feedBaseFeeValue("100000000000", await latestBlock());
+      await setNewBaseFeePrice(100);
 
       await expect(
         openTrove({
@@ -345,9 +353,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       });
       expect(await troveManager.TroveOwners(0)).to.be.equal(alice.address);
 
-      await secondaryOracle
-        .connect(deployer)
-        .feedBaseFeeValue("100000000000", await latestBlock());
+      await setNewBaseFeePrice(100);
 
       await openTrove({
         caller: bob,
@@ -460,9 +466,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         baseFeeLMAAmount: debtAmountBob,
       });
 
-      await secondaryOracle
-        .connect(deployer)
-        .feedBaseFeeValue("110000000000", await latestBlock());
+      await setNewBaseFeePrice(110);
 
       expect(await troveManager.Troves(carol.address)).not.to.be.reverted;
 
@@ -593,9 +597,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         baseFeeLMAAmount: debtAmountBob,
       });
 
-      await secondaryOracle
-        .connect(deployer)
-        .feedBaseFeeValue("70000000000", await latestBlock());
+      await setNewBaseFeePrice(70);
 
       const amountForAddColl = BigInt("5000000000000000");
 
@@ -747,9 +749,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         baseFeeLMAAmount: debtAmountAlice,
       });
 
-      await secondaryOracle
-        .connect(deployer)
-        .feedBaseFeeValue("80000000000", await latestBlock());
+      await setNewBaseFeePrice(80);
 
       const amountForAddColl = BigInt("50000000000000000000");
 
@@ -793,9 +793,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         baseFeeLMAAmount: newDebt,
       });
 
-      await secondaryOracle
-        .connect(deployer)
-        .feedBaseFeeValue("50000000000", await latestBlock());
+      await setNewBaseFeePrice(50);
 
       await expect(
         borrowerOperations
@@ -850,9 +848,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         baseFeeLMAAmount: debtAmountBob,
       });
 
-      await secondaryOracle
-        .connect(deployer)
-        .feedBaseFeeValue("90000000000", await latestBlock());
+      await setNewBaseFeePrice(90);
 
       const addCollAlice = BigInt("530000000000000000000");
       const addDebtAlice = BigInt("810000000000000000000000000");
@@ -891,9 +887,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         baseFeeLMAAmount: debtAmountBob,
       });
 
-      await secondaryOracle
-        .connect(deployer)
-        .feedBaseFeeValue("70000000000", await latestBlock());
+      await setNewBaseFeePrice(70);
 
       const amountForWithdraw = BigInt("10000000000000000000");
       const maxFeePercentage = ethers.parseEther("1");
@@ -1058,9 +1052,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         baseFeeLMAAmount: debtAmountBob,
       });
 
-      await secondaryOracle
-        .connect(deployer)
-        .feedBaseFeeValue("540000000000", await latestBlock());
+      await setNewBaseFeePrice(540);
 
       const amountForWithdraw = BigInt("30000000000000000000000000");
       const maxFeePercentage = ethers.parseEther("1");
@@ -1097,9 +1089,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         baseFeeLMAAmount: debtAmountBob,
       });
 
-      await secondaryOracle
-        .connect(deployer)
-        .feedBaseFeeValue("532000000000", await latestBlock());
+      await setNewBaseFeePrice(532);
 
       const amountForWithdraw = BigInt("30000000000000000000000000");
       const maxFeePercentage = ethers.parseEther("1");
@@ -1300,9 +1290,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       });
       const amountForRepay = BigInt("1000000000000000000000");
 
-      await secondaryOracle
-        .connect(deployer)
-        .feedBaseFeeValue("100000000000", await latestBlock());
+      await setNewBaseFeePrice(100);
 
       await expect(
         borrowerOperations
@@ -1370,9 +1358,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
       const allTroveCountBefore = await troveManager.getTroveOwnersCount();
 
-      await secondaryOracle
-        .connect(deployer)
-        .feedBaseFeeValue("110000000000", await latestBlock());
+      await setNewBaseFeePrice(110);
 
       await troveManager.liquidateTroves(2);
 

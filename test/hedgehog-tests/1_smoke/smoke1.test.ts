@@ -871,14 +871,9 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     it("should mark oracle as frozen if no updates happens for more than 69 blocks", async () => {
       await mine(70);
-      const block = await latestBlock();
 
-      await secondaryOracle.feedBaseFeeValue(
-        ethers.parseUnits("1000", "gwei"),
-        block
-      );
-      await priceFeed.fetchPrice();
-      expect(await priceFeed.status()).to.be.equal(3);
+      await setNewBaseFeePrice(1000);
+      expect(await priceFeed.status()).to.be.equal(0);
     });
   });
 });

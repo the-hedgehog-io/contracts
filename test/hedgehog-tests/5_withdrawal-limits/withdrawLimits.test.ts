@@ -12,8 +12,7 @@ const { increase } = time;
 
 describe("Hedgehog Core Contracts Smoke tests", () => {
   context("Withdrawal functionality. Flow #1", () => {
-    let alice: SignerWithAddress;
-
+    let alice: SignerWithAddress, bob: SignerWithAddress;
     let borrowerOperations: BorrowerOperations;
     let payToken: TERC20;
 
@@ -52,7 +51,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const eleventhWithdraw = BigInt("138926014327856650000");
 
     before(async () => {
-      [alice] = await getSigners({
+      [alice, bob] = await getSigners({
         fork: false,
       });
       ({ borrowerOperations, payToken } = await setupContracts());
@@ -83,18 +82,21 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         .addColl(ethers.ZeroAddress, ethers.ZeroAddress, amount);
     };
 
-    const decreaseColl = async ({ amount }: { amount: bigint }) => {
-      await borrowerOperations.withdrawColl(
-        amount,
-        ethers.ZeroAddress,
-        ethers.ZeroAddress
-      );
+    const decreaseColl = async ({
+      amount,
+      caller = alice,
+    }: {
+      amount: bigint;
+      caller?: SignerWithAddress;
+    }) => {
+      await borrowerOperations
+        .connect(caller)
+        .withdrawColl(amount, ethers.ZeroAddress, ethers.ZeroAddress);
     };
 
     it("should let open the trove (1000): step 1", async () => {
       const unusedLimitBeforeOpenTrove =
         await borrowerOperations.unusedWithdrawalLimit();
-
       await openTrove({
         collAmount: firstDeposit,
         baseFeeLMAAmount: debtAmountAlice,
@@ -102,7 +104,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
       const unusedLimitAfterOpenTrove =
         await borrowerOperations.unusedWithdrawalLimit();
-
       expect(
         unusedLimitAfterOpenTrove - unusedLimitBeforeOpenTrove
       ).to.be.equal(firstDeposit / BigInt("2"));
@@ -124,7 +125,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       ).to.be.equal(firstWithdraw);
     });
 
-    it("should revert if user tries to withdraw more than 80% withdrawable (322): step3", async () => {
+    it("should revert if user tries to withdraw more than 80% withdrawable (320): step3", async () => {
       await increase(timestring("1 minutes"));
       await expect(decreaseColl({ amount: secondWithdraw })).to.be.revertedWith(
         "BO: Cannot withdraw more than 80% of withdrawable in one tx"
@@ -132,7 +133,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     // actually here nothing changes - waiting doesn't increase the limit
-    it("should not revert after enough time has passed (322): step4", async () => {
+    it("should not revert after enough time has passed (320): step4", async () => {
       await increase(timestring("60 minutes"));
 
       const unusedLimitBeforeWithdrawal =
@@ -201,7 +202,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       ).that.be.equal(thirdDeposit / BigInt("2"));
     });
 
-    it("should not revert after increasing the deposit (144,96): step 9", async () => {
+    it("should not revert after increasing the deposit (89,9): step 9", async () => {
       await increase(timestring("1 minute"));
 
       const unusedLimitBeforeWithdrawal =
@@ -217,7 +218,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       ).to.be.equal(BigInt("89441826000000000000"));
     });
 
-    it("should not revert (74,8): step 10", async () => {
+    it("should not revert (18,25): step 10", async () => {
       await increase(timestring("1 minute"));
 
       const unusedLimitBeforeWithdrawal =
@@ -255,7 +256,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       );
     });
 
-    it("should not revert (518):  step 13", async () => {
+    it("should not revert (403,6):  step 13", async () => {
       const unusedLimitBeforeWithdrawal =
         await borrowerOperations.unusedWithdrawalLimit();
 
@@ -283,12 +284,60 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       ).to.be.equal(BigInt(BigInt("49992357151145958905")));
     });
 
-    it("should revert (138,9):  step 15", async () => {
+    it("should revert (138,92):  step 15", async () => {
       await expect(
         decreaseColl({ amount: eleventhWithdraw })
       ).to.be.revertedWith(
         "BO: Cannot withdraw more than 80% of withdrawable in one tx"
       );
+    });
+
+    it("should allow to open new trove for bob (1000), step 16", async () => {
+      const unusedLimitBeforeOpenTrove =
+        await borrowerOperations.unusedWithdrawalLimit();
+
+      await openTrove({
+        caller: bob,
+        collAmount: firstDeposit,
+        baseFeeLMAAmount: debtAmountAlice / BigInt(2),
+      });
+
+      const unusedLimitAfterOpenTrove =
+        await borrowerOperations.unusedWithdrawalLimit();
+
+      expect(
+        unusedLimitAfterOpenTrove - unusedLimitBeforeOpenTrove
+      ).to.be.equal(firstDeposit / BigInt("2"));
+    });
+
+    it("should revert (if withdrawalAmount = 0):  step 17", async () => {
+      await expect(
+        decreaseColl({
+          amount: BigInt("0"),
+        })
+      ).to.be.revertedWith(
+        "BorrowerOps: There must be either a collateral change or a debt change"
+      );
+    });
+
+    it("should not revert (if withdrawalAmount 80% unusedLimit):  step 18", async () => {
+      const unusedLimitBeforeWithdrawal =
+        await borrowerOperations.unusedWithdrawalLimit();
+      const limit =
+        (unusedLimitBeforeWithdrawal * BigInt("80")) / BigInt("100");
+
+      await expect(
+        decreaseColl({
+          caller: bob,
+          amount: limit,
+        })
+      ).not.to.be.reverted;
+
+      const unusedLimitAfterWithdrawal =
+        await borrowerOperations.unusedWithdrawalLimit();
+      expect(
+        unusedLimitBeforeWithdrawal - unusedLimitAfterWithdrawal
+      ).to.be.equal(BigInt("440768868858262020604"));
     });
   });
 });

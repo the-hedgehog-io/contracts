@@ -2,7 +2,7 @@ import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 
 import { ethers } from "hardhat";
-import { TERC20 } from "../../../typechain-types";
+import { TERC20, TestPriceFeed } from "../../../typechain-types";
 import { expect } from "chai";
 import { getSigners, setupContracts } from "../../utils";
 const { latestBlock } = time;
@@ -21,6 +21,7 @@ import {
   RedeemCollateral,
   getOpenTrove,
   redeem,
+  setNewParamsToBaseFee,
 } from "../../utils/shared";
 
 describe("Hedgehog Core Contracts Smoke tests", () => {
@@ -33,13 +34,15 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     let activePool: ActivePool;
     let troveManager: TroveManager;
     let hintHelpers: HintHelpers;
-
+    let mainOracle: BaseFeeOracle;
     let secondaryOracle: BaseFeeOracle;
     let baseFeeLMAToken: BaseFeeLMAToken;
     let borrowerOperations: BorrowerOperations;
+    let priceFeed: TestPriceFeed;
     let payToken: TERC20;
     let openTrove: OpenTrove;
     let redeemCollateral: RedeemCollateral;
+    let setNewBaseFeePrice: (_amount: number) => Promise<void>;
 
     beforeEach(async () => {
       [deployer, alice, bob, carol, dave, bob, carol] = await getSigners({
@@ -53,6 +56,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         payToken,
         secondaryOracle,
         baseFeeLMAToken,
+        mainOracle,
+        priceFeed,
       } = await setupContracts());
 
       ({ openTrove } = await getOpenTrove({
@@ -61,6 +66,12 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       }));
 
       ({ redeemCollateral } = await redeem({ hintHelpers, troveManager }));
+
+      ({ setNewBaseFeePrice } = await setNewParamsToBaseFee({
+        mainOracle,
+        secondaryOracle,
+        priceFeed,
+      }));
     });
     const collAmountAlice = BigInt("200000000000000000000");
     const collAmountAliceExtended = BigInt("2000000000000000000000");
@@ -100,9 +111,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
       expect(await troveManager.getTroveOwnersCount()).to.be.equal(4);
 
-      await secondaryOracle
-        .connect(deployer)
-        .feedBaseFeeValue("110000000000", await latestBlock());
+      await setNewBaseFeePrice(110);
 
       const unusedLimitBeforeLiquidate =
         await borrowerOperations.unusedWithdrawalLimit();
@@ -111,9 +120,15 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
       const systemCollAfterLiquidate =
         await borrowerOperations.getEntireSystemColl();
-
       const unusedLimitAfterLiquidate =
         await borrowerOperations.unusedWithdrawalLimit();
+      expect(
+        unusedLimitBeforeLiquidate - unusedLimitAfterLiquidate
+      ).to.be.equal(BigInt("400000000000000000000"));
+
+      expect(systemCollBeforeLiquidate - systemCollAfterLiquidate).to.be.equal(
+        ethers.parseEther("2")
+      );
     });
 
     it("should allow to update limits after close troves correctly", async () => {
@@ -133,7 +148,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
       const unusedLimitBeforeClose =
         await borrowerOperations.unusedWithdrawalLimit();
-
       await borrowerOperations.connect(alice).closeTrove();
 
       const systemCollAfterClose =
@@ -144,6 +158,10 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
       expect(systemCollBeforeClose - systemCollAfterClose).to.be.equal(
         collAmountAlice
+      );
+
+      expect(unusedLimitBeforeClose - unusedLimitAfterClose).to.be.equal(
+        BigInt("200000000000000000000")
       );
     });
 
@@ -183,9 +201,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         baseFeeLMAAmount: debtAmountBob,
       });
 
-      await secondaryOracle
-        .connect(deployer)
-        .feedBaseFeeValue("110000000000", await latestBlock());
+      await setNewBaseFeePrice(110);
 
       expect(await troveManager.Troves(bob.address)).not.to.be.reverted;
 
@@ -221,7 +237,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
       await borrowerOperations.connect(bob).closeTrove();
 
-      const unusedLimitAfterClose = BigInt("905000000000000000000");
+      const unusedLimitAfterClose = BigInt("900000000000000000000");
       expect(await borrowerOperations.unusedWithdrawalLimit()).to.be.equal(
         unusedLimitAfterClose
       );
@@ -257,9 +273,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         baseFeeLMAAmount: debtAmountBob, //200
       });
 
-      await secondaryOracle
-        .connect(deployer)
-        .feedBaseFeeValue("110000000000", await latestBlock());
+      await setNewBaseFeePrice(110);
 
       expect(await troveManager.Troves(bob.address)).not.to.be.reverted;
 

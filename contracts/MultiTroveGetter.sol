@@ -17,7 +17,7 @@ contract MultiTroveGetter {
         uint snapshotBaseFeeLMADebt;
     }
 
-    TroveManager public troveManager; // XXX Troves missing from ITroveManager?
+    TroveManager public troveManager;
     ISortedTroves public sortedTroves;
 
     constructor(TroveManager _troveManager, ISortedTroves _sortedTroves) {
