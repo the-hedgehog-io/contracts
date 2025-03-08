@@ -67,12 +67,13 @@ describe("BaseFeeOracle Tests", () => {
     });
 
     it("should not let non-admin account set community issuance factor", async () => {
-      await expect(communityIssuance.connect(bob).setISSUANCE_FACTOR(1)).to.be
+      await expect(communityIssuance.connect(bob).proposeIssuanceFactor(1)).to.be
         .reverted;
     });
 
     it("should let admin decrease community issuance factor", async () => {
-      await expect(communityIssuance.setISSUANCE_FACTOR(1)).not.to.be.reverted;
+      await expect(communityIssuance.proposeIssuanceFactor(1)).not.to.be.reverted;
+      await expect(communityIssuance.acceptNewIssuanceFactor()).not.to.be.reverted;
     });
   });
 });

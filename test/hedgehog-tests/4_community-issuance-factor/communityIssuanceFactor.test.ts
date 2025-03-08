@@ -24,12 +24,12 @@ const hogGainSchedule: string[] = [
   "646897495231310500000", //   Step7: 646897495243494000000
   "646044946450686500000", //   Step8: 646044946462864000000
   "0", //  Step9-10
-  "109475863570035000000", //   Step10: 109475863524222000000
-  "109451803908871500000", //   Step11: 109451803863070000000
-  "109427749535333000000", //   Step12: 109427749489577000000
-  "1420374199722784000000", //  Step13: 1420374199129440000000
-  "109091542856110000000", //   Step14: 109091542810635000000
-  "116546149676417000000", //   Step15: 116436660046349000000
+  "109475839507732000000", //   Step10: 109475839507732000000
+  "109451779851856500000", //   Step11: 109451779851856500000
+  "109427725483606000000", //   Step12: 109427725483606000000
+  "1420373887530919000000", //  Step13: 1420373887530919000000
+  "109091518878279500000", //   Step14: 109091518878279500000
+  "116437070134026000000", //  Step15: 116437070134026000000
   "109469836420618000000", //   Step16: 109469848014854000000
   "101223819996069500000", //   Step17: 101224290254997000000
 ];
@@ -232,9 +232,11 @@ describe("BaseFeeOracle Tests", () => {
     };
 
     const setStepValues = async () => {
-      await communityIssuance.setISSUANCE_FACTOR(factorSteps[currentStep]);
+      await communityIssuance.proposeIssuanceFactor(factorSteps[currentStep]);
+      await communityIssuance.acceptNewIssuanceFactor();
 
-      await communityIssuance.setHOGSupplyCap(suppCapSteps[currentStep]);
+      await communityIssuance.proposeHOGSupplyCap(suppCapSteps[currentStep]);
+      await communityIssuance.acceptNewHOGSupplyCap();
 
       if (timeSteps[currentStep] != 0) {
         await increaseTime(timestring(`${timeSteps[currentStep]} minutes`));
@@ -272,7 +274,8 @@ describe("BaseFeeOracle Tests", () => {
 
     it("should let execute 5 step correctly", async () => {
       await setStepValues();
-      await communityIssuance.setTotalHogIssued("8822946494815800000000");
+      await communityIssuance.proposeTotalHogIssued("8822946494815800000000");
+      await communityIssuance.acceptNewTotalHogIssued();
       await executeCurrentStepTxsAndChecks();
     });
     it("should let execute 6 step correctly", async () => {

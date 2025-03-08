@@ -41,6 +41,7 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
      * F = 0.5 ** (1/525600)
      * F = 0.999998681227695000
      */
+    uint256 public proposedIssuanceFactor;
     uint256 public ISSUANCE_FACTOR = 999998681227695000;
 
     /*
@@ -50,15 +51,19 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
      * The community HOG supply cap is the starting balance of the Community Issuance contract.
      * It should be minted to this contract by HOGToken, when the token is deployed.
      */
+    uint256 public proposedHOGSupplyCap;
     uint256 public HOGSupplyCap;
 
+    event ProposedHOGSupplyCapUpdate(uint256 _oldCap, uint256 _newCap);
     event HOGSupplyCapUpdated(uint256 _newCap);
-    event ISSUANCE_FACTORUpdated(uint256 _newFactor);
+    event ProposedIssuanceFactorUpdate(uint256 _oldFactor, uint256 _newFactor);
+    event IssuanceFactorUpdated(uint256 _newFactor);
 
     IHOGToken public hogToken;
 
     address public stabilityPoolAddress;
 
+    uint public proposedTotalHOGIssued;
     uint public totalHOGIssued;
     uint public immutable deploymentTime;
 
@@ -67,12 +72,16 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
     event HOGTokenAddressSet(address _hogTokenAddress);
     event StabilityPoolAddressSet(address _stabilityPoolAddress);
     event TotalHOGIssuedUpdated(uint _totalHOGIssued);
+    event ProposedTotalHogIssuedManually(uint256 _oldTotalHOGIssued, uint256 _totalHOGIssued);
     event TotalHogIssuedManuallyUpdated(uint256 _totalHOGIssued);
 
     // --- Functions ---
 
     constructor() {
         deploymentTime = block.timestamp;
+        proposedHOGSupplyCap = type(uint256).max;
+        proposedIssuanceFactor = type(uint256).max;
+        proposedTotalHOGIssued = type(uint256).max;
     }
 
     function setAddresses(
@@ -154,34 +163,69 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
     // --- 'admin' function ---
     /*
      * HEDGEHOG UPDATES: HOGSupplyCap is not a constant variable anymore.
-     * May now be updated by a DISTRIBUTION_SETTER
+     * May now be updated by a DISTRIBUTION_SETTER, two step operation
      * */
-    function setHOGSupplyCap(
+    function proposeHOGSupplyCap(
         uint _newCap
     ) external onlyRole(DISTRIBUTION_SETTER) {
+        proposedHOGSupplyCap = _newCap;
+        emit ProposedHOGSupplyCapUpdate(HOGSupplyCap, _newCap);
+    }
+
+    function acceptNewHOGSupplyCap() external onlyRole(DISTRIBUTION_SETTER) {
+        uint _newCap = proposedHOGSupplyCap;
+        require(
+            _newCap != type(uint256).max,
+            "CommunityIssuance: incorrect proposed supply cap"
+        );
         HOGSupplyCap = _newCap;
+        proposedHOGSupplyCap = type(uint256).max;
         emit HOGSupplyCapUpdated(_newCap);
     }
 
     /*
      * HEDGEHOG UPDATES: ISSUANCE_FACTOR is not a constant variable anymore.
-     * May now be updated by a DISTRIBUTION_SETTER
+     * May now be updated by a DISTRIBUTION_SETTER, two step operation
      * */
-    function setISSUANCE_FACTOR(
-        uint _newIssFactor
+    function proposeIssuanceFactor(
+        uint _newIssuanceFactor
     ) external onlyRole(DISTRIBUTION_SETTER) {
-        ISSUANCE_FACTOR = _newIssFactor;
-        emit ISSUANCE_FACTORUpdated(_newIssFactor);
+        proposedIssuanceFactor = _newIssuanceFactor;
+        emit ProposedIssuanceFactorUpdate(ISSUANCE_FACTOR, _newIssuanceFactor);
+    }
+
+    function acceptNewIssuanceFactor(
+    ) external onlyRole(DISTRIBUTION_SETTER) {
+        uint _newIssuanceFactor = proposedIssuanceFactor;
+        require(
+            _newIssuanceFactor != type(uint256).max,
+            "CommunityIssuance: incorrect proposed issuance factor"
+        );
+        ISSUANCE_FACTOR = _newIssuanceFactor;
+        proposedIssuanceFactor = type(uint256).max;
+        emit IssuanceFactorUpdated(_newIssuanceFactor);
     }
 
     /*
      * HEDGEHOG UPDATES:
-     * totalHOGIssued may now be updated by a DISTRIBUTION_SETTER
+     * totalHOGIssued may now be updated by a DISTRIBUTION_SETTER, two step operation
      * */
-    function setTotalHogIssued(
+    function proposeTotalHogIssued(
         uint _newHogIssued
     ) external onlyRole(DISTRIBUTION_SETTER) {
+        proposedTotalHOGIssued = _newHogIssued;
+        emit ProposedTotalHogIssuedManually(totalHOGIssued, _newHogIssued);
+    }
+
+    function acceptNewTotalHogIssued(
+    ) external onlyRole(DISTRIBUTION_SETTER) {
+        uint _newHogIssued = proposedTotalHOGIssued;
+        require(
+            _newHogIssued != type(uint256).max,
+            "CommunityIssuance: incorrect proposed new total hog issued"
+        );
         totalHOGIssued = _newHogIssued;
+        proposedTotalHOGIssued = type(uint256).max;
         emit TotalHogIssuedManuallyUpdated(_newHogIssued);
     }
 
