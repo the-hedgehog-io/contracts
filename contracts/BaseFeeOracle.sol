@@ -18,9 +18,9 @@ error OutdatedRequest();
 contract BaseFeeOracle is AccessControl, IBaseFeeOracle {
     struct Response {
         int256 answer; // LogMA50(BaseFeePerGas) * WstETH / ETH ratio in wei
-        uint256 blockNumber; // L1 block number from which the last BaseFeePerGas value was retrieved
-        uint256 currentChainBN; // Current network's block number during which structure was updated
-        uint256 roundId; // Round during which the structure was updated
+        uint64 blockNumber; // L1 block number from which the last BaseFeePerGas value was retrieved
+        uint64 currentChainBN; // Current network's block number during which structure was updated
+        uint64 roundId; // Round during which the structure was updated
     }
 
     mapping(uint256 => Response) public responseById;
@@ -59,8 +59,8 @@ contract BaseFeeOracle is AccessControl, IBaseFeeOracle {
         responseById[round] = Response({
             answer: _newValue,
             blockNumber: _blockNumber,
-            currentChainBN: block.number,
-            roundId: round
+            currentChainBN: uint64(block.number),
+            roundId: uint64(round)
         });
 
         latestRound++;
@@ -80,9 +80,9 @@ contract BaseFeeOracle is AccessControl, IBaseFeeOracle {
         return (
             response.roundId, // Round during which the structure was updated
             response.answer, // LogMA50(BaseFeePerGas) * WstETH / ETH ratio in wei
-            response.blockNumber, // L1 block number from which the last BaseFeePerGas value was retrieved
-            response.currentChainBN, // Current network's block.number during which structure was updated
-            response.roundId // Round during which the structure was update. Keeping that to be compatibale with Chainlink's API
+            uint256(response.blockNumber), // L1 block number from which the last BaseFeePerGas value was retrieved
+            uint256(response.currentChainBN), // Current network's block.number during which structure was updated
+            uint256(response.roundId) // Round during which the structure was update. Keeping that to be compatibale with Chainlink's API
         );
     }
 
