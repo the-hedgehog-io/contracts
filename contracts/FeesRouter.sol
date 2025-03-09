@@ -359,8 +359,8 @@ contract FeesRouter is AccessControl {
     }
 
     /**
-     *  Finds range in config with rounding based on total tx value(can be BaseFeeLMA token or WstETH) and absolute fee amount
-     *  In case the fee is less then 3% it's going to round to 5% anyway
+     *  Finds range in config with rounding based on total tx value (can be BaseFeeLMA token or WstETH)
+     *  and absolute fee amount. In case the fee is less then 3% it's going to round to 5%
      *
      * @param _debt total tx payment amount (BaseFee LMA Token or WstETH)
      * @param _fee total tx fee in an absolute number (BaseFee LMA Token or WstETH)

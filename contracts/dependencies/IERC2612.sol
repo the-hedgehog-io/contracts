@@ -9,7 +9,7 @@ pragma solidity 0.8.19;
  * {IERC20-allowance} without having to send a transaction, by signing a
  * message. This allows users to spend tokens without having to hold WStETH.
  *
- * See https://eips.wStETHeum.org/EIPS/eip-2612.
+ * See https://eips.ethereum.org/EIPS/eip-2612.
  *
  * Code adapted from https://github.com/OpenZeppelin/openzeppelin-contracts/pull/2237/
  */
@@ -33,7 +33,7 @@ interface IERC2612 {
      * - the signature must use ``owner``'s current nonce (see {nonces}).
      *
      * For more information on the signature format, see the
-     * https://eips.wStETHeum.org/EIPS/eip-2612#specification[relevant EIP
+     * https://eips.ethereum.org/EIPS/eip-2612#specification[relevant EIP
      * section].
      */
     function permit(

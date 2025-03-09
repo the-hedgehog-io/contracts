@@ -1163,11 +1163,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * 1) When a user adds collateral, the new collateral amount is calculated by adding the deposit to the existing collateral.
      * 2) Calculate New Withdrawal Limit:
      * The system calculates the new withdrawal limit as the sum of the old limit plus 50% of the deposit.
-     * Condition Check:
-     * If this new limit is greater than or equal to 50% of the new total collateral, the withdrawal limit is immediately set to 50% of the new collateral,
-     * and the time counter is reset until the next withdrawal.
-     * If the new limit is less than 50% of the new total collateral, the withdrawal limit is set to the calculated value (old limit + 50% of the deposit).
-     * The target limit is set to 50% of the new total collateral, and the time counter continues from the last withdrawal.
      *
      * When Collateral is Withdrawn from the System:
      * 1) Calculate the Current Withdrawal Limit: The system calculates the current withdrawal limit as:
