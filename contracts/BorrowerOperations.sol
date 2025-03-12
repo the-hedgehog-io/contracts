@@ -14,6 +14,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 error TroveAdjustedThisBlock();
+error TooFrequentWithdrawals();
 
 /**
  * @notice Fork of Liquity's BorrowerOperations. . Most of the Logic remains unchanged..
@@ -55,8 +56,11 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     // HEDGEHOG UPDATES: Added two new public variables
     // Two variables that are used to track and calculate collateral withdrawal limits
+    // also we've added limits on the number of transactions to prevent grieving attacks
     uint256 public lastWithdrawalTimestamp;
     uint256 public unusedWithdrawalLimit;
+    uint8 public constant maxConsecutiveWithdrawals = 10;
+    uint8 public remainingWithdrawals = 0;
 
     /* --- Variable container structs  ---
 
@@ -383,6 +387,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _upperHint,
         address _lowerHint
     ) external {
+        _handleNumberOfWithdrawals();
+
         _adjustTrove(
             msg.sender,
             _collWithdrawal,
@@ -458,6 +464,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _upperHint,
         address _lowerHint
     ) external {
+        if (_collWithdrawal > 0) {
+            _handleNumberOfWithdrawals();
+        }
         _adjustTrove(
             msg.sender,
             _collWithdrawal,
@@ -819,9 +828,10 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         activePool.increaseBalance(_amount);
 
         // Update withdrawal Limit from collateral addition.
-        unusedWithdrawalLimit = unusedWithdrawalLimit + _amount / 2;
+        uint256 _newLimit = unusedWithdrawalLimit + _amount / 2;
+        unusedWithdrawalLimit = _newLimit;
 
-        emit WithdrawalLimitUpdated(unusedWithdrawalLimit);
+        emit WithdrawalLimitUpdated(_newLimit);
     }
 
     // Issue the specified amount of BaseFeeLMA to _account and increases the total active debt (_netDebtIncrease potentially includes a BaseFeeLMAFee)
@@ -1149,6 +1159,22 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint price = priceFeed.lastGoodPrice();
 
         return LiquityMath._computeCR(_coll, _debt, price);
+    }
+
+    /**
+     * HEDGEHOG UPDATES:
+     * Introduced limit on how many withdrawal transactions can be requested within 10 minutes
+     */
+    function _handleNumberOfWithdrawals(
+    ) internal {
+        if (block.timestamp - lastWithdrawalTimestamp > 10 minutes) {
+            remainingWithdrawals = maxConsecutiveWithdrawals;
+        }
+        if (remainingWithdrawals == 0) {
+            revert TooFrequentWithdrawals();
+        } else {
+            remainingWithdrawals -= 1;
+        }
     }
 
     /**

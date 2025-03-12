@@ -2,6 +2,8 @@ import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
+import { toNumber } from "ethers";
+import timestring from "timestring";
 import { TERC20, TestPriceFeed } from "../../../typechain-types";
 import {
   BaseFeeLMAToken,
@@ -101,6 +103,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const BobUnstakeFirst = BigInt("990074994000000000000000000");
     const BobRedemptionFirst = BigInt("990074994000000000000000000");
     const BobCollWithdraw = "225000000000000000";
+    const BobSmallWithdrawal = "225000000";
 
     // Carol:
     const CarolTroveColl = BigInt("4000000000000000000000");
@@ -479,6 +482,87 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
           BobUnstakeFirst
         )
       ).not.to.be.reverted;
+    });
+
+    it("Should revert if the withdrawColl() calls are too frequent", async () => {
+      let maxConsecutiveWithdrawals = toNumber(await borrowerOperations.maxConsecutiveWithdrawals());
+      while (maxConsecutiveWithdrawals > 0) {
+        await borrowerOperations
+          .connect(bob)
+          .withdrawColl(BobSmallWithdrawal, ethers.ZeroAddress, ethers.ZeroAddress);
+          maxConsecutiveWithdrawals -= 1
+      }
+
+      await expect(
+        borrowerOperations
+          .connect(bob)
+          .withdrawColl(BobSmallWithdrawal, ethers.ZeroAddress, ethers.ZeroAddress)
+      ).to.be.revertedWithCustomError(
+        borrowerOperations,
+        "TooFrequentWithdrawals"
+      );
+
+      // After the wait we should be good
+      await increase(timestring("10 minutes"));
+      await expect(
+        borrowerOperations
+          .connect(bob)
+          .withdrawColl(BobSmallWithdrawal, ethers.ZeroAddress, ethers.ZeroAddress)
+      ).not.to.be.reverted
+    });
+
+    it("Should revert if the adjustTrove() calls are too frequent", async () => {
+      // The wait is to negate previous withdrawals
+      await increase(timestring("10 minutes"));
+
+      let maxConsecutiveWithdrawals = toNumber(await borrowerOperations.maxConsecutiveWithdrawals());
+      while (maxConsecutiveWithdrawals > 0) {
+        await borrowerOperations
+          .connect(bob)
+          .adjustTrove(
+            0,
+            BobSmallWithdrawal,
+            0,
+            0,
+            false,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress,
+          );
+          maxConsecutiveWithdrawals -= 1
+      }
+
+      await expect(
+        borrowerOperations
+          .connect(bob)
+          .adjustTrove(
+            0,
+            BobSmallWithdrawal,
+            0,
+            0,
+            false,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress,
+          )
+      ).to.be.revertedWithCustomError(
+        borrowerOperations,
+        "TooFrequentWithdrawals"
+      );
+
+      // After the wait we should be good
+      await increase(timestring("10 minutes"));
+      await expect(
+        borrowerOperations
+          .connect(bob)
+          .adjustTrove(
+            0,
+            BobSmallWithdrawal,
+            0,
+            0,
+            false,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress,
+          )
+      ).not.to.be.reverted
     });
 
     it("Should not let perform multiple trove adjustments in a single block, but should revert", async () => {
