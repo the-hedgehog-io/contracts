@@ -2,6 +2,8 @@ import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
+import { toNumber } from "ethers";
+import timestring from "timestring";
 import { TERC20, TestPriceFeed } from "../../../typechain-types";
 import {
   BaseFeeLMAToken,
@@ -74,7 +76,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const gasPrice010 = "30000000000";
     const expectedStakedBalance = "4970074994000000000000000000";
     const expectedStabilityPoolAfterDeposit = "6780823345083667292000000000";
-    const transferAmount = "9000000000000000000000";
+    const transferAmount = "18000000000000000000000";
 
     // Alice:
     const AliceTroveColl = BigInt("602000000000000000000");
@@ -101,6 +103,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const BobUnstakeFirst = BigInt("990074994000000000000000000");
     const BobRedemptionFirst = BigInt("990074994000000000000000000");
     const BobCollWithdraw = "225000000000000000";
+    const BobSmallWithdrawal = "225000000";
 
     // Carol:
     const CarolTroveColl = BigInt("4000000000000000000000");
@@ -481,6 +484,44 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       ).not.to.be.reverted;
     });
 
+    it("Should revert if the withdrawColl() or adjustTrove() call happens right after deposit", async () => {
+      await expect(
+        borrowerOperations
+          .connect(bob)
+          .withdrawColl(BobSmallWithdrawal, ethers.ZeroAddress, ethers.ZeroAddress)
+      ).to.be.revertedWithCustomError(
+        borrowerOperations,
+        "WithdrawalRequestedTooSoonAfterDeposit"
+      );
+
+      await expect(
+        borrowerOperations
+          .connect(bob)
+          .adjustTrove(
+            0,
+            BobSmallWithdrawal,
+            0,
+            0,
+            true,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).to.be.revertedWithCustomError(
+        borrowerOperations,
+        "WithdrawalRequestedTooSoonAfterDeposit"
+      );
+
+      await increase(timestring("721 minutes"));
+
+      // After the wait we should be good
+      await increase(timestring("10 minutes"));
+      await expect(
+        borrowerOperations
+          .connect(bob)
+          .withdrawColl(BobSmallWithdrawal, ethers.ZeroAddress, ethers.ZeroAddress)
+      ).not.to.be.reverted
+    });
+
     it("Should not let perform multiple trove adjustments in a single block, but should revert", async () => {
       await increase(90000);
       const price = ethers.parseEther("475");
@@ -501,6 +542,12 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await payToken
         .connect(carol)
         .transfer(singleTxCaller.target, transferAmount);
+
+      await singleTxCaller.justAddCollateral(
+        borrowerOperations.target,
+        payToken.target
+      );
+      await increase(timestring("721 minutes"));
 
       await expect(
         singleTxCaller.singleTx(

@@ -14,6 +14,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 error TroveAdjustedThisBlock();
+error WithdrawalRequestedTooSoonAfterDeposit();
 
 /**
  * @notice Fork of Liquity's BorrowerOperations. . Most of the Logic remains unchanged..
@@ -55,8 +56,16 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     // HEDGEHOG UPDATES: Added two new public variables
     // Two variables that are used to track and calculate collateral withdrawal limits
+    // also to prevent griefing attacks - collateral has to sit in the contract 
+    // some time before withdrawal request
     uint256 public lastWithdrawalTimestamp;
     uint256 public unusedWithdrawalLimit;
+
+    struct UserLimit {
+        uint256 lockedCollateral;
+        uint256 lockTimestamp;
+    }
+    mapping(address => UserLimit) private userWithdrawalLimits;
 
     /* --- Variable container structs  ---
 
@@ -383,6 +392,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _upperHint,
         address _lowerHint
     ) external {
+        _checkUserWithdrawalLimit(_collWithdrawal);
+
         _adjustTrove(
             msg.sender,
             _collWithdrawal,
@@ -458,6 +469,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _upperHint,
         address _lowerHint
     ) external {
+        if (_collWithdrawal > 0) {
+            _checkUserWithdrawalLimit(_collWithdrawal);
+        }
         _adjustTrove(
             msg.sender,
             _collWithdrawal,
@@ -819,9 +833,16 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         activePool.increaseBalance(_amount);
 
         // Update withdrawal Limit from collateral addition.
-        unusedWithdrawalLimit = unusedWithdrawalLimit + _amount / 2;
+        uint256 _newLimit = unusedWithdrawalLimit + _amount / 2;
+        unusedWithdrawalLimit = _newLimit;
 
-        emit WithdrawalLimitUpdated(unusedWithdrawalLimit);
+        UserLimit storage limit = userWithdrawalLimits[msg.sender];
+        limit.lockedCollateral = limit.lockTimestamp > block.timestamp ? 
+            limit.lockedCollateral + _amount :
+            _amount;
+        limit.lockTimestamp = block.timestamp + EXPAND_DURATION;
+
+        emit WithdrawalLimitUpdated(_newLimit);
     }
 
     // Issue the specified amount of BaseFeeLMA to _account and increases the total active debt (_netDebtIncrease potentially includes a BaseFeeLMAFee)
@@ -1149,6 +1170,23 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint price = priceFeed.lastGoodPrice();
 
         return LiquityMath._computeCR(_coll, _debt, price);
+    }
+
+    /**
+     * HEDGEHOG UPDATES:
+     * Introduced limit on how many withdrawal transactions can be requested within 10 minutes
+     */
+    function _checkUserWithdrawalLimit(
+        uint _collWithdrawal
+    ) internal view {
+        UserLimit memory limit = userWithdrawalLimits[msg.sender];
+        uint userCollateral = troveManager.getTroveColl(msg.sender);
+        if (
+            block.timestamp < limit.lockTimestamp && 
+            userCollateral - _collWithdrawal < limit.lockedCollateral
+        ) {
+            revert WithdrawalRequestedTooSoonAfterDeposit();
+        }
     }
 
     /**
