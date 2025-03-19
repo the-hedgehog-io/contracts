@@ -11,13 +11,14 @@ error OutdatedRequest();
  * @notice Completely new contract in Hedgehog Protocol, that was never a part of Liquity Protocol
  *
  * A custom oracle that's used to feed real world (LogMA50(BaseFeePerGas) * WstETH / ETH ratio) value to the system onchain
+ * e.g. if LogMA50(BaseFeePerGas) is 20 gwei and (WstETH / ETH) = 1.1 - the oracle returns 22 * 10**9
  * A user with SETTER rights is able to update the responseById mapping via feedBaseFeeValue method
  * A user with ULTIMATE_ADMIN rights may update SETTER users
  */
 
 contract BaseFeeOracle is AccessControl, IBaseFeeOracle {
     struct Response {
-        int256 answer; // LogMA50(BaseFeePerGas) * WstETH / ETH ratio in wei
+        int256 answer; // LogMA50(BaseFeePerGas) * WstETH / ETH ratio
         uint64 blockNumber; // L1 block number from which the last BaseFeePerGas value was retrieved
         uint64 currentChainBN; // Current network's block number during which structure was updated
         uint64 roundId; // Round during which the structure was updated
