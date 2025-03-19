@@ -5,7 +5,6 @@ pragma solidity 0.8.19;
 import "./interfaces/ISortedTroves.sol";
 import "./interfaces/ITroveManager.sol";
 import "./interfaces/IBorrowerOperations.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
 
@@ -43,7 +42,6 @@ import "./dependencies/CheckContract.sol";
  * - Public functions with parameters have been made internal to save gas, and given an external wrapper function for external access
  */
 contract SortedTroves is Ownable, CheckContract {
-    using SafeMath for uint256;
 
     string public constant NAME = "SortedTroves";
 
@@ -170,7 +168,7 @@ contract SortedTroves is Ownable, CheckContract {
             data.nodes[nextId].prevId = _id;
         }
 
-        data.size = data.size.add(1);
+        data.size = data.size + 1;
         emit NodeAdded(_id, _NICR);
     }
 
@@ -220,7 +218,7 @@ contract SortedTroves is Ownable, CheckContract {
         }
 
         delete data.nodes[_id];
-        data.size = data.size.sub(1);
+        data.size = data.size - 1;
         emit NodeRemoved(_id);
     }
 

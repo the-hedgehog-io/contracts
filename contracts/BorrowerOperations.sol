@@ -26,11 +26,9 @@ error WithdrawalRequestedTooSoonAfterDeposit();
  * - Logic updates with borrowing fees calculation and their distribution
  * - Removed Native Liquity Protocol Token Staking
  * - Remove _getUSDValue view method as it's not used anymore
- * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  */
 
 contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
-    using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     string public constant NAME = "BorrowerOperations";
@@ -591,7 +589,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         // When the adjustment is a debt repayment, check it's a valid amount and that the caller has enough BaseFeeLMA
         if (!_isDebtIncrease && _BaseFeeLMAChange > 0) {
             _requireAtLeastMinNetDebt(
-                _getNetDebt(vars.debt).sub(vars.netDebtChange)
+                _getNetDebt(vars.debt) - vars.netDebtChange
             );
             _requireValidBaseFeeLMARepayment(vars.debt, vars.netDebtChange);
             _requireSufficientBaseFeeLMABalance(
@@ -675,7 +673,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         _requireSufficientBaseFeeLMABalance(
             baseFeeLMATokenCached,
             msg.sender,
-            debt.sub(BaseFeeLMA_GAS_COMPENSATION)
+            debt - BaseFeeLMA_GAS_COMPENSATION
         );
 
         uint newTCR = _getNewTCRFromTroveChange(
@@ -697,7 +695,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             activePoolCached,
             baseFeeLMATokenCached,
             msg.sender,
-            debt.sub(BaseFeeLMA_GAS_COMPENSATION)
+            debt - BaseFeeLMA_GAS_COMPENSATION
         );
         _repayBaseFeeLMA(
             activePoolCached,
@@ -1035,7 +1033,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint _debtRepayment
     ) internal pure {
         require(
-            _debtRepayment <= _currentDebt.sub(BaseFeeLMA_GAS_COMPENSATION),
+            _debtRepayment <= _currentDebt - BaseFeeLMA_GAS_COMPENSATION,
             "BorrowerOps: Amount repaid must not be larger than the Trove's debt"
         );
     }
@@ -1135,11 +1133,11 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint newDebt = _debt;
 
         newColl = _isCollIncrease
-            ? _coll.add(_collChange)
-            : _coll.sub(_collChange);
+            ? _coll + _collChange
+            : _coll - _collChange;
         newDebt = _isDebtIncrease
-            ? _debt.add(_debtChange)
-            : _debt.sub(_debtChange);
+            ? _debt + _debtChange
+            : _debt - _debtChange;
 
         return (newColl, newDebt);
     }
@@ -1155,11 +1153,11 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint totalDebt = getEntireSystemDebt();
 
         totalColl = _isCollIncrease
-            ? totalColl.add(_collChange)
-            : totalColl.sub(_collChange);
+            ? totalColl + _collChange
+            : totalColl - _collChange;
         totalDebt = _isDebtIncrease
-            ? totalDebt.add(_debtChange)
-            : totalDebt.sub(_debtChange);
+            ? totalDebt + _debtChange
+            : totalDebt - _debtChange;
 
         uint newTCR = LiquityMath._computeCR(totalColl, totalDebt, _price);
         return newTCR;

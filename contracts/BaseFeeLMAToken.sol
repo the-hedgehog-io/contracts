@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./dependencies/IERC2612.sol";
 import "./dependencies/CheckContract.sol";
@@ -29,7 +28,6 @@ import "./dependencies/CheckContract.sol";
  */
 
 contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
-    using SafeMath for uint256;
 
     uint256 private _totalSupply;
     string internal constant _NAME = "BaseFeeLMA Token";
@@ -64,7 +62,7 @@ contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
     address public immutable troveManagerAddress;
     address public immutable stabilityPoolAddress;
     address public immutable borrowerOperationsAddress;
-    address public feesRouter;
+    address public immutable feesRouter;
 
     // --- Events ---
     event TroveManagerAddressChanged(address _troveManagerAddress);
@@ -187,10 +185,7 @@ contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
         _approve(
             sender,
             msg.sender,
-            _allowances[sender][msg.sender].sub(
-                amount,
-                "ERC20: transfer amount exceeds allowance"
-            )
+            _allowances[sender][msg.sender] - amount
         );
         return true;
     }
@@ -202,7 +197,7 @@ contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
         _approve(
             msg.sender,
             spender,
-            _allowances[msg.sender][spender].add(addedValue)
+            _allowances[msg.sender][spender] + addedValue
         );
         return true;
     }
@@ -214,10 +209,7 @@ contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
         _approve(
             msg.sender,
             spender,
-            _allowances[msg.sender][spender].sub(
-                subtractedValue,
-                "ERC20: decreased allowance below zero"
-            )
+            _allowances[msg.sender][spender] - subtractedValue
         );
         return true;
     }
@@ -303,30 +295,24 @@ contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
         assert(sender != address(0));
         assert(recipient != address(0));
 
-        _balances[sender] = _balances[sender].sub(
-            amount,
-            "ERC20: transfer amount exceeds balance"
-        );
-        _balances[recipient] = _balances[recipient].add(amount);
+        _balances[sender] = _balances[sender] - amount;
+        _balances[recipient] = _balances[recipient] + amount;
         emit Transfer(sender, recipient, amount);
     }
 
     function _mint(address account, uint256 amount) internal {
         assert(account != address(0));
 
-        _totalSupply = _totalSupply.add(amount);
-        _balances[account] = _balances[account].add(amount);
+        _totalSupply = _totalSupply + amount;
+        _balances[account] = _balances[account] + amount;
         emit Transfer(address(0), account, amount);
     }
 
     function _burn(address account, uint256 amount) internal {
         assert(account != address(0));
 
-        _balances[account] = _balances[account].sub(
-            amount,
-            "ERC20: burn amount exceeds balance"
-        );
-        _totalSupply = _totalSupply.sub(amount);
+        _balances[account] = _balances[account] - amount;
+        _totalSupply = _totalSupply - amount;
         emit Transfer(account, address(0), amount);
     }
 

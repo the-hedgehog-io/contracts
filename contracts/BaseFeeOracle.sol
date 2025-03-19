@@ -64,7 +64,7 @@ contract BaseFeeOracle is AccessControl, IBaseFeeOracle {
             roundId: uint64(round)
         });
 
-        latestRound++;
+        latestRound = round;
 
         emit BaseFeeSet(_newValue, round, block.number);
     }

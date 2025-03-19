@@ -21,7 +21,6 @@ import "hardhat/console.sol";
  * Update Min Net Debt
  */
 contract HedgehogBase is BaseMath, IHedgehogBase {
-    using SafeMath for uint;
 
     uint public constant _100pct = 1000000000000000000; // 1e18 == 100%
 
@@ -57,11 +56,11 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
 
     // Returns the composite debt (drawn debt + gas compensation) of a trove, for the purpose of ICR calculation
     function _getCompositeDebt(uint _debt) internal pure returns (uint) {
-        return _debt.add(BaseFeeLMA_GAS_COMPENSATION);
+        return _debt + BaseFeeLMA_GAS_COMPENSATION;
     }
 
     function _getNetDebt(uint _debt) internal pure returns (uint) {
-        return _debt.sub(BaseFeeLMA_GAS_COMPENSATION);
+        return _debt - BaseFeeLMA_GAS_COMPENSATION;
     }
 
     // Return the amount of WStETH to be drawn from a trove's collateral and sent as gas compensation.
@@ -74,14 +73,14 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
     function getEntireSystemColl() public view returns (uint entireSystemColl) {
         uint activeColl = activePool.getWStETH();
         uint liquidatedColl = defaultPool.getWStETH();
-        return activeColl.add(liquidatedColl);
+        return activeColl + liquidatedColl;
     }
 
     function getEntireSystemDebt() public view returns (uint entireSystemDebt) {
         uint activeDebt = activePool.getBaseFeeLMADebt();
         uint closedDebt = defaultPool.getBaseFeeLMADebt();
 
-        return activeDebt.add(closedDebt);
+        return activeDebt + closedDebt;
     }
 
     function _getTCR(uint _price) internal view returns (uint TCR) {
@@ -107,7 +106,7 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
         uint _amount,
         uint _maxFeePercentage
     ) internal pure {
-        uint feePercentage = _fee.mul(DECIMAL_PRECISION).div(_amount);
+        uint feePercentage = _fee * DECIMAL_PRECISION / _amount;
         require(
             feePercentage <= _maxFeePercentage,
             "Fee exceeded provided maximum"

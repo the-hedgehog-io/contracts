@@ -598,7 +598,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         uint _entireTroveDebt,
         uint _entireTroveColl,
         uint _price
-    ) internal view returns (LiquidationValues memory singleLiquidation) {
+    ) internal pure returns (LiquidationValues memory singleLiquidation) {
         singleLiquidation.entireTroveDebt = _entireTroveDebt;
         singleLiquidation.entireTroveColl = _entireTroveColl;
 

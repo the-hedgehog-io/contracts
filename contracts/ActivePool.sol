@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -17,7 +16,6 @@ import "./interfaces/IPool.sol";
  * - Removed an import of ActivePool Interface
  * - Updated variable names and docs to refer to BaseFeeLMA token and WStETH as a collateral
  * - Collateral is now an ERC20 token instead of a native one
- * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  *
  * The Active Pool holds the WStETH collateral and BaseFeeLMA debt (but not BaseFeeLMA tokens) for all active troves.
  *
@@ -26,7 +24,6 @@ import "./interfaces/IPool.sol";
  *
  */
 contract ActivePool is Ownable, CheckContract, IPool {
-    using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     string public constant NAME = "ActivePool";
@@ -115,7 +112,7 @@ contract ActivePool is Ownable, CheckContract, IPool {
      */
     function sendWStETH(address _account, uint _amount) external {
         _requireCallerIsBOorTroveMorSPorFRoute();
-        WStETH = WStETH.sub(_amount);
+        WStETH = WStETH - _amount;
         emit ActivePoolWStETHBalanceUpdated(WStETH);
         emit WStETHSent(_account, _amount);
         WStETHToken.safeTransfer(_account, _amount);
@@ -123,13 +120,13 @@ contract ActivePool is Ownable, CheckContract, IPool {
 
     function increaseBaseFeeLMADebt(uint _amount) external override {
         _requireCallerIsBOorTroveM();
-        BaseFeeLMADebt = BaseFeeLMADebt.add(_amount);
+        BaseFeeLMADebt = BaseFeeLMADebt + _amount;
         emit ActivePoolBaseFeeLMADebtUpdated(BaseFeeLMADebt);
     }
 
     function decreaseBaseFeeLMADebt(uint _amount) external override {
         _requireCallerIsBOorTroveMorSP();
-        BaseFeeLMADebt = BaseFeeLMADebt.sub(_amount);
+        BaseFeeLMADebt = BaseFeeLMADebt - _amount;
         emit ActivePoolBaseFeeLMADebtUpdated(BaseFeeLMADebt);
     }
 
@@ -177,7 +174,7 @@ contract ActivePool is Ownable, CheckContract, IPool {
      */
     function increaseBalance(uint256 _amount) external {
         _requireCallerIsBorrowerOperationsOrDefaultPool();
-        WStETH = WStETH.add(_amount);
+        WStETH = WStETH + _amount;
         emit ActivePoolWStETHBalanceUpdated(WStETH);
     }
 
