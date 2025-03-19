@@ -136,6 +136,11 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint _BaseFeeLMAFee
     );
     event WithdrawalLimitUpdated(uint256 _limit);
+    event UserWithdrawalLimitUpdated(
+        address indexed _borrower,
+        uint256 _lockedCollateral,
+        uint256 _lockTimestamp
+    );
 
     // --- Dependency setters ---
 
@@ -842,6 +847,11 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             _amount;
         limit.lockTimestamp = block.timestamp + EXPAND_DURATION;
 
+        emit UserWithdrawalLimitUpdated(
+            msg.sender,
+            limit.lockedCollateral,
+            limit.lockTimestamp
+        );
         emit WithdrawalLimitUpdated(_newLimit);
     }
 
