@@ -6,12 +6,10 @@ import "../interfaces/IHOGToken.sol";
 import "../dependencies/BaseMath.sol";
 import "../dependencies/LiquityMath.sol";
 import "../dependencies/CheckContract.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
-    using SafeMath for uint;
 
     // HEDGEHOG UPDATES: Add Access control to the contract for the setting of dynamic variables
     bytes32 internal constant DISTRIBUTION_SETTER =
@@ -118,14 +116,14 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
     function issueHOG() external returns (uint) {
         _requireCallerIsStabilityPool();
 
-        uint latestTotalHOGIssued = HOGSupplyCap
-            .mul(_getCumulativeIssuanceFraction())
-            .div(DECIMAL_PRECISION);
+        uint latestTotalHOGIssued = HOGSupplyCap *
+            _getCumulativeIssuanceFraction() /
+            DECIMAL_PRECISION;
 
         // Hedgehog Updates: Since now Issuance Factor is dynamic it is possible to block the whole system in case the factor reduction
         // Because of that we simply stop the issuance in such cases in case of letting it underflow
         uint issuance = latestTotalHOGIssued > totalHOGIssued
-            ? latestTotalHOGIssued.sub(totalHOGIssued)
+            ? latestTotalHOGIssued - totalHOGIssued
             : 0;
 
         totalHOGIssued = latestTotalHOGIssued;
@@ -140,15 +138,14 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
     t:  time passed since last HOG issuance event  */
     function _getCumulativeIssuanceFraction() internal view returns (uint) {
         // Get the time passed since deployment
-        uint timePassedInMinutes = block.timestamp.sub(deploymentTime).div(
-            SECONDS_IN_ONE_MINUTE
-        );
+        uint timePassedInMinutes = (block.timestamp - deploymentTime) /
+            SECONDS_IN_ONE_MINUTE;
 
         // f^t
         uint power = LiquityMath._decPow(ISSUANCE_FACTOR, timePassedInMinutes);
 
         //  (1 - f^t)
-        uint cumulativeIssuanceFraction = (uint(DECIMAL_PRECISION).sub(power));
+        uint cumulativeIssuanceFraction = (uint(DECIMAL_PRECISION) - power);
         assert(cumulativeIssuanceFraction <= DECIMAL_PRECISION); // must be in range [0,1]
 
         return cumulativeIssuanceFraction;

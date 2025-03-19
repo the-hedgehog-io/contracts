@@ -3,7 +3,6 @@
 pragma solidity 0.8.19;
 
 import "../dependencies/CheckContract.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../dependencies/IERC2612.sol";
@@ -16,7 +15,6 @@ import "../dependencies/IERC2612.sol";
  * - Raised pragma version
  * - Removed an import of Token Interface
  * - Remove native Liquidity Staking contract functionality
- * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  *
  * Based upon OpenZeppelin's ERC20 contract:
  * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol
@@ -45,7 +43,6 @@ import "../dependencies/IERC2612.sol";
  */
 
 contract HOGToken is CheckContract, IERC20, IERC2612 {
-    using SafeMath for uint256;
 
     // --- ERC20 Data ---
 
@@ -79,7 +76,6 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
 
     // --- HOGToken specific data ---
 
-    // uint for use with SafeMath
     uint internal _1_MILLION = 1e24; // 1e6 * 1e18 = 1e24
 
     address public immutable multisigAddress;
@@ -112,7 +108,7 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         */
 
         // Allocate the remainder to the HOG Multisig = 100 million
-        uint multisigEntitlement = _1_MILLION.mul(100);
+        uint multisigEntitlement = _1_MILLION * 100;
 
         _mint(_multisigAddress, multisigEntitlement);
     }
@@ -172,10 +168,7 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         _approve(
             sender,
             msg.sender,
-            _allowances[sender][msg.sender].sub(
-                amount,
-                "ERC20: transfer amount exceeds allowance"
-            )
+            _allowances[sender][msg.sender] - amount
         );
         return true;
     }
@@ -187,7 +180,7 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         _approve(
             msg.sender,
             spender,
-            _allowances[msg.sender][spender].add(addedValue)
+            _allowances[msg.sender][spender] + addedValue
         );
         return true;
     }
@@ -199,10 +192,7 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         _approve(
             msg.sender,
             spender,
-            _allowances[msg.sender][spender].sub(
-                subtractedValue,
-                "ERC20: decreased allowance below zero"
-            )
+            _allowances[msg.sender][spender] - subtractedValue
         );
         return true;
     }
@@ -289,19 +279,16 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         uint256 amount
     ) internal {
         require(sender != address(0), "ERC20: transfer from the zero address");
-        _balances[sender] = _balances[sender].sub(
-            amount,
-            "ERC20: transfer amount exceeds balance"
-        );
-        _balances[recipient] = _balances[recipient].add(amount);
+        _balances[sender] = _balances[sender] - amount;
+        _balances[recipient] = _balances[recipient] + amount;
         emit Transfer(sender, recipient, amount);
     }
 
     function _mint(address account, uint256 amount) internal {
         require(account != address(0), "ERC20: mint to the zero address");
 
-        _totalSupply = _totalSupply.add(amount);
-        _balances[account] = _balances[account].add(amount);
+        _totalSupply = _totalSupply + amount;
+        _balances[account] = _balances[account] + amount;
         emit Transfer(address(0), account, amount);
     }
 

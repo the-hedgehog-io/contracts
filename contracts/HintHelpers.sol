@@ -7,7 +7,6 @@ import "./interfaces/ISortedTroves.sol";
 import "./dependencies/HedgehogBase.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract HintHelpers is HedgehogBase, Ownable, CheckContract {
     string public constant NAME = "HintHelpers";
