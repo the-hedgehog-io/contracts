@@ -104,7 +104,6 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
         hogToken = IHOGToken(_hogTokenAddress);
         stabilityPoolAddress = _stabilityPoolAddress;
 
-        ISSUANCE_FACTOR = 999998681227695000; // default issuance factor value;
         HOGSupplyCap = 0; // default supply cap value
 
         emit HOGTokenAddressSet(_hogTokenAddress);

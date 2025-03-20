@@ -406,13 +406,11 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
         uint initialDeposit = deposits[msg.sender].initialValue;
         _requireUserHasDeposit(initialDeposit);
         _requireUserHasTrove(msg.sender);
-        _requireUserHasWStETHGain(msg.sender);
+        uint depositorWStETHGain = _requireUserHasWStETHGain(msg.sender);
 
         ICommunityIssuance communityIssuanceCached = communityIssuance;
 
         _triggerHOGIssuance(communityIssuanceCached);
-
-        uint depositorWStETHGain = getDepositorWStETHGain(msg.sender);
 
         uint compoundedBaseFeeLMADeposit = getCompoundedBaseFeeLMADeposit(
             msg.sender
@@ -987,8 +985,8 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
         );
     }
 
-    function _requireUserHasWStETHGain(address _depositor) internal view {
-        uint WStETHGain = getDepositorWStETHGain(_depositor);
+    function _requireUserHasWStETHGain(address _depositor) internal view returns (uint WStETHGain) {
+        WStETHGain = getDepositorWStETHGain(_depositor);
         require(
             WStETHGain > 0,
             "StabilityPool: caller must have non-zero WStETH Gain"
