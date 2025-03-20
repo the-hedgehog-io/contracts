@@ -7,11 +7,9 @@ import "../interfaces/IBaseFeeLMAToken.sol";
 import "../interfaces/ISortedTroves.sol";
 import "../interfaces/ICommunityIssuance.sol";
 import "../dependencies/HedgehogBase.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../dependencies/LiquitySafeMath128.sol";
 import "../dependencies/CheckContract.sol";
-
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -21,7 +19,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * Changes to the contract:
  * - Raised pragma version
  * - Removed an import of IStabilityPool Interface
- * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  *
  * The Stability Pool holds BaseFeeLMA tokens deposited by Stability Pool depositors.
  *
@@ -153,7 +150,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  */
 contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
     using LiquitySafeMath128 for uint128;
-    using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     string public constant NAME = "StabilityPool";
@@ -347,7 +343,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
         uint compoundedBaseFeeLMADeposit = getCompoundedBaseFeeLMADeposit(
             msg.sender
         );
-        uint BaseFeeLMALoss = initialDeposit.sub(compoundedBaseFeeLMADeposit); // Needed only for event log
+        uint BaseFeeLMALoss = initialDeposit - (compoundedBaseFeeLMADeposit); // Needed only for event log
 
         // HEDGEHOG UPDATES: No longer perform any kind of "frontend" payments
         // First pay out any HOG gains
@@ -355,7 +351,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
 
         _sendBaseFeeLMAtoStabilityPool(msg.sender, _amount);
 
-        uint newDeposit = compoundedBaseFeeLMADeposit.add(_amount);
+        uint newDeposit = compoundedBaseFeeLMADeposit + (_amount);
         _updateDepositAndSnapshots(msg.sender, newDeposit);
         emit UserDepositChanged(msg.sender, newDeposit);
 
@@ -395,7 +391,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
             _amount,
             compoundedBaseFeeLMADeposit
         );
-        uint BaseFeeLMALoss = initialDeposit.sub(compoundedBaseFeeLMADeposit); // Needed only for event log
+        uint BaseFeeLMALoss = initialDeposit - (compoundedBaseFeeLMADeposit); // Needed only for event log
 
         // HEDGEHOG UPDATES: No longer perform any kind of "frontend" payments
         // First pay out any HOG gains
@@ -404,7 +400,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
         _sendBaseFeeLMAToDepositor(msg.sender, BaseFeeLMAtoWithdraw);
 
         // Update deposit
-        uint newDeposit = compoundedBaseFeeLMADeposit.sub(BaseFeeLMAtoWithdraw);
+        uint newDeposit = compoundedBaseFeeLMADeposit - (BaseFeeLMAtoWithdraw);
         _updateDepositAndSnapshots(msg.sender, newDeposit);
         emit UserDepositChanged(msg.sender, newDeposit);
 
@@ -422,7 +418,6 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
     function _triggerHOGIssuance(
         ICommunityIssuance _communityIssuance
     ) internal {
-      
         uint HOGIssuance = _communityIssuance.issueHOG();
 
         _updateG(HOGIssuance);
@@ -445,10 +440,10 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
             totalBaseFeeLMA
         );
 
-        uint marginalHOGGain = HOGPerUnitStaked.mul(P);
-        epochToScaleToG[currentEpoch][currentScale] = epochToScaleToG[
-            currentEpoch
-        ][currentScale].add(marginalHOGGain);
+        uint marginalHOGGain = HOGPerUnitStaked * (P);
+        epochToScaleToG[currentEpoch][currentScale] =
+            epochToScaleToG[currentEpoch][currentScale] +
+            (marginalHOGGain);
 
         emit G_Updated(
             epochToScaleToG[currentEpoch][currentScale],
@@ -472,14 +467,12 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
          * 4) Store this error for use in the next correction when this function is called.
          * 5) Note: static analysis tools complain about this "division before multiplication", however, it is intended.
          */
-        uint HOGNumerator = _HOGIssuance.mul(DECIMAL_PRECISION).add(
-            lastHOGError
-        );
+        uint HOGNumerator = _HOGIssuance * (DECIMAL_PRECISION) + (lastHOGError);
 
-        uint HOGPerUnitStaked = HOGNumerator.div(_totalBaseFeeLMADeposits);
-        lastHOGError = HOGNumerator.sub(
-            HOGPerUnitStaked.mul(_totalBaseFeeLMADeposits)
-        );
+        uint HOGPerUnitStaked = HOGNumerator / (_totalBaseFeeLMADeposits);
+        lastHOGError =
+            HOGNumerator -
+            (HOGPerUnitStaked * (_totalBaseFeeLMADeposits));
 
         return HOGPerUnitStaked;
     }
@@ -537,34 +530,34 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
          * 4) Store these errors for use in the next correction when this function is called.
          * 5) Note: static analysis tools complain about this "division before multiplication", however, it is intended.
          */
-        uint WStETHNumerator = _collToAdd.mul(DECIMAL_PRECISION).add(
-            lastWStETHError_Offset
-        );
+        uint WStETHNumerator = _collToAdd *
+            (DECIMAL_PRECISION) +
+            (lastWStETHError_Offset);
 
         assert(_debtToOffset <= _totalBaseFeeLMADeposits);
         if (_debtToOffset == _totalBaseFeeLMADeposits) {
             BaseFeeLMALossPerUnitStaked = DECIMAL_PRECISION; // When the Pool depletes to 0, so does each deposit
             lastBaseFeeLMALossError_Offset = 0;
         } else {
-            uint BaseFeeLMALossNumerator = _debtToOffset
-                .mul(DECIMAL_PRECISION)
-                .sub(lastBaseFeeLMALossError_Offset);
+            uint BaseFeeLMALossNumerator = _debtToOffset *
+                (DECIMAL_PRECISION) -
+                (lastBaseFeeLMALossError_Offset);
             /*
              * Add 1 to make error in quotient positive. We want "slightly too much" BaseFeeLMA loss,
              * which ensures the error in any given compoundedBaseFeeLMADeposit favors the Stability Pool.
              */
-            BaseFeeLMALossPerUnitStaked = (
-                BaseFeeLMALossNumerator.div(_totalBaseFeeLMADeposits)
-            ).add(1);
-            lastBaseFeeLMALossError_Offset = (
-                BaseFeeLMALossPerUnitStaked.mul(_totalBaseFeeLMADeposits)
-            ).sub(BaseFeeLMALossNumerator);
+            BaseFeeLMALossPerUnitStaked =
+                (BaseFeeLMALossNumerator / (_totalBaseFeeLMADeposits)) +
+                (1);
+            lastBaseFeeLMALossError_Offset =
+                (BaseFeeLMALossPerUnitStaked * (_totalBaseFeeLMADeposits)) -
+                (BaseFeeLMALossNumerator);
         }
 
-        WStETHGainPerUnitStaked = WStETHNumerator.div(_totalBaseFeeLMADeposits);
-        lastWStETHError_Offset = WStETHNumerator.sub(
-            WStETHGainPerUnitStaked.mul(_totalBaseFeeLMADeposits)
-        );
+        WStETHGainPerUnitStaked = WStETHNumerator / (_totalBaseFeeLMADeposits);
+        lastWStETHError_Offset =
+            WStETHNumerator -
+            (WStETHGainPerUnitStaked * (_totalBaseFeeLMADeposits));
 
         return (WStETHGainPerUnitStaked, BaseFeeLMALossPerUnitStaked);
     }
@@ -582,9 +575,8 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
          * The newProductFactor is the factor by which to change all deposits, due to the depletion of Stability Pool BaseFeeLMA in the liquidation.
          * We make the product factor 0 if there was a pool-emptying. Otherwise, it is (1 - BaseFeeLMALossPerUnitStaked)
          */
-        uint newProductFactor = uint(DECIMAL_PRECISION).sub(
-            _BaseFeeLMALossPerUnitStaked
-        );
+        uint newProductFactor = uint(DECIMAL_PRECISION) -
+            (_BaseFeeLMALossPerUnitStaked);
 
         uint128 currentScaleCached = currentScale;
         uint128 currentEpochCached = currentEpoch;
@@ -599,8 +591,8 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
          *
          * Since S corresponds to WStETH gain, and P to deposit loss, we update S first.
          */
-        uint marginalWStETHGain = _WStETHGainPerUnitStaked.mul(currentP);
-        uint newS = currentS.add(marginalWStETHGain);
+        uint marginalWStETHGain = _WStETHGainPerUnitStaked * (currentP);
+        uint newS = currentS + (marginalWStETHGain);
         epochToScaleToSum[currentEpochCached][currentScaleCached] = newS;
         emit S_Updated(newS, currentEpochCached, currentScaleCached);
 
@@ -614,15 +606,15 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
 
             // If multiplying P by a non-zero product factor would reduce P below the scale boundary, increment the scale
         } else if (
-            currentP.mul(newProductFactor).div(DECIMAL_PRECISION) < SCALE_FACTOR
+            (currentP * (newProductFactor)) / (DECIMAL_PRECISION) < SCALE_FACTOR
         ) {
-            newP = currentP.mul(newProductFactor).mul(SCALE_FACTOR).div(
-                DECIMAL_PRECISION
-            );
+            newP =
+                (currentP * (newProductFactor) * (SCALE_FACTOR)) /
+                (DECIMAL_PRECISION);
             currentScale = currentScaleCached.add(1);
             emit ScaleUpdated(currentScale);
         } else {
-            newP = currentP.mul(newProductFactor).div(DECIMAL_PRECISION);
+            newP = (currentP * (newProductFactor)) / (DECIMAL_PRECISION);
         }
 
         assert(newP > 0);
@@ -649,7 +641,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
     }
 
     function _decreaseBaseFeeLMA(uint _amount) internal {
-        uint newTotalBaseFeeLMADeposits = totalBaseFeeLMADeposits.sub(_amount);
+        uint newTotalBaseFeeLMADeposits = totalBaseFeeLMADeposits - (_amount);
         totalBaseFeeLMADeposits = newTotalBaseFeeLMADeposits;
         emit StabilityPoolBaseFeeLMABalanceUpdated(newTotalBaseFeeLMADeposits);
     }
@@ -693,17 +685,15 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
         uint S_Snapshot = snapshots.S;
         uint P_Snapshot = snapshots.P;
 
-        uint firstPortion = epochToScaleToSum[epochSnapshot][scaleSnapshot].sub(
-            S_Snapshot
-        );
+        uint firstPortion = epochToScaleToSum[epochSnapshot][scaleSnapshot] -
+            (S_Snapshot);
         uint secondPortion = epochToScaleToSum[epochSnapshot][
-            scaleSnapshot.add(1)
-        ].div(SCALE_FACTOR);
+            scaleSnapshot + (1)
+        ] / (SCALE_FACTOR);
 
-        uint WStETHGain = initialDeposit
-            .mul(firstPortion.add(secondPortion))
-            .div(P_Snapshot)
-            .div(DECIMAL_PRECISION);
+        uint WStETHGain = (initialDeposit * (firstPortion + (secondPortion))) /
+            (P_Snapshot) /
+            (DECIMAL_PRECISION);
 
         return WStETHGain;
     }
@@ -744,17 +734,15 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
         uint G_Snapshot = snapshots.G;
         uint P_Snapshot = snapshots.P;
 
-        uint firstPortion = epochToScaleToG[epochSnapshot][scaleSnapshot].sub(
-            G_Snapshot
-        );
+        uint firstPortion = epochToScaleToG[epochSnapshot][scaleSnapshot] -
+            (G_Snapshot);
         uint secondPortion = epochToScaleToG[epochSnapshot][
-            scaleSnapshot.add(1)
-        ].div(SCALE_FACTOR);
+            scaleSnapshot + (1)
+        ] / (SCALE_FACTOR);
 
-        uint HOGGain = initialStake
-            .mul(firstPortion.add(secondPortion))
-            .div(P_Snapshot)
-            .div(DECIMAL_PRECISION);
+        uint HOGGain = (initialStake * (firstPortion + (secondPortion))) /
+            (P_Snapshot) /
+            (DECIMAL_PRECISION);
 
         return HOGGain;
     }
@@ -804,11 +792,12 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
          * at least 1e-9 -- so return 0.
          */
         if (scaleDiff == 0) {
-            compoundedStake = initialStake.mul(P).div(snapshot_P);
+            compoundedStake = (initialStake * (P)) / (snapshot_P);
         } else if (scaleDiff == 1) {
-            compoundedStake = initialStake.mul(P).div(snapshot_P).div(
-                SCALE_FACTOR
-            );
+            compoundedStake =
+                (initialStake * (P)) /
+                (snapshot_P) /
+                (SCALE_FACTOR);
         } else {
             // if scaleDiff >= 2
             compoundedStake = 0;
@@ -823,7 +812,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
          *
          * Thus it's unclear whether this line is still really needed.
          */
-        if (compoundedStake < initialStake.div(1e9)) {
+        if (compoundedStake < initialStake / (1e9)) {
             return 0;
         }
 
@@ -838,7 +827,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
         uint _amount
     ) internal {
         baseFeeLMAToken.sendToPool(_address, address(this), _amount);
-        uint newTotalBaseFeeLMADeposits = totalBaseFeeLMADeposits.add(_amount);
+        uint newTotalBaseFeeLMADeposits = totalBaseFeeLMADeposits + (_amount);
         totalBaseFeeLMADeposits = newTotalBaseFeeLMADeposits;
         emit StabilityPoolBaseFeeLMABalanceUpdated(newTotalBaseFeeLMADeposits);
     }
@@ -850,7 +839,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
         if (_amount == 0) {
             return;
         }
-        uint newWStETH = WStETH.sub(_amount);
+        uint newWStETH = WStETH - (_amount);
         WStETH = newWStETH;
         emit StabilityPoolWStETHBalanceUpdated(newWStETH);
         emit WStETHSent(msg.sender, _amount);
@@ -965,7 +954,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
      * Remove native token fallback function and replace with internal balance increaser as it is used only in the offset function
      */
     function _increaseBalance(uint256 _amount) internal {
-        WStETH = WStETH.add(_amount);
+        WStETH = WStETH + (_amount);
         emit StabilityPoolWStETHBalanceUpdated(WStETH);
     }
 

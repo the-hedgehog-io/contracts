@@ -853,8 +853,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         .reverted;
     });
 
-    // TODO: Get into a separate file
-
     it("should not mark oracles as broken if price was increased by more than 12.5%", async () => {
       await setNewBaseFeePrice(100000);
 

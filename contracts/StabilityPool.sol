@@ -12,7 +12,6 @@ import "./dependencies/HedgehogBase.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/LiquitySafeMath128.sol";
 import "./dependencies/CheckContract.sol";
-
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -474,8 +473,8 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
         );
 
         uint marginalHOGGain = HOGPerUnitStaked * P;
-        epochToScaleToG[currentEpoch][currentScale] = 
-            epochToScaleToG[currentEpoch][currentScale] + 
+        epochToScaleToG[currentEpoch][currentScale] =
+            epochToScaleToG[currentEpoch][currentScale] +
             marginalHOGGain;
 
         emit G_Updated(
@@ -500,15 +499,13 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
          * 4) Store this error for use in the next correction when this function is called.
          * 5) Note: static analysis tools complain about this "division before multiplication", however, it is intended.
          */
-        uint HOGNumerator = 
-            (_HOGIssuance * DECIMAL_PRECISION) +
-            lastHOGError;
+        uint HOGNumerator = (_HOGIssuance * DECIMAL_PRECISION) + lastHOGError;
 
         uint HOGPerUnitStaked = HOGNumerator / _totalBaseFeeLMADeposits;
-        lastHOGError = 
+        lastHOGError =
             HOGNumerator -
-            HOGPerUnitStaked * _totalBaseFeeLMADeposits;
-
+            HOGPerUnitStaked *
+            _totalBaseFeeLMADeposits;
         return HOGPerUnitStaked;
     }
 
@@ -566,8 +563,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
          * 4) Store these errors for use in the next correction when this function is called.
          * 5) Note: static analysis tools complain about this "division before multiplication", however, it is intended.
          */
-        uint WStETHNumerator = 
-            (_collToAdd * DECIMAL_PRECISION) +
+        uint WStETHNumerator = (_collToAdd * DECIMAL_PRECISION) +
             lastWStETHError_Offset;
 
         assert(_debtToOffset <= _totalBaseFeeLMADeposits);
@@ -575,25 +571,26 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
             BaseFeeLMALossPerUnitStaked = DECIMAL_PRECISION; // When the Pool depletes to 0, so does each deposit
             lastBaseFeeLMALossError_Offset = 0;
         } else {
-            uint BaseFeeLMALossNumerator = 
-                _debtToOffset * DECIMAL_PRECISION
-                - lastBaseFeeLMALossError_Offset;
+            uint BaseFeeLMALossNumerator = _debtToOffset *
+                DECIMAL_PRECISION -
+                lastBaseFeeLMALossError_Offset;
             /*
              * Add 1 to make error in quotient positive. We want "slightly too much" BaseFeeLMA loss,
              * which ensures the error in any given compoundedBaseFeeLMADeposit favors the Stability Pool.
              */
             BaseFeeLMALossPerUnitStaked =
-                (BaseFeeLMALossNumerator / _totalBaseFeeLMADeposits) + 1;
+                (BaseFeeLMALossNumerator / _totalBaseFeeLMADeposits) +
+                1;
             lastBaseFeeLMALossError_Offset =
-                (BaseFeeLMALossPerUnitStaked * _totalBaseFeeLMADeposits) - 
+                (BaseFeeLMALossPerUnitStaked * _totalBaseFeeLMADeposits) -
                 BaseFeeLMALossNumerator;
         }
 
         WStETHGainPerUnitStaked = WStETHNumerator / _totalBaseFeeLMADeposits;
-        // why
-        lastWStETHError_Offset = 
-            WStETHNumerator - 
-            WStETHGainPerUnitStaked * _totalBaseFeeLMADeposits;
+        lastWStETHError_Offset =
+            WStETHNumerator -
+            WStETHGainPerUnitStaked *
+            _totalBaseFeeLMADeposits;
 
         return (WStETHGainPerUnitStaked, BaseFeeLMALossPerUnitStaked);
     }
@@ -611,8 +608,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
          * The newProductFactor is the factor by which to change all deposits, due to the depletion of Stability Pool BaseFeeLMA in the liquidation.
          * We make the product factor 0 if there was a pool-emptying. Otherwise, it is (1 - BaseFeeLMALossPerUnitStaked)
          */
-        uint newProductFactor = 
-            uint(DECIMAL_PRECISION) -
+        uint newProductFactor = uint(DECIMAL_PRECISION) -
             _BaseFeeLMALossPerUnitStaked;
 
         uint128 currentScaleCached = currentScale;
@@ -645,8 +641,8 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
         } else if (
             (currentP * newProductFactor) / DECIMAL_PRECISION < SCALE_FACTOR
         ) {
-            newP = 
-                (currentP * newProductFactor * SCALE_FACTOR) / 
+            newP =
+                (currentP * newProductFactor * SCALE_FACTOR) /
                 DECIMAL_PRECISION;
             currentScale = currentScaleCached + 1;
             emit ScaleUpdated(currentScale);
@@ -722,15 +718,13 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
         uint S_Snapshot = snapshots.S;
         uint P_Snapshot = snapshots.P;
 
-        uint firstPortion = 
-            epochToScaleToSum[epochSnapshot][scaleSnapshot] -
+        uint firstPortion = epochToScaleToSum[epochSnapshot][scaleSnapshot] -
             S_Snapshot;
-        uint secondPortion = 
-            epochToScaleToSum[epochSnapshot][scaleSnapshot + 1] / 
-            SCALE_FACTOR;
+        uint secondPortion = epochToScaleToSum[epochSnapshot][
+            scaleSnapshot + 1
+        ] / SCALE_FACTOR;
 
-        uint WStETHGain = 
-            (initialDeposit * (firstPortion + secondPortion)) / 
+        uint WStETHGain = (initialDeposit * (firstPortion + secondPortion)) /
             P_Snapshot /
             DECIMAL_PRECISION;
 
@@ -772,15 +766,12 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
         uint G_Snapshot = snapshots.G;
         uint P_Snapshot = snapshots.P;
 
-        uint firstPortion = 
-            epochToScaleToG[epochSnapshot][scaleSnapshot] -
+        uint firstPortion = epochToScaleToG[epochSnapshot][scaleSnapshot] -
             G_Snapshot;
-        uint secondPortion = 
-            epochToScaleToG[epochSnapshot][scaleSnapshot + 1] / 
+        uint secondPortion = epochToScaleToG[epochSnapshot][scaleSnapshot + 1] /
             SCALE_FACTOR;
 
-        uint HOGGain = 
-            (initialStake * (firstPortion + secondPortion)) /
+        uint HOGGain = (initialStake * (firstPortion + secondPortion)) /
             P_Snapshot /
             DECIMAL_PRECISION;
 
@@ -832,14 +823,9 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
          * at least 1e-9 -- so return 0.
          */
         if (scaleDiff == 0) {
-            compoundedStake = 
-                (initialStake * P) / 
-                snapshot_P;
+            compoundedStake = (initialStake * P) / snapshot_P;
         } else if (scaleDiff == 1) {
-            compoundedStake = 
-                (initialStake * P) / 
-                snapshot_P / 
-                SCALE_FACTOR;
+            compoundedStake = (initialStake * P) / snapshot_P / SCALE_FACTOR;
         } else {
             // if scaleDiff >= 2
             compoundedStake = 0;
