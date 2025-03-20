@@ -21,7 +21,6 @@ error WithdrawalRequestedTooSoonAfterDeposit();
  * @notice Fork of Liquity's BorrowerOperations. . Most of the Logic remains unchanged..
  * Changes to the contract:
  * - Raised pragma version
- * - Removed an import of IBorrowerOperations Interface
  * - Collateral is now an ERC20 token instead of a native one
  * - Updated variable names and docs to refer to BaseFeeLMA token and wwstETH as a collateral
  * - Logic updates with borrowing fees calculation and their distribution

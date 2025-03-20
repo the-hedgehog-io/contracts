@@ -2041,7 +2041,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
     /*
      * HEDGEHOG UPDATES:
      * 1) Now passing _calcDecayedBorrowBaseRate instead of _calcDecayedBaseRate function to calculate the decayed borrowBaseRate
-     * TODO: Write test
      */
     function getBorrowingRateWithDecay(
         uint _issuedBaseFeeLMA
