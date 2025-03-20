@@ -3,13 +3,14 @@
 pragma solidity 0.8.19;
 
 import "../interfaces/IHOGToken.sol";
+import "../interfaces/ICommunityIssuance.sol";
 import "../dependencies/BaseMath.sol";
 import "../dependencies/LiquityMath.sol";
 import "../dependencies/CheckContract.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
+contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath, ICommunityIssuance {
 
     // HEDGEHOG UPDATES: Add Access control to the contract for the setting of dynamic variables
     bytes32 internal constant DISTRIBUTION_SETTER =
@@ -64,14 +65,6 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
     uint public proposedTotalHOGIssued;
     uint public totalHOGIssued;
     uint public immutable deploymentTime;
-
-    // --- Events ---
-
-    event HOGTokenAddressSet(address _hogTokenAddress);
-    event StabilityPoolAddressSet(address _stabilityPoolAddress);
-    event TotalHOGIssuedUpdated(uint _totalHOGIssued);
-    event ProposedTotalHogIssuedManually(uint256 _oldTotalHOGIssued, uint256 _totalHOGIssued);
-    event TotalHogIssuedManuallyUpdated(uint256 _totalHOGIssued);
 
     // --- Functions ---
 

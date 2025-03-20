@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.19;
 
+import "./interfaces/IBorrowerOperations.sol";
 import "./interfaces/ITroveManager.sol";
 import "./interfaces/IBaseFeeLMAToken.sol";
 import "./interfaces/ICollSurplusPool.sol";
@@ -28,7 +29,7 @@ error WithdrawalRequestedTooSoonAfterDeposit();
  * - Remove _getUSDValue view method as it's not used anymore
  */
 
-contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
+contract BorrowerOperations is HedgehogBase, Ownable, CheckContract, IBorrowerOperations {
     using SafeERC20 for IERC20;
 
     string public constant NAME = "BorrowerOperations";
@@ -103,43 +104,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         IBaseFeeLMAToken baseFeeLMAToken;
     }
 
-    enum BorrowerOperation {
-        openTrove,
-        closeTrove,
-        adjustTrove
-    }
-
-    event TroveManagerAddressChanged(address _newTroveManagerAddress);
-    event ActivePoolAddressChanged(address _activePoolAddress);
-    event DefaultPoolAddressChanged(address _defaultPoolAddress);
-    event StabilityPoolAddressChanged(address _stabilityPoolAddress);
-    event GasPoolAddressChanged(address _gasPoolAddress);
-    event CollSurplusPoolAddressChanged(address _collSurplusPoolAddress);
-    event PriceFeedAddressChanged(address _newPriceFeedAddress);
-    event SortedTrovesAddressChanged(address _sortedTrovesAddress);
-    event BaseFeeLMATokenAddressChanged(address _BaseFeeLMATokenAddress);
-    event WStETHTokenAddressUpdated(IERC20 _WStEthAddress);
-    event FeesRouterAddressUpdated(IFeesRouter _feesRouter);
-
-    event TroveCreated(address indexed _borrower, uint arrayIndex);
-    event TroveUpdated(
-        address indexed _borrower,
-        uint _debt,
-        uint _coll,
-        uint stake,
-        BorrowerOperation operation
-    );
-    event BaseFeeLMABorrowingFeePaid(
-        address indexed _borrower,
-        uint _BaseFeeLMAFee
-    );
-    event WithdrawalLimitUpdated(uint256 _limit);
-    event UserWithdrawalLimitUpdated(
-        address indexed _borrower,
-        uint256 _lockedCollateral,
-        uint256 _lockTimestamp
-    );
-
     // --- Dependency setters ---
 
     /**
@@ -200,8 +164,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         emit PriceFeedAddressChanged(_priceFeedAddress);
         emit SortedTrovesAddressChanged(_sortedTrovesAddress);
         emit BaseFeeLMATokenAddressChanged(_baseFeeLMATokenAddress);
-        emit WStETHTokenAddressUpdated(_wStETHTokenAddress);
-        emit FeesRouterAddressUpdated(_feesRouter);
+        emit WStETHTokenAddressChanged(address(_wStETHTokenAddress));
+        emit FeesRouterAddressChanged(address(_feesRouter));
 
         renounceOwnership();
     }

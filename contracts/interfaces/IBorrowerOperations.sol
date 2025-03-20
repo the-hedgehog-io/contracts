@@ -2,6 +2,12 @@
 
 pragma solidity 0.8.19;
 
+enum BorrowerOperation {
+    openTrove,
+    closeTrove,
+    adjustTrove
+}
+
 // Common interface for the Trove Manager.
 interface IBorrowerOperations {
     // --- Events ---
@@ -15,6 +21,8 @@ interface IBorrowerOperations {
     event PriceFeedAddressChanged(address _newPriceFeedAddress);
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
     event BaseFeeLMATokenAddressChanged(address _baseFeeLMATokenAddress);
+    event WStETHTokenAddressChanged(address _WStEthAddress);
+    event FeesRouterAddressChanged(address _feesRouter);
 
     event TroveCreated(address indexed _borrower, uint arrayIndex);
     event TroveUpdated(
@@ -22,26 +30,20 @@ interface IBorrowerOperations {
         uint _debt,
         uint _coll,
         uint stake,
-        uint8 operation
+        BorrowerOperation operation
     );
     event BaseFeeLMABorrowingFeePaid(
         address indexed _borrower,
         uint _BaseFeeLMAFee
     );
+    event WithdrawalLimitUpdated(uint256 _limit);
+    event UserWithdrawalLimitUpdated(
+        address indexed _borrower,
+        uint256 _lockedCollateral,
+        uint256 _lockTimestamp
+    );
 
     // --- Functions ---
-
-    function setAddresses(
-        address _troveManagerAddress,
-        address _activePoolAddress,
-        address _defaultPoolAddress,
-        address _stabilityPoolAddress,
-        address _gasPoolAddress,
-        address _collSurplusPoolAddress,
-        address _priceFeedAddress,
-        address _sortedTrovesAddress,
-        address _baseFeeLMATokenAddress
-    ) external;
 
     function openTrove(
         uint _maxFee,
