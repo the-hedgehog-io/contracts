@@ -323,8 +323,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       );
     });
 
-    it("should revert (if timelock less 720):  step 18", async () => {
-      await increase(timestring("719 minutes"));
+    it("should revert (if timelock less 59):  step 18", async () => {
+      await increase(timestring("59 minutes"));
 
       const unusedLimitBeforeWithdrawal =
         await borrowerOperations.unusedWithdrawalLimit();

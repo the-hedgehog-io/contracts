@@ -72,7 +72,7 @@ contract BorrowerOperations is
         uint256 lockedCollateral;
         uint256 lockTimestamp;
     }
-    mapping(address => UserLimit) private userWithdrawalLimits;
+    mapping(address => UserLimit) public userWithdrawalLimits;
 
     /* --- Variable container structs  ---
 
@@ -815,7 +815,7 @@ contract BorrowerOperations is
         limit.lockedCollateral = limit.lockTimestamp > block.timestamp
             ? limit.lockedCollateral + _amount
             : _amount;
-        limit.lockTimestamp = block.timestamp + EXPAND_DURATION;
+        limit.lockTimestamp = block.timestamp + DEPOSIT_LOCK_DURATION;
 
         emit UserWithdrawalLimitUpdated(
             msg.sender,

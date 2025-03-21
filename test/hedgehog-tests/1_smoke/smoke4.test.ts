@@ -34,7 +34,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
   context("Base functionality and Access Control. Flow #4", () => {
     let alice: SignerWithAddress,
       bob: SignerWithAddress,
-      carol: SignerWithAddress;
+      carol: SignerWithAddress,
+      dave: SignerWithAddress;
 
     let priceFeed: TestPriceFeed;
     let troveManager: TroveManager;
@@ -103,7 +104,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const BobUnstakeFirst = BigInt("990074994000000000000000000");
     const BobRedemptionFirst = BigInt("990074994000000000000000000");
     const BobCollWithdraw = "225000000000000000";
-    const BobSmallWithdrawal = "225000000";
 
     // Carol:
     const CarolTroveColl = BigInt("4000000000000000000000");
@@ -115,6 +115,11 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       "9600000000000000000000000000"
     );
 
+    // Dave:
+    const DaveTroveColl = BigInt("3000000000000000000000");
+    const DaveTroveDebt = BigInt("2000000000000000000000000000");
+    const DaveBigWithdrawal = BigInt("2000000000000000000000");
+
     const totalCollateralAliceOpening = BigInt("602000000000000000000");
     const totalDebtAliceOpening = BigInt("4000000000000000000000000000");
     const totalCollateralBobOpening = BigInt("3602000000000000000000");
@@ -125,7 +130,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const totalDebtCarolOpening = BigInt("15600000000000000000000000000");
 
     before(async () => {
-      [, , , alice, bob, carol] = await getSigners({
+      [, , , alice, bob, carol, dave] = await getSigners({
         fork: false,
       });
 
@@ -485,10 +490,20 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("Should revert if the withdrawColl() or adjustTrove() call happens right after deposit", async () => {
+      await payToken.transfer(dave.address, DaveTroveColl);
+
+      await expect(
+        openTrove({
+          caller: dave,
+          baseFeeLMAAmount: DaveTroveDebt,
+          collAmount: DaveTroveColl,
+        })
+      ).not.to.be.reverted;
+  
       await expect(
         borrowerOperations
-          .connect(bob)
-          .withdrawColl(BobSmallWithdrawal, ethers.ZeroAddress, ethers.ZeroAddress)
+          .connect(dave)
+          .withdrawColl(DaveBigWithdrawal, ethers.ZeroAddress, ethers.ZeroAddress)
       ).to.be.revertedWithCustomError(
         borrowerOperations,
         "WithdrawalRequestedTooSoonAfterDeposit"
@@ -496,10 +511,10 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
       await expect(
         borrowerOperations
-          .connect(bob)
+          .connect(dave)
           .adjustTrove(
             0,
-            BobSmallWithdrawal,
+            DaveBigWithdrawal,
             0,
             0,
             true,
@@ -511,14 +526,13 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         "WithdrawalRequestedTooSoonAfterDeposit"
       );
 
-      await increase(timestring("721 minutes"));
+      await increase(timestring("61 minutes"));
 
       // After the wait we should be good
-      await increase(timestring("10 minutes"));
       await expect(
         borrowerOperations
-          .connect(bob)
-          .withdrawColl(BobSmallWithdrawal, ethers.ZeroAddress, ethers.ZeroAddress)
+          .connect(dave)
+          .withdrawColl(DaveBigWithdrawal, ethers.ZeroAddress, ethers.ZeroAddress)
       ).not.to.be.reverted
     });
 

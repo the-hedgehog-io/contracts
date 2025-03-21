@@ -39,6 +39,7 @@ contract HedgehogBase is BaseMath, IHedgehogBase {
     // Minimum amount of net BaseFeeLMA debt a trove must have
     uint public constant MIN_NET_DEBT = 100000000000000000000000000;
 
+    uint256 public constant DEPOSIT_LOCK_DURATION = 60 minutes;
     uint256 public constant EXPAND_DURATION = 720 minutes;
 
     uint public constant PERCENT_DIVISOR = 200; // dividing by 200 yields 0.5%
