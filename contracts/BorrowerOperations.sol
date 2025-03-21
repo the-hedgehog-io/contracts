@@ -21,14 +21,23 @@ error WithdrawalRequestedTooSoonAfterDeposit();
  * @notice Fork of Liquity's BorrowerOperations. . Most of the Logic remains unchanged..
  * Changes to the contract:
  * - Raised pragma version
+ * - SafeMath is removed & native math operators are used from this point
  * - Collateral is now an ERC20 token instead of a native one
- * - Updated variable names and docs to refer to BaseFeeLMA token and wwstETH as a collateral
+ * - Updated variable names and docs to refer to BaseFeeLMA token and wstETH as a collateral
  * - Logic updates with borrowing fees calculation and their distribution
  * - Removed Native Liquity Protocol Token Staking
  * - Remove _getUSDValue view method as it's not used anymore
+ * - Introduction of withdrawal limit logic
+ * - Introduction of single block open-withdraw limitations
+ * - Introduction of timelock on withdraw after deposits
  */
 
-contract BorrowerOperations is HedgehogBase, Ownable, CheckContract, IBorrowerOperations {
+contract BorrowerOperations is
+    HedgehogBase,
+    Ownable,
+    CheckContract,
+    IBorrowerOperations
+{
     using SafeERC20 for IERC20;
 
     string public constant NAME = "BorrowerOperations";
@@ -54,7 +63,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract, IBorrowerOp
 
     // HEDGEHOG UPDATES: Added two new public variables
     // Two variables that are used to track and calculate collateral withdrawal limits
-    // also to prevent griefing attacks - collateral has to sit in the contract 
+    // also to prevent griefing attacks - collateral has to sit in the contract
     // some time before withdrawal request
     uint256 public lastWithdrawalTimestamp;
     uint256 public unusedWithdrawalLimit;
@@ -786,7 +795,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract, IBorrowerOp
     /**
      * HEDGEHOG UPDATES: use SafeERC20 safe transfer instead of native token transfer
      * Send funds from User's account instead of relaying native token through address(this)
-     * Manualy increase balance in Active Pool, since it used to be done in the native token fallback
+     * Manually increase balance in Active Pool, since it used to be done in the native token fallback
      *
      * Now also update the contract's withdrawal limit along with the changes to the coll balance in the active pool
      */
@@ -803,9 +812,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract, IBorrowerOp
         unusedWithdrawalLimit = _newLimit;
 
         UserLimit storage limit = userWithdrawalLimits[msg.sender];
-        limit.lockedCollateral = limit.lockTimestamp > block.timestamp ? 
-            limit.lockedCollateral + _amount :
-            _amount;
+        limit.lockedCollateral = limit.lockTimestamp > block.timestamp
+            ? limit.lockedCollateral + _amount
+            : _amount;
         limit.lockTimestamp = block.timestamp + EXPAND_DURATION;
 
         emit UserWithdrawalLimitUpdated(
@@ -1095,12 +1104,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract, IBorrowerOp
         uint newColl = _coll;
         uint newDebt = _debt;
 
-        newColl = _isCollIncrease
-            ? _coll + _collChange
-            : _coll - _collChange;
-        newDebt = _isDebtIncrease
-            ? _debt + _debtChange
-            : _debt - _debtChange;
+        newColl = _isCollIncrease ? _coll + _collChange : _coll - _collChange;
+        newDebt = _isDebtIncrease ? _debt + _debtChange : _debt - _debtChange;
 
         return (newColl, newDebt);
     }
@@ -1147,13 +1152,11 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract, IBorrowerOp
      * HEDGEHOG UPDATES:
      * Introduced limit on how many withdrawal transactions can be requested within 10 minutes
      */
-    function _checkUserWithdrawalLimit(
-        uint _collWithdrawal
-    ) internal view {
+    function _checkUserWithdrawalLimit(uint _collWithdrawal) internal view {
         UserLimit memory limit = userWithdrawalLimits[msg.sender];
         uint userCollateral = troveManager.getTroveColl(msg.sender);
         if (
-            block.timestamp < limit.lockTimestamp && 
+            block.timestamp < limit.lockTimestamp &&
             userCollateral - _collWithdrawal < limit.lockedCollateral
         ) {
             revert WithdrawalRequestedTooSoonAfterDeposit();

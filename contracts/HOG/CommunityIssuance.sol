@@ -10,8 +10,13 @@ import "../dependencies/CheckContract.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath, ICommunityIssuance {
-
+contract CommunityIssuance is
+    AccessControl,
+    Ownable,
+    CheckContract,
+    BaseMath,
+    ICommunityIssuance
+{
     // HEDGEHOG UPDATES: Add Access control to the contract for the setting of dynamic variables
     bytes32 internal constant DISTRIBUTION_SETTER =
         keccak256("DISTRIBUTION_SETTER");
@@ -108,9 +113,8 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath, I
     function issueHOG() external returns (uint) {
         _requireCallerIsStabilityPool();
 
-        uint latestTotalHOGIssued = HOGSupplyCap *
-            _getCumulativeIssuanceFraction() /
-            DECIMAL_PRECISION;
+        uint latestTotalHOGIssued = (HOGSupplyCap *
+            _getCumulativeIssuanceFraction()) / DECIMAL_PRECISION;
 
         // Hedgehog Updates: Since now Issuance Factor is dynamic it is possible to block the whole system in case the factor reduction
         // Because of that we simply stop the issuance in such cases in case of letting it underflow
@@ -183,8 +187,11 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath, I
         emit ProposedIssuanceFactorUpdate(ISSUANCE_FACTOR, _newIssuanceFactor);
     }
 
-    function acceptNewIssuanceFactor(
-    ) external onlyRole(DISTRIBUTION_SETTER) {
+    /*
+     * HEDGEHOG UPDATES:
+     * New function: second step operation that updates current ISSUANCE_FACTOR variable
+     * */
+    function acceptNewIssuanceFactor() external onlyRole(DISTRIBUTION_SETTER) {
         uint _newIssuanceFactor = proposedIssuanceFactor;
         require(
             _newIssuanceFactor != type(uint256).max,
@@ -206,8 +213,11 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath, I
         emit ProposedTotalHogIssuedManually(totalHOGIssued, _newHogIssued);
     }
 
-    function acceptNewTotalHogIssued(
-    ) external onlyRole(DISTRIBUTION_SETTER) {
+    /*
+     * HEDGEHOG UPDATES:
+     * New function: second step operation that updates current totalHOGIssued variable
+     * */
+    function acceptNewTotalHogIssued() external onlyRole(DISTRIBUTION_SETTER) {
         uint _newHogIssued = proposedTotalHOGIssued;
         require(
             _newHogIssued != type(uint256).max,

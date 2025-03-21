@@ -3,12 +3,13 @@
 pragma solidity 0.8.19;
 
 /**
- * @notice A fork of Liquity Math library with an upgraded pragma
+ * HEDGEHOG UPDATES:
+ * @notice A fork of Liquity Math library with an upgraded pragma & migration from SafeMath to native math operator
  *
+ * New function was added: _checkWithdrawalLimit
  */
 
 library LiquityMath {
-
     uint internal constant DECIMAL_PRECISION = 1e18;
     uint256 public constant WITHDRAWAL_LIMIT_THRESHOLD = 10 ether;
     uint256 internal constant DENOMINATOR = 100000;
@@ -124,11 +125,8 @@ library LiquityMath {
         uint _price
     ) internal pure returns (uint) {
         if (_debt > 0) {
-            uint newCollRatio = _coll *
-                DECIMAL_PRECISION /
-                _debt * 
-                DECIMAL_PRECISION /
-                _price;
+            uint newCollRatio = (((_coll * DECIMAL_PRECISION) / _debt) *
+                DECIMAL_PRECISION) / _price;
 
             return newCollRatio;
         }
@@ -151,6 +149,10 @@ library LiquityMath {
             1;
     }
 
+    /**
+     * HEDGEHOG UPDATES:
+     * New internal function that's executed as a part of _handleWithdrawalLimit function
+     */
     function _checkWithdrawalLimit(
         uint256 _lastWithdrawTimestamp,
         uint256 _expandDuration,
@@ -162,12 +164,12 @@ library LiquityMath {
         if (_currentTotalColl <= WITHDRAWAL_LIMIT_THRESHOLD) {
             return (_currentTotalColl, _currentTotalColl);
         }
-        
+
         // We calculate 50% of the current collateral over WITHDRAWAL_LIMIT_THRESHOLD
         // so max limit is half of the collateral plus 50% of the threshold (5 ether)
-        uint256 totalCollBasedLimit = 
-            WITHDRAWAL_LIMIT_THRESHOLD + 
-            (_currentTotalColl - WITHDRAWAL_LIMIT_THRESHOLD) / 2;
+        uint256 totalCollBasedLimit = WITHDRAWAL_LIMIT_THRESHOLD +
+            (_currentTotalColl - WITHDRAWAL_LIMIT_THRESHOLD) /
+            2;
 
         // Now we calculate an amount that can be added based on the newest coll value
         uint256 additionFromNewColl;

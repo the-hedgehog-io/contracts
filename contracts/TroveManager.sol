@@ -18,12 +18,13 @@ import "./dependencies/CheckContract.sol";
  * @notice Fork of Liquity's TroveManager. Most of the Logic remains unchanged.
  * Changes to the contract:
  * - Raised pragma version
+ * - SafeMath is removed & native math operators are used from this point
  * - Removed an import of ActivePool Interface
  * - Logic updates with redemption & borrowing fees calculation and their distribution
+ * - Handling of withdrawal limits during redemptions
  */
 
 contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
-
     string public constant NAME = "TroveManager";
 
     // --- Connected contract declarations ---
@@ -422,7 +423,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         );
         singleLiquidation
             .BaseFeeLMAGasCompensation = BaseFeeLMA_GAS_COMPENSATION;
-        vars.collToLiquidate = singleLiquidation.entireTroveColl -
+        vars.collToLiquidate =
+            singleLiquidation.entireTroveColl -
             singleLiquidation.collGasCompensation;
 
         // If ICR <= 100%, purely redistribute the Trove across all active Troves
@@ -600,11 +602,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
 
         // HEDGEHOG UPDATES:
         // Changed the cappedCollPortion formula from [entireTroveDebt] * [MCR] / [price]  to => [entireTroveDebt] * [MCR] / [DECIMAL_PRECISION] * [price] / [DECIMAL_PRECISION]
-        uint cappedCollPortion = 
-            (_entireTroveDebt * MCR) /
-            DECIMAL_PRECISION * 
-            _price /
-            DECIMAL_PRECISION;
+        uint cappedCollPortion = (((_entireTroveDebt * MCR) /
+            DECIMAL_PRECISION) * _price) / DECIMAL_PRECISION;
 
         singleLiquidation.collGasCompensation = _getCollGasCompensation(
             cappedCollPortion
@@ -613,7 +612,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             .BaseFeeLMAGasCompensation = BaseFeeLMA_GAS_COMPENSATION;
 
         singleLiquidation.debtToOffset = _entireTroveDebt;
-        singleLiquidation.collToSendToSP = cappedCollPortion -
+        singleLiquidation.collToSendToSP =
+            cappedCollPortion -
             singleLiquidation.collGasCompensation;
         singleLiquidation.collSurplus = _entireTroveColl - cappedCollPortion;
         singleLiquidation.debtToRedistribute = 0;
@@ -694,8 +694,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         );
 
         vars.liquidatedDebt = totals.totalDebtInSequence;
-        vars.liquidatedColl = totals
-            .totalCollInSequence - 
+        vars.liquidatedColl =
+            totals.totalCollInSequence -
             totals.totalCollGasCompensation -
             totals.totalCollSurplus;
         emit Liquidation(
@@ -770,13 +770,14 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                 );
 
                 // Update aggregate trackers
-                vars.remainingBaseFeeLMAInStabPool = vars
-                    .remainingBaseFeeLMAInStabPool -
+                vars.remainingBaseFeeLMAInStabPool =
+                    vars.remainingBaseFeeLMAInStabPool -
                     singleLiquidation.debtToOffset;
-                vars.entireSystemDebt = vars.entireSystemDebt -
+                vars.entireSystemDebt =
+                    vars.entireSystemDebt -
                     singleLiquidation.debtToOffset;
-                vars.entireSystemColl = vars
-                    .entireSystemColl -
+                vars.entireSystemColl =
+                    vars.entireSystemColl -
                     singleLiquidation.collToSendToSP -
                     singleLiquidation.collGasCompensation -
                     singleLiquidation.collSurplus;
@@ -800,8 +801,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                     vars.remainingBaseFeeLMAInStabPool
                 );
 
-                vars.remainingBaseFeeLMAInStabPool = vars
-                    .remainingBaseFeeLMAInStabPool -
+                vars.remainingBaseFeeLMAInStabPool =
+                    vars.remainingBaseFeeLMAInStabPool -
                     singleLiquidation.debtToOffset;
 
                 // Add liquidation values to their respective running totals
@@ -840,8 +841,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                     vars.remainingBaseFeeLMAInStabPool
                 );
 
-                vars.remainingBaseFeeLMAInStabPool = vars
-                    .remainingBaseFeeLMAInStabPool -
+                vars.remainingBaseFeeLMAInStabPool =
+                    vars.remainingBaseFeeLMAInStabPool -
                     singleLiquidation.debtToOffset;
 
                 // Add liquidation values to their respective running totals
@@ -923,8 +924,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
 
         vars.liquidatedDebt = totals.totalDebtInSequence;
 
-        vars.liquidatedColl = totals
-            .totalCollInSequence -
+        vars.liquidatedColl =
+            totals.totalCollInSequence -
             totals.totalCollGasCompensation -
             totals.totalCollSurplus;
         emit Liquidation(
@@ -1000,14 +1001,15 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                 );
 
                 // Update aggregate trackers
-                vars.remainingBaseFeeLMAInStabPool = vars
-                    .remainingBaseFeeLMAInStabPool -
+                vars.remainingBaseFeeLMAInStabPool =
+                    vars.remainingBaseFeeLMAInStabPool -
                     singleLiquidation.debtToOffset;
-                vars.entireSystemDebt = vars.entireSystemDebt -
+                vars.entireSystemDebt =
+                    vars.entireSystemDebt -
                     singleLiquidation.debtToOffset;
 
-                vars.entireSystemColl = vars
-                    .entireSystemColl -
+                vars.entireSystemColl =
+                    vars.entireSystemColl -
                     singleLiquidation.collToSendToSP -
                     singleLiquidation.collGasCompensation -
                     singleLiquidation.collSurplus;
@@ -1030,8 +1032,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                     vars.user,
                     vars.remainingBaseFeeLMAInStabPool
                 );
-                vars.remainingBaseFeeLMAInStabPool = vars
-                    .remainingBaseFeeLMAInStabPool -
+                vars.remainingBaseFeeLMAInStabPool =
+                    vars.remainingBaseFeeLMAInStabPool -
                     singleLiquidation.debtToOffset;
 
                 // Add liquidation values to their respective running totals
@@ -1067,8 +1069,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                     vars.remainingBaseFeeLMAInStabPool
                 );
 
-                vars.remainingBaseFeeLMAInStabPool = vars
-                    .remainingBaseFeeLMAInStabPool -
+                vars.remainingBaseFeeLMAInStabPool =
+                    vars.remainingBaseFeeLMAInStabPool -
                     singleLiquidation.debtToOffset;
 
                 // Add liquidation values to their respective running totals
@@ -1087,27 +1089,32 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         LiquidationValues memory singleLiquidation
     ) internal pure returns (LiquidationTotals memory newTotals) {
         // Tally all the values with their respective running totals
-        newTotals.totalCollGasCompensation = oldTotals
-            .totalCollGasCompensation + 
+        newTotals.totalCollGasCompensation =
+            oldTotals.totalCollGasCompensation +
             singleLiquidation.collGasCompensation;
-        newTotals.totalBaseFeeLMAGasCompensation = oldTotals
-            .totalBaseFeeLMAGasCompensation +
+        newTotals.totalBaseFeeLMAGasCompensation =
+            oldTotals.totalBaseFeeLMAGasCompensation +
             singleLiquidation.BaseFeeLMAGasCompensation;
-        newTotals.totalDebtInSequence = oldTotals.totalDebtInSequence + 
+        newTotals.totalDebtInSequence =
+            oldTotals.totalDebtInSequence +
             singleLiquidation.entireTroveDebt;
-        newTotals.totalCollInSequence = oldTotals.totalCollInSequence +
+        newTotals.totalCollInSequence =
+            oldTotals.totalCollInSequence +
             singleLiquidation.entireTroveColl;
-        newTotals.totalDebtToOffset = oldTotals.totalDebtToOffset +
+        newTotals.totalDebtToOffset =
+            oldTotals.totalDebtToOffset +
             singleLiquidation.debtToOffset;
-        newTotals.totalCollToSendToSP = oldTotals.totalCollToSendToSP +
+        newTotals.totalCollToSendToSP =
+            oldTotals.totalCollToSendToSP +
             singleLiquidation.collToSendToSP;
-        newTotals.totalDebtToRedistribute = oldTotals
-            .totalDebtToRedistribute +
+        newTotals.totalDebtToRedistribute =
+            oldTotals.totalDebtToRedistribute +
             singleLiquidation.debtToRedistribute;
-        newTotals.totalCollToRedistribute = oldTotals
-            .totalCollToRedistribute +
+        newTotals.totalCollToRedistribute =
+            oldTotals.totalCollToRedistribute +
             singleLiquidation.collToRedistribute;
-        newTotals.totalCollSurplus = oldTotals.totalCollSurplus +
+        newTotals.totalCollSurplus =
+            oldTotals.totalCollSurplus +
             singleLiquidation.collSurplus;
 
         return newTotals;
@@ -1165,8 +1172,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
 
         // Get the WStETHLot of equivalent value in BaseFeeLMA
         // HEDGEHOG UPDATES: Change WStETHLOT calculations formula from [debtToBeRedeemed * price * 10e9] to [debtToBeRedeemed * price / 10e18]
-        singleRedemption.WStETHLot = 
-            (singleRedemption.BaseFeeLMALot * _price) / 
+        singleRedemption.WStETHLot =
+            (singleRedemption.BaseFeeLMALot * _price) /
             DECIMAL_PRECISION;
 
         // Decrease the debt and collateral of the current Trove according to the BaseFeeLMA lot and corresponding WStETH to send
@@ -1393,12 +1400,15 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                 );
 
             if (singleRedemption.cancelledPartial) break; // Partial redemption was cancelled (out-of-date hint, or new net debt < minimum), therefore we could not redeem from the last Trove
-            totals.totalBaseFeeLMAToRedeem = totals.totalBaseFeeLMAToRedeem +
+            totals.totalBaseFeeLMAToRedeem =
+                totals.totalBaseFeeLMAToRedeem +
                 singleRedemption.BaseFeeLMALot;
-            totals.totalWStETHDrawn = totals.totalWStETHDrawn +
+            totals.totalWStETHDrawn =
+                totals.totalWStETHDrawn +
                 singleRedemption.WStETHLot;
 
-            totals.remainingBaseFeeLMA = totals.remainingBaseFeeLMA -
+            totals.remainingBaseFeeLMA =
+                totals.remainingBaseFeeLMA -
                 singleRedemption.BaseFeeLMALot;
             currentBorrower = nextUserToCheck;
         }
@@ -1426,7 +1436,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         // Fees are now distributed among different addresses based on how big they are
         feesRouter.distributeCollFee(totals.totalWStETHDrawn, totals.WStETHFee);
 
-        totals.WStETHToSendToRedeemer = totals.totalWStETHDrawn -
+        totals.WStETHToSendToRedeemer =
+            totals.totalWStETHDrawn -
             totals.WStETHFee;
 
         emit Redemption(
@@ -1551,10 +1562,12 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             );
 
             // Apply pending rewards to trove's state
-            Troves[_borrower].coll = Troves[_borrower].coll +
+            Troves[_borrower].coll =
+                Troves[_borrower].coll +
                 pendingWStETHReward;
 
-            Troves[_borrower].debt = Troves[_borrower].debt +
+            Troves[_borrower].debt =
+                Troves[_borrower].debt +
                 pendingBaseFeeLMADebtReward;
 
             _updateTroveRewardSnapshots(_borrower);
@@ -1605,8 +1618,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
 
         uint stake = Troves[_borrower].stake;
 
-        uint pendingWStETHReward = 
-            (stake * rewardPerUnitStaked) /
+        uint pendingWStETHReward = (stake * rewardPerUnitStaked) /
             DECIMAL_PRECISION;
 
         return pendingWStETHReward;
@@ -1628,8 +1640,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
 
         uint stake = Troves[_borrower].stake;
 
-        uint pendingBaseFeeLMADebtReward = 
-            (stake * rewardPerUnitStaked) /
+        uint pendingBaseFeeLMADebtReward = (stake * rewardPerUnitStaked) /
             DECIMAL_PRECISION;
 
         return pendingBaseFeeLMADebtReward;
@@ -1717,9 +1728,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
              * rewards would’ve been emptied and totalCollateralSnapshot would be zero too.
              */
             assert(totalStakesSnapshot > 0);
-            stake = 
-                (_coll * totalStakesSnapshot) / 
-                totalCollateralSnapshot;
+            stake = (_coll * totalStakesSnapshot) / totalCollateralSnapshot;
         }
         return stake;
     }
@@ -1745,31 +1754,28 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
          * 4) Store these errors for use in the next correction when this function is called.
          * 5) Note: static analysis tools complain about this "division before multiplication", however, it is intended.
          */
-        uint WStETHNumerator = 
-            (_coll * DECIMAL_PRECISION) + 
+        uint WStETHNumerator = (_coll * DECIMAL_PRECISION) +
             lastWStETHError_Redistribution;
-        uint BaseFeeLMADebtNumerator = 
-            (_debt * DECIMAL_PRECISION) +
+        uint BaseFeeLMADebtNumerator = (_debt * DECIMAL_PRECISION) +
             lastBaseFeeLMADebtError_Redistribution;
 
         // Get the per-unit-staked terms
         uint WStETHRewardPerUnitStaked = WStETHNumerator / totalStakes;
-        uint BaseFeeLMADebtRewardPerUnitStaked = 
-            BaseFeeLMADebtNumerator /
+        uint BaseFeeLMADebtRewardPerUnitStaked = BaseFeeLMADebtNumerator /
             totalStakes;
 
-        lastWStETHError_Redistribution = 
-            WStETHNumerator - 
-            WStETHRewardPerUnitStaked * totalStakes;
-        lastBaseFeeLMADebtError_Redistribution = 
-            BaseFeeLMADebtNumerator - 
-            BaseFeeLMADebtRewardPerUnitStaked * totalStakes;
+        lastWStETHError_Redistribution =
+            WStETHNumerator -
+            WStETHRewardPerUnitStaked *
+            totalStakes;
+        lastBaseFeeLMADebtError_Redistribution =
+            BaseFeeLMADebtNumerator -
+            BaseFeeLMADebtRewardPerUnitStaked *
+            totalStakes;
 
         // Add per-unit-staked terms to the running totals
         L_WStETH = L_WStETH + WStETHRewardPerUnitStaked;
-        L_BaseFeeLMADebt = 
-            L_BaseFeeLMADebt + 
-            BaseFeeLMADebtRewardPerUnitStaked;
+        L_BaseFeeLMADebt = L_BaseFeeLMADebt + BaseFeeLMADebtRewardPerUnitStaked;
 
         emit LTermsUpdated(L_WStETH, L_BaseFeeLMADebt);
 
@@ -1821,10 +1827,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
 
         uint activeColl = _activePool.getWStETH();
         uint liquidatedColl = defaultPool.getWStETH();
-        totalCollateralSnapshot = 
-            activeColl -
-            _collRemainder +
-            liquidatedColl;
+        totalCollateralSnapshot = activeColl - _collRemainder + liquidatedColl;
 
         emit SystemSnapshotsUpdated(
             totalStakesSnapshot,
@@ -1950,8 +1953,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         // system
 
         // HEDGEHOG UPDATES: Calculation the fraction now as a ratio of Collateral that is about to get redeemed and a sum of collateral in active & default pools.
-        uint redeemedCollFraction = 
-            (_WStETHDrawn * DECIMAL_PRECISION) /
+        uint redeemedCollFraction = (_WStETHDrawn * DECIMAL_PRECISION) /
             (activePool.getWStETH() + defaultPool.getWStETH());
 
         // Hedgehog Updates: Remove division by BETA
@@ -2017,8 +2019,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         uint _redemptionRate,
         uint _WStETHDrawn
     ) internal pure returns (uint) {
-        uint redemptionFee = 
-            (_redemptionRate * _WStETHDrawn) /
+        uint redemptionFee = (_redemptionRate * _WStETHDrawn) /
             DECIMAL_PRECISION;
 
         // Hedgehog Updates: check if fee is too big is now performed at the redeemCollateral function
@@ -2068,9 +2069,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
 
         return
             LiquityMath._min(
-                BORROWING_FEE_FLOOR + 
-                _borrowBaseRate + 
-                _issuedBaseFeeLMA * DECIMAL_PRECISION / supply,
+                BORROWING_FEE_FLOOR +
+                    _borrowBaseRate +
+                    (_issuedBaseFeeLMA * DECIMAL_PRECISION) /
+                    supply,
                 MAX_BORROWING_FEE
             );
     }
@@ -2199,9 +2201,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
      * New function _minutesPassedSinceLastRedemption simmilar to _minutesPassedSinceLastFeeOp, that returns amount of minutes since last registered redemption
      */
     function _minutesPassedSinceLastRedemption() internal view returns (uint) {
-        return
-            (block.timestamp - lastRedemptionTime) /
-            SECONDS_IN_ONE_MINUTE;
+        return (block.timestamp - lastRedemptionTime) / SECONDS_IN_ONE_MINUTE;
     }
 
     /*

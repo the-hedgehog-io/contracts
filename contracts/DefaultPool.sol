@@ -13,6 +13,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * @notice Based on Liquity's Default Pool. Overall logic remains unchanged, but ERC20 token is used instsead of a native token
  * Changes to the contract:
  * - Raised pragma version
+ * - SafeMath is removed & native math operators are used from this point
  * - Removed an import of Default Interface and updated with IPool
  * - Removed _requireCallerIsActivePool modifier as it is not used anymore
  *
@@ -44,7 +45,7 @@ contract DefaultPool is Ownable, CheckContract, IPool {
     /**
      * HEDGEHOG UPDATES:
      * ERC20 is used as a collateral instead of native token.
-     * Setting erc20 address in the initialisation
+     * Setting erc20 address in the initialization
      */
     function setAddresses(
         address _troveManagerAddress,
