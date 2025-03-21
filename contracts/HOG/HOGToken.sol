@@ -3,7 +3,6 @@
 pragma solidity 0.8.19;
 
 import "../dependencies/CheckContract.sol";
-
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../dependencies/IERC2612.sol";
 
@@ -13,6 +12,7 @@ import "../dependencies/IERC2612.sol";
  * Functions logic remains unchanged.
  * Changes to the contract:
  * - Raised pragma version
+ * - SafeMath is removed & native math operators are used from this point
  * - Removed an import of Token Interface
  * - Remove native Liquidity Staking contract functionality
  *
@@ -34,7 +34,7 @@ import "../dependencies/IERC2612.sol";
  * 3) Supply hard-capped at 100 million
  * * *
  *
- * HEDGEHOG YPDATES:
+ * HEDGEHOG UPDATES:
  * 4) Total Supply goes to the multisigAddress given at deployment
  * 5) There is no lock period on the token anymore
  *
@@ -43,7 +43,6 @@ import "../dependencies/IERC2612.sol";
  */
 
 contract HOGToken is CheckContract, IERC20, IERC2612 {
-
     // --- ERC20 Data ---
 
     string internal constant _NAME = "Hedgehog";
@@ -103,7 +102,7 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
 
         /*
         * Hedgehog Updates:
-        Not allocating anymore tokens for differrent purposes to different accounts.
+        Not allocating anymore tokens for different purposes to different accounts.
         Bounty Entitlement, LP Rewards Entitlement, Multisig Entitlement and potential rewards for depositors in community issuance address are to be distributed manualy
         */
 
@@ -165,11 +164,7 @@ contract HOGToken is CheckContract, IERC20, IERC2612 {
         _requireValidRecipient(recipient);
 
         _transfer(sender, recipient, amount);
-        _approve(
-            sender,
-            msg.sender,
-            _allowances[sender][msg.sender] - amount
-        );
+        _approve(sender, msg.sender, _allowances[sender][msg.sender] - amount);
         return true;
     }
 

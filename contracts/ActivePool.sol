@@ -13,6 +13,7 @@ import "./interfaces/IPool.sol";
  * @notice Fork of Liquity's Active Pool. Most of the logic remains unchanged.
  * Changes to the contract:
  * - Raised pragma version
+ * - SafeMath is removed & native math operators are used from this point
  * - Removed an import of ActivePool Interface
  * - Updated variable names and docs to refer to BaseFeeLMA token and WStETH as a collateral
  * - Collateral is now an ERC20 token instead of a native one

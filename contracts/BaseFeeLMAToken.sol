@@ -9,7 +9,7 @@ import "./dependencies/CheckContract.sol";
 /*
  * Hedgehog Updates:
  *  - Remove transfer protection described later in the contract
- *
+ *  - SafeMath is removed & native math operators are used from this point
  *
  * Based upon OpenZeppelin's ERC20 contract:
  * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol
@@ -28,7 +28,6 @@ import "./dependencies/CheckContract.sol";
  */
 
 contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
-
     uint256 private _totalSupply;
     string internal constant _NAME = "BaseFeeLMA Token";
     string internal constant _SYMBOL = "BFEE";
@@ -182,11 +181,7 @@ contract BaseFeeLMAToken is CheckContract, IERC20, IERC2612 {
     ) external override returns (bool) {
         _requireValidRecipient(recipient);
         _transfer(sender, recipient, amount);
-        _approve(
-            sender,
-            msg.sender,
-            _allowances[sender][msg.sender] - amount
-        );
+        _approve(sender, msg.sender, _allowances[sender][msg.sender] - amount);
         return true;
     }
 
