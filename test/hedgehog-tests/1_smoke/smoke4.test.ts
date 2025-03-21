@@ -2,6 +2,8 @@ import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
+import { toNumber } from "ethers";
+import timestring from "timestring";
 import { TERC20, TestPriceFeed } from "../../../typechain-types";
 import {
   BaseFeeLMAToken,
@@ -32,7 +34,8 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
   context("Base functionality and Access Control. Flow #4", () => {
     let alice: SignerWithAddress,
       bob: SignerWithAddress,
-      carol: SignerWithAddress;
+      carol: SignerWithAddress,
+      dave: SignerWithAddress;
 
     let priceFeed: TestPriceFeed;
     let troveManager: TroveManager;
@@ -74,7 +77,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const gasPrice010 = "30000000000";
     const expectedStakedBalance = "4970074994000000000000000000";
     const expectedStabilityPoolAfterDeposit = "6780823345083667292000000000";
-    const transferAmount = "9000000000000000000000";
+    const transferAmount = "18000000000000000000000";
 
     // Alice:
     const AliceTroveColl = BigInt("602000000000000000000");
@@ -112,6 +115,11 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       "9600000000000000000000000000"
     );
 
+    // Dave:
+    const DaveTroveColl = BigInt("3000000000000000000000");
+    const DaveTroveDebt = BigInt("2000000000000000000000000000");
+    const DaveBigWithdrawal = BigInt("2000000000000000000000");
+
     const totalCollateralAliceOpening = BigInt("602000000000000000000");
     const totalDebtAliceOpening = BigInt("4000000000000000000000000000");
     const totalCollateralBobOpening = BigInt("3602000000000000000000");
@@ -122,7 +130,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const totalDebtCarolOpening = BigInt("15600000000000000000000000000");
 
     before(async () => {
-      [, , , alice, bob, carol] = await getSigners({
+      [, , , alice, bob, carol, dave] = await getSigners({
         fork: false,
       });
 
@@ -481,6 +489,53 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       ).not.to.be.reverted;
     });
 
+    it("Should revert if the withdrawColl() or adjustTrove() call happens right after deposit", async () => {
+      await payToken.transfer(dave.address, DaveTroveColl);
+
+      await expect(
+        openTrove({
+          caller: dave,
+          baseFeeLMAAmount: DaveTroveDebt,
+          collAmount: DaveTroveColl,
+        })
+      ).not.to.be.reverted;
+  
+      await expect(
+        borrowerOperations
+          .connect(dave)
+          .withdrawColl(DaveBigWithdrawal, ethers.ZeroAddress, ethers.ZeroAddress)
+      ).to.be.revertedWithCustomError(
+        borrowerOperations,
+        "WithdrawalRequestedTooSoonAfterDeposit"
+      );
+
+      await expect(
+        borrowerOperations
+          .connect(dave)
+          .adjustTrove(
+            0,
+            DaveBigWithdrawal,
+            0,
+            0,
+            true,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress
+          )
+      ).to.be.revertedWithCustomError(
+        borrowerOperations,
+        "WithdrawalRequestedTooSoonAfterDeposit"
+      );
+
+      await increase(timestring("61 minutes"));
+
+      // After the wait we should be good
+      await expect(
+        borrowerOperations
+          .connect(dave)
+          .withdrawColl(DaveBigWithdrawal, ethers.ZeroAddress, ethers.ZeroAddress)
+      ).not.to.be.reverted
+    });
+
     it("Should not let perform multiple trove adjustments in a single block, but should revert", async () => {
       await increase(90000);
       const price = ethers.parseEther("475");
@@ -501,6 +556,12 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await payToken
         .connect(carol)
         .transfer(singleTxCaller.target, transferAmount);
+
+      await singleTxCaller.justAddCollateral(
+        borrowerOperations.target,
+        payToken.target
+      );
+      await increase(timestring("721 minutes"));
 
       await expect(
         singleTxCaller.singleTx(

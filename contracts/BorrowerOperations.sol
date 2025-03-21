@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.19;
 
+import "./interfaces/IBorrowerOperations.sol";
 import "./interfaces/ITroveManager.sol";
 import "./interfaces/IBaseFeeLMAToken.sol";
 import "./interfaces/ICollSurplusPool.sol";
@@ -14,22 +15,29 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 error TroveAdjustedThisBlock();
+error WithdrawalRequestedTooSoonAfterDeposit();
 
 /**
  * @notice Fork of Liquity's BorrowerOperations. . Most of the Logic remains unchanged..
  * Changes to the contract:
  * - Raised pragma version
- * - Removed an import of IBorrowerOperations Interface
+ * - SafeMath is removed & native math operators are used from this point
  * - Collateral is now an ERC20 token instead of a native one
- * - Updated variable names and docs to refer to BaseFeeLMA token and wwstETH as a collateral
+ * - Updated variable names and docs to refer to BaseFeeLMA token and wstETH as a collateral
  * - Logic updates with borrowing fees calculation and their distribution
  * - Removed Native Liquity Protocol Token Staking
  * - Remove _getUSDValue view method as it's not used anymore
- * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
+ * - Introduction of withdrawal limit logic
+ * - Introduction of single block open-withdraw limitations
+ * - Introduction of timelock on withdraw after deposits
  */
 
-contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
-    using SafeMath for uint256;
+contract BorrowerOperations is
+    HedgehogBase,
+    Ownable,
+    CheckContract,
+    IBorrowerOperations
+{
     using SafeERC20 for IERC20;
 
     string public constant NAME = "BorrowerOperations";
@@ -55,8 +63,16 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     // HEDGEHOG UPDATES: Added two new public variables
     // Two variables that are used to track and calculate collateral withdrawal limits
+    // also to prevent griefing attacks - collateral has to sit in the contract
+    // some time before withdrawal request
     uint256 public lastWithdrawalTimestamp;
     uint256 public unusedWithdrawalLimit;
+
+    struct UserLimit {
+        uint256 lockedCollateral;
+        uint256 lockTimestamp;
+    }
+    mapping(address => UserLimit) public userWithdrawalLimits;
 
     /* --- Variable container structs  ---
 
@@ -95,38 +111,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         IActivePool activePool;
         IBaseFeeLMAToken baseFeeLMAToken;
     }
-
-    enum BorrowerOperation {
-        openTrove,
-        closeTrove,
-        adjustTrove
-    }
-
-    event TroveManagerAddressChanged(address _newTroveManagerAddress);
-    event ActivePoolAddressChanged(address _activePoolAddress);
-    event DefaultPoolAddressChanged(address _defaultPoolAddress);
-    event StabilityPoolAddressChanged(address _stabilityPoolAddress);
-    event GasPoolAddressChanged(address _gasPoolAddress);
-    event CollSurplusPoolAddressChanged(address _collSurplusPoolAddress);
-    event PriceFeedAddressChanged(address _newPriceFeedAddress);
-    event SortedTrovesAddressChanged(address _sortedTrovesAddress);
-    event BaseFeeLMATokenAddressChanged(address _BaseFeeLMATokenAddress);
-    event WStETHTokenAddressUpdated(IERC20 _WStEthAddress);
-    event FeesRouterAddressUpdated(IFeesRouter _feesRouter);
-
-    event TroveCreated(address indexed _borrower, uint arrayIndex);
-    event TroveUpdated(
-        address indexed _borrower,
-        uint _debt,
-        uint _coll,
-        uint stake,
-        BorrowerOperation operation
-    );
-    event BaseFeeLMABorrowingFeePaid(
-        address indexed _borrower,
-        uint _BaseFeeLMAFee
-    );
-    event WithdrawalLimitUpdated(uint256 _limit);
 
     // --- Dependency setters ---
 
@@ -188,8 +172,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         emit PriceFeedAddressChanged(_priceFeedAddress);
         emit SortedTrovesAddressChanged(_sortedTrovesAddress);
         emit BaseFeeLMATokenAddressChanged(_baseFeeLMATokenAddress);
-        emit WStETHTokenAddressUpdated(_wStETHTokenAddress);
-        emit FeesRouterAddressUpdated(_feesRouter);
+        emit WStETHTokenAddressChanged(address(_wStETHTokenAddress));
+        emit FeesRouterAddressChanged(address(_feesRouter));
 
         renounceOwnership();
     }
@@ -383,6 +367,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _upperHint,
         address _lowerHint
     ) external {
+        _checkUserWithdrawalLimit(_collWithdrawal);
+
         _adjustTrove(
             msg.sender,
             _collWithdrawal,
@@ -458,6 +444,9 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         address _upperHint,
         address _lowerHint
     ) external {
+        if (_collWithdrawal > 0) {
+            _checkUserWithdrawalLimit(_collWithdrawal);
+        }
         _adjustTrove(
             msg.sender,
             _collWithdrawal,
@@ -572,7 +561,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         // When the adjustment is a debt repayment, check it's a valid amount and that the caller has enough BaseFeeLMA
         if (!_isDebtIncrease && _BaseFeeLMAChange > 0) {
             _requireAtLeastMinNetDebt(
-                _getNetDebt(vars.debt).sub(vars.netDebtChange)
+                _getNetDebt(vars.debt) - vars.netDebtChange
             );
             _requireValidBaseFeeLMARepayment(vars.debt, vars.netDebtChange);
             _requireSufficientBaseFeeLMABalance(
@@ -656,7 +645,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         _requireSufficientBaseFeeLMABalance(
             baseFeeLMATokenCached,
             msg.sender,
-            debt.sub(BaseFeeLMA_GAS_COMPENSATION)
+            debt - BaseFeeLMA_GAS_COMPENSATION
         );
 
         uint newTCR = _getNewTCRFromTroveChange(
@@ -678,7 +667,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
             activePoolCached,
             baseFeeLMATokenCached,
             msg.sender,
-            debt.sub(BaseFeeLMA_GAS_COMPENSATION)
+            debt - BaseFeeLMA_GAS_COMPENSATION
         );
         _repayBaseFeeLMA(
             activePoolCached,
@@ -806,7 +795,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
     /**
      * HEDGEHOG UPDATES: use SafeERC20 safe transfer instead of native token transfer
      * Send funds from User's account instead of relaying native token through address(this)
-     * Manualy increase balance in Active Pool, since it used to be done in the native token fallback
+     * Manually increase balance in Active Pool, since it used to be done in the native token fallback
      *
      * Now also update the contract's withdrawal limit along with the changes to the coll balance in the active pool
      */
@@ -819,9 +808,21 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         activePool.increaseBalance(_amount);
 
         // Update withdrawal Limit from collateral addition.
-        unusedWithdrawalLimit = unusedWithdrawalLimit + _amount / 2;
+        uint256 _newLimit = unusedWithdrawalLimit + _amount / 2;
+        unusedWithdrawalLimit = _newLimit;
 
-        emit WithdrawalLimitUpdated(unusedWithdrawalLimit);
+        UserLimit storage limit = userWithdrawalLimits[msg.sender];
+        limit.lockedCollateral = limit.lockTimestamp > block.timestamp
+            ? limit.lockedCollateral + _amount
+            : _amount;
+        limit.lockTimestamp = block.timestamp + DEPOSIT_LOCK_DURATION;
+
+        emit UserWithdrawalLimitUpdated(
+            msg.sender,
+            limit.lockedCollateral,
+            limit.lockTimestamp
+        );
+        emit WithdrawalLimitUpdated(_newLimit);
     }
 
     // Issue the specified amount of BaseFeeLMA to _account and increases the total active debt (_netDebtIncrease potentially includes a BaseFeeLMAFee)
@@ -1004,7 +1005,7 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint _debtRepayment
     ) internal pure {
         require(
-            _debtRepayment <= _currentDebt.sub(BaseFeeLMA_GAS_COMPENSATION),
+            _debtRepayment <= _currentDebt - BaseFeeLMA_GAS_COMPENSATION,
             "BorrowerOps: Amount repaid must not be larger than the Trove's debt"
         );
     }
@@ -1103,12 +1104,8 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint newColl = _coll;
         uint newDebt = _debt;
 
-        newColl = _isCollIncrease
-            ? _coll.add(_collChange)
-            : _coll.sub(_collChange);
-        newDebt = _isDebtIncrease
-            ? _debt.add(_debtChange)
-            : _debt.sub(_debtChange);
+        newColl = _isCollIncrease ? _coll + _collChange : _coll - _collChange;
+        newDebt = _isDebtIncrease ? _debt + _debtChange : _debt - _debtChange;
 
         return (newColl, newDebt);
     }
@@ -1124,11 +1121,11 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
         uint totalDebt = getEntireSystemDebt();
 
         totalColl = _isCollIncrease
-            ? totalColl.add(_collChange)
-            : totalColl.sub(_collChange);
+            ? totalColl + _collChange
+            : totalColl - _collChange;
         totalDebt = _isDebtIncrease
-            ? totalDebt.add(_debtChange)
-            : totalDebt.sub(_debtChange);
+            ? totalDebt + _debtChange
+            : totalDebt - _debtChange;
 
         uint newTCR = LiquityMath._computeCR(totalColl, totalDebt, _price);
         return newTCR;
@@ -1153,6 +1150,21 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
 
     /**
      * HEDGEHOG UPDATES:
+     * Introduced limit on how many withdrawal transactions can be requested within 10 minutes
+     */
+    function _checkUserWithdrawalLimit(uint _collWithdrawal) internal view {
+        UserLimit memory limit = userWithdrawalLimits[msg.sender];
+        uint userCollateral = troveManager.getTroveColl(msg.sender);
+        if (
+            block.timestamp < limit.lockTimestamp &&
+            userCollateral - _collWithdrawal < limit.lockedCollateral
+        ) {
+            revert WithdrawalRequestedTooSoonAfterDeposit();
+        }
+    }
+
+    /**
+     * HEDGEHOG UPDATES:
      * New function to handle dynamic Withdrawal Limit.
      * the new dynamic collateral withdrawal limit in our smart contract, inspired by a similar mechanism in the Fluid InstaDApp protocol.
      * The purpose of this mechanism is to dynamically adjust the withdrawal limit based on the collateral added or removed from the system,
@@ -1163,11 +1175,6 @@ contract BorrowerOperations is HedgehogBase, Ownable, CheckContract {
      * 1) When a user adds collateral, the new collateral amount is calculated by adding the deposit to the existing collateral.
      * 2) Calculate New Withdrawal Limit:
      * The system calculates the new withdrawal limit as the sum of the old limit plus 50% of the deposit.
-     * Condition Check:
-     * If this new limit is greater than or equal to 50% of the new total collateral, the withdrawal limit is immediately set to 50% of the new collateral,
-     * and the time counter is reset until the next withdrawal.
-     * If the new limit is less than 50% of the new total collateral, the withdrawal limit is set to the calculated value (old limit + 50% of the deposit).
-     * The target limit is set to 50% of the new total collateral, and the time counter continues from the last withdrawal.
      *
      * When Collateral is Withdrawn from the System:
      * 1) Calculate the Current Withdrawal Limit: The system calculates the current withdrawal limit as:

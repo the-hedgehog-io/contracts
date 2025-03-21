@@ -3,7 +3,6 @@
 pragma solidity 0.8.19;
 
 import "./interfaces/IPool.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
 import "./interfaces/IActivePool.sol";
@@ -14,10 +13,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * @notice Based on Liquity's Default Pool. Overall logic remains unchanged, but ERC20 token is used instsead of a native token
  * Changes to the contract:
  * - Raised pragma version
+ * - SafeMath is removed & native math operators are used from this point
  * - Removed an import of Default Interface and updated with IPool
  * - Removed _requireCallerIsActivePool modifier as it is not used anymore
- *
- * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
  *
  * The Default Pool holds the WStETH and BaseFeeLMA debt (but not BaseFeeLMA tokens) from liquidations that have been redistributed
  * to active troves but not yet "applied", i.e. not yet recorded on a recipient active trove's struct.
@@ -27,7 +25,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  *
  */
 contract DefaultPool is Ownable, CheckContract, IPool {
-    using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     string public constant NAME = "DefaultPool";
@@ -48,7 +45,7 @@ contract DefaultPool is Ownable, CheckContract, IPool {
     /**
      * HEDGEHOG UPDATES:
      * ERC20 is used as a collateral instead of native token.
-     * Setting erc20 address in the initialisation
+     * Setting erc20 address in the initialization
      */
     function setAddresses(
         address _troveManagerAddress,
@@ -93,7 +90,7 @@ contract DefaultPool is Ownable, CheckContract, IPool {
     function sendWStETHToActivePool(uint _amount) external {
         _requireCallerIsTroveManager();
         address activePool = activePoolAddress; // cache to save an SLOAD
-        WStETH = WStETH.sub(_amount);
+        WStETH = WStETH - _amount;
         emit DefaultPoolWStETHBalanceUpdated(WStETH);
         emit WStETHSent(activePool, _amount);
 
@@ -103,13 +100,13 @@ contract DefaultPool is Ownable, CheckContract, IPool {
 
     function increaseBaseFeeLMADebt(uint _amount) external override {
         _requireCallerIsTroveManager();
-        BaseFeeLMADebt = BaseFeeLMADebt.add(_amount);
+        BaseFeeLMADebt = BaseFeeLMADebt + _amount;
         emit DefaultPoolBaseFeeLMADebtUpdated(BaseFeeLMADebt);
     }
 
     function decreaseBaseFeeLMADebt(uint _amount) external override {
         _requireCallerIsTroveManager();
-        BaseFeeLMADebt = BaseFeeLMADebt.sub(_amount);
+        BaseFeeLMADebt = BaseFeeLMADebt - _amount;
         emit DefaultPoolBaseFeeLMADebtUpdated(BaseFeeLMADebt);
     }
 
@@ -128,7 +125,7 @@ contract DefaultPool is Ownable, CheckContract, IPool {
      */
     function increaseBalance(uint256 _amount) external {
         _requireCallerIsTroveManager();
-        WStETH = WStETH.add(_amount);
+        WStETH = WStETH + _amount;
         emit DefaultPoolWStETHBalanceUpdated(WStETH);
     }
 }

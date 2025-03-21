@@ -2,20 +2,17 @@
 
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
 /**
- * @notice A fork of Liquity Math library with an upgraded pragma
+ * HEDGEHOG UPDATES:
+ * @notice A fork of Liquity Math library with an upgraded pragma & migration from SafeMath to native math operator
  *
- * Even though SafeMath is no longer required, the decision was made to keep it to avoid human factor errors
+ * New function was added: _checkWithdrawalLimit
  */
 
 library LiquityMath {
-    using SafeMath for uint;
-
     uint internal constant DECIMAL_PRECISION = 1e18;
-
     uint256 public constant WITHDRAWAL_LIMIT_THRESHOLD = 10 ether;
+    uint256 internal constant DENOMINATOR = 100000;
 
     /* Precision for Nominal ICR (independent of price). Rationale for the value:
      *
@@ -44,9 +41,9 @@ library LiquityMath {
      * Used only inside the exponentiation, _decPow().
      */
     function decMul(uint x, uint y) internal pure returns (uint decProd) {
-        uint prod_xy = x.mul(y);
+        uint prod_xy = x * y;
 
-        decProd = prod_xy.add(DECIMAL_PRECISION / 2).div(DECIMAL_PRECISION);
+        decProd = (prod_xy + DECIMAL_PRECISION / 2) / DECIMAL_PRECISION;
     }
 
     /*
@@ -84,12 +81,12 @@ library LiquityMath {
         while (n > 1) {
             if (n % 2 == 0) {
                 x = decMul(x, x);
-                n = n.div(2);
+                n = n / 2;
             } else {
                 // if (n % 2 != 0)
                 y = decMul(x, y);
                 x = decMul(x, x);
-                n = (n.sub(1)).div(2);
+                n = (n - 1) / 2;
             }
         }
 
@@ -100,7 +97,7 @@ library LiquityMath {
         uint _a,
         uint _b
     ) internal pure returns (uint) {
-        return (_a >= _b) ? _a.sub(_b) : _b.sub(_a);
+        return (_a >= _b) ? _a - _b : _b - _a;
     }
 
     function _computeNominalCR(
@@ -108,7 +105,7 @@ library LiquityMath {
         uint _debt
     ) internal pure returns (uint) {
         if (_debt > 0) {
-            return _coll.mul(NICR_PRECISION).div(_debt);
+            return (_coll * NICR_PRECISION) / _debt;
         }
         // Return the maximal value for uint256 if the Trove has a debt of 0. Represents "infinite" CR.
         else {
@@ -128,11 +125,8 @@ library LiquityMath {
         uint _price
     ) internal pure returns (uint) {
         if (_debt > 0) {
-            uint newCollRatio = _coll
-                .mul(DECIMAL_PRECISION)
-                .div(_debt)
-                .mul(DECIMAL_PRECISION)
-                .div(_price);
+            uint newCollRatio = (((_coll * DECIMAL_PRECISION) / _debt) *
+                DECIMAL_PRECISION) / _price;
 
             return newCollRatio;
         }
@@ -155,6 +149,10 @@ library LiquityMath {
             1;
     }
 
+    /**
+     * HEDGEHOG UPDATES:
+     * New internal function that's executed as a part of _handleWithdrawalLimit function
+     */
     function _checkWithdrawalLimit(
         uint256 _lastWithdrawTimestamp,
         uint256 _expandDuration,
@@ -166,19 +164,17 @@ library LiquityMath {
         if (_currentTotalColl <= WITHDRAWAL_LIMIT_THRESHOLD) {
             return (_currentTotalColl, _currentTotalColl);
         }
-        
+
         // We calculate 50% of the current collateral over WITHDRAWAL_LIMIT_THRESHOLD
         // so max limit is half of the collateral plus 50% of the threshold (5 ether)
-        uint256 totalCollBasedLimit = 
-            WITHDRAWAL_LIMIT_THRESHOLD + 
-            (_currentTotalColl - WITHDRAWAL_LIMIT_THRESHOLD) / 2;
+        uint256 totalCollBasedLimit = WITHDRAWAL_LIMIT_THRESHOLD +
+            (_currentTotalColl - WITHDRAWAL_LIMIT_THRESHOLD) /
+            2;
 
         // Now we calculate an amount that can be added based on the newest coll value
         uint256 additionFromNewColl;
 
         if (totalCollBasedLimit > _unusedWithdrawalLimit) {
-            uint256 DENOMINATOR = 100000;
-
             // First, we calculate how much time has passed since the last withdrawal
             uint256 minutesPassed = block.timestamp - _lastWithdrawTimestamp;
 

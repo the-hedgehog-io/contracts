@@ -12,6 +12,12 @@ interface BOps {
         address _lowerHint
     ) external;
 
+    function addColl(
+        address _upperHint,
+        address _lowerHint,
+        uint _amount
+    ) external;
+
     function withdrawColl(
         uint _collWithdrawal,
         address _upperHint,
@@ -32,6 +38,20 @@ interface TM {
 }
 
 contract SingleTxCaller {
+    function justAddCollateral(
+        address _bo,
+        address _payToken
+    ) public {
+        IERC20(_payToken).approve(_bo, 9000000000000000000000);
+        BOps(_bo).openTrove(
+            1e18,
+            350000000000000000000000000,
+            9000000000000000000000,
+            address(0),
+            address(0)
+        );
+    }
+
     function singleTx(
         uint256 _coll,
         address _bo,
@@ -45,12 +65,10 @@ contract SingleTxCaller {
     ) public {
         IERC20(_payToken).approve(_bo, 9000000000000000000000);
         IERC20(_debtToken).approve(_tm, 44000);
-        BOps(_bo).openTrove(
-            1e18,
-            350000000000000000000000000,
-            9000000000000000000000,
+        BOps(_bo).addColl(
             address(0),
-            address(0)
+            address(0),
+            9000000000000000000000
         );
 
         BOps(_bo).withdrawColl(1, address(0), address(0));

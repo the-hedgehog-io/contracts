@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -10,7 +9,6 @@ import "./dependencies/CheckContract.sol";
 import "./interfaces/ICollSurplusPool.sol";
 
 contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
-    using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     string public constant NAME = "CollSurplusPool";
@@ -78,7 +76,7 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
     function accountSurplus(address _account, uint _amount) external {
         _requireCallerIsTroveManager();
 
-        uint newAmount = balances[_account].add(_amount);
+        uint newAmount = balances[_account] + _amount;
         balances[_account] = newAmount;
 
         emit CollBalanceUpdated(_account, newAmount);
@@ -99,7 +97,7 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
         balances[_account] = 0;
         emit CollBalanceUpdated(_account, 0);
 
-        WStETH = WStETH.sub(claimableColl);
+        WStETH = WStETH - claimableColl;
         emit EtherSent(_account, claimableColl);
 
         WStETHToken.safeTransfer(_account, claimableColl);
@@ -125,7 +123,7 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
     // New function, that increases balance tracker instead of a native token fallback
     function increaseBalance(uint256 _amount) external {
         _requireCallerIsTroveManager();
-        WStETH = WStETH.add(_amount);
+        WStETH = WStETH + _amount;
     }
 
     // --- Fallback function ---

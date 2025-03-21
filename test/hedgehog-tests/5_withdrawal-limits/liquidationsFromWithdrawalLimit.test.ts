@@ -45,7 +45,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     let setNewBaseFeePrice: (_amount: number) => Promise<void>;
 
     beforeEach(async () => {
-      [deployer, alice, bob, carol, dave, bob, carol] = await getSigners({
+      [deployer, alice, bob, , dave, bob, carol] = await getSigners({
         fork: false,
       });
       ({

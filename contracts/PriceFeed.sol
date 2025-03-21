@@ -568,7 +568,7 @@ contract PriceFeed is Ownable, BaseMath {
     ) internal pure returns (uint) {
         /*
          * Convert the price returned by an oracle to an 18-digit decimal for use by Hedgehog.
-         * At date of Hedgehog launch, MaainOracle uses an 8-digit price, but we also handle the possibility of
+         * At date of Hedgehog launch, MainOracle uses an 18-digit price, but we also handle the possibility of
          * future changes.
          */
         uint price;

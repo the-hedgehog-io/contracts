@@ -9,7 +9,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./dependencies/CheckContract.sol";
 
 contract HintHelpers is HedgehogBase, Ownable, CheckContract {
-    using SafeMath for uint256;
     string public constant NAME = "HintHelpers";
 
     ISortedTroves public sortedTroves;
@@ -96,37 +95,32 @@ contract HintHelpers is HedgehogBase, Ownable, CheckContract {
             _maxIterations-- > 0
         ) {
             uint netBaseFeeLMADebt = _getNetDebt(
-                troveManager.getTroveDebt(currentTroveuser)
-            ).add(
-                    troveManager.getPendingBaseFeeLMADebtReward(
-                        currentTroveuser
-                    )
-                );
+                troveManager.getTroveDebt(currentTroveuser) +
+                troveManager.getPendingBaseFeeLMADebtReward(
+                    currentTroveuser
+                )
+            );
 
             if (netBaseFeeLMADebt > remainingBaseFeeLMA) {
                 if (netBaseFeeLMADebt > MIN_NET_DEBT) {
                     uint maxRedeemableBaseFeeLMA = LiquityMath._min(
                         remainingBaseFeeLMA,
-                        netBaseFeeLMADebt.sub(MIN_NET_DEBT)
+                        netBaseFeeLMADebt - MIN_NET_DEBT
                     );
 
                     uint WStETH = troveManager
-                        .getTroveColl(currentTroveuser)
-                        .add(
-                            troveManager.getPendingWStETHReward(
-                                currentTroveuser
-                            )
+                        .getTroveColl(currentTroveuser) +
+                        troveManager.getPendingWStETHReward(
+                            currentTroveuser
                         );
 
                     // HEDGEHOG UPDATES: Change WStETHLOT calculations formula from [debtToBeRedeemed * price * 10e9] to [debtToBeRedeemed / price / DECIMAL_PRECISION]
-                    uint newColl = WStETH.sub(
-                        maxRedeemableBaseFeeLMA.mul(_price).div(
-                            DECIMAL_PRECISION
-                        )
-                    );
-                    uint newDebt = netBaseFeeLMADebt.sub(
-                        maxRedeemableBaseFeeLMA
-                    );
+                    uint newColl = 
+                        WStETH -
+                        maxRedeemableBaseFeeLMA * _price / DECIMAL_PRECISION;
+                    uint newDebt = 
+                        netBaseFeeLMADebt -
+                        maxRedeemableBaseFeeLMA;
 
                     uint compositeDebt = _getCompositeDebt(newDebt);
                     partialRedemptionHintNICR = LiquityMath._computeNominalCR(
@@ -134,21 +128,21 @@ contract HintHelpers is HedgehogBase, Ownable, CheckContract {
                         compositeDebt
                     );
 
-                    remainingBaseFeeLMA = remainingBaseFeeLMA.sub(
-                        maxRedeemableBaseFeeLMA
-                    );
+                    remainingBaseFeeLMA = 
+                        remainingBaseFeeLMA -
+                        maxRedeemableBaseFeeLMA;
                 }
                 break;
             } else {
-                remainingBaseFeeLMA = remainingBaseFeeLMA.sub(
-                    netBaseFeeLMADebt
-                );
+                remainingBaseFeeLMA = 
+                    remainingBaseFeeLMA -
+                    netBaseFeeLMADebt;
             }
 
             currentTroveuser = sortedTrovesCached.getPrev(currentTroveuser);
         }
 
-        truncatedBaseFeeLMAamount = _BaseFeeLMAamount.sub(remainingBaseFeeLMA);
+        truncatedBaseFeeLMAamount = _BaseFeeLMAamount - remainingBaseFeeLMA;
     }
 
     /* getApproxHint() - return address of a Trove that is, on average, (length / numTrials) positions away in the 

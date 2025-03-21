@@ -3,16 +3,20 @@
 pragma solidity 0.8.19;
 
 import "../interfaces/IHOGToken.sol";
+import "../interfaces/ICommunityIssuance.sol";
 import "../dependencies/BaseMath.sol";
 import "../dependencies/LiquityMath.sol";
 import "../dependencies/CheckContract.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
-    using SafeMath for uint;
-
+contract CommunityIssuance is
+    AccessControl,
+    Ownable,
+    CheckContract,
+    BaseMath,
+    ICommunityIssuance
+{
     // HEDGEHOG UPDATES: Add Access control to the contract for the setting of dynamic variables
     bytes32 internal constant DISTRIBUTION_SETTER =
         keccak256("DISTRIBUTION_SETTER");
@@ -41,6 +45,7 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
      * F = 0.5 ** (1/525600)
      * F = 0.999998681227695000
      */
+    uint256 public proposedIssuanceFactor;
     uint256 public ISSUANCE_FACTOR = 999998681227695000;
 
     /*
@@ -50,29 +55,29 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
      * The community HOG supply cap is the starting balance of the Community Issuance contract.
      * It should be minted to this contract by HOGToken, when the token is deployed.
      */
+    uint256 public proposedHOGSupplyCap;
     uint256 public HOGSupplyCap;
 
+    event ProposedHOGSupplyCapUpdate(uint256 _oldCap, uint256 _newCap);
     event HOGSupplyCapUpdated(uint256 _newCap);
-    event ISSUANCE_FACTORUpdated(uint256 _newFactor);
+    event ProposedIssuanceFactorUpdate(uint256 _oldFactor, uint256 _newFactor);
+    event IssuanceFactorUpdated(uint256 _newFactor);
 
     IHOGToken public hogToken;
 
     address public stabilityPoolAddress;
 
+    uint public proposedTotalHOGIssued;
     uint public totalHOGIssued;
     uint public immutable deploymentTime;
-
-    // --- Events ---
-
-    event HOGTokenAddressSet(address _hogTokenAddress);
-    event StabilityPoolAddressSet(address _stabilityPoolAddress);
-    event TotalHOGIssuedUpdated(uint _totalHOGIssued);
-    event TotalHogIssuedManuallyUpdated(uint256 _totalHOGIssued);
 
     // --- Functions ---
 
     constructor() {
         deploymentTime = block.timestamp;
+        proposedHOGSupplyCap = type(uint256).max;
+        proposedIssuanceFactor = type(uint256).max;
+        proposedTotalHOGIssued = type(uint256).max;
     }
 
     function setAddresses(
@@ -97,7 +102,6 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
         hogToken = IHOGToken(_hogTokenAddress);
         stabilityPoolAddress = _stabilityPoolAddress;
 
-        ISSUANCE_FACTOR = 999998681227695000; // default issuance factor value;
         HOGSupplyCap = 0; // default supply cap value
 
         emit HOGTokenAddressSet(_hogTokenAddress);
@@ -109,14 +113,13 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
     function issueHOG() external returns (uint) {
         _requireCallerIsStabilityPool();
 
-        uint latestTotalHOGIssued = HOGSupplyCap
-            .mul(_getCumulativeIssuanceFraction())
-            .div(DECIMAL_PRECISION);
+        uint latestTotalHOGIssued = (HOGSupplyCap *
+            _getCumulativeIssuanceFraction()) / DECIMAL_PRECISION;
 
         // Hedgehog Updates: Since now Issuance Factor is dynamic it is possible to block the whole system in case the factor reduction
         // Because of that we simply stop the issuance in such cases in case of letting it underflow
         uint issuance = latestTotalHOGIssued > totalHOGIssued
-            ? latestTotalHOGIssued.sub(totalHOGIssued)
+            ? latestTotalHOGIssued - totalHOGIssued
             : 0;
 
         totalHOGIssued = latestTotalHOGIssued;
@@ -131,15 +134,14 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
     t:  time passed since last HOG issuance event  */
     function _getCumulativeIssuanceFraction() internal view returns (uint) {
         // Get the time passed since deployment
-        uint timePassedInMinutes = block.timestamp.sub(deploymentTime).div(
-            SECONDS_IN_ONE_MINUTE
-        );
+        uint timePassedInMinutes = (block.timestamp - deploymentTime) /
+            SECONDS_IN_ONE_MINUTE;
 
         // f^t
         uint power = LiquityMath._decPow(ISSUANCE_FACTOR, timePassedInMinutes);
 
         //  (1 - f^t)
-        uint cumulativeIssuanceFraction = (uint(DECIMAL_PRECISION).sub(power));
+        uint cumulativeIssuanceFraction = (uint(DECIMAL_PRECISION) - power);
         assert(cumulativeIssuanceFraction <= DECIMAL_PRECISION); // must be in range [0,1]
 
         return cumulativeIssuanceFraction;
@@ -154,34 +156,75 @@ contract CommunityIssuance is AccessControl, Ownable, CheckContract, BaseMath {
     // --- 'admin' function ---
     /*
      * HEDGEHOG UPDATES: HOGSupplyCap is not a constant variable anymore.
-     * May now be updated by a DISTRIBUTION_SETTER
+     * May now be updated by a DISTRIBUTION_SETTER, two step operation
      * */
-    function setHOGSupplyCap(
+    function proposeHOGSupplyCap(
         uint _newCap
     ) external onlyRole(DISTRIBUTION_SETTER) {
+        proposedHOGSupplyCap = _newCap;
+        emit ProposedHOGSupplyCapUpdate(HOGSupplyCap, _newCap);
+    }
+
+    function acceptNewHOGSupplyCap() external onlyRole(DISTRIBUTION_SETTER) {
+        uint _newCap = proposedHOGSupplyCap;
+        require(
+            _newCap != type(uint256).max,
+            "CommunityIssuance: incorrect proposed supply cap"
+        );
         HOGSupplyCap = _newCap;
+        proposedHOGSupplyCap = type(uint256).max;
         emit HOGSupplyCapUpdated(_newCap);
     }
 
     /*
      * HEDGEHOG UPDATES: ISSUANCE_FACTOR is not a constant variable anymore.
-     * May now be updated by a DISTRIBUTION_SETTER
+     * May now be updated by a DISTRIBUTION_SETTER, two step operation
      * */
-    function setISSUANCE_FACTOR(
-        uint _newIssFactor
+    function proposeIssuanceFactor(
+        uint _newIssuanceFactor
     ) external onlyRole(DISTRIBUTION_SETTER) {
-        ISSUANCE_FACTOR = _newIssFactor;
-        emit ISSUANCE_FACTORUpdated(_newIssFactor);
+        proposedIssuanceFactor = _newIssuanceFactor;
+        emit ProposedIssuanceFactorUpdate(ISSUANCE_FACTOR, _newIssuanceFactor);
     }
 
     /*
      * HEDGEHOG UPDATES:
-     * totalHOGIssued may now be updated by a DISTRIBUTION_SETTER
+     * New function: second step operation that updates current ISSUANCE_FACTOR variable
      * */
-    function setTotalHogIssued(
+    function acceptNewIssuanceFactor() external onlyRole(DISTRIBUTION_SETTER) {
+        uint _newIssuanceFactor = proposedIssuanceFactor;
+        require(
+            _newIssuanceFactor != type(uint256).max,
+            "CommunityIssuance: incorrect proposed issuance factor"
+        );
+        ISSUANCE_FACTOR = _newIssuanceFactor;
+        proposedIssuanceFactor = type(uint256).max;
+        emit IssuanceFactorUpdated(_newIssuanceFactor);
+    }
+
+    /*
+     * HEDGEHOG UPDATES:
+     * totalHOGIssued may now be updated by a DISTRIBUTION_SETTER, two step operation
+     * */
+    function proposeTotalHogIssued(
         uint _newHogIssued
     ) external onlyRole(DISTRIBUTION_SETTER) {
+        proposedTotalHOGIssued = _newHogIssued;
+        emit ProposedTotalHogIssuedManually(totalHOGIssued, _newHogIssued);
+    }
+
+    /*
+     * HEDGEHOG UPDATES:
+     * New function: second step operation that updates current totalHOGIssued variable
+     * */
+    function acceptNewTotalHogIssued() external onlyRole(DISTRIBUTION_SETTER) {
+        uint _newHogIssued = proposedTotalHOGIssued;
+        require(
+            _newHogIssued != type(uint256).max,
+            "CommunityIssuance: incorrect proposed new total hog issued"
+        );
         totalHOGIssued = _newHogIssued;
+        proposedTotalHOGIssued = type(uint256).max;
         emit TotalHogIssuedManuallyUpdated(_newHogIssued);
     }
 

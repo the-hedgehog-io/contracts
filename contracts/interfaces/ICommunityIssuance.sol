@@ -8,12 +8,16 @@ interface ICommunityIssuance {
     event HOGTokenAddressSet(address _hogTokenAddress);
     event StabilityPoolAddressSet(address _stabilityPoolAddress);
     event TotalHOGIssuedUpdated(uint _totalHOGIssued);
+    event ProposedTotalHogIssuedManually(uint256 _oldTotalHOGIssued, uint256 _totalHOGIssued);
+    event TotalHogIssuedManuallyUpdated(uint256 _totalHOGIssued);
 
     // --- Functions ---
 
     function setAddresses(
         address _hogTokenAddress,
-        address _stabilityPoolAddress
+        address _stabilityPoolAddress,
+        address _setter,
+        address _setterAdmin
     ) external;
 
     function issueHOG() external returns (uint);
