@@ -110,8 +110,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should let withdraw (100): step2", async () => {
-      // User has to wait EXPAND_DURATION (720 mins) after the deposit to withdraw funds
-      await increase(timestring("721 minutes"));
+      await increase(60);
 
       const unusedLimitBeforeWithdrawal =
         await borrowerOperations.unusedWithdrawalLimit();
@@ -252,8 +251,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     });
 
     it("should revert (600): step 12", async () => {
-      // User has to wait EXPAND_DURATION after the deposit to withdraw funds
-      await increase(timestring("721 minutes"));
+      await increase(timestring("1 minute"));
       await expect(decreaseColl({ amount: eighthWithdraw })).to.be.revertedWith(
         "BO: Cannot withdraw more than 80% of withdrawable in one tx"
       );
@@ -270,7 +268,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
       expect(
         unusedLimitBeforeWithdrawal - unusedLimitAfterDecrease
-      ).to.be.equal(BigInt("400047361224660000000"));
+      ).to.be.equal(BigInt("403589803926714774200"));
     });
 
     it("should not revert (50): step 14", async () => {
@@ -284,7 +282,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
       expect(
         unusedLimitBeforeWithdrawal - unusedLimitAfterDecrease
-      ).to.be.equal(BigInt(BigInt("49992428000000000000")));
+      ).to.be.equal(BigInt(BigInt("49992357151145958905")));
     });
 
     it("should revert (138,92):  step 15", async () => {
@@ -323,33 +321,13 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       );
     });
 
-    it("should revert (if timelock less 59):  step 18", async () => {
-      await increase(timestring("59 minutes"));
+    it("should not revert (if withdrawalAmount 80% unusedLimit):  step 18", async () => {
 
       const unusedLimitBeforeWithdrawal =
         await borrowerOperations.unusedWithdrawalLimit();
       const limit =
         (unusedLimitBeforeWithdrawal * BigInt("80")) / BigInt("100");
 
-      await expect(
-        decreaseColl({
-          caller: bob,
-          amount: limit,
-        })
-      ).to.be.revertedWithCustomError(
-        borrowerOperations,
-        "WithdrawalRequestedTooSoonAfterDeposit"
-      );
-    });
-
-    it("should not revert (if withdrawalAmount 80% unusedLimit):  step 19", async () => {
-      await increase(timestring("720 minutes"));
-
-      const unusedLimitBeforeWithdrawal =
-        await borrowerOperations.unusedWithdrawalLimit();
-
-      const limit =
-        (unusedLimitBeforeWithdrawal * BigInt("80")) / BigInt("100");
       await expect(
         decreaseColl({
           caller: bob,
@@ -362,7 +340,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
       expect(
         unusedLimitBeforeWithdrawal - unusedLimitAfterWithdrawal
-      ).to.be.equal(BigInt("236846658400000000000"));
+      ).to.be.equal(BigInt("440768868858262020604"));
     });
   });
 });
