@@ -36,7 +36,6 @@ interface IBorrowerOperations {
         address indexed _borrower,
         uint _BaseFeeLMAFee
     );
-    event WithdrawalLimitUpdated(uint256 _limit);
 
     // --- Functions ---
 
@@ -95,9 +94,4 @@ interface IBorrowerOperations {
     function claimCollateral() external;
 
     function getCompositeDebt(uint _debt) external pure returns (uint);
-
-    function handleWithdrawalLimit(
-        uint256 _collWithdrawal,
-        bool _isLiquidation
-    ) external;
 }

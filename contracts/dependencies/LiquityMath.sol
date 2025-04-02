@@ -6,12 +6,10 @@ pragma solidity 0.8.19;
  * HEDGEHOG UPDATES:
  * @notice A fork of Liquity Math library with an upgraded pragma & migration from SafeMath to native math operator
  *
- * New function was added: _checkWithdrawalLimit
  */
 
 library LiquityMath {
     uint internal constant DECIMAL_PRECISION = 1e18;
-    uint256 public constant WITHDRAWAL_LIMIT_THRESHOLD = 10 ether;
     uint256 internal constant DENOMINATOR = 100000;
 
     /* Precision for Nominal ICR (independent of price). Rationale for the value:
@@ -147,50 +145,5 @@ library LiquityMath {
             ((((_coll * DECIMAL_PRECISION) / _debt) * DECIMAL_PRECISION) /
                 _mcr) +
             1;
-    }
-
-    /**
-     * HEDGEHOG UPDATES:
-     * New internal function that's executed as a part of _handleWithdrawalLimit function
-     */
-    function _checkWithdrawalLimit(
-        uint256 _lastWithdrawTimestamp,
-        uint256 _expandDuration,
-        uint256 _unusedWithdrawalLimit,
-        uint256 _currentTotalColl
-    ) internal view returns (uint256 fullLimit, uint256 singleTxWithdrawable) {
-        // If coll in the system is greater than the threshold - we check if user may withdraw the desired amount
-        // Otherwise they are free to withdraw whole amount
-        if (_currentTotalColl <= WITHDRAWAL_LIMIT_THRESHOLD) {
-            return (_currentTotalColl, _currentTotalColl);
-        }
-
-        // We calculate 50% of the current collateral over WITHDRAWAL_LIMIT_THRESHOLD
-        // so max limit is half of the collateral plus 50% of the threshold (5 ether)
-        uint256 totalCollBasedLimit = WITHDRAWAL_LIMIT_THRESHOLD +
-            (_currentTotalColl - WITHDRAWAL_LIMIT_THRESHOLD) /
-            2;
-
-        // Now we calculate an amount that can be added based on the newest coll value
-        uint256 additionFromNewColl;
-
-        if (totalCollBasedLimit > _unusedWithdrawalLimit) {
-            // First, we calculate how much time has passed since the last withdrawal
-            uint256 minutesPassed = block.timestamp - _lastWithdrawTimestamp;
-
-            // We calculate the percentage based on the time diff between last withdrawal and current moment
-            uint256 percentageToGet = minutesPassed > _expandDuration
-                ? DENOMINATOR
-                : (minutesPassed * DENOMINATOR) / _expandDuration;
-
-            additionFromNewColl =
-                ((totalCollBasedLimit - _unusedWithdrawalLimit) *
-                    percentageToGet) /
-                DENOMINATOR;
-        }
-        // Ultimately we get two values: Full withdrawal limit and an instant withdrawal limit which is 80% of the full one
-        fullLimit = _unusedWithdrawalLimit + additionFromNewColl;
-
-        singleTxWithdrawable = (fullLimit * 80) / 100;
     }
 }
