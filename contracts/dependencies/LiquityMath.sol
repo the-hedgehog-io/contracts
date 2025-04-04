@@ -10,7 +10,6 @@ pragma solidity 0.8.19;
 
 library LiquityMath {
     uint internal constant DECIMAL_PRECISION = 1e18;
-    uint256 internal constant DENOMINATOR = 100000;
 
     /* Precision for Nominal ICR (independent of price). Rationale for the value:
      *
