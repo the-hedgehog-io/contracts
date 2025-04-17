@@ -21,7 +21,6 @@ import "./dependencies/CheckContract.sol";
  * - SafeMath is removed & native math operators are used from this point
  * - Removed an import of ActivePool Interface
  * - Logic updates with redemption & borrowing fees calculation and their distribution
- * - Handling of withdrawal limits during redemptions
  */
 
 contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
@@ -712,12 +711,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             totals.totalBaseFeeLMAGasCompensation,
             totals.totalCollGasCompensation
         );
-
-        // Hedgehog Updates: Update Dynamic Withdrawal Limits but do not revert tx if exceeds 80% single tx limit
-        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawalLimit(
-            totals.totalCollInSequence,
-            true
-        );
     }
 
     /*
@@ -941,12 +934,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             msg.sender,
             totals.totalBaseFeeLMAGasCompensation,
             totals.totalCollGasCompensation
-        );
-
-        // Hedgehog Updates: Update Dynamic Withdrawal Limits but do not revert tx if exceeds 80% single tx limit
-        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawalLimit(
-            totals.totalCollInSequence,
-            true
         );
     }
 
@@ -1458,12 +1445,6 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         contractsCache.activePool.sendWStETH(
             msg.sender,
             totals.WStETHToSendToRedeemer
-        );
-
-        // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
-        IBorrowerOperations(borrowerOperationsAddress).handleWithdrawalLimit(
-            totals.totalWStETHDrawn,
-            false
         );
     }
 

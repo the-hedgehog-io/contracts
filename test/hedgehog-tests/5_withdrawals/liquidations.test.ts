@@ -113,25 +113,17 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
       await setNewBaseFeePrice(110);
 
-      const unusedLimitBeforeLiquidate =
-        await borrowerOperations.unusedWithdrawalLimit();
-
       await troveManager.liquidateTroves(2);
 
       const systemCollAfterLiquidate =
         await borrowerOperations.getEntireSystemColl();
-      const unusedLimitAfterLiquidate =
-        await borrowerOperations.unusedWithdrawalLimit();
-      expect(
-        unusedLimitBeforeLiquidate - unusedLimitAfterLiquidate
-      ).to.be.equal(BigInt("400000000000000000000"));
 
       expect(systemCollBeforeLiquidate - systemCollAfterLiquidate).to.be.equal(
         ethers.parseEther("2")
       );
     });
 
-    it("should allow to update limits after close troves correctly", async () => {
+    it("should allow close troves correctly", async () => {
       await openTrove({
         caller: alice,
         collAmount: collAmountAlice,
@@ -146,22 +138,13 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       const systemCollBeforeClose =
         await borrowerOperations.getEntireSystemColl();
 
-      const unusedLimitBeforeClose =
-        await borrowerOperations.unusedWithdrawalLimit();
       await borrowerOperations.connect(alice).closeTrove();
 
       const systemCollAfterClose =
         await borrowerOperations.getEntireSystemColl();
 
-      const unusedLimitAfterClose =
-        await borrowerOperations.unusedWithdrawalLimit();
-
       expect(systemCollBeforeClose - systemCollAfterClose).to.be.equal(
         collAmountAlice
-      );
-
-      expect(unusedLimitBeforeClose - unusedLimitAfterClose).to.be.equal(
-        BigInt("200000000000000000000")
       );
     });
 
@@ -225,10 +208,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         baseFeeLMAAmount: debtAmountBob,
       });
 
-      expect(await borrowerOperations.unusedWithdrawalLimit()).to.be.equal(
-        (collAmountAliceExtended + collAmountBob) / BigInt(2)
-      );
-
       await baseFeeLMAToken
         .connect(alice)
         .transfer(bob.address, ethers.parseEther("900000000"));
@@ -236,11 +215,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       expect(await troveManager.getTroveStatus(bob.address)).to.be.equal(1);
 
       await borrowerOperations.connect(bob).closeTrove();
-
-      const unusedLimitAfterClose = BigInt("900000000000000000000");
-      expect(await borrowerOperations.unusedWithdrawalLimit()).to.be.equal(
-        unusedLimitAfterClose
-      );
 
       expect(await troveManager.getTroveStatus(bob.address)).not.to.be.equal(1);
 
@@ -252,10 +226,6 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
         collAmount: newCollBob,
         baseFeeLMAAmount: newDebtBob,
       });
-
-      expect(await borrowerOperations.unusedWithdrawalLimit()).to.be.equal(
-        unusedLimitAfterClose + newCollBob / BigInt("2")
-      );
 
       expect(await troveManager.getTroveStatus(bob.address)).to.be.equal(1);
     });

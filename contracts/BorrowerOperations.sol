@@ -15,7 +15,6 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 error TroveAdjustedThisBlock();
-error WithdrawalRequestedTooSoonAfterDeposit();
 
 /**
  * @notice Fork of Liquity's BorrowerOperations. . Most of the Logic remains unchanged..
@@ -27,7 +26,6 @@ error WithdrawalRequestedTooSoonAfterDeposit();
  * - Logic updates with borrowing fees calculation and their distribution
  * - Removed Native Liquity Protocol Token Staking
  * - Remove _getUSDValue view method as it's not used anymore
- * - Introduction of withdrawal limit logic
  * - Introduction of single block open-withdraw limitations
  * - Introduction of timelock on withdraw after deposits
  */
@@ -60,19 +58,6 @@ contract BorrowerOperations is
 
     // A doubly linked list of Troves, sorted by their collateral ratios
     ISortedTroves public sortedTroves;
-
-    // HEDGEHOG UPDATES: Added two new public variables
-    // Two variables that are used to track and calculate collateral withdrawal limits
-    // also to prevent griefing attacks - collateral has to sit in the contract
-    // some time before withdrawal request
-    uint256 public lastWithdrawalTimestamp;
-    uint256 public unusedWithdrawalLimit;
-
-    struct UserLimit {
-        uint256 lockedCollateral;
-        uint256 lockTimestamp;
-    }
-    mapping(address => UserLimit) public userWithdrawalLimits;
 
     /* --- Variable container structs  ---
 
@@ -118,7 +103,6 @@ contract BorrowerOperations is
      * HEDGEHOG UPDATES:
      * ERC20 is used as a collateral instead of native token.
      * Setting erc20 address in the initialisation
-     * Setting initial value for newly added lastWithdrawalTimestamp
      */
     function setAddresses(
         address _troveManagerAddress,
@@ -159,9 +143,6 @@ contract BorrowerOperations is
         baseFeeLMAToken = IBaseFeeLMAToken(_baseFeeLMATokenAddress);
         WStETHToken = _wStETHTokenAddress;
         feesRouter = _feesRouter;
-
-        // Setting a value of block.timestamp 720 minutes ago to make sure that in any case first withdrawal wouldn't get decreased unfairly
-        lastWithdrawalTimestamp = block.timestamp - EXPAND_DURATION;
 
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit ActivePoolAddressChanged(_activePoolAddress);
@@ -367,8 +348,6 @@ contract BorrowerOperations is
         address _upperHint,
         address _lowerHint
     ) external {
-        _checkUserWithdrawalLimit(_collWithdrawal);
-
         _adjustTrove(
             msg.sender,
             _collWithdrawal,
@@ -444,9 +423,6 @@ contract BorrowerOperations is
         address _upperHint,
         address _lowerHint
     ) external {
-        if (_collWithdrawal > 0) {
-            _checkUserWithdrawalLimit(_collWithdrawal);
-        }
         _adjustTrove(
             msg.sender,
             _collWithdrawal,
@@ -613,14 +589,6 @@ contract BorrowerOperations is
             _isDebtIncrease,
             vars.netDebtChange
         );
-
-        /**
-         * HEDGEHOG UPDATES: Perform withdrawal limit check if adjustTrove intent is coll withdraw
-         */
-        if (_collWithdrawal > 0) {
-            // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
-            _handleWithdrawalLimit(_collWithdrawal, false);
-        }
     }
 
     // Hedgehog Updates: Do not deduct gas fee compensation from trove Debt as user just received less tokens during position opening
@@ -678,9 +646,6 @@ contract BorrowerOperations is
 
         // Send the collateral back to the user
         activePoolCached.sendWStETH(msg.sender, coll);
-
-        // Hedgehog Updates: Introducing the dynamic collateral withdrawal limits
-        _handleWithdrawalLimit(coll, false);
     }
 
     /**
@@ -796,8 +761,6 @@ contract BorrowerOperations is
      * HEDGEHOG UPDATES: use SafeERC20 safe transfer instead of native token transfer
      * Send funds from User's account instead of relaying native token through address(this)
      * Manually increase balance in Active Pool, since it used to be done in the native token fallback
-     *
-     * Now also update the contract's withdrawal limit along with the changes to the coll balance in the active pool
      */
     // Send WStETH to Active Pool and increase its recorded WStETH balance
     function _activePoolAddColl(
@@ -806,23 +769,6 @@ contract BorrowerOperations is
     ) internal {
         WStETHToken.safeTransferFrom(msg.sender, address(_activePool), _amount);
         activePool.increaseBalance(_amount);
-
-        // Update withdrawal Limit from collateral addition.
-        uint256 _newLimit = unusedWithdrawalLimit + _amount / 2;
-        unusedWithdrawalLimit = _newLimit;
-
-        UserLimit storage limit = userWithdrawalLimits[msg.sender];
-        limit.lockedCollateral = limit.lockTimestamp > block.timestamp
-            ? limit.lockedCollateral + _amount
-            : _amount;
-        limit.lockTimestamp = block.timestamp + DEPOSIT_LOCK_DURATION;
-
-        emit UserWithdrawalLimitUpdated(
-            msg.sender,
-            limit.lockedCollateral,
-            limit.lockTimestamp
-        );
-        emit WithdrawalLimitUpdated(_newLimit);
     }
 
     // Issue the specified amount of BaseFeeLMA to _account and increases the total active debt (_netDebtIncrease potentially includes a BaseFeeLMAFee)
@@ -1146,83 +1092,5 @@ contract BorrowerOperations is
         uint price = priceFeed.lastGoodPrice();
 
         return LiquityMath._computeCR(_coll, _debt, price);
-    }
-
-    /**
-     * HEDGEHOG UPDATES:
-     * Introduced limit on how many withdrawal transactions can be requested within 10 minutes
-     */
-    function _checkUserWithdrawalLimit(uint _collWithdrawal) internal view {
-        UserLimit memory limit = userWithdrawalLimits[msg.sender];
-        uint userCollateral = troveManager.getTroveColl(msg.sender);
-        if (
-            block.timestamp < limit.lockTimestamp &&
-            userCollateral - _collWithdrawal < limit.lockedCollateral
-        ) {
-            revert WithdrawalRequestedTooSoonAfterDeposit();
-        }
-    }
-
-    /**
-     * HEDGEHOG UPDATES:
-     * New function to handle dynamic Withdrawal Limit.
-     * the new dynamic collateral withdrawal limit in our smart contract, inspired by a similar mechanism in the Fluid InstaDApp protocol.
-     * The purpose of this mechanism is to dynamically adjust the withdrawal limit based on the collateral added or removed from the system,
-     * while considering the time elapsed since the last withdrawal.
-     *
-     * Basic Withdrawal Dynamic Limits overview:
-     * When Collateral is Added to the System:
-     * 1) When a user adds collateral, the new collateral amount is calculated by adding the deposit to the existing collateral.
-     * 2) Calculate New Withdrawal Limit:
-     * The system calculates the new withdrawal limit as the sum of the old limit plus 50% of the deposit.
-     *
-     * When Collateral is Withdrawn from the System:
-     * 1) Calculate the Current Withdrawal Limit: The system calculates the current withdrawal limit as:
-     * Current Limit = Old Limit + (threshold + 50% * (Current Collateral over threshold) - Old Limit) * ( Time Elapsed(minutes) / 720 )
-     * This formula accounts for the time elapsed since the last withdrawal, with the withdrawal limit gradually increasing towards the target limit over a 12-hour period.
-     *
-     * 2) Determine User's Withdrawal Limit for the Transaction:
-     * The user's withdrawal limit for the current transaction is calculated as 80% of the current limit.
-     *
-     * After the collateral is withdraw from the system:
-     * 1) When collateral is withdrawn, the new collateral amount is calculated by subtracting the withdrawn amount from the current collateral.
-     * 2) The system subtracts the withdrawn amount from the current withdrawal limit to determine the new limit. This new limit will be considered as the old limit for the next withdrawal.
-     * 3) The system records the time of the withdrawal and starts a new 12-hour countdown for the dynamic adjustment of the withdrawal limit.
-     */
-    function _handleWithdrawalLimit(
-        uint256 _collWithdrawal,
-        bool _isLiquidation
-    ) internal {
-        (uint256 fullLimit, uint256 singleTxWithdrawable) = LiquityMath
-            ._checkWithdrawalLimit(
-                lastWithdrawalTimestamp,
-                EXPAND_DURATION,
-                unusedWithdrawalLimit,
-                activePool.getWStETH()
-            );
-
-        if (!_isLiquidation && singleTxWithdrawable < _collWithdrawal) {
-            revert(
-                "BO: Cannot withdraw more than 80% of withdrawable in one tx"
-            );
-        }
-
-        // Update current unusedWithdrawalLimit
-        unusedWithdrawalLimit = fullLimit > _collWithdrawal
-            ? fullLimit - _collWithdrawal
-            : 0;
-
-        // Update the withdrawal recorded timestamp
-        lastWithdrawalTimestamp = block.timestamp;
-
-        emit WithdrawalLimitUpdated(unusedWithdrawalLimit);
-    }
-
-    function handleWithdrawalLimit(
-        uint256 _collWithdrawal,
-        bool _isLiquidation
-    ) external {
-        _requireCallerIsTroveManager();
-        _handleWithdrawalLimit(_collWithdrawal, _isLiquidation);
     }
 }
