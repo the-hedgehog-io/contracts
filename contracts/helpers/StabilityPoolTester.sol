@@ -8,7 +8,6 @@ import "../interfaces/ISortedTroves.sol";
 import "../interfaces/ICommunityIssuance.sol";
 import "../dependencies/HedgehogBase.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "../dependencies/LiquitySafeMath128.sol";
 import "../dependencies/CheckContract.sol";
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -85,8 +84,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  *
  * --- TRACKING DEPOSIT OVER SCALE CHANGES AND EPOCHS ---
  *
- * When a deposit is made, it gets snapshots of the currentEpoch and the currentScale.
- *
  * When calculating a compounded deposit, we compare the current epoch to the deposit's epoch snapshot. If the current epoch is newer,
  * then the deposit was present during a pool-emptying liquidation, and necessarily has been depleted to 0.
  *
@@ -149,7 +146,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  *
  */
 contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
-    using LiquitySafeMath128 for uint128;
     using SafeERC20 for IERC20;
 
     string public constant NAME = "StabilityPool";
@@ -177,8 +173,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
         uint S;
         uint P;
         uint G;
-        uint128 scale;
-        uint128 epoch;
+        uint scale;
     }
 
     mapping(address => Deposit) public deposits; // depositor address -> Deposit struct
@@ -195,10 +190,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
     uint public constant SCALE_FACTOR = 1e9;
 
     // Each time the scale of P shifts by SCALE_FACTOR, the scale is incremented by 1
-    uint128 public currentScale;
-
-    // With each offset that fully empties the Pool, the epoch is incremented by 1
-    uint128 public currentEpoch;
+    uint public currentScale;
 
     /* WStETH Gain sum 'S': During its lifetime, each deposit d_t earns an WStETH gain of ( d_t * [S - S_t] )/P_t, where S_t
      * is the depositor's snapshot of S taken at the time t when the deposit was made.
@@ -208,7 +200,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
      * - The inner mapping records the sum S at different scales
      * - The outer mapping records the (scale => sum) mappings, for different epochs.
      */
-    mapping(uint128 => mapping(uint128 => uint)) public epochToScaleToSum;
+    mapping(uint => uint) public scaleToSum;
 
     /*
      * Similarly, the sum 'G' is used to calculate HOG gains. During it's lifetime, each deposit d_t earns a HOG gain of
@@ -217,7 +209,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
      *  HOG reward events occur are triggered by depositor operations (new deposit, topup, withdrawal), and liquidations.
      *  In each case, the HOG reward is issued (i.e. G is updated), before other state changes are made.
      */
-    mapping(uint128 => mapping(uint128 => uint)) public epochToScaleToG;
+    mapping(uint => uint) public scaleToG;
 
     // Error tracker for the error correction in the HOG issuance calculation
     uint public lastHOGError;
@@ -243,10 +235,9 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
     event WStETHTokenAddressUpdated(IERC20 _WStEthAddress);
 
     event P_Updated(uint _P);
-    event S_Updated(uint _S, uint128 _epoch, uint128 _scale);
-    event G_Updated(uint _G, uint128 _epoch, uint128 _scale);
-    event EpochUpdated(uint128 _currentEpoch);
-    event ScaleUpdated(uint128 _currentScale);
+    event S_Updated(uint _S, uint _scale);
+    event G_Updated(uint _G, uint _scale);
+    event ScaleUpdated(uint _currentScale);
 
     event DepositSnapshotUpdated(
         address indexed _depositor,
@@ -441,13 +432,12 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
         );
 
         uint marginalHOGGain = HOGPerUnitStaked * (P);
-        epochToScaleToG[currentEpoch][currentScale] =
-            epochToScaleToG[currentEpoch][currentScale] +
+        scaleToG[currentScale] =
+            scaleToG[currentScale] +
             (marginalHOGGain);
 
         emit G_Updated(
-            epochToScaleToG[currentEpoch][currentScale],
-            currentEpoch,
+            scaleToG[currentScale],
             currentScale
         );
     }
@@ -578,11 +568,8 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
         uint newProductFactor = uint(DECIMAL_PRECISION) -
             (_BaseFeeLMALossPerUnitStaked);
 
-        uint128 currentScaleCached = currentScale;
-        uint128 currentEpochCached = currentEpoch;
-        uint currentS = epochToScaleToSum[currentEpochCached][
-            currentScaleCached
-        ];
+        uint currentScaleCached = currentScale;
+        uint currentS = scaleToSum[currentScaleCached];
 
         /*
          * Calculate the new S first, before we update P.
@@ -593,13 +580,11 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
          */
         uint marginalWStETHGain = _WStETHGainPerUnitStaked * (currentP);
         uint newS = currentS + (marginalWStETHGain);
-        epochToScaleToSum[currentEpochCached][currentScaleCached] = newS;
-        emit S_Updated(newS, currentEpochCached, currentScaleCached);
+        scaleToSum[currentScaleCached] = newS;
+        emit S_Updated(newS, currentScaleCached);
 
         // If the Stability Pool was emptied, increment the epoch, and reset the scale and product P
         if (newProductFactor == 0) {
-            currentEpoch = currentEpochCached.add(1);
-            emit EpochUpdated(currentEpoch);
             currentScale = 0;
             emit ScaleUpdated(currentScale);
             newP = DECIMAL_PRECISION;
@@ -611,7 +596,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
             newP =
                 (currentP * (newProductFactor) * (SCALE_FACTOR)) /
                 (DECIMAL_PRECISION);
-            currentScale = currentScaleCached.add(1);
+            currentScale = currentScaleCached + 1;
             emit ScaleUpdated(currentScale);
         } else {
             newP = (currentP * (newProductFactor)) / (DECIMAL_PRECISION);
@@ -680,14 +665,13 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
          * If it does, the second portion of the WStETH gain is scaled by 1e9.
          * If the gain spans no scale change, the second portion will be 0.
          */
-        uint128 epochSnapshot = snapshots.epoch;
-        uint128 scaleSnapshot = snapshots.scale;
+        uint scaleSnapshot = snapshots.scale;
         uint S_Snapshot = snapshots.S;
         uint P_Snapshot = snapshots.P;
 
-        uint firstPortion = epochToScaleToSum[epochSnapshot][scaleSnapshot] -
+        uint firstPortion = scaleToSum[scaleSnapshot] -
             (S_Snapshot);
-        uint secondPortion = epochToScaleToSum[epochSnapshot][
+        uint secondPortion = scaleToSum[
             scaleSnapshot + (1)
         ] / (SCALE_FACTOR);
 
@@ -729,14 +713,13 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
          * If it does, the second portion of the HOG gain is scaled by 1e9.
          * If the gain spans no scale change, the second portion will be 0.
          */
-        uint128 epochSnapshot = snapshots.epoch;
-        uint128 scaleSnapshot = snapshots.scale;
+        uint scaleSnapshot = snapshots.scale;
         uint G_Snapshot = snapshots.G;
         uint P_Snapshot = snapshots.P;
 
-        uint firstPortion = epochToScaleToG[epochSnapshot][scaleSnapshot] -
+        uint firstPortion = scaleToG[scaleSnapshot] -
             (G_Snapshot);
-        uint secondPortion = epochToScaleToG[epochSnapshot][
+        uint secondPortion = scaleToG[
             scaleSnapshot + (1)
         ] / (SCALE_FACTOR);
 
@@ -776,16 +759,10 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
         Snapshots memory snapshots
     ) internal view returns (uint) {
         uint snapshot_P = snapshots.P;
-        uint128 scaleSnapshot = snapshots.scale;
-        uint128 epochSnapshot = snapshots.epoch;
-
-        // If stake was made before a pool-emptying event, then it has been fully cancelled with debt -- so, return 0
-        if (epochSnapshot < currentEpoch) {
-            return 0;
-        }
+        uint scaleSnapshot = snapshots.scale;
 
         uint compoundedStake;
-        uint128 scaleDiff = currentScale.sub(scaleSnapshot);
+        uint scaleDiff = currentScale - scaleSnapshot;
 
         /* Compute the compounded stake. If a scale change in P was made during the stake's lifetime,
          * account for it. If more than one scale change was made, then the stake has decreased by a factor of
@@ -876,22 +853,18 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
             emit DepositSnapshotUpdated(_depositor, 0, 0, 0);
             return;
         }
-        uint128 currentScaleCached = currentScale;
-        uint128 currentEpochCached = currentEpoch;
+        uint currentScaleCached = currentScale;
         uint currentP = P;
 
         // Get S and G for the current epoch and current scale
-        uint currentS = epochToScaleToSum[currentEpochCached][
-            currentScaleCached
-        ];
-        uint currentG = epochToScaleToG[currentEpochCached][currentScaleCached];
+        uint currentS = scaleToSum[currentScaleCached];
+        uint currentG = scaleToG[currentScaleCached];
 
         // Record new snapshots of the latest running product P, sum S, and sum G, for the depositor
         depositSnapshots[_depositor].P = currentP;
         depositSnapshots[_depositor].S = currentS;
         depositSnapshots[_depositor].G = currentG;
         depositSnapshots[_depositor].scale = currentScaleCached;
-        depositSnapshots[_depositor].epoch = currentEpochCached;
 
         emit DepositSnapshotUpdated(_depositor, currentP, currentS, currentG);
     }
