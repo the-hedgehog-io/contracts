@@ -150,11 +150,6 @@ interface IStabilityPool {
     function getWStETH() external view returns (uint);
 
     /*
-     * Returns BaseFeeLMA held in the pool. Changes when users deposit/withdraw, and when Trove debt is offset.
-     */
-    function getTotalBaseFeeLMADeposits() external view returns (uint);
-
-    /*
      * Returns the max amount of BaseFeeLMA held in the pool that can be used for liquidations.
      * It makes sure that at least 1 BaseFeeLMA remains.
      * If the max amount is used, it makes sure it won’t revert by underflow due to the accumulated offset error.

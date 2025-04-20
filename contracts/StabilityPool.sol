@@ -81,12 +81,15 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * When a deposit is made, it gets snapshots of the currentScale.
  *
  * We compare the current scale to the deposit's scale snapshot. If they're equal, the compounded deposit is given by d_t * P/P_t.
+ * If it spans one scale change, it is given by d_t * P/(P_t * 1e9). If it spans more than one scale change, we define the compounded deposit
+ * as 0, since it is now less than 1e-9'th of its initial value (e.g. a deposit of 1 billion BaseFeeLMA has depleted to < 1 BaseFeeLMA).
+ *
  *
  *  --- TRACKING DEPOSITOR'S WStETH GAIN OVER SCALE CHANGES ---
  *
  * The latest value of S is stored upon each scale change.
  *
- * This allows us to calculate a deposit's accumulated ETH gain.
+ * This allows us to calculate a deposit's accumulated WStETH gain.
  *
  * We calculate the depositor's accumulated WStETH gain for the scale at which they made the deposit, using the WStETH gain formula:
  * e_1 = d_t * (S - S_t) / P_t
@@ -174,7 +177,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
     mapping(address => Snapshots) public depositSnapshots; // depositor address -> snapshots struct
 
     // We never allow the SP to go below this amount through withdrawals or liquidations
-    uint constant internal MIN_BASEFEELMA_IN_SP = 1e18;
+    uint internal constant MIN_BASEFEELMA_IN_SP = 1e18;
 
     /*  Product 'P': Running product by which to multiply an initial deposit, in order to find the current compounded deposit,
      * after a series of liquidations have occurred, each of which cancel some BaseFeeLMA debt with the deposit.
@@ -266,10 +269,6 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
 
     function getWStETH() external view returns (uint) {
         return WStETH;
-    }
-
-    function getTotalBaseFeeLMADeposits() external view returns (uint) {
-        return totalBaseFeeLMADeposits;
     }
 
     // --- External Depositor Functions ---
@@ -457,10 +456,7 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
         uint marginalHOGGain = HOGPerUnitStaked * P;
         scaleToG[currentScale] = scaleToG[currentScale] + marginalHOGGain;
 
-        emit G_Updated(
-            scaleToG[currentScale],
-            currentScale
-        );
+        emit G_Updated(scaleToG[currentScale], currentScale);
     }
 
     function _computeHOGPerUnitStaked(
@@ -494,13 +490,18 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
         uint totalBaseFeeLMA = totalBaseFeeLMADeposits; // cache
         // - If the SP has total deposits >= 1e18, we leave 1e18 in it untouched.
         // - If it has 0 < x < 1e18 total deposits, we leave x in it.
-        uint256 baseFeeLMAToLeaveInSP = LiquityMath._min(MIN_BASEFEELMA_IN_SP, totalBaseFeeLMA);
+        uint256 baseFeeLMAToLeaveInSP = LiquityMath._min(
+            MIN_BASEFEELMA_IN_SP,
+            totalBaseFeeLMA
+        );
         uint BaseFeeLMAInSPForOffsets = totalBaseFeeLMA - baseFeeLMAToLeaveInSP; // safe, for the line above
         // Let’s avoid underflow in case of a tiny offset
-        if (BaseFeeLMAInSPForOffsets * DECIMAL_PRECISION <= lastBaseFeeLMALossError_Offset) {
+        if (
+            BaseFeeLMAInSPForOffsets * DECIMAL_PRECISION <=
+            lastBaseFeeLMALossError_Offset
+        ) {
             BaseFeeLMAInSPForOffsets = 0;
         }
-
         return BaseFeeLMAInSPForOffsets;
     }
 
@@ -568,18 +569,29 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
          * See: https://github.com/liquity/dev/pull/417#issuecomment-805721292
          * As we are doing floor + 1 in the division, it will still offset something
          */
-        if (_debtToOffset * DECIMAL_PRECISION <= lastBaseFeeLMALossError_Offset) {
+        if (
+            _debtToOffset * DECIMAL_PRECISION <= lastBaseFeeLMALossError_Offset
+        ) {
             BaseFeeLMALossNumerator = 0;
         } else {
-            BaseFeeLMALossNumerator = _debtToOffset * DECIMAL_PRECISION - lastBaseFeeLMALossError_Offset;
+            BaseFeeLMALossNumerator =
+                _debtToOffset *
+                DECIMAL_PRECISION -
+                lastBaseFeeLMALossError_Offset;
         }
 
         /*
          * Add 1 to make error in quotient positive. We want "slightly too much" BaseFeeLMA loss,
          * which ensures the error in any given compoundedBaseFeeLMADeposit favors the Stability Pool.
          */
-        BaseFeeLMALossPerUnitStaked = BaseFeeLMALossNumerator / _totalBaseFeeLMADeposits + 1;
-        lastBaseFeeLMALossError_Offset = BaseFeeLMALossPerUnitStaked * _totalBaseFeeLMADeposits - BaseFeeLMALossNumerator;
+        BaseFeeLMALossPerUnitStaked =
+            BaseFeeLMALossNumerator /
+            _totalBaseFeeLMADeposits +
+            1;
+        lastBaseFeeLMALossError_Offset =
+            BaseFeeLMALossPerUnitStaked *
+            _totalBaseFeeLMADeposits -
+            BaseFeeLMALossNumerator;
 
         WStETHGainPerUnitStaked = WStETHNumerator / _totalBaseFeeLMADeposits;
         lastWStETHError_Offset =
@@ -622,13 +634,17 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
         emit S_Updated(newS, currentScaleCached);
 
         // If multiplying P by a non-zero product factor would reduce P below the scale boundary, increment the scale
-        if (currentP * newProductFactor / DECIMAL_PRECISION < SCALE_FACTOR) {
-            newP = currentP * newProductFactor * SCALE_FACTOR / DECIMAL_PRECISION;
+        if ((currentP * newProductFactor) / DECIMAL_PRECISION < SCALE_FACTOR) {
+            newP =
+                (currentP * newProductFactor * SCALE_FACTOR) /
+                DECIMAL_PRECISION;
             currentScaleCached = currentScaleCached + 1;
             // If it’s still smaller than the SCALE_FACTOR, increment scale again.
             // Afterwards it couldn’t happen again, as DECIMAL_PRECISION = SCALE_FACTOR^2
             if (newP < SCALE_FACTOR) {
-                newP = currentP * newProductFactor * (SCALE_FACTOR ** 2) / DECIMAL_PRECISION;
+                newP =
+                    (currentP * newProductFactor * (SCALE_FACTOR ** 2)) /
+                    DECIMAL_PRECISION;
                 currentScaleCached = currentScaleCached + 1;
             }
             currentScale = currentScaleCached;
@@ -662,7 +678,10 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
 
     function _decreaseBaseFeeLMA(uint _amount) internal {
         uint newTotalBaseFeeLMADeposits = totalBaseFeeLMADeposits - _amount;
-        require(newTotalBaseFeeLMADeposits >= MIN_BASEFEELMA_IN_SP, "Withdrawal must leave totalBoldDeposits >= MIN_BASEFEELMA_IN_SP");
+        require(
+            newTotalBaseFeeLMADeposits >= MIN_BASEFEELMA_IN_SP,
+            "Withdrawal must leave totalBoldDeposits >= MIN_BASEFEELMA_IN_SP"
+        );
         totalBaseFeeLMADeposits = newTotalBaseFeeLMADeposits;
         emit StabilityPoolBaseFeeLMABalanceUpdated(newTotalBaseFeeLMADeposits);
     }
@@ -942,7 +961,9 @@ contract StabilityPool is HedgehogBase, Ownable, CheckContract, IStabilityPool {
         );
     }
 
-    function _requireUserHasWStETHGain(address _depositor) internal view returns (uint WStETHGain) {
+    function _requireUserHasWStETHGain(
+        address _depositor
+    ) internal view returns (uint WStETHGain) {
         WStETHGain = getDepositorWStETHGain(_depositor);
         require(
             WStETHGain > 0,

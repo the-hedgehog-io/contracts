@@ -75,28 +75,20 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * scale boundary: when P is at its minimum value of 1e9, the relative precision loss in P due to floor division is only on the
  * order of 1e-9.
  *
- * --- EPOCHS ---
+ * --- TRACKING DEPOSIT OVER SCALE CHANGES ---
  *
- * Whenever a liquidation fully empties the Stability Pool, all deposits should become 0. However, setting P to 0 would make P be 0
- * forever, and break all future reward calculations.
+ * When a deposit is made, it gets snapshots of the currentScale.
  *
- * So, every time the Stability Pool is emptied by a liquidation, we reset P = 1 and currentScale = 0, and increment the currentEpoch by 1.
- *
- * --- TRACKING DEPOSIT OVER SCALE CHANGES AND EPOCHS ---
- *
- * When calculating a compounded deposit, we compare the current epoch to the deposit's epoch snapshot. If the current epoch is newer,
- * then the deposit was present during a pool-emptying liquidation, and necessarily has been depleted to 0.
- *
- * Otherwise, we then compare the current scale to the deposit's scale snapshot. If they're equal, the compounded deposit is given by d_t * P/P_t.
+ * We compare the current scale to the deposit's scale snapshot. If they're equal, the compounded deposit is given by d_t * P/P_t.
  * If it spans one scale change, it is given by d_t * P/(P_t * 1e9). If it spans more than one scale change, we define the compounded deposit
  * as 0, since it is now less than 1e-9'th of its initial value (e.g. a deposit of 1 billion BaseFeeLMA has depleted to < 1 BaseFeeLMA).
  *
  *
- *  --- TRACKING DEPOSITOR'S WStETH GAIN OVER SCALE CHANGES AND EPOCHS ---
+ *  --- TRACKING DEPOSITOR'S WStETH GAIN OVER SCALE CHANGES ---
  *
- * In the current epoch, the latest value of S is stored upon each scale change, and the mapping (scale -> S) is stored for each epoch.
+ * The latest value of S is stored upon each scale change.
  *
- * This allows us to calculate a deposit's accumulated WStETH gain, during the epoch in which the deposit was non-zero and earned WStETH.
+ * This allows us to calculate a deposit's accumulated WStETH gain.
  *
  * We calculate the depositor's accumulated WStETH gain for the scale at which they made the deposit, using the WStETH gain formula:
  * e_1 = d_t * (S - S_t) / P_t
@@ -195,10 +187,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
     /* WStETH Gain sum 'S': During its lifetime, each deposit d_t earns an WStETH gain of ( d_t * [S - S_t] )/P_t, where S_t
      * is the depositor's snapshot of S taken at the time t when the deposit was made.
      *
-     * The 'S' sums are stored in a nested mapping (epoch => scale => sum):
-     *
-     * - The inner mapping records the sum S at different scales
-     * - The outer mapping records the (scale => sum) mappings, for different epochs.
+     * The 'S' sums are stored in a mapping (scale => sum), that records the sum S at different scales
      */
     mapping(uint => uint) public scaleToSum;
 
@@ -305,10 +294,6 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
 
     function getWStETH() external view returns (uint) {
         return WStETH;
-    }
-
-    function getTotalBaseFeeLMADeposits() external view returns (uint) {
-        return totalBaseFeeLMADeposits;
     }
 
     // --- External Depositor Functions ---
@@ -432,14 +417,9 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
         );
 
         uint marginalHOGGain = HOGPerUnitStaked * (P);
-        scaleToG[currentScale] =
-            scaleToG[currentScale] +
-            (marginalHOGGain);
+        scaleToG[currentScale] = scaleToG[currentScale] + (marginalHOGGain);
 
-        emit G_Updated(
-            scaleToG[currentScale],
-            currentScale
-        );
+        emit G_Updated(scaleToG[currentScale], currentScale);
     }
 
     function _computeHOGPerUnitStaked(
@@ -583,7 +563,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
         scaleToSum[currentScaleCached] = newS;
         emit S_Updated(newS, currentScaleCached);
 
-        // If the Stability Pool was emptied, increment the epoch, and reset the scale and product P
+        // If multiplying P by a non-zero product factor would reduce P below the scale boundary, increment the scale
         if (newProductFactor == 0) {
             currentScale = 0;
             emit ScaleUpdated(currentScale);
@@ -661,7 +641,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
         Snapshots memory snapshots
     ) internal view returns (uint) {
         /*
-         * Grab the sum 'S' from the epoch at which the stake was made. The WStETH gain may span up to one scale change.
+         * Grab the sum 'S' from the scale at which the stake was made. The WStETH gain may span up to one scale change.
          * If it does, the second portion of the WStETH gain is scaled by 1e9.
          * If the gain spans no scale change, the second portion will be 0.
          */
@@ -669,11 +649,8 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
         uint S_Snapshot = snapshots.S;
         uint P_Snapshot = snapshots.P;
 
-        uint firstPortion = scaleToSum[scaleSnapshot] -
-            (S_Snapshot);
-        uint secondPortion = scaleToSum[
-            scaleSnapshot + (1)
-        ] / (SCALE_FACTOR);
+        uint firstPortion = scaleToSum[scaleSnapshot] - (S_Snapshot);
+        uint secondPortion = scaleToSum[scaleSnapshot + (1)] / (SCALE_FACTOR);
 
         uint WStETHGain = (initialDeposit * (firstPortion + (secondPortion))) /
             (P_Snapshot) /
@@ -709,7 +686,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
         Snapshots memory snapshots
     ) internal view returns (uint) {
         /*
-         * Grab the sum 'G' from the epoch at which the stake was made. The HOG gain may span up to one scale change.
+         * Grab the sum 'G' from the scale at which the stake was made. The HOG gain may span up to one scale change.
          * If it does, the second portion of the HOG gain is scaled by 1e9.
          * If the gain spans no scale change, the second portion will be 0.
          */
@@ -717,11 +694,8 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
         uint G_Snapshot = snapshots.G;
         uint P_Snapshot = snapshots.P;
 
-        uint firstPortion = scaleToG[scaleSnapshot] -
-            (G_Snapshot);
-        uint secondPortion = scaleToG[
-            scaleSnapshot + (1)
-        ] / (SCALE_FACTOR);
+        uint firstPortion = scaleToG[scaleSnapshot] - (G_Snapshot);
+        uint secondPortion = scaleToG[scaleSnapshot + (1)] / (SCALE_FACTOR);
 
         uint HOGGain = (initialStake * (firstPortion + (secondPortion))) /
             (P_Snapshot) /
@@ -856,7 +830,7 @@ contract StabilityPoolTester is HedgehogBase, Ownable, CheckContract {
         uint currentScaleCached = currentScale;
         uint currentP = P;
 
-        // Get S and G for the current epoch and current scale
+        // Get S and G for the current scale
         uint currentS = scaleToSum[currentScaleCached];
         uint currentG = scaleToG[currentScaleCached];
 

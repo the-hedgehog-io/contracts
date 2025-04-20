@@ -639,8 +639,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         LiquidationTotals memory totals;
 
         vars.price = priceFeed.fetchPrice();
-        vars.BaseFeeLMAForOffsets = stabilityPoolCached
-            .getTotalBaseFeeLMADeposits();
+        vars.BaseFeeLMAForOffsets = stabilityPoolCached.getMaxAmountToOffset();
         vars.recoveryModeAtStart = _checkRecoveryMode(vars.price);
 
         // Perform the appropriate liquidation sequence - tally the values, and obtain their totals
@@ -864,8 +863,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         LiquidationTotals memory totals;
 
         vars.price = priceFeed.fetchPrice();
-        vars.BaseFeeLMAForOffsets = stabilityPoolCached
-            .getTotalBaseFeeLMADeposits();
+        vars.BaseFeeLMAForOffsets = stabilityPoolCached.getMaxAmountToOffset();
+
         vars.recoveryModeAtStart = _checkRecoveryMode(vars.price);
         // Perform the appropriate liquidation sequence - tally values and obtain their totals.
         if (vars.recoveryModeAtStart) {
