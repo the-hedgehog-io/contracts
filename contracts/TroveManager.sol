@@ -141,7 +141,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
 
     struct LocalVariables_OuterLiquidationFunction {
         uint price;
-        uint BaseFeeLMAInStabPool;
+        uint BaseFeeLMAForOffsets;
         bool recoveryModeAtStart;
         uint liquidatedDebt;
         uint liquidatedColl;
@@ -154,7 +154,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
     }
 
     struct LocalVariables_LiquidationSequence {
-        uint remainingBaseFeeLMAInStabPool;
+        uint remainingBaseFeeLMAForOffsets;
         uint i;
         uint ICR;
         address user;
@@ -342,7 +342,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         IActivePool _activePool,
         IDefaultPool _defaultPool,
         address _borrower,
-        uint _BaseFeeLMAInStabPool
+        uint _BaseFeeLMAForOffsets
     ) internal returns (LiquidationValues memory singleLiquidation) {
         LocalVariables_InnerSingleLiquidateFunction memory vars;
         (
@@ -376,7 +376,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         ) = _getOffsetAndRedistributionVals(
             singleLiquidation.entireTroveDebt,
             collToLiquidate,
-            _BaseFeeLMAInStabPool
+            _BaseFeeLMAForOffsets
         );
 
         _closeTrove(_borrower, Status.closedByLiquidation);
@@ -402,7 +402,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         IDefaultPool _defaultPool,
         address _borrower,
         uint _ICR,
-        uint _BaseFeeLMAInStabPool,
+        uint _BaseFeeLMAForOffsets,
         uint _TCR,
         uint _price
     ) internal returns (LiquidationValues memory singleLiquidation) {
@@ -475,7 +475,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             ) = _getOffsetAndRedistributionVals(
                 singleLiquidation.entireTroveDebt,
                 vars.collToLiquidate,
-                _BaseFeeLMAInStabPool
+                _BaseFeeLMAForOffsets
             );
 
             _closeTrove(_borrower, Status.closedByLiquidation);
@@ -501,7 +501,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         } else if (
             (_ICR >= MCR) &&
             (_ICR < _TCR) &&
-            (singleLiquidation.entireTroveDebt <= _BaseFeeLMAInStabPool)
+            (singleLiquidation.entireTroveDebt <= _BaseFeeLMAForOffsets)
         ) {
             _movePendingTroveRewardsToActivePool(
                 _activePool,
@@ -509,7 +509,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                 vars.pendingDebtReward,
                 vars.pendingCollReward
             );
-            assert(_BaseFeeLMAInStabPool != 0);
+            assert(_BaseFeeLMAForOffsets != 0);
 
             _removeStake(_borrower);
             singleLiquidation = _getCappedOffsetVals(
@@ -540,7 +540,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                 TroveManagerOperation.liquidateInRecoveryMode
             );
         } else {
-            // if (_ICR >= MCR && ( _ICR >= _TCR || singleLiquidation.entireTroveDebt > _BaseFeeLMAInStabPool))
+            // if (_ICR >= MCR && ( _ICR >= _TCR || singleLiquidation.entireTroveDebt > _BaseFeeLMAForOffsets))
             LiquidationValues memory zeroVals;
             return zeroVals;
         }
@@ -554,7 +554,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
     function _getOffsetAndRedistributionVals(
         uint _debt,
         uint _coll,
-        uint _BaseFeeLMAInStabPool
+        uint _BaseFeeLMAForOffsets
     )
         internal
         pure
@@ -565,7 +565,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             uint collToRedistribute
         )
     {
-        if (_BaseFeeLMAInStabPool > 0) {
+        if (_BaseFeeLMAForOffsets > 0) {
             /*
              * Offset as much debt & collateral as possible against the Stability Pool, and redistribute the remainder
              * between all active troves.
@@ -576,7 +576,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
              *  - Send a fraction of the trove's collateral to the Stability Pool, equal to the fraction of its offset debt
              *
              */
-            debtToOffset = LiquityMath._min(_debt, _BaseFeeLMAInStabPool);
+            debtToOffset = LiquityMath._min(_debt, _BaseFeeLMAForOffsets);
             collToSendToSP = (_coll * debtToOffset) / _debt;
             debtToRedistribute = _debt - debtToOffset;
             collToRedistribute = _coll - collToSendToSP;
@@ -639,8 +639,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         LiquidationTotals memory totals;
 
         vars.price = priceFeed.fetchPrice();
-        vars.BaseFeeLMAInStabPool = stabilityPoolCached
-            .getTotalBaseFeeLMADeposits();
+        vars.BaseFeeLMAForOffsets = stabilityPoolCached.getMaxAmountToOffset();
         vars.recoveryModeAtStart = _checkRecoveryMode(vars.price);
 
         // Perform the appropriate liquidation sequence - tally the values, and obtain their totals
@@ -648,7 +647,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             totals = _getTotalsFromLiquidateTrovesSequence_RecoveryMode(
                 contractsCache,
                 vars.price,
-                vars.BaseFeeLMAInStabPool,
+                vars.BaseFeeLMAForOffsets,
                 _n
             );
         } else {
@@ -657,7 +656,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                 contractsCache.activePool,
                 contractsCache.defaultPool,
                 vars.price,
-                vars.BaseFeeLMAInStabPool,
+                vars.BaseFeeLMAForOffsets,
                 _n
             );
         }
@@ -720,13 +719,13 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
     function _getTotalsFromLiquidateTrovesSequence_RecoveryMode(
         ContractsCache memory _contractsCache,
         uint _price,
-        uint _BaseFeeLMAInStabPool,
+        uint _BaseFeeLMAForOffsets,
         uint _n
     ) internal returns (LiquidationTotals memory totals) {
         LocalVariables_LiquidationSequence memory vars;
         LiquidationValues memory singleLiquidation;
 
-        vars.remainingBaseFeeLMAInStabPool = _BaseFeeLMAInStabPool;
+        vars.remainingBaseFeeLMAForOffsets = _BaseFeeLMAForOffsets;
         vars.backToNormalMode = false;
         vars.entireSystemDebt = getEntireSystemDebt();
         vars.entireSystemColl = getEntireSystemColl();
@@ -742,7 +741,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             if (!vars.backToNormalMode) {
                 // Break the loop if ICR is greater than MCR and Stability Pool is empty
                 if (
-                    vars.ICR >= MCR && vars.remainingBaseFeeLMAInStabPool == 0
+                    vars.ICR >= MCR && vars.remainingBaseFeeLMAForOffsets == 0
                 ) {
                     break;
                 }
@@ -757,14 +756,14 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                     _contractsCache.defaultPool,
                     vars.user,
                     vars.ICR,
-                    vars.remainingBaseFeeLMAInStabPool,
+                    vars.remainingBaseFeeLMAForOffsets,
                     TCR,
                     _price
                 );
 
                 // Update aggregate trackers
-                vars.remainingBaseFeeLMAInStabPool =
-                    vars.remainingBaseFeeLMAInStabPool -
+                vars.remainingBaseFeeLMAForOffsets =
+                    vars.remainingBaseFeeLMAForOffsets -
                     singleLiquidation.debtToOffset;
                 vars.entireSystemDebt =
                     vars.entireSystemDebt -
@@ -791,11 +790,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                     _contractsCache.activePool,
                     _contractsCache.defaultPool,
                     vars.user,
-                    vars.remainingBaseFeeLMAInStabPool
+                    vars.remainingBaseFeeLMAForOffsets
                 );
 
-                vars.remainingBaseFeeLMAInStabPool =
-                    vars.remainingBaseFeeLMAInStabPool -
+                vars.remainingBaseFeeLMAForOffsets =
+                    vars.remainingBaseFeeLMAForOffsets -
                     singleLiquidation.debtToOffset;
 
                 // Add liquidation values to their respective running totals
@@ -813,14 +812,14 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         IActivePool _activePool,
         IDefaultPool _defaultPool,
         uint _price,
-        uint _BaseFeeLMAInStabPool,
+        uint _BaseFeeLMAForOffsets,
         uint _n
     ) internal returns (LiquidationTotals memory totals) {
         LocalVariables_LiquidationSequence memory vars;
         LiquidationValues memory singleLiquidation;
         ISortedTroves sortedTrovesCached = sortedTroves;
 
-        vars.remainingBaseFeeLMAInStabPool = _BaseFeeLMAInStabPool;
+        vars.remainingBaseFeeLMAForOffsets = _BaseFeeLMAForOffsets;
 
         for (vars.i = 0; vars.i < _n; vars.i++) {
             vars.user = sortedTrovesCached.getLast();
@@ -831,11 +830,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                     _activePool,
                     _defaultPool,
                     vars.user,
-                    vars.remainingBaseFeeLMAInStabPool
+                    vars.remainingBaseFeeLMAForOffsets
                 );
 
-                vars.remainingBaseFeeLMAInStabPool =
-                    vars.remainingBaseFeeLMAInStabPool -
+                vars.remainingBaseFeeLMAForOffsets =
+                    vars.remainingBaseFeeLMAForOffsets -
                     singleLiquidation.debtToOffset;
 
                 // Add liquidation values to their respective running totals
@@ -864,8 +863,8 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         LiquidationTotals memory totals;
 
         vars.price = priceFeed.fetchPrice();
-        vars.BaseFeeLMAInStabPool = stabilityPoolCached
-            .getTotalBaseFeeLMADeposits();
+        vars.BaseFeeLMAForOffsets = stabilityPoolCached.getMaxAmountToOffset();
+
         vars.recoveryModeAtStart = _checkRecoveryMode(vars.price);
         // Perform the appropriate liquidation sequence - tally values and obtain their totals.
         if (vars.recoveryModeAtStart) {
@@ -873,7 +872,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                 activePoolCached,
                 defaultPoolCached,
                 vars.price,
-                vars.BaseFeeLMAInStabPool,
+                vars.BaseFeeLMAForOffsets,
                 _troveArray
             );
         } else {
@@ -882,7 +881,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                 activePoolCached,
                 defaultPoolCached,
                 vars.price,
-                vars.BaseFeeLMAInStabPool,
+                vars.BaseFeeLMAForOffsets,
                 _troveArray
             );
         }
@@ -945,13 +944,13 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         IActivePool _activePool,
         IDefaultPool _defaultPool,
         uint _price,
-        uint _BaseFeeLMAInStabPool,
+        uint _BaseFeeLMAForOffsets,
         address[] memory _troveArray
     ) internal returns (LiquidationTotals memory totals) {
         LocalVariables_LiquidationSequence memory vars;
         LiquidationValues memory singleLiquidation;
 
-        vars.remainingBaseFeeLMAInStabPool = _BaseFeeLMAInStabPool;
+        vars.remainingBaseFeeLMAForOffsets = _BaseFeeLMAForOffsets;
         vars.backToNormalMode = false;
         vars.entireSystemDebt = getEntireSystemDebt();
         vars.entireSystemColl = getEntireSystemColl();
@@ -967,7 +966,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
             if (!vars.backToNormalMode) {
                 // Skip this trove if ICR is greater than MCR and Stability Pool is empty
                 if (
-                    vars.ICR >= MCR && vars.remainingBaseFeeLMAInStabPool == 0
+                    vars.ICR >= MCR && vars.remainingBaseFeeLMAForOffsets == 0
                 ) {
                     continue;
                 }
@@ -982,14 +981,14 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                     _defaultPool,
                     vars.user,
                     vars.ICR,
-                    vars.remainingBaseFeeLMAInStabPool,
+                    vars.remainingBaseFeeLMAForOffsets,
                     TCR,
                     _price
                 );
 
                 // Update aggregate trackers
-                vars.remainingBaseFeeLMAInStabPool =
-                    vars.remainingBaseFeeLMAInStabPool -
+                vars.remainingBaseFeeLMAForOffsets =
+                    vars.remainingBaseFeeLMAForOffsets -
                     singleLiquidation.debtToOffset;
                 vars.entireSystemDebt =
                     vars.entireSystemDebt -
@@ -1017,10 +1016,10 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                     _activePool,
                     _defaultPool,
                     vars.user,
-                    vars.remainingBaseFeeLMAInStabPool
+                    vars.remainingBaseFeeLMAForOffsets
                 );
-                vars.remainingBaseFeeLMAInStabPool =
-                    vars.remainingBaseFeeLMAInStabPool -
+                vars.remainingBaseFeeLMAForOffsets =
+                    vars.remainingBaseFeeLMAForOffsets -
                     singleLiquidation.debtToOffset;
 
                 // Add liquidation values to their respective running totals
@@ -1036,13 +1035,13 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         IActivePool _activePool,
         IDefaultPool _defaultPool,
         uint _price,
-        uint _BaseFeeLMAInStabPool,
+        uint _BaseFeeLMAForOffsets,
         address[] memory _troveArray
     ) internal returns (LiquidationTotals memory totals) {
         LocalVariables_LiquidationSequence memory vars;
         LiquidationValues memory singleLiquidation;
 
-        vars.remainingBaseFeeLMAInStabPool = _BaseFeeLMAInStabPool;
+        vars.remainingBaseFeeLMAForOffsets = _BaseFeeLMAForOffsets;
 
         for (vars.i = 0; vars.i < _troveArray.length; vars.i++) {
             vars.user = _troveArray[vars.i];
@@ -1053,11 +1052,11 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
                     _activePool,
                     _defaultPool,
                     vars.user,
-                    vars.remainingBaseFeeLMAInStabPool
+                    vars.remainingBaseFeeLMAForOffsets
                 );
 
-                vars.remainingBaseFeeLMAInStabPool =
-                    vars.remainingBaseFeeLMAInStabPool -
+                vars.remainingBaseFeeLMAForOffsets =
+                    vars.remainingBaseFeeLMAForOffsets -
                     singleLiquidation.debtToOffset;
 
                 // Add liquidation values to their respective running totals

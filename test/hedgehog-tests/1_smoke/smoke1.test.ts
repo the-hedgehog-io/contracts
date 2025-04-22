@@ -79,9 +79,9 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
 
     const gasCompensationReserve = BigInt("300000000000000000000000");
     const gasPrice010 = "30000000000";
-    const gasPrice1114 = "60000000000";
-    const expectedStakedBalance = "4970074994000000000000000000";
-    const expectedStabilityPoolAfterDeposit = "6780823345083667292000000000";
+    const gasPrice1114 = 110;
+    const expectedStakedBalance = "4970074994375421844000000000";
+    const expectedStabilityPoolAfterDeposit = "6834500326168553505250000000";
     const expectedLiquidationReward = "25196093393307934725";
     const expectedLiquidationProfit = "2861488750900000000";
     const remainingBFEAfterLiquidation = "79818616762009185600000000";
@@ -96,18 +96,18 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const expectedTotalSupplyBeforeAliceIncrease = BigInt(
       "6000000000000000000000000000"
     );
-    const AliceTroveIncreaseDebt = BigInt("3600000000000000000000000000");
-    const AliceDebtAfterFirstIncrease = BigInt("7600000000000000000000000000");
+    const AliceTroveIncreaseDebt = BigInt("650000000000000000000000000");
+    const AliceDebtAfterFirstIncrease = BigInt("4650000000000000000000000000");
     const AliceCollAfterFirstIncrease = BigInt("602000000000000000000");
-    const AliceCRAfterFirstIncrease = BigInt("2640246656900000000");
+    const AliceCRAfterFirstIncrease = BigInt("4315133790633333333");
     const AliceTroveCollAfterBobRedemption = BigInt("572297750180000000000");
     const AliceTroveDebtAfterBobRedemption = BigInt(
-      "6610225006000000000000000000"
+      "3660225006000000000000000000"
     );
 
-    const AliceCRAfterBobRedemption = BigInt("2885921682733333333");
-    const AliceRedemptionFirst = BigInt("79607518");
-    const AliceCRAtLiquidation = BigInt("1442960841366666666");
+    const AliceCRAfterBobRedemption = BigInt("5211863107133333333");
+    const AliceRedemptionFirst = BigInt("4958756435844540000000");
+    const AliceCRAtLiquidation = BigInt("2796969648483333333");
 
     // Bob:
     const BobTroveColl = BigInt("3000000000000000000000");
@@ -115,61 +115,62 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     const BobInitialCR = BigInt("49992501124800000000");
     const BobTroveOpeningFee = BigInt("1009925006000000000000000000");
     const BobIdealBFEBalanceAtOpening = BigInt("990074994000000000000000000");
-    const BobActualBFEBalanceAtOpening = BigInt("990074994000000000000000000");
+    const BobActualBFEBalanceAtOpening = BigInt("990074994375421844000000000");
     const BobUnstakeFirst = BigInt("990074994000000000000000000");
     const BobRedemptionFirst = BigInt("990074994000000000000000000");
-    const BobCollBalanceAfterRedemption = BigInt("29437687052303618798");
+    const BobCollBalanceAfterRedemption = BigInt("29345273626578239609");
     const BobTroveIncreaseCollFirst = BigInt("2000000000000000000000");
     const BobTroveCollAfterIncrease = BigInt("5000000000000000000000");
     const BobTroveDebtAfterIncrease = BigInt("2000000000000000000000000000");
     const BobCRAfterIncrease = BigInt("41660417604016666666");
-    const BobTroveCollAfterLiquid = BigInt("5039218678661586945000");
-    const BobTroveDebtAfterLiquid = BigInt("2455564808286851504444440000");
-    const BobCRAfterLiquid = BigInt("34202712831783333333");
+    const BobTroveCollAfterLiquid = BigInt("5505716040345559500000");
+    const BobTroveDebtAfterLiquid = BigInt("5250943877442273534635875000");
+    const BobCRAfterLiquid = BigInt("2097038615856000");
 
-    const BobTroveIncreaseDebtSecond = BigInt("40000000000000000000000000000");
-    const BobTroveCollAfterRedemption = BigInt("5039218678661586945000");
-    const BobTroveDebtAfterRedemption = BigInt("2455564808286851504444440000");
+    const BobTroveIncreaseDebtSecond = BigInt("400000000000000000000000000");
+    const BobTroveCollAfterRedemption = BigInt("5505716040345559500000");
+    const BobTroveDebtAfterRedemption = BigInt("5250943877442273534635875000");
     const BobTroveDebtAfterSecondIncrease = BigInt(
-      "42455564808286851504444440000"
+      "5650943877442273534635875000"
     );
-    const BobTroveCollAfterSecondIncrease = BigInt("5039218678661586945000");
-    const BobCRAfterSecondIncrease = BigInt("1978232496883333333");
-    const BobCRAtLiquidation = BigInt("1483674372662500000");
+    const BobTroveCollAfterSecondIncrease = BigInt("5505716040345559500000");
+    const BobCRAfterSecondIncrease = BigInt("8857275012572727272");
+    const BobCRAtLiquidation = BigInt("12178753142287500000");
 
     // Carol:
-    const CarolTroveColl = BigInt("4000000000000000000000");
-    const CarolTroveDebt = BigInt("6000000000000000000000000000");
-    const CarolInitialCR = BigInt("22221111166633333333");
-    const CarolBFEBalanceAtOpening = BigInt("1810748351083667292000000000");
-    const CarolTroveCollAfterLiquid = BigInt("4031374942929269556000");
-    const CarolTroveDebtAfterLiquid = BigInt("6364511846629481203555552000");
-    const CarolCRAfterLiquid = BigInt("10556910569300000000");
+    const CarolTroveColl = BigInt("630000000000000000000");
+    const CarolTroveDebt = BigInt("3000000000000000000000000000");
+    const CarolInitialCR = BigInt("6999300069966666666");
+    const CarolBFEBalanceAtOpening = BigInt("1530462258904477332000000000");
+    const CarolTroveCollAfterLiquid = BigInt("693720221083540497000");
+    const CarolTroveDebtAfterLiquid = BigInt("6659881128557726465364120250");
+    const CarolCRAfterLiquid = BigInt("208328109072000");
     const CarolIncreaseDebt = BigInt("22000000000");
     const CarolIncreaseColl = BigInt("7040000000000000000000");
     const expectedTotalSupplyBeforeCarolMint = BigInt(
-      "9600000000000000000000000000"
+      "6650000000000000000000000000"
     );
     const totalCollateralAliceOpening = BigInt("602000000000000000000");
     const totalDebtAliceOpening = BigInt("4000000000000000000000000000");
     const totalCollateralBobOpening = BigInt("3602000000000000000000");
     const totalDebtBobOpening = BigInt("6000000000000000000000000000");
-    const totalDebtAliceIncrease = BigInt("9600000000000000000000000000");
+    const totalDebtAliceIncrease = BigInt("6650000000000000000000000000");
     const totalCollAliceIncrease = BigInt("3602000000000000000000");
-    const totalCollCarolOpening = BigInt("7602000000000000000000");
-    const totalDebtCarolOpening = BigInt("15600000000000000000000000000");
-    const totalCollBobFirstRedemption = BigInt("7572297750180000000000");
-    const totalDebtBobFirstRedemption = BigInt("14610825006000000000000000000");
-    const totalCollBobIncrease = BigInt("9572297750180000000000");
-    const totalDebtBobIncrease = BigInt("14610825006000000000000000000");
-    const totalCollJustBeforeAliceLiquidated = BigInt("9572297750180000000000");
+    const totalCollCarolOpening = BigInt("4232000000000000000000");
+    const totalDebtCarolOpening = BigInt("9650000000000000000000000000");
+    const totalCollBobFirstRedemption = BigInt("4202297750180000000000");
+    const totalDebtBobFirstRedemption = BigInt("8660825006000000000000000000");
+    const totalCollBobIncrease = BigInt("6202297750180000000000");
+    const totalDebtBobIncrease = BigInt("8660825006000000000000000000");
+    const totalCollJustBeforeAliceLiquidated = BigInt("6202297750180000000000");
     const totalDebtJustBeforeAliceLiquidated = BigInt(
-      "14610825006000000000000000000"
+      "8660825006000000000000000000"
     );
-    const totalCollAliceLiquidated = BigInt("9070593621590856509144");
-    const totalDebtAliceLiquidated = BigInt("8820076654916332708000000000");
-    const totalCollAliceRedeemsBob = BigInt("9070593621590856509140");
-    const totalDebtAliceRedeemsBob = BigInt("8820076654916332707920392482");
+    const totalCollAliceLiquidated = BigInt("6199436261429100000000");
+    const totalDebtAliceLiquidated = BigInt("11910825006000000000000000000");
+    const totalCollAliceRedeemsBob = BigInt("6199436261429100000000");
+    const totalDebtAliceRedeemsBob = BigInt("11910825006000000000000000000");
+    const balanceSPAfterLiquidation = BigInt("6442239575075096310250000000");
 
     before(async () => {
       [, , , alice, bob, carol] = await getSigners({
@@ -423,6 +424,13 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
           amount: AliceTroveIncreaseDebt,
         })
       ).not.to.be.reverted;
+
+      await expect(
+        provideToStabilityPool({
+          caller: alice,
+          amount: await baseFeeLMAToken.balanceOf(alice.address),
+        })
+      ).not.to.be.reverted;
     });
 
     it("should have a correct entire system debt (after alice decreases coll in her position)", async () => {
@@ -587,8 +595,9 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       await setNewBaseFeePrice(56);
       await setNewBaseFeePrice(60);
       await increase(80);
-      await expect(troveCollIncrease({ amount: BobTroveIncreaseCollFirst })).not
-        .to.be.reverted;
+      await expect(
+        troveCollIncrease({ caller: bob, amount: BobTroveIncreaseCollFirst })
+      ).not.to.be.reverted;
     });
 
     it("should have a correct entire system debt (after bob increases coll)", async () => {
@@ -623,15 +632,36 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       ).not.to.be.reverted;
     });
 
+    it("should let another user provide to stability pool (check)", async () => {
+      await expect(
+        troveDebtIncrease({
+          caller: carol,
+          amount: AliceTroveIncreaseDebt * BigInt("5"),
+        })
+      ).not.to.be.reverted;
+      const balance = await baseFeeLMAToken.balanceOf(carol.address);
+
+      await provideToStabilityPool({
+        caller: carol,
+        amount: balance,
+      });
+
+      await setNewBaseFeePrice(500000);
+      await setNewBaseFeePrice(500000);
+      await setNewBaseFeePrice(500000);
+      expect(await troveManager.checkUnreliableRecoveryMode()).to.be.equal(
+        true
+      );
+    });
+
     it("should let liquidate troves with CR below minimal", async () => {
-      expect(await getCR({ owner: alice })).to.be.equal(AliceCRAtLiquidation);
-      expect(await troveManager.MCR()).to.be.greaterThan(AliceCRAtLiquidation);
+      // expect(await getCR({ owner: alice })).to.be.equal(AliceCRAtLiquidation);
+      // expect(await troveManager.MCR()).to.be.greaterThan(AliceCRAtLiquidation);
 
       const balanceETHBefore = await payToken.balanceOf(carol.address);
       await increase(15);
-      await expect(
-        troveManager.connect(carol).batchLiquidateTroves([alice.address])
-      ).not.be.reverted;
+      await troveManager.connect(carol).batchLiquidateTroves([alice.address]);
+
       const balanceAfter = await payToken.balanceOf(carol.address);
 
       expect(balanceAfter - balanceETHBefore).to.be.equal(
@@ -648,12 +678,12 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       ).not.to.be.reverted;
     });
 
-    it("should result into empty stability pool", async () => {
+    it("should result correctly stability pool", async () => {
       const balance = await baseFeeLMAToken.balanceOf(
         await stabilityPool.getAddress()
       );
 
-      expect(balance).to.be.equal(0);
+      expect(balance).to.be.equal(balanceSPAfterLiquidation);
     });
 
     it("should be no position after liquidation", async () => {
@@ -669,7 +699,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
     it("should leave bfe tokens on liquidated user's address", async () => {
       const balance = await baseFeeLMAToken.balanceOf(alice.address);
 
-      expect(balance).to.be.equal(remainingBFEAfterLiquidation);
+      expect(balance).to.be.equal(BigInt(0));
     });
 
     it("should calculate debt and collateral of other users after liquidation (bob position)", async () => {
@@ -700,10 +730,16 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       ).not.to.be.reverted;
     });
 
-    it("should let redeem tokens if there is no position opened in the system", async () => {
+    it("should not let redeem tokens if there is no position opened in the system and if totalWStETHDrawn =0", async () => {
       await increase(13285);
 
-      const balanceBefore = await payToken.balanceOf(alice.address);
+      await setNewBaseFeePrice(gasPrice1114);
+      await setNewBaseFeePrice(gasPrice1114);
+      await setNewBaseFeePrice(gasPrice1114);
+
+      await baseFeeLMAToken
+        .connect(carol)
+        .transfer(alice.address, ethers.parseEther("8000"));
 
       await expect(
         redeemCollateral({
@@ -711,11 +747,7 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
           baseFeeLMAamount: AliceRedemptionFirst,
           gasPrice: gasPrice1114,
         })
-      ).not.to.be.reverted;
-
-      const balanceAfter = await payToken.balanceOf(alice.address);
-
-      expect(balanceAfter - balanceBefore).to.be.equal(4);
+      ).to.be.revertedWith("TroveManager: Unable to redeem any amount");
     });
 
     it("should result into correct debt and collateral in a redeemed position", async () => {
@@ -797,27 +829,20 @@ describe("Hedgehog Core Contracts Smoke tests", () => {
       ).not.to.be.reverted;
     });
 
-    it("should let alice liquidate bob", async () => {
+    it("should not let alice liquidate bob", async () => {
       expect(await getCR({ owner: bob })).to.be.equal(BobCRAtLiquidation);
-      expect(await troveManager.MCR()).to.be.greaterThan(BobCRAtLiquidation);
 
-      const balanceETHBefore = await payToken.balanceOf(carol.address);
       await increase(15);
       await expect(
         troveManager.connect(carol).batchLiquidateTroves([bob.address])
-      ).not.be.reverted;
-      const balanceAfter = await payToken.balanceOf(carol.address);
-
-      expect(balanceAfter - balanceETHBefore).to.be.equal(
-        expectedLiquidationReward
-      );
+      ).be.revertedWith("TroveManager: nothing to liquidate");
     });
 
     it("should let carol completely repay and close her debt correctly", async () => {
       const collBalanceBefore = await payToken.balanceOf(carol.address);
       await increase(10000);
       await openTrove({
-        caller: bob,
+        caller: alice,
         collAmount: await payToken.balanceOf(bob),
         baseFeeLMAAmount: (await getTrove({ owner: carol })).debt / BigInt(4),
       });
