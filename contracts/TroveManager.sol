@@ -2127,7 +2127,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         uint timePassed = block.timestamp - lastRedemptionTime;
 
         if (timePassed >= SECONDS_IN_ONE_MINUTE) {
-            lastRedemptionTime = block.timestamp;
+            lastRedemptionTime += _minutesPassedSinceLastRedemption() * 60;
             emit LastRedemptionTimeUpdated(block.timestamp);
         }
     }
@@ -2142,7 +2142,7 @@ contract TroveManager is HedgehogBase, Ownable, CheckContract, ITroveManager {
         uint timePassed = block.timestamp - lastBorrowTime;
 
         if (timePassed >= SECONDS_IN_ONE_MINUTE) {
-            lastBorrowTime = block.timestamp;
+            lastBorrowTime += _minutesPassedSinceLastBorrow() * 60;
             emit LastBorrowTimeUpdated(block.timestamp);
         }
     }
