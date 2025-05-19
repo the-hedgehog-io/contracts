@@ -80,7 +80,7 @@ describe("BaseFeeOracle Tests", () => {
     const AliceTroveDebt = BigInt("2550000000000000000000000000");
     const AliceTroveOpeningFee = BigInt("12750000000000000000000000");
     const AliceBFEBalanceAtOpening = BigInt("2537250000000000000000000000");
-    const AliceInitialCR = BigInt("2640212262600000000");
+    const AliceInitialCR = BigInt("2640212262609627625");
     const expectedTotalSupplyBeforeAliceIncrease = BigInt(
       "4550000000000000000000000000"
     );
@@ -88,7 +88,7 @@ describe("BaseFeeOracle Tests", () => {
     const AliceTroveIncreaseDebt = BigInt("400000000000000000000000000");
     const AliceDebtAfterFirstIncrease = BigInt("2950000000000000000000000000");
     const AliceCollAfterFirstIncrease = BigInt("202000000000000000000");
-    const AliceCRAfterFirstIncrease = BigInt("2282253782100000000");
+    const AliceCRAfterFirstIncrease = BigInt("2282253782101255239");
 
     const totalSupplyBeforeBobOpensPosition = BigInt(
       "2550000000000000000000000000"
@@ -97,7 +97,7 @@ describe("BaseFeeOracle Tests", () => {
     const BobTroveCollSecond = "2528977540106951870400";
     const BobTroveDebt = BigInt("2000000000000000000000000000");
     const BobTroveDebtSecond = "6833212299465240641711229600";
-    const BobInitialCR = BigInt("6665666816633333333");
+    const BobInitialCR = BigInt("6665666816644170041");
     const BobTroveOpeningFee = BigInt("1578442928000000000000000000");
     const BobIdealBFEBalanceAtOpening = BigInt("421557071717053000000000000");
     const BobActualBFEBalanceAtOpening = BigInt("421434061409356496000000000");
@@ -105,7 +105,7 @@ describe("BaseFeeOracle Tests", () => {
     const BobTroveIncreaseCollFirst = BigInt("2000000000000000000000");
     const BobTroveCollAfterIncrease = BigInt("2400000000000000000000");
     const BobTroveDebtAfterIncrease = BigInt("2000000000000000000000000000");
-    const BobCRAfterIncrease = BigInt("19997000449916666666");
+    const BobCRAfterIncrease = BigInt("19997000449932510123");
 
     const BobTroveIncreaseDebtSecond = BigInt("2940000000000000000000000000");
 
@@ -114,7 +114,7 @@ describe("BaseFeeOracle Tests", () => {
     const CarolTroveDebt = BigInt("600000000000000000000000000");
     const CarolTroveDebtSecond = "1757087700534759358288769860";
     const CarolTroveOpeningFee = BigInt("104038098000000000000000000");
-    const CarolInitialCR = BigInt("4997501249366666666");
+    const CarolInitialCR = BigInt("4997501249375312343");
     const CarolBFEBalanceAtOpening = BigInt("495961901938739523000000000");
     const expectedTotalSupplyBeforeCarolMint = BigInt(
       "4950000000000000000000000000"

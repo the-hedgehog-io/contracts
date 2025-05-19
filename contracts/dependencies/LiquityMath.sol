@@ -122,8 +122,7 @@ library LiquityMath {
         uint _price
     ) internal pure returns (uint) {
         if (_debt > 0) {
-            uint newCollRatio = (((_coll * DECIMAL_PRECISION) / _debt) *
-                DECIMAL_PRECISION) / _price;
+            uint newCollRatio = ((_coll * DECIMAL_PRECISION ** 2) / _debt) / _price;
 
             return newCollRatio;
         }
@@ -139,10 +138,9 @@ library LiquityMath {
         uint256 _debt,
         uint _mcr
     ) internal pure returns (uint256 price) {
-        // Finds an exact price at which CR becomes MCR. Liqudation does not happen in the event of them being equal, hence we add 1 to it to find closest liqudation price
+        // Finds an exact price at which CR becomes MCR. Liqudation does not happen in the event 
+        // of them being equal, hence we add 1 to it to find closest liqudation price
         price =
-            ((((_coll * DECIMAL_PRECISION) / _debt) * DECIMAL_PRECISION) /
-                _mcr) +
-            1;
+            (((_coll * DECIMAL_PRECISION ** 2) / _debt) / _mcr) + 1;
     }
 }
